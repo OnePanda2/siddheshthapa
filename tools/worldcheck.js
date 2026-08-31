@@ -66,9 +66,11 @@ const PROBE = `(function(){
   M.setOpen(1); M.settle(60);
   var open={ mind:M.mind(), rel:M.relVis(), afterEnter:afterEnter,
              afterPick:afterPick, afterBack:afterBack };
-  open.base={ phil:b('philosophy'), love:b('love'), obs:b('observation') };
+  open.base={ phil:b('philosophy'), love:b('love'), obs:b('observation'),
+              loveTight:b('love',40) };
   M.highlight('love'); M.settle(30);
-  open.hLove={ st:M.hoverState(), phil:b('philosophy'), love:b('love') };
+  open.hLove={ st:M.hoverState(), phil:b('philosophy'), love:b('love'),
+               loveTight:b('love',40) };
   M.highlight(null); M.settle(30);
   open.rel={ phil:b('philosophy'), love:b('love') };
 
@@ -231,9 +233,24 @@ ck('H1', loveIdx >= 0 && r.open.hLove.st.hoverRegion === loveIdx &&
 
 // H2 / H3
 /* strictly brighter: `> base * 0.98` would have accepted it getting darker */
-ck('H2', r.open.hLove.love > r.open.base.love,
+/* ANY rise was too weak a bar. A hover does two things — raises the emphasis
+   AND grows the point — so with the brightening removed entirely the growth
+   alone still nudged the total from 62 to 64, and "greater than" accepted it.
+   The assertion passed against a build where hovering did not brighten
+   anything, which is precisely what it existed to catch.
+
+   Measured through this same probe: with the brightening, the core reads
+   44 -> 60 (+36%); without it, 44 -> 44 (+0%). The 20% bound sits between
+   them with room either side. The tight window is what makes the reading
+   honest — growth spreads a sprite's light outward, out of a 40px box, while
+   emphasis raises it in place — and the wide reading is kept alongside so a
+   world that brightens at its core while going dark overall still fails. */
+const h2rise = r.open.base.loveTight ? r.open.hLove.loveTight / r.open.base.loveTight : 0;
+ck('H2', r.open.hLove.love > r.open.base.love && h2rise >= 1.20,
    'the right world answers once the mind is open — love ' + r.open.base.love +
-   ' -> ' + r.open.hLove.love);
+   ' -> ' + r.open.hLove.love + ', and at its core ' + r.open.base.loveTight +
+   ' -> ' + r.open.hLove.loveTight + ' (+' + Math.round((h2rise - 1) * 100) +
+   '%, needs +20%)');
 /* the gap alone did not test RECEDING: the hovered world's own lift produced
    it even with the dimming removed. Assert the unhovered world actually darkens
    against its own baseline. */

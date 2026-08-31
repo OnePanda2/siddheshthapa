@@ -3125,6 +3125,7 @@ if(glOK){
   /* render-only bodies occupy vertices AFTER every real node, so picking —
      which walks nodeOrder — can never reach them by construction */
   var TOTV=placed.length+COMPANIONS.length+CONST_BG.length;
+  var NOCTR=new Float32Array(TOTV);
   var P=new Float32Array(TOTV*3), CELLA=new Float32Array(TOTV*2),
       SZ=new Float32Array(TOTV), COL=new Float32Array(TOTV*3),
       EMPH=new Float32Array(TOTV), REG=new Float32Array(TOTV),
@@ -3166,9 +3167,15 @@ if(glOK){
        companion separates from it instead of being swallowed. That reveal is
        the whole point: from far away LOVE is one warm light; up close it is
        unmistakably two. */
-    /* OBSERVATION has no central body: the figure is the emblem, so the MIG
-       node is present for its label and the camera but is never drawn. */
-    if(n.t==='mig'&&CONSTELLATIONS[n.id]) EMPH[i]=0.0;
+    /* OBSERVATION has no central body: inside its world the FIGURE is the
+       emblem, and inventing a star at the middle of Ursa Major would be a
+       fabrication — the Dipper has no such star.
+
+       But that was applied unconditionally, so the region had nothing to find
+       in the MIND either: fourteen regions showed an emblem and OBSERVATION
+       showed empty space, which is precisely what it looked like. The
+       suppression belongs to the WORLD, not to the menu. */
+    NOCTR[i]=(n.t==='mig'&&CONSTELLATIONS[n.id])?1:0;
     if(n.star!==undefined) EMPH[i]=n.offAsterism?1.35:1.12;
     if(n.t==='mig'&&BINARY[n.id]){ CAP[i]=68; }
     else if(BINARY[n.mig]){ CAP[i]=50; }     // and never larger than its stars
@@ -3233,6 +3240,9 @@ if(glOK){
     else { CELLB[cb*2]=CELLA[cb*2]; CELLB[cb*2+1]=CELLA[cb*2+1]; }
   }
   geo.setAttribute('cellB',new THREE.BufferAttribute(CELLB,2));
+  /* 1 for a world whose figure IS its emblem: no centre once that world opens,
+     and one in the mind, where the region has to be findable */
+  geo.setAttribute('noCentre',new THREE.BufferAttribute(NOCTR,1));
 
   var mat=new THREE.ShaderMaterial({
     uniforms:{ atlas:{value:atlas}, fogColor:{value:FAR_TONE},
@@ -3244,16 +3254,35 @@ if(glOK){
       'uniform float minPx; uniform float maxPx;',
       'uniform float focusRegion; uniform float hoverRegion; uniform float mindOpen;',
       'uniform float hoverNode; attribute float nodeIdx;',
-      'attribute float isMig;',
+      'attribute float isMig; attribute float noCentre;',
       'attribute vec2 cell; attribute vec2 cellB; attribute float size; attribute vec3 tint; attribute float emph;',
       'attribute float region; attribute float capPx;',
       'varying vec2 vCell; varying vec3 vTint; varying float vFog; varying float vEmph;',
-      'uniform float brainMid; varying float vBrain;',
+      'uniform float brainMid; varying float vBrain; varying float vMig;',
       'void main(){',
       /* a region wears its world's species only once the mind is open; before
          that every region is drawn the same way, because it is still one organ */
       '  vCell = (mindOpen < 0.5) ? cellB : cell;',
-      '  vTint=tint;',
+      /* IN THE MIND, A REGION IS A STAR.
+
+         Its declared colour is the colour of its WORLD — TRAPPIST-1 indigo,
+         Kepler-16 amber, Ursa Major verdigris — and those were chosen as ink
+         on a pale page, where luminance was never the point. Used unchanged
+         against a sky they cap the emblem far below the constellation stars
+         around it: Ursa Major's 0x1d4f4a cannot exceed a luminance of 64
+         however bright the glyph is drawn, so OBSERVATION read as empty space.
+
+         While the mind is closed the emblem is lifted toward white, which
+         keeps the hue and gives it a star's brightness. Once a world opens the
+         tint returns to exactly its declared value, so every approved palette
+         is untouched where it actually matters. */
+      /* Lifted MULTIPLICATIVELY, not mixed toward white. Mixing washes the
+         hue out, and every region then reads as the same pale dot — which
+         throws away the one thing that makes a world identifiable at a
+         glance. Scaling keeps the colour and only raises its luminance, so
+         Kepler-16 stays amber and Ursa Major stays verdigris while both
+         become bright enough to find. */
+      '  vTint=min(tint*mix(3.4, 1.0, mindOpen), vec3(1.0));',
       // inside a world everything elsewhere recedes but never vanishes: the
       // mind must stay felt while one region of it is being read
       '  float here = (focusRegion<0.0 || abs(region-focusRegion)<0.5) ? 1.0 : 0.13;',
@@ -3275,7 +3304,11 @@ if(glOK){
       '  if(hoverNode >= 0.0){',
       '    here *= (abs(nodeIdx-hoverNode)<0.5) ? 2.30 : 0.44;',
       '  }',
+      /* a world whose figure is its own emblem loses its centre as that world
+         opens, and keeps it in the mind where it must be found */
+      '  here *= (1.0 - noCentre*mindOpen);',
       '  vEmph=clamp(emph*here,0.0,1.6);',
+      '  vMig=isMig;',
       '  vec4 mv=modelViewMatrix*vec4(position,1.0);',
       '  float persp=size*(300.0/max(1.0,-mv.z));',
       /* the floor is the whole starfield: without it distance erases the mind */
@@ -3296,14 +3329,26 @@ if(glOK){
     fragmentShader:[
       'uniform sampler2D atlas; uniform vec3 fogColor; uniform float fogDensity; uniform float cells;',
       'varying vec2 vCell; varying vec3 vTint; varying float vFog; varying float vEmph;',
-      'uniform float mindOpen; varying float vBrain;',
+      'uniform float mindOpen; varying float vBrain; varying float vMig;',
       'void main(){',
       '  vec2 uv=(vCell+gl_PointCoord)/cells;',
       '  float a=texture2D(atlas,uv).a*vEmph;',
       '  if(a<0.02) discard;',
       /* atmospheric perspective: distance drains the ink toward the far tone.
          This is the depth medium — not shadow. */
+      /* A REGION IS A TARGET, NOT ATMOSPHERE.
+
+         Distance drains everything else toward the far tone, and inside the
+         organ the far hemisphere recedes — both correct for the mind's
+         CONTENTS. Applied to the regions themselves they were wrong: the
+         fifteen things the whole menu exists to point at were rendering
+         dimmer than the constellation stars beside them, so the centre of
+         PHILOSOPHY and OBSERVATION read as empty space and clicking one
+         looked like flying into nothing.
+
+         A region is exempt from both. It is what you are being shown. */
       '  float f=1.0-exp(-fogDensity*fogDensity*vFog*vFog);',
+      '  f *= (1.0 - vMig*0.85);',
       '  vec3 col=mix(vTint,fogColor,clamp(f,0.0,1.0));',
       '  float out_a=a*(1.0-clamp(f*0.55,0.0,0.88));',
       /* inside the organ, depth is the whole hierarchy: the near hemisphere
@@ -3311,6 +3356,7 @@ if(glOK){
          two hemispheres would read as one flat sheet of labels. */
       '  float d=clamp(vBrain*0.5+0.5,0.0,1.0);',
       '  float bd=mix(0.62,1.0,pow(d,1.10));',
+      '  bd = mix(bd, 1.0, vMig);',
       '  out_a*=mix(bd,1.0,mindOpen);',
       '  col=mix(mix(fogColor,col,mix(0.55,1.0,bd)),col,mindOpen);',
       '  if(out_a<0.004) discard;',
@@ -5268,9 +5314,24 @@ window.__v02={
        monotone in the sprite's own contribution whatever else shares the box. */
     var sum=0;
     for(var s3=0;s3<grid.length;s3++) sum+=grid[s3];
+    /* MEAN COLOUR of the brightest ink, so a suite can ask whether an emblem
+       kept its hue and not merely whether it got brighter. Lifting a region
+       toward white would raise every signal above and still be a regression:
+       fifteen identical pale dots carry no identity. Only pixels at or above
+       the same threshold the blob pass uses contribute, so the surrounding
+       sky cannot drag the reading toward grey. */
+    var rs=0,gs=0,bs=0,cn=0;
+    for(var cy3=0;cy3<gh;cy3++) for(var cx3=0;cx3<gw;cx3++){
+      if(grid[cy3*gw+cx3]<thr) continue;
+      var i3=((cy3*STEP)*w+(cx3*STEP))*4;
+      rs+=buf[i3]; gs+=buf[i3+1]; bs+=buf[i3+2]; cn++;
+    }
+    var rgb = cn ? [Math.round(rs/cn),Math.round(gs/cn),Math.round(bs/cn)] : [0,0,0];
+    var mx=Math.max(rgb[0],rgb[1],rgb[2]), mn=Math.min(rgb[0],rgb[1],rgb[2]);
     return {id:id, box:B, blobs:blobs, dominance:+dominance.toFixed(2),
             maxSignal:Math.round(maxD),
             sumSignal:Math.round(sum/100),
+            rgb:rgb, chroma:mx-mn,
             at:[pr.x,pr.y]};
   },
   /* THE ATLAS SAMPLING CONTRACT. A13 measures whether a concept renders as

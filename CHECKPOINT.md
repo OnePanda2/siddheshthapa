@@ -55,8 +55,10 @@ LOVE → Kepler-16, OBSERVATION → Ursa Major. Real astronomy, real provenance.
 | worldframecheck | 8/8 |
 | **total** | **105/105** |
 
-*(The suite has since grown to 133/133: `travelcheck` was added when the MIG
-zoom was fixed, and `braincheck` was rewritten for the constellation.)*
+*(The suite has since grown to 143/143 across twelve check suites, with 87
+mutations verified: `travelcheck` was added when the MIG zoom was fixed,
+`braincheck` was rewritten for the constellation, and `emblemcheck` was added
+when the region emblems turned out to be invisible in the menu.)*
 
 - idle = **0 renders** over two seconds
 - draw calls 6 — three for the mind, three for the sky
@@ -82,10 +84,28 @@ to undo anything here.
    below the Sylvian, the cerebellar chain at the back and below — not merely
    their presence. 20/20, mutation-verified.
 3. **Phone labels crowd.** Fifteen region names over a small figure overlap.
-4. **The full six-width visual matrix has not been re-run** since the sky went
-   in, and the mutation suites have not been re-run since the brightness metric
-   was inverted.
+4. ~~**The mutation suites have not been re-run** since the brightness metric
+   was inverted.~~ **DONE** — all 87 re-verified. One assertion had gone quiet
+   and was repaired: `worldcheck` H2 claimed to test that hovering a region
+   brightens it, but measured any rise at all in a wide window, and a hover
+   also GROWS the point. With the brightening removed entirely the growth alone
+   moved the reading 62 → 64 and H2 still passed. It now measures the core in a
+   tight window, where growth spreads light outward and only emphasis raises
+   it: +36% healthy against +0% mutated.
+   **The six-width visual matrix still has not been re-run** since the sky went
+   in.
 5. **MOVIES → HR 8799 is not built.** No fourth world exists.
+6. ~~**The region emblems were invisible in the menu.**~~ **FIXED.** The fifteen
+   emblems are the only navigation targets in the Main Mind Menu and were being
+   drawn dimmer than the constellation's own decorative stars — Philosophy at
+   45 and Observation at 72 against background stars near 250 — so choosing a
+   region flew the camera into what looked like empty space. Three causes: the
+   regions were subject to the same atmospheric fade and depth drain as
+   ordinary bodies; they were tinted for a world's interior rather than for
+   being seen across the whole mind; and Observation alone was zeroed
+   unconditionally by a rule that should only have applied inside its own
+   world. Now 129–182 across all fifteen, with hue preserved. Guarded by
+   `emblemcheck` / `emblemmutate`, 6/6.
 
 ---
 
