@@ -55,7 +55,7 @@ LOVE → Kepler-16, OBSERVATION → Ursa Major. Real astronomy, real provenance.
 | worldframecheck | 8/8 |
 | **total** | **105/105** |
 
-*(The suite has since grown to 153/153 across twelve check suites, with 110
+*(The suite has since grown to 156/156 across twelve check suites, with 112
 mutations verified: `travelcheck` was added when the MIG zoom was fixed,
 `braincheck` was rewritten for the constellation, `emblemcheck` was added when
 the region emblems turned out to be invisible in the menu, and `travelcheck`
@@ -109,6 +109,14 @@ to undo anything here.
    bodies from 16 to 68 AU). It needed no new renderer branch: only a system
    assignment, a scale, a palette and a per-world framing bias.
    `astronomycheck` A19/A20/A21, mutation-verified.
+   **LIFE → Kepler-33 followed as the fifth world**, the richest region that
+   was still a placeholder (5 concepts, 12 writings) and an exact 5<->5 match.
+   With three planetary worlds the claim "each world is its own species" has to
+   hold across a SET, so A24 orders them by the trend of their own orbit gaps,
+   last over first: Kepler-33 0.68 (compresses) < TRAPPIST-1 0.97 (nearly even)
+   < HR 8799 1.22 (opens). Three regimes straddling 1.0, not one idea rendered
+   three times. It needed no per-world code and no framing override beyond a
+   bias — the shared rule placed it.
 6. ~~**The region emblems were invisible in the menu.**~~ **FIXED.** The fifteen
    emblems are the only navigation targets in the Main Mind Menu and were being
    drawn dimmer than the constellation's own decorative stars — Philosophy at

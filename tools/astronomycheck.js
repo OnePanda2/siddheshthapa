@@ -27,6 +27,10 @@
    A20 HR 8799's rendered spacing IS its measured spacing
    A21 the two planetary worlds are geometrically OPPOSITE, which is the whole
        reason HR 8799 was the system chosen to answer TRAPPIST-1
+   A22 LIFE uses Kepler-33, with provenance and an exact 5<->5 mapping
+   A23 Kepler-33's rendered spacing IS its measured spacing
+   A24 the THREE planetary worlds occupy three distinct spacing regimes, in
+       order, so a set of worlds is not one idea rendered three times
 
    usage: node tools/astronomycheck.js [v02.html]
 */
@@ -264,6 +268,55 @@ ck('A21', trTightens && mvOpens && mvGaps[mvGaps.length - 1] > trGaps[trGaps.len
    'the two worlds are opposite shapes — TRAPPIST-1 tightens outward (' +
    trGaps.map(g => g.toFixed(2)).join(' > ') + ') while HR 8799 opens (' +
    mvGaps.map(g => g.toFixed(2)).join(' < ') + ')');
+
+/* ── THE FIFTH WORLD ──────────────────────────────────────────────────
+   LIFE is Kepler-33, and it is the third PLANETARY world — the point at which
+   "each world is its own species" stops being a claim about two systems and
+   has to hold across a set. */
+const lfAssigned = A.assigned.life, lfOrbits = (A.orbits.life || []);
+const lfAsc = lfOrbits.slice().sort((a, b) => a.slot - b.slot);
+
+// A22 — the system, its provenance, and an exact 5<->5 mapping
+const lfConcepts = lfOrbits.filter(o => o.t === 'minor');
+ck('A22', lfAssigned && lfAssigned.system === 'Kepler-33' &&
+          Array.isArray(lfAssigned.axes) && lfAssigned.axes.length === 5 &&
+          lfConcepts.length === 5 && new Set(lfAsc.map(o => o.slot)).size === 5,
+   'LIFE uses ' + (lfAssigned ? lfAssigned.system : 'nothing') + ' — ' +
+   (lfAssigned ? lfAssigned.axes.length : 0) + ' measured axes for ' +
+   lfConcepts.length + ' concepts, each on its own orbit');
+
+// A23 — and the spacing is the measurement
+let lfOK = false, lfDetail = 'no data';
+if (lfAssigned && lfAssigned.axes && lfAsc.length === lfAssigned.axes.length) {
+  const want = lfAssigned.axes.map(v => +(v / lfAssigned.axes[0]).toFixed(3));
+  const got = lfAsc.map(o => +(o.r / lfAsc[0].r).toFixed(3));
+  lfOK = want.every((v, i) => Math.abs(v - got[i]) < 0.005);
+  lfDetail = 'measured ' + want.join(' ') + '  ·  rendered ' + got.join(' ');
+}
+ck('A23', lfOK, 'Kepler-33 is rendered at its measured spacing — ' + lfDetail);
+
+/* A24 — THREE WORLDS, THREE REGIMES, IN ORDER.
+
+   A21 separated two systems by the sign of their spacing. With a third
+   planetary world the weaker claim — "these two differ" — is no longer enough:
+   a set of worlds that all compress would be one idea rendered three times.
+
+   Measured by the trend of each system's own gaps, last over first, which is a
+   ratio of ratios and therefore survives any scene scale:
+
+     Kepler-33   1.18/1.76 = 0.67   compresses hard
+     TRAPPIST-1  1.32/1.37 = 0.96   nearly even
+     HR 8799     1.79/1.46 = 1.23   opens out
+
+   Strictly ordered and straddling 1.0. That is three genuinely different
+   shapes, not three paint jobs. */
+const trendOf = a => { const g = gapsOf(a); return g[g.length - 1] / g[0]; };
+const tKep = trendOf(lfAssigned.axes), tTra = trendOf(assigned.axes),
+      tHR = trendOf(mvAssigned.axes);
+ck('A24', tKep < tTra && tTra < tHR && tKep < 0.85 && tHR > 1.15,
+   'the three planetary worlds are three regimes in order — Kepler-33 ' +
+   tKep.toFixed(2) + ' (compresses) < TRAPPIST-1 ' + tTra.toFixed(2) +
+   ' (nearly even) < HR 8799 ' + tHR.toFixed(2) + ' (opens)');
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' astronomy invariants hold');
 console.log('  draw calls ' + r.perf.calls + ' · geometries ' + r.perf.geometries +

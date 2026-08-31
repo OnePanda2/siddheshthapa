@@ -301,8 +301,8 @@ ck('W8', psy.id === 'psychology' && rn.from === 'psychology' &&
 /* W9 — every MIG states its source, and an unassigned one says so */
 const srcBad = (r.closed.menu || []).filter(m => !m.source || m.source !== m.expected);
 const charted = (r.closed.menu || []).filter(m => m.source !== 'not yet charted');
-ck('W9', srcBad.length === 0 && charted.length === 4 &&
-         charted.every(m => /TRAPPIST-1|Kepler-16|Ursa Major|HR 8799/.test(m.source)) &&
+ck('W9', srcBad.length === 0 && charted.length === 5 &&
+         charted.every(m => /TRAPPIST-1|Kepler-16|Ursa Major|HR 8799|Kepler-33/.test(m.source)) &&
          (r.closed.menu || []).every(m => m.aria && m.aria.indexOf(m.source) >= 0),
    'every MIG states its astronomical source and it matches its profile — ' +
    charted.map(m => m.id + '=' + m.source).join(', ') + '; the other ' +

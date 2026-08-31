@@ -1423,7 +1423,8 @@ var ASTRO={}; (ASTRO_DATA.systems||[]).forEach(function(sy){ ASTRO[sy.system]=sy
 
 /* Two worlds are assigned, chosen to be structurally opposite: one star with
    seven packed orbits, against two stars with a hollow centre. */
-var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799' };
+var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799',
+                 'life':'Kepler-33' };
 function templateFor(migId){ return ASTRO[MIG_SYSTEM[migId]]||null; }
 
 var ORBIT_R0=13;                     // the innermost orbit, in scene units
@@ -1439,7 +1440,11 @@ var SYS_TILT=0.42;                   // one shared viewing tilt, ~24 degrees
    four whose spacing EXPANDS (1.46, 1.58, 1.79) — the near-2:1 resonances of
    a directly imaged system spanning 16 to 68 AU. The scale is larger so that
    four bodies have room to be sparse rather than merely few. */
-var WORLD_SCALE={ 'philosophy':13, 'love':52, 'movies':18 };
+/* LIFE is Kepler-33, five bodies evenly graded outward across 3.7x. Its gaps
+   COMPRESS harder than TRAPPIST-1's — 1.76 down to 1.19 against 1.37 down to
+   1.22 — so it is the most compressive system in the set, not a smaller copy
+   of Philosophy. */
+var WORLD_SCALE={ 'philosophy':13, 'love':52, 'movies':18, 'life':15 };
 function scaleFor(migId){ return WORLD_SCALE[migId]||ORBIT_R0; }
 
 /* TRAPPIST-1 is famously coplanar — mutual inclinations under ~0.1 degrees —
@@ -2562,6 +2567,23 @@ var MOVIES_VARIANTS={
   c:{ name:'steel + coal ember',
       fog:0xc8ced8, star:0x35719f, body:0xa85231, orbit:0x38547c, accent:0xb85f32 }
 };
+/* LIFE inverts MOVIES, and the astronomy is why. Kepler-33 is an old
+   Sun-like star slightly evolved off the main sequence — yellow-white, warm —
+   and its five planets are sub-Neptunes, hazy and cool. So this world is a
+   warm centre with cool bodies, exactly the reverse of HR 8799's cold star
+   among its embers. Neither is a mood: both are what the two systems are. */
+var LIFE_VARIANTS={
+  a:{ name:'old gold + cool haze',
+      fog:0xd0c8b4, star:0x7a6420, body:0x4a5f72, orbit:0x6b5a2c, accent:0x8a6f22 },
+  b:{ name:'amber-olive + slate',
+      fog:0xcdc7ae, star:0x6e5f1c, body:0x445870, orbit:0x63562a, accent:0x7d6a26 },
+  c:{ name:'wheat + deep blue-grey',
+      fog:0xd6ccb8, star:0x866c26, body:0x3f5468, orbit:0x74602f, accent:0x957726 }
+};
+var LIFE_PICK=(function(){
+  var m=/(^|[#&])lifepal:([abc])/.exec(location.hash||'');
+  return m?m[2]:'a';
+})();
 var MOVIES_PICK=(function(){
   var m=/(^|[#&])movpal:([abc])/.exec(location.hash||'');
   return m?m[2]:'a';
@@ -2594,6 +2616,9 @@ var MIG_PALETTE={};
   var mv=MOVIES_VARIANTS[MOVIES_PICK]||MOVIES_VARIANTS.a;
   MIG_PALETTE['movies']={fog:mv.fog, star:mv.star, body:mv.body,
                          orbit:mv.orbit, accent:mv.accent};
+  var lf=LIFE_VARIANTS[LIFE_PICK]||LIFE_VARIANTS.a;
+  MIG_PALETTE['life']={fog:lf.fog, star:lf.star, body:lf.body,
+                       orbit:lf.orbit, accent:lf.accent};
 })();
 /* every other MIG keeps the neutral atmosphere until its own world is built —
    inventing thirteen palettes before their geometry exists would be decoration */
@@ -2604,7 +2629,7 @@ function paletteOf(migId){ return MIG_PALETTE[migId]||NEUTRAL_PALETTE; }
    visual interpretation of it. Every field the renderer actually consults
    lives here, so a new world is a profile rather than a new branch. */
 var WORLD_TYPES=['planetary','circumbinary','constellation','latent'];
-var WORLD_BIAS={ 'movies':0.90 };
+var WORLD_BIAS={ 'movies':0.90, 'life':1.20 };
 var MIG_WORLD_PROFILE={};
 (function(){
   MIGS.forEach(function(m){

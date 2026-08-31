@@ -16,8 +16,8 @@ const ORIG_DATA = fs.readFileSync(DATA, 'utf8');
 
 const MUTATIONS = [
   { n: 'A1', name: 'Philosophy uses TRAPPIST-1',
-    file: APP, find: "var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799' };",
-    repl: "var MIG_SYSTEM={ 'philosophy':'HR 8799', 'love':'Kepler-16', 'movies':'HR 8799' };",
+    file: APP, find: "var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16',",
+    repl: "var MIG_SYSTEM={ 'philosophy':'HR 8799', 'love':'Kepler-16',",
     expect: 'Philosophy uses HR 8799' },
 
   /* the geometry must come from the DATASET. Corrupt the source figures and
@@ -100,8 +100,8 @@ const MUTATIONS = [
      placeholder — the state it was in before this increment. */
   { n: 'A19', name: 'MOVIES uses HR 8799',
     file: APP,
-    find: "var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799' };",
-    repl: "var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16' };",
+    find: "'movies':'HR 8799',",
+    repl: "",
     expect: 'MOVIES uses' },
 
   /* A20 needs no mutation of its own, and that is the point: MOVIES adds no
@@ -119,6 +119,27 @@ const MUTATIONS = [
     find: ['"semiMajorAxisAU": [','    16.4,','    24,','    38,','    68','   ],'].join('\n'),
     repl: ['"semiMajorAxisAU": [','    16.4,','    20,','    24,','    28','   ],'].join('\n'),
     expect: 'opposite shapes' },
+
+  /* THE FIFTH WORLD, same shape as A19: take the system away and LIFE falls
+     back to the latent placeholder it was. */
+  { n: 'A22', name: 'LIFE uses Kepler-33',
+    file: APP,
+    find: "var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799',\n                 'life':'Kepler-33' };",
+    repl: "var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799' };",
+    expect: 'LIFE uses' },
+
+  /* A23 needs no mutation for the same reason A20 does not: LIFE shares the
+     one code path, so A7's mutation fails it too.
+
+     What the SOURCE figures bind is A24. Turn Kepler-33 from the most
+     compressive system in the set into an expanding one and the three regimes
+     stop being three — every ratio on screen still matches the data it was
+     given, which is exactly the failure A24 exists to catch. */
+  { n: 'A24', name: 'the three planetary worlds are three regimes in order',
+    file: DATA,
+    find: ['"semiMajorAxisAU": [','    0.0677,','    0.1189,','    0.1662,','    0.2138,','    0.2535','   ],'].join('\n'),
+    repl: ['"semiMajorAxisAU": [','    0.0677,','    0.0800,','    0.1100,','    0.1700,','    0.3000','   ],'].join('\n'),
+    expect: 'three regimes in order' },
 
   { n: 'A3', name: 'exactly seven Philosophy concepts',
     file: APP,
