@@ -134,7 +134,7 @@ var ASTRO={}; (ASTRO_DATA.systems||[]).forEach(function(sy){ ASTRO[sy.system]=sy
 
 /* Two worlds are assigned, chosen to be structurally opposite: one star with
    seven packed orbits, against two stars with a hollow centre. */
-var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16' };
+var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799' };
 function templateFor(migId){ return ASTRO[MIG_SYSTEM[migId]]||null; }
 
 var ORBIT_R0=13;                     // the innermost orbit, in scene units
@@ -144,7 +144,13 @@ var SYS_TILT=0.42;                   // one shared viewing tilt, ~24 degrees
    fixes is the ratios inside a world, and that is what the checks pin.
    Kepler-16 needs a larger scale for one reason: its two stars have to resolve
    as two. */
-var WORLD_SCALE={ 'philosophy':13, 'love':52 };
+/* MOVIES is the counterweight to PHILOSOPHY, and the data says so: HR 8799 is
+   filed as "the strongest available contrast to TRAPPIST-1". Seven tight
+   orbits whose spacing COMPRESSES outward (gaps 1.37 down to 1.22) against
+   four whose spacing EXPANDS (1.46, 1.58, 1.79) — the near-2:1 resonances of
+   a directly imaged system spanning 16 to 68 AU. The scale is larger so that
+   four bodies have room to be sparse rather than merely few. */
+var WORLD_SCALE={ 'philosophy':13, 'love':52, 'movies':18 };
 function scaleFor(migId){ return WORLD_SCALE[migId]||ORBIT_R0; }
 
 /* TRAPPIST-1 is famously coplanar — mutual inclinations under ~0.1 degrees —
@@ -817,6 +823,26 @@ var OBS_VARIANTS={
       fog:0xc3d2c8, star:0x24564a, body:0x38756a, line:0x56988a, accent:0x2f8471,
       anomaly:0x8f7a26 }
 };
+/* MOVIES: HR 8799 is the one system here whose planets have been SEEN rather
+   than inferred — four young, hot, self-luminous giants imaged in the near
+   infrared, orbiting an A5V star of about 7400K. So the world is a cold
+   blue-white centre with ember companions, which is what that photograph
+   actually looks like, and it is a combination nothing else in the mind uses:
+   Philosophy is uniformly blue-violet, Love a warm pair, Observation
+   verdigris. The contrast between a hot white star and its own red planets is
+   the astronomy, not a mood. */
+var MOVIES_VARIANTS={
+  a:{ name:'deep blue-white + ember',
+      fog:0xc4ccd6, star:0x2f6aa8, body:0xb85a34, orbit:0x3d5c85, accent:0xc86a38 },
+  b:{ name:'cold blue + infrared',
+      fog:0xbdc9d8, star:0x265f9c, body:0xc26139, orbit:0x44648c, accent:0xd2743d },
+  c:{ name:'steel + coal ember',
+      fog:0xc8ced8, star:0x35719f, body:0xa85231, orbit:0x38547c, accent:0xb85f32 }
+};
+var MOVIES_PICK=(function(){
+  var m=/(^|[#&])movpal:([abc])/.exec(location.hash||'');
+  return m?m[2]:'a';
+})();
 var OBS_PICK=(function(){
   var m=/(^|[#&])obspal:([abc])/.exec(location.hash||'');
   return m?m[2]:'a';
@@ -842,6 +868,9 @@ var MIG_PALETTE={};
   var w=LOVE_VARIANTS[LOVE_PICK]||LOVE_VARIANTS.a;
   MIG_PALETTE['love']={fog:w.fog, star:w.star, star2:w.star2, body:w.body,
                        orbit:w.orbit, accent:w.accent};
+  var mv=MOVIES_VARIANTS[MOVIES_PICK]||MOVIES_VARIANTS.a;
+  MIG_PALETTE['movies']={fog:mv.fog, star:mv.star, body:mv.body,
+                         orbit:mv.orbit, accent:mv.accent};
 })();
 /* every other MIG keeps the neutral atmosphere until its own world is built —
    inventing thirteen palettes before their geometry exists would be decoration */
@@ -852,6 +881,7 @@ function paletteOf(migId){ return MIG_PALETTE[migId]||NEUTRAL_PALETTE; }
    visual interpretation of it. Every field the renderer actually consults
    lives here, so a new world is a profile rather than a new branch. */
 var WORLD_TYPES=['planetary','circumbinary','constellation','latent'];
+var WORLD_BIAS={ 'movies':0.90 };
 var MIG_WORLD_PROFILE={};
 (function(){
   MIGS.forEach(function(m){
@@ -864,9 +894,21 @@ var MIG_WORLD_PROFILE={};
              : 'latent';
     /* how far the camera stands when it arrives — the one number that sets the
        scale of everything range-based in that world */
+    /* A world framed further out has to carry its ranges with it. The bias is
+       what sets the distance, so the ranges scale by how far this world's bias
+       departs from the one its type would otherwise use. Every world without
+       an override has a scale of exactly 1, so the approved worlds are
+       untouched to the unit. Without this MOVIES arrived at 272 with a label
+       range of 160 and showed four unnamed lights. */
+    /* Written as a lookup rather than a second ternary chain: an identical
+       chain would duplicate the framingBias anchors below, and a mutation
+       whose anchor matches twice is UNVERIFIED. */
+    var TYPE_BIAS={constellation:1.00, circumbinary:0.55, planetary:0.66, latent:1.00};
+    var typeBias = TYPE_BIAS[type]!==undefined ? TYPE_BIAS[type] : 1.00;
+    var biasScale = (WORLD_BIAS[m.id]!==undefined ? WORLD_BIAS[m.id] : typeBias)/typeBias;
     var arrive = kon ? (CONST_DATA.derived.meanDistanceLy*CONST_SCALE)
                : (type==='circumbinary') ? 2.5*scaleFor(m.id)*0.70+2.5*scaleFor(m.id)*0.42
-               : (type==='planetary') ? 115
+               : (type==='planetary') ? 115*biasScale
                : 96;
     MIG_WORLD_PROFILE[m.id]={
       worldType:type,
@@ -886,11 +928,20 @@ var MIG_WORLD_PROFILE={};
          own arrival distance, so every world's relationships are equally
          legible when you get there — the shared rule, parameterised. */
       relationshipStyle:{ range:+(arrive*2.2).toFixed(1), arrival:+arrive.toFixed(1) },
-      labelStyle: type==='constellation' ? {minor:470, writing:190} : {minor:160, writing:80},
+      labelStyle: type==='constellation' ? {minor:470, writing:190}
+                : {minor:Math.round(160*biasScale), writing:Math.round(80*biasScale)},
       /* how much of the world must fit the readable area. A constellation is a
          FIGURE and must be whole; a dense planetary system is allowed to crop
          its outer orbits, which is what its approved composition does. */
-      framingBias: type==='constellation' ? 1.00
+      /* A per-world override, because a bias is a statement about ONE world's
+         composition and the type only approximates it. TRAPPIST-1 can crop its
+         outer orbits: it has seven bodies and the outermost is one voice among
+         many. HR 8799 has four, each 1.5 to 1.8 times further out than the
+         last, and the wide separation IS the world — cropping the outermost
+         throws away the exact property that makes it the counterweight to
+         Philosophy. So MOVIES asks for nearly all of itself. */
+      framingBias: WORLD_BIAS[m.id]!==undefined ? WORLD_BIAS[m.id]
+                 : type==='constellation' ? 1.00
                  : type==='circumbinary'  ? 0.55
                  : type==='planetary'     ? 0.66
                  /* A latent world is a placeholder sphere. It has no approved

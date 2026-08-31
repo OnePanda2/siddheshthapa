@@ -16,8 +16,8 @@ const ORIG_DATA = fs.readFileSync(DATA, 'utf8');
 
 const MUTATIONS = [
   { n: 'A1', name: 'Philosophy uses TRAPPIST-1',
-    file: APP, find: "var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16' };",
-    repl: "var MIG_SYSTEM={ 'philosophy':'HR 8799', 'love':'Kepler-16' };",
+    file: APP, find: "var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799' };",
+    repl: "var MIG_SYSTEM={ 'philosophy':'HR 8799', 'love':'Kepler-16', 'movies':'HR 8799' };",
     expect: 'Philosophy uses HR 8799' },
 
   /* the geometry must come from the DATASET. Corrupt the source figures and
@@ -95,6 +95,30 @@ const MUTATIONS = [
     file: APP, find: "'<span class=\"verb\">'+esc(k.v)+'</span> '+esc(o.label)",
     repl: "'<span class=\"verb\">'+esc(k.verb)+'</span> '+esc(o.label)",
     expect: 'relationship verbs rendered' },
+
+  /* THE FOURTH WORLD. Take the system away and MOVIES falls back to a latent
+     placeholder — the state it was in before this increment. */
+  { n: 'A19', name: 'MOVIES uses HR 8799',
+    file: APP,
+    find: "var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799' };",
+    repl: "var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16' };",
+    expect: 'MOVIES uses' },
+
+  /* A20 needs no mutation of its own, and that is the point: MOVIES adds no
+     new code path. It is built by the same shared rule as PHILOSOPHY, so A7's
+     mutation — breaking the link between the measured axes and the rendered
+     radii — fails A20 as well. A separate mutation here could only be a
+     contrived one.
+
+     What the SOURCE figures do bind is A21. Flatten HR 8799's axes into a
+     tightening series and it stops being the contrast it was chosen to be,
+     while every ratio on screen still faithfully matches the data it was
+     given — which is exactly the failure A21 exists to catch. */
+  { n: 'A21', name: 'the two planetary worlds are opposite shapes',
+    file: DATA,
+    find: ['"semiMajorAxisAU": [','    16.4,','    24,','    38,','    68','   ],'].join('\n'),
+    repl: ['"semiMajorAxisAU": [','    16.4,','    20,','    24,','    28','   ],'].join('\n'),
+    expect: 'opposite shapes' },
 
   { n: 'A3', name: 'exactly seven Philosophy concepts',
     file: APP,

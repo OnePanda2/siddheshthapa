@@ -23,6 +23,10 @@
    A16 the mobile semantic model survives
    A17 the atlas sampling contract — the fault that actually shipped
    A18 relationship verbs render as real verbs, never "undefined"
+   A19 MOVIES uses HR 8799, with provenance and an exact 4<->4 mapping
+   A20 HR 8799's rendered spacing IS its measured spacing
+   A21 the two planetary worlds are geometrically OPPOSITE, which is the whole
+       reason HR 8799 was the system chosen to answer TRAPPIST-1
 
    usage: node tools/astronomycheck.js [v02.html]
 */
@@ -214,6 +218,52 @@ ck('A14', r.perf.lines > 0 && r.perf.calls <= 7,
 ck('A16', mob && mob.dom && mob.dom.navRows >= 3 && mob.dom.canvasHidden,
    mob ? 'mobile keeps ' + mob.dom.navRows + ' navigable rows, canvas still aria-hidden'
        : 'mobile state could not be measured');
+
+/* ── THE FOURTH WORLD ─────────────────────────────────────────────────
+   MOVIES is the counterweight to PHILOSOPHY, and the data file says so in as
+   many words: HR 8799 is filed as "the strongest available contrast to
+   TRAPPIST-1". These three hold that claim to the same standard the first
+   world is held to — the ratios on screen must BE the measured ratios. */
+const mvAssigned = A.assigned.movies, mvOrbits = (A.orbits.movies || []);
+const mvAsc = mvOrbits.slice().sort((a, b) => a.slot - b.slot);
+
+// A19 — the system, its provenance, and an exact 4<->4 mapping
+const mvConcepts = mvOrbits.filter(o => o.t === 'minor');
+ck('A19', mvAssigned && mvAssigned.system === 'HR 8799' &&
+          Array.isArray(mvAssigned.axes) && mvAssigned.axes.length === 4 &&
+          mvConcepts.length === 4 && new Set(mvAsc.map(o => o.slot)).size === 4,
+   'MOVIES uses ' + (mvAssigned ? mvAssigned.system : 'nothing') + ' — ' +
+   (mvAssigned ? mvAssigned.axes.length : 0) + ' measured axes for ' +
+   mvConcepts.length + ' concepts, each on its own orbit, no interpolation');
+
+// A20 — and the spacing is the measurement, not a look
+let mvOK = false, mvDetail = 'no data';
+if (mvAssigned && mvAssigned.axes && mvAsc.length === mvAssigned.axes.length) {
+  const want = mvAssigned.axes.map(v => +(v / mvAssigned.axes[0]).toFixed(3));
+  const got = mvAsc.map(o => +(o.r / mvAsc[0].r).toFixed(3));
+  mvOK = want.every((v, i) => Math.abs(v - got[i]) < 0.005);
+  mvDetail = 'measured ' + want.join(' ') + '  ·  rendered ' + got.join(' ');
+}
+ck('A20', mvOK, 'HR 8799 is rendered at its measured spacing — ' + mvDetail);
+
+/* A21 — THE CONTRAST, ASSERTED RATHER THAN DESCRIBED.
+
+   Choosing a second planetary system is only worth doing if it is genuinely a
+   different shape, and "vast and sparse" is a phrase until something measures
+   it. The two systems separate on the SIGN of their spacing: TRAPPIST-1's
+   orbit gaps compress as they go out (1.37 down to 1.22, seven bodies packed
+   inside 0.062 AU) while HR 8799's expand (1.46, 1.58, 1.79 — the near-2:1
+   resonances of four bodies spread from 16 to 68 AU). One tightens, the other
+   opens. That is a property of the astronomy, and it survives any change of
+   scene scale because both are ratios. */
+const gapsOf = a => a.slice(1).map((v, i) => v / a[i]);
+const trGaps = gapsOf(assigned.axes), mvGaps = gapsOf(mvAssigned.axes);
+const trTightens = trGaps[trGaps.length - 1] < trGaps[0];
+const mvOpens = mvGaps.every((g, i) => i === 0 || g > mvGaps[i - 1]);
+ck('A21', trTightens && mvOpens && mvGaps[mvGaps.length - 1] > trGaps[trGaps.length - 1] * 1.3,
+   'the two worlds are opposite shapes — TRAPPIST-1 tightens outward (' +
+   trGaps.map(g => g.toFixed(2)).join(' > ') + ') while HR 8799 opens (' +
+   mvGaps.map(g => g.toFixed(2)).join(' < ') + ')');
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' astronomy invariants hold');
 console.log('  draw calls ' + r.perf.calls + ' · geometries ' + r.perf.geometries +

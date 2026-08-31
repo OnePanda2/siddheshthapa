@@ -55,7 +55,7 @@ LOVE → Kepler-16, OBSERVATION → Ursa Major. Real astronomy, real provenance.
 | worldframecheck | 8/8 |
 | **total** | **105/105** |
 
-*(The suite has since grown to 150/150 across twelve check suites, with 95
+*(The suite has since grown to 153/153 across twelve check suites, with 110
 mutations verified: `travelcheck` was added when the MIG zoom was fixed,
 `braincheck` was rewritten for the constellation, `emblemcheck` was added when
 the region emblems turned out to be invisible in the menu, and `travelcheck`
@@ -99,7 +99,16 @@ to undo anything here.
    it: +36% healthy against +0% mutated.
    **The six-width visual matrix still has not been re-run** since the sky went
    in.
-5. **MOVIES → HR 8799 is not built.** No fourth world exists.
+5. ~~**MOVIES → HR 8799 is not built.**~~ **BUILT.** The fourth world, and the
+   first added since the checkpoint. MOVIES has exactly four concepts and
+   HR 8799 exactly four measured planets, so the 4<->4 mapping is as exact as
+   Philosophy's 7<->7. The data file already filed it as "the strongest
+   available contrast to TRAPPIST-1" and that claim is now asserted rather
+   than described: TRAPPIST-1's orbit gaps TIGHTEN outward (1.37 down to 1.22,
+   seven bodies inside 0.062 AU) while HR 8799's OPEN (1.46, 1.58, 1.79 — four
+   bodies from 16 to 68 AU). It needed no new renderer branch: only a system
+   assignment, a scale, a palette and a per-world framing bias.
+   `astronomycheck` A19/A20/A21, mutation-verified.
 6. ~~**The region emblems were invisible in the menu.**~~ **FIXED.** The fifteen
    emblems are the only navigation targets in the Main Mind Menu and were being
    drawn dimmer than the constellation's own decorative stars — Philosophy at

@@ -227,8 +227,8 @@ ck('B18', r.mmm.arch.reparented.length === 0 &&
 const menu = r.mmm.menu || [];
 const charted = menu.filter(x => x.source && x.source !== 'not yet charted');
 ck('B19', menu.length === r.mmm.arch.migCount &&
-          menu.every(x => x.source === x.expected) && charted.length === 3 &&
-          charted.every(x => /TRAPPIST-1|Kepler-16|Ursa Major/.test(x.source)),
+          menu.every(x => x.source === x.expected) && charted.length === 4 &&
+          charted.every(x => /TRAPPIST-1|Kepler-16|Ursa Major|HR 8799/.test(x.source)),
    'source labels derive from the world assignments — ' +
    charted.map(x => x.id + '=' + x.source).join(', ') + '; the other ' +
    (menu.length - charted.length) + ' say "not yet charted" rather than inventing one');
