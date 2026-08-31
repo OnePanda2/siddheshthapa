@@ -3733,6 +3733,18 @@ function worldBounds(migId){
 function fitDistance(migId, whole){
   var b=worldBounds(migId);
   if(!b||!b.radius||!camera) return 0;
+  /* NO VIEWPORT, NO FIT.
+
+     If the canvas has no size — a tab that has not been laid out, a resize
+     race, a hidden pane — camera.aspect is zero or NaN and this divides a
+     world's radius by nothing. Observed: a world 105 units across asking to be
+     viewed from 93,812, which puts every one of its objects off screen and
+     looks exactly like "I clicked the region and there is nothing there".
+
+     A framing rule must never be able to throw the camera into deep space. */
+  var vpW=renderer?renderer.domElement.clientWidth:0;
+  var vpH=renderer?renderer.domElement.clientHeight:0;
+  if(!(vpW>0 && vpH>0) || !isFinite(camera.aspect) || camera.aspect<=0) return 0;
   var phone=window.innerWidth<768;
   var vHalf=(camera.fov*Math.PI/180)/2;
   /* two fits. The READABLE one asks for the world to land where a person is
@@ -3741,7 +3753,10 @@ function fitDistance(migId, whole){
   var safeW=whole?0.96:(phone?0.86:0.62);
   var tanV=Math.tan(vHalf)*safeH;
   var tanH=Math.tan(vHalf)*camera.aspect*safeW;
-  return b.radius/Math.max(0.001,Math.min(tanV,tanH));
+  var d=b.radius/Math.max(0.001,Math.min(tanV,tanH));
+  /* and a hard ceiling relative to the world's own size, so no arithmetic
+     accident can put the camera somewhere a person would never be */
+  return Math.min(d, b.radius*16);
 }
 /* the camera position a world's own profile prefers, pulled back if it does not
    fit. A world that already frames well is left exactly as it was. */
@@ -3876,7 +3891,22 @@ function travelTo(mode,id,push){
   if(push!==false) history.push({mode:state.mode, focus:state.focus, region:state.region});
   /* the brain opens into the world you chose, and closes behind you */
   var wantOpen = (mode==='universe' && !id) ? 0 : 1;
-  if(entered && wantOpen!==mindOpen && !MORPH_ON){
+  /* RETARGET, never discard.
+
+     This used to refuse to start a morph while one was already running. The
+     effect was that choosing a region DURING a transition was thrown away: the
+     morph already in flight carried on to wherever IT was going, so clicking a
+     MIG while the mind was still closing left the mind CLOSED with the state
+     saying 'region' — the world's objects still folded inside the brain, and
+     nothing to see. Going back and clicking again worked, because by then no
+     morph was in flight.
+
+     A destination is a destination. If the mind is heading somewhere other
+     than where the new selection needs it, it turns around from wherever it
+     currently is. */
+  var needsMorph = entered &&
+    (MORPH_ON ? (wantOpen!==MORPH_TO) : (wantOpen!==mindOpen));
+  if(needsMorph){
     if(reduced||LITE){ setMindOpen(wantOpen); }
     else { MORPH_FROM=mindOpen; MORPH_TO=wantOpen; MORPH_ON=true; morphT=0; morphStart=0; }
   }
@@ -3886,8 +3916,19 @@ function travelTo(mode,id,push){
   else if(mode==='universe'){ state.region=null; state.focus=null; }
   var f=frameFor(mode, id||state.region);
   wantPos.copy(f.p); wantAim.copy(f.a);
-  invalidate(140);
-  if(reduced||LITE){ camPos.copy(wantPos); camAim.copy(wantAim); }
+  invalidate(190);
+  if(reduced||LITE){ camPos.copy(wantPos); camAim.copy(wantAim); FLIGHT_ON=false; }
+  else {
+    var jump=camPos.distanceTo(wantPos);
+    if(entered && jump>FLIGHT_MIN){
+      FLIGHT_FROM_P.copy(camPos); FLIGHT_FROM_A.copy(camAim);
+      /* longer for a longer journey, but bounded at both ends: never so brief
+         that it reads as a cut, never so slow that it reads as waiting */
+      FLIGHT_MS=Math.min(1600, Math.max(820, jump*2.1));
+      FLIGHT_T0=(performance&&performance.now)?performance.now():Date.now();
+      FLIGHT_ON=true;
+    } else FLIGHT_ON=false;
+  }
   paintDOM();
 }
 
@@ -4071,6 +4112,21 @@ window.addEventListener('resize',function(){ resize(); invalidate(40); });
 document.addEventListener('visibilitychange',function(){ if(!document.hidden) invalidate(40); });
 
 var morphT=0, morphStart=0, MORPH_FROM=0, MORPH_TO=1;
+/* ── THE FLIGHT ───────────────────────────────────────────────────────
+   Choosing a region is a journey, not a nudge, and it should feel like one.
+
+   The camera has always eased toward its target exponentially, which has no
+   duration and no shape: it leaves fast, arrives slowly, and a 600-unit
+   journey into a world reads exactly like a 20-unit adjustment. For travel
+   between the mind and a world that is the wrong gesture — you are supposed
+   to feel that you MOVED.
+
+   So a large move becomes a timed flight with an ease that accelerates out of
+   the mind and decelerates into the world. Small moves keep the old lerp,
+   because ceremonially animating a nudge is worse than not animating it. */
+var FLIGHT_ON=false, FLIGHT_T0=0, FLIGHT_MS=1400;
+var FLIGHT_FROM_P=new THREE.Vector3(), FLIGHT_FROM_A=new THREE.Vector3();
+var FLIGHT_MIN=48;      /* below this a move is an adjustment, not a journey */
 var lastMs=0, frameMs=16;
 function step(){
   var t0=(performance&&performance.now)?performance.now():Date.now();
@@ -4081,7 +4137,18 @@ function step(){
      is the subject, so the same pointer travel carries much further there. */
   var par=(state.region && CONSTELLATIONS[state.region]) ? 13.0 : 1.0;
   aim.x+=mx*10*par; aim.y+=-my*7*par;
-  camPos.lerp(aim,k); camAim.lerp(wantAim,k);
+  if(FLIGHT_ON){
+    var fnow=(performance&&performance.now)?performance.now():Date.now();
+    var ft=Math.min(1,(fnow-FLIGHT_T0)/FLIGHT_MS);
+    /* ease in and out: leave the mind gathering speed, arrive settling */
+    var fe = ft<0.5 ? 4*ft*ft*ft : 1-Math.pow(-2*ft+2,3)/2;
+    camPos.lerpVectors(FLIGHT_FROM_P, aim, fe);
+    camAim.lerpVectors(FLIGHT_FROM_A, wantAim, fe);
+    if(ft>=1) FLIGHT_ON=false;
+    invalidate(4);
+  } else {
+    camPos.lerp(aim,k); camAim.lerp(wantAim,k);
+  }
   camera.position.copy(camPos); camera.lookAt(camAim);
   /* RANGE GOVERNS WHAT IS SHOWN. From the universe a visitor should see that
      worlds exist and that a few thoughts travel between them — not 126 lines.
@@ -4589,9 +4656,51 @@ window.__v02={
     });
     out.centre=b.centre.toArray().map(function(v){return +v.toFixed(1);});
     out.camDist=camera?+camera.position.distanceTo(b.centre).toFixed(1):null;
+    /* where the camera is HEADING, which is what the framing rule decided */
+    out.wantDist=+wantPos.distanceTo(b.centre).toFixed(1);
     return out;
   },
   renders:function(){ return RENDERS; },
+  /* the unfolding, from the inside. Exposed because the two bugs that made
+     choosing a region show nothing were both invisible to every existing
+     suite: they only appear with motion enabled and a laid-out viewport, and
+     every check runs under reduced motion, which snaps. */
+  morph:function(){
+    return { on:MORPH_ON, from:+MORPH_FROM.toFixed(4), to:MORPH_TO,
+             open:+mindOpen.toFixed(4), reduced:!!reduced };
+  },
+  /* Park a morph part-way, so the retarget can be tested against a KNOWN
+     in-flight state. Headless cannot observe a real one: under a virtual time
+     budget the browser fast-forwards timers straight past the whole 1150ms,
+     so the morph is always either not started or already finished. This
+     constructs the state under test rather than waiting to be lucky. */
+  /* Snap the camera to wherever it is heading. Framing is a claim about the
+     DESTINATION, and with motion enabled a flight does not advance inside a
+     synchronous harness — so measuring the live camera measures where the
+     journey started, and any assertion about arrival passes vacuously. */
+  arrive:function(){
+    camPos.copy(wantPos); camAim.copy(wantAim); FLIGHT_ON=false;
+    if(camera){ camera.position.copy(camPos); camera.lookAt(camAim); }
+    invalidate(6);
+    return this.camera();
+  },
+  parkMorph:function(from,to){
+    MORPH_FROM=from; MORPH_TO=to; MORPH_ON=true;
+    morphStart=(performance&&performance.now)?performance.now():Date.now();
+    morphT=0; setMindOpen(from); invalidate(4);
+    return this.morph();
+  },
+  /* where the camera actually is, and where it is heading — so the TRAVEL
+     between the mind and a world can be measured rather than described */
+  camera:function(){
+    return { pos:camPos.toArray().map(function(v){return +v.toFixed(1);}),
+             aim:camAim.toArray().map(function(v){return +v.toFixed(1);}),
+             want:wantPos.toArray().map(function(v){return +v.toFixed(1);}),
+             distToWant:+camPos.distanceTo(wantPos).toFixed(1),
+             flying:FLIGHT_ON, flightMs:Math.round(FLIGHT_MS),
+             fov:camera?camera.fov:null,
+             dolly:+dolly.toFixed(1) };
+  },
   mind:function(){ return {open:+mindOpen.toFixed(4), morphing:MORPH_ON, entered:entered,
     mode:state.mode, region:state.region||null,
                            brainR:BRAIN_R}; },

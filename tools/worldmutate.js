@@ -43,11 +43,11 @@ const MUTATIONS = [
     MINORS.forEach(function(x){ if(x.id==='psychology-behaviour') x.mig=a.id; });   // mutation: steal it` },
 
   { n: 'M1', file: APP, name: 'the layout really has brain proportions',
-    find: `  var p=new THREE.Vector3(x*brainWidth(y,z), y*r*0.80, z*r);`,
+    find: `  var p=new THREE.Vector3(x*brainWidth(y,z), y*r*0.74, z*r);`,
     repl: `  var p=new THREE.Vector3(x*brainWidth(y,z), y*r*1.28, z*r);  // mutation: too tall` },
 
   { n: 'M1b', assert: 'M1', file: APP, name: 'the midline stays clear',
-    find: `  p.x += (x>=0?1:-1)*BRAIN_GAP;`,
+    find: `  p.x += (x>=0?1:-1)*(0.030+0.022*bsmooth(0.15,1.0,y));   /* a cleft, not a chasm */`,
     repl: `  p.x += 0.0;                                  // mutation: no fissure` },
 
   { n: 'M2', file: APP, name: 'every MIG is in the brain',
@@ -115,7 +115,7 @@ const MUTATIONS = [
     repl: `  if(p.worldType==='latent' || !p.astronomyTemplate) return 'TRAPPIST-1';` },
 
   { n: 'M6', file: APP, name: 'the whole brain stays inside the frame',
-    find: `    var k=(phoneB2?6.20:2.78)*(1+WELCOME_DIM*0.13);`,
+    find: `    var k=(phoneB2?5.60:2.50)*(1+WELCOME_DIM*0.13);`,
     repl: `    var k=phoneB2?2.62:0.34;            // mutation: zoom into the brain` },
 
   { n: 'MI1', file: APP, name: 'the named object is the one that lights',

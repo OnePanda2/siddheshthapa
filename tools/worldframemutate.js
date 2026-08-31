@@ -12,8 +12,8 @@ const DRY = process.argv.includes('--dry');
 
 const M = [
   { id:'WF1', why:'stop measuring the world and frame it from a constant instead',
-    find:'  return b.radius/Math.max(0.001,Math.min(tanV,tanH));',
-    repl:'  return 0;' },
+    find:'  var d=b.radius/Math.max(0.001,Math.min(tanV,tanH));',
+    repl:'  var d=0;' },
 
   { id:'WF2', why:'ignore the fit entirely, so a world is framed by its preference alone',
     find:'  var d=Math.max(preferred, need);',

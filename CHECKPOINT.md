@@ -55,6 +55,9 @@ LOVE → Kepler-16, OBSERVATION → Ursa Major. Real astronomy, real provenance.
 | worldframecheck | 8/8 |
 | **total** | **105/105** |
 
+*(The suite has since grown to 113/113 with `travelcheck`, added when the MIG
+zoom was fixed.)*
+
 - idle = **0 renders** over two seconds
 - draw calls 6 — three for the mind, three for the sky
 - `preview.html` sha256-16 `a86e4deb12e0a496`, the P4.7 fallback, untouched
@@ -67,9 +70,11 @@ LOVE → Kepler-16, OBSERVATION → Ursa Major. Real astronomy, real provenance.
 Recorded so they are not rediscovered as surprises. None of these is a reason
 to undo anything here.
 
-1. **Selecting a MIG does not zoom in.** The world is framed correctly and all
-   its objects are in the readable area, but the camera does not travel into
-   it the way the brief describes.
+1. ~~**Selecting a MIG does not zoom in.**~~ **FIXED** after this checkpoint,
+   see `travelcheck` / `travelmutate`. Two real bugs were behind it: a region
+   chosen while a transition was already running was silently discarded, and a
+   degenerate viewport could fling the camera 93,812 units from a world 105
+   across. The camera now flies with an eased, bounded journey.
 2. **`braincheck` and `brainmutate` are stale.** They assert the old anatomical
    sulci by name; those names no longer exist. 4 of 20 fail on naming, not on
    the design. The brain currently has no dedicated test coverage.
