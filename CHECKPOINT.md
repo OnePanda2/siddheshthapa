@@ -55,7 +55,7 @@ LOVE → Kepler-16, OBSERVATION → Ursa Major. Real astronomy, real provenance.
 | worldframecheck | 8/8 |
 | **total** | **105/105** |
 
-*(The suite has since grown to 148/148 across twelve check suites, with 92
+*(The suite has since grown to 150/150 across twelve check suites, with 95
 mutations verified: `travelcheck` was added when the MIG zoom was fixed,
 `braincheck` was rewritten for the constellation, `emblemcheck` was added when
 the region emblems turned out to be invisible in the menu, and `travelcheck`
@@ -63,7 +63,7 @@ grew T9/T10/T11 when the first selection from the CLOSED mind turned out to
 arrive at the wrong place for fourteen of the fifteen regions on a desktop and,
 separately, under the sheet for twelve of them on a phone. `travelcheck` now
 runs at two viewports, and `worldframecheck` gained WF9/WF10 for the narrow
-laptop, which now runs at three.)*
+laptop and WF11/WF12 for the per-world bias, and now runs at three.)*
 
 - idle = **0 renders** over two seconds
 - draw calls 6 — three for the mind, three for the sky

@@ -26,6 +26,10 @@ function run(W, H) {
       M.go('region',id); M.settle(220);
       out.worlds[id]=M.framing(id);
     });
+    /* BUSINESS is the densest LATENT world — the class that had no astronomy
+       and therefore no branch of its own, and was framed by a constant. */
+    M.go('region','business'); M.settle(220);
+    out.business=M.framing('business');
     /* and back — the world camera must not still be driving */
     M.go('universe'); M.settle(260);
     out.after={ mind:M.mind(), organ:{ frame:M.organ().frame, lateralDeg:M.organ().lateralDeg } };
@@ -57,7 +61,7 @@ if (D.ERROR || P.ERROR || N.ERROR) {
 }
 
 let bad = 0;
-const TOTAL = 10;
+const TOTAL = 12;
 function ck(id, ok, msg) {
   if (!ok) bad++;
   console.log('  ' + (ok ? 'PASS' : 'FAIL') + '  ' + id.padEnd(4) + '  ' + msg);
@@ -197,6 +201,48 @@ ck('WF10', loveN.principal.inSafe >= loveD.principal.inSafe &&
    loveN.principal.total + ' readable at ' + N.w + ', the same as ' +
    loveD.principal.inSafe + '/' + loveD.principal.total + ' at ' + D.w +
    ', standing at ' + loveN.camDist + ' against ' + loveD.camDist);
+
+/* WF11 — A DENSE WORLD LOSES NO MORE TO A NARROW WINDOW THAN TO A WIDE ONE.
+
+   WF9 holds every world to its bar, and a bar is a floor: PHILOSOPHY sat at
+   6 of 8 concepts against a bar of 0.60 and passed comfortably while losing a
+   concept that a wide window keeps. A floor cannot express "no worse than
+   before", so this compares the narrow window against the wide one directly.
+
+   Two changes had to land for it to hold. The composition is pushed clear of
+   the panel rather than merely off it — the mutation for this assertion is
+   the weaker push, which still satisfies every bar in WF9. And the cropping
+   allowance is applied against the panel's WIDE share instead of the whole
+   readable fit, so it is no longer spent twice on a narrow window; that half
+   is caught by WF10, where LOVE is the world it costs.
+
+   The approved compositions are unchanged to the unit on a wide desktop:
+   Philosophy still stands at 129, Love at 181. */
+ck('WF11', N.worlds.philosophy.principal.inSafe >= D.worlds.philosophy.principal.inSafe &&
+           N.worlds.philosophy.camDist > D.worlds.philosophy.camDist &&
+           D.worlds.philosophy.camDist < 145,
+   'a narrow window costs PHILOSOPHY nothing a wide one does not — ' +
+   N.worlds.philosophy.principal.inSafe + '/' + N.worlds.philosophy.principal.total +
+   ' at ' + N.w + ' against ' + D.worlds.philosophy.principal.inSafe + '/' +
+   D.worlds.philosophy.principal.total + ' at ' + D.w + ', standing at ' +
+   N.worlds.philosophy.camDist + ' against the approved ' + D.worlds.philosophy.camDist);
+
+/* WF12 — and a world with no astronomy yet is still framed by its own size.
+
+   The twelve latent regions had no branch of their own and stood at a flat 62
+   units whatever they contained. Their profiles declared a framingBias the
+   whole time and nothing ever read it: BUSINESS measured a fit of 62.4 on a
+   wide desktop and 72.0 on a narrow one, and both were discarded for the
+   constant — which is why it held 8 of 8 concepts readable at 1440 and 5 of 8
+   at 900. 62 remains the PREFERRED distance, so a world that already framed
+   well from there has not moved at all. */
+ck('WF12', N.business.principal.inSafe === N.business.principal.total &&
+           N.business.camDist > D.business.camDist &&
+           D.business.principal.inSafe === D.business.principal.total,
+   'a latent world is framed by its own size, not a constant — BUSINESS ' +
+   N.business.principal.inSafe + '/' + N.business.principal.total + ' at ' + N.w +
+   ', standing at ' + N.business.camDist + ' against ' + D.business.camDist +
+   ' on a wide desktop, where the same fit asks for less');
 
 console.log('\n  1440: ' + all.map(f => f.id + ' ' + f.principal.inSafe + '/' + f.principal.total + ' @' + f.camDist).join(' · '));
 console.log('  900 : ' + nw.map(f => f.id + ' ' + f.principal.inSafe + '/' + f.principal.total + ' @' + f.camDist).join(' · '));

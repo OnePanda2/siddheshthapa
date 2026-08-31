@@ -2616,7 +2616,11 @@ var MIG_WORLD_PROFILE={};
       framingBias: type==='constellation' ? 1.00
                  : type==='circumbinary'  ? 0.55
                  : type==='planetary'     ? 0.66
-                 : 0.90,
+                 /* A latent world is a placeholder sphere. It has no approved
+                    composition to protect and nothing worth cropping, so it
+                    simply fits. 0.90 was never read at all until this branch
+                    started asking for a measured distance. */
+                 : 1.00,
       atmosphere: MIG_PALETTE[m.id]?'own fog and body tones':'shared neutral',
       mobileMode: type==='constellation' ? 'stand back 2.02x and aim below the figure'
                 : type==='circumbinary' ? 'stand back and lift the pair out of the sheet'
@@ -3805,7 +3809,11 @@ function worldBounds(migId){
 /* the distance at which those bounds fit the readable area. The sheet covers
    the left of a desktop and the lower part of a phone, so the safe area is not
    the viewport. */
-function fitDistance(migId, whole){
+/* refWidth asks the question the APPROVED compositions were tuned against:
+   how far back would this world need to stand if the panel took the share of
+   the frame it takes on a wide desktop? The difference between that and the
+   real answer is what the panel costs beyond what was already allowed for. */
+function fitDistance(migId, whole, refWidth){
   var b=worldBounds(migId);
   if(!b||!b.radius||!camera) return 0;
   /* NO VIEWPORT, NO FIT.
@@ -3837,7 +3845,7 @@ function fitDistance(migId, whole){
      Taking the smaller of the two leaves every wide desktop framed exactly as
      it was and only tightens the frame once the panel genuinely crowds it. */
   var safeW=whole?0.96:(phone?0.86:0.62);
-  if(!whole && !phone){
+  if(!whole && !phone && !refWidth){
     var shE=document.getElementById('semantic');
     var shB=(shE && shE.getBoundingClientRect) ? shE.getBoundingClientRect() : null;
     if(shB && vpW>0) safeW=Math.min(safeW, Math.max(0.30, 1-(shB.right/vpW)-0.06));
@@ -3868,8 +3876,25 @@ function frameWorldPos(migId, centre, dir, preferred){
      biased fit and lets its outer bodies travel through the frame. */
   var p2=MIG_WORLD_PROFILE[migId]||{};
   var moves=(p2.worldType==='planetary'||p2.worldType==='circumbinary');
-  var need=moves ? fitDistance(migId)*bias
-                 : Math.max(fitDistance(migId)*bias, fitDistance(migId,true));
+  /* THE BIAS IS AN ALLOWANCE FOR CROPPING, AND IT BELONGS TO THE WORLD.
+
+     It used to multiply the whole readable fit, which quietly spent the same
+     allowance twice on a narrow window: the fit already grows there to make
+     room for a panel that takes 43% of the width instead of 27%, and cutting
+     that larger number by the same 0.66 threw away the panel's share as well
+     as the world's. PHILOSOPHY kept 7 of its 8 concepts readable at 1440 and
+     only 6 at 900 for that reason.
+
+     Split the two against the panel's WIDE share, which is the share the
+     approved compositions were tuned with. On a wide desktop the two fits are
+     identical, so every approved camera distance comes out unchanged to the
+     unit. Only the EXTRA distance a narrower panel demands is added, and it is
+     added in full, because the panel does not negotiate. */
+  var fitRead=fitDistance(migId), fitAll=fitDistance(migId,true),
+      fitRef=fitDistance(migId,false,true);
+  var extra=Math.max(0, fitRead-fitRef);
+  var need=moves ? fitRef*bias + extra
+                 : Math.max(fitRef*bias + extra, fitAll);
   var d=Math.max(preferred, need);
   return { p:new THREE.Vector3().addVectors(centre, dir.clone().normalize().multiplyScalar(d)),
            d:d, preferred:preferred, need:need };
@@ -3901,7 +3926,7 @@ function composeForSheet(mode,f){
   var el=document.getElementById('semantic');
   var pr=(el && el.getBoundingClientRect) ? el.getBoundingClientRect() : null;
   var panelR=pr?pr.right:Wpx*0.27;
-  var shiftPx=Math.max(Wpx/2, panelR+0.16*Wpx)-Wpx/2;
+  var shiftPx=Math.max(Wpx/2, panelR+0.20*Wpx)-Wpx/2;
   if(shiftPx<1) return f;
   var d=f.p.distanceTo(f.a);
   if(!(d>0)) return f;
@@ -4032,8 +4057,27 @@ function frameForRaw(mode,id){
      whose radial is the most steeply inclined, still landed 6px inside it.
      Projecting world up onto the view plane makes the correction mean the same
      thing everywhere. */
+  /* AND IT OWES EVERY WORLD A MEASURED DISTANCE.
+
+     This branch stood at a flat 62 units whatever it was looking at, so the
+     twelve uncharted regions were the only ones in the mind not framed by
+     their own size. Their profiles have declared a framingBias all along and
+     nothing ever read it: fitDistance was computing 62.4 for BUSINESS on a
+     wide desktop and 72.0 on a narrow one, and both were discarded for the
+     constant. That is why BUSINESS held 8 of 8 concepts readable at 1440 and
+     only 5 of 8 at 900 — the world never moved.
+
+     A latent world is a placeholder sphere with no approved composition to
+     protect, so unlike TRAPPIST-1 it has no reason to crop: its bias is 1.00
+     and it simply fits. 62 stays as the PREFERRED distance, so a world small
+     enough to frame well from there is left exactly where it was. */
   var dOut=(mode==='region'?62:26);
   var out=n.pos.clone().normalize().multiplyScalar(dOut);
+  if(mode==='region'){
+    var fwG=frameWorldPos(id, n.pos, out, dOut);
+    out.normalize().multiplyScalar(fwG.d);
+    dOut=fwG.d;
+  }
   var aimN=n.pos.clone();
   if(window.innerWidth<768){
     var vd=out.clone().normalize().negate();            // camera toward the world

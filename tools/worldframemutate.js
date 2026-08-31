@@ -40,7 +40,7 @@ const M = [
      mutation that matters is not "move the camera" but "take the guarantee
      away": with no fit, the figure is left resting on a coincidence. */
   { id:'WF7', why:'remove the fit so the constellation is whole only by luck',
-    find:'  var need=moves ? fitDistance(migId)*bias\n                 : Math.max(fitDistance(migId)*bias, fitDistance(migId,true));',
+    find:'  var need=moves ? fitRef*bias + extra\n                 : Math.max(fitRef*bias + extra, fitAll);',
     repl:'  var need=0;' },
 
   /* NARROW LAPTOPS. Two separate assumptions that the sheet is a constant
@@ -52,6 +52,25 @@ const M = [
   { id:'WF10', why:'reserve a constant fraction for a panel whose width is fixed',
     find:'    if(shB && vpW>0) safeW=Math.min(safeW, Math.max(0.30, 1-(shB.right/vpW)-0.06));',
     repl:'    if(shB && vpW>0) safeW=safeW;' },
+
+  /* Spending the cropping allowance on the panel as well as on the world is
+     caught by WF10, not WF11: with the shift at its current strength
+     PHILOSOPHY holds 7/8 either way, and it is LOVE that drops to 3/5. Each
+     mutation is filed under the assertion that actually catches it. */
+  { id:'WF10', why:'spend the cropping allowance on the panel as well as on the world',
+    find:'  var need=moves ? fitRef*bias + extra\n                 : Math.max(fitRef*bias + extra, fitAll);',
+    repl:'  var need=moves ? fitRead*bias : Math.max(fitRead*bias, fitAll);' },
+
+  /* PER-WORLD BIAS. WF11 is about how far the composition is pushed clear of
+     the panel: at 0.16 the shift satisfies every bar in WF9 while still
+     costing PHILOSOPHY a concept that a wide window keeps. */
+  { id:'WF11', why:'push the composition only far enough to satisfy the bar, not far enough to keep the world whole',
+    find:'  var shiftPx=Math.max(Wpx/2, panelR+0.20*Wpx)-Wpx/2;',
+    repl:'  var shiftPx=Math.max(Wpx/2, panelR+0.16*Wpx)-Wpx/2;' },
+
+  { id:'WF12', why:'frame a latent world from a constant instead of from its own size',
+    find:'    out.normalize().multiplyScalar(fwG.d);\n    dOut=fwG.d;',
+    repl:'    out.normalize().multiplyScalar(dOut);' },
 
   { id:'WF8', why:'leave the selected world’s camera driving after the return',
     find:'  var wantOpen = (mode===\'universe\' && !id) ? 0 : 1;',
