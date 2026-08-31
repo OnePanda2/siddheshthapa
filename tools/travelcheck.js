@@ -73,6 +73,14 @@ setTimeout(async function(){
     out.fits={};
     ['philosophy','love','observation'].forEach(function(id){
       M.go('region',id);
+      /* ARRIVING IS BOTH JOURNEYS. The interruption above deliberately leaves
+         the fold parked at 0.4, and a time-driven morph does not advance
+         inside a synchronous harness — so landing only the camera measured a
+         world still half folded into the brain against a camera framed for
+         the unfolded one, and called the difference "off screen". Land the
+         fold too, without re-framing: setOpen would recompute the camera and
+         hide the framing decision this suite exists to measure. */
+      M.parkMorph(1,1);
       M.arrive();                       /* measure the destination, not the departure */
       M.settle(30);
       var f=M.framing(id);
@@ -80,8 +88,32 @@ setTimeout(async function(){
                      wantDist:f.wantDist, offScreen:f.principal.offScreen };
     });
 
+    /* THE FIRST SELECTION FROM THE CLOSED MIND, for every region.
+
+       This is the path a visitor actually takes, and the one the other
+       measurements above never cover: they select from wherever the previous
+       step left the mind, which after the first world is already unfolded.
+       Forced back to the closed menu each time, then landed WITHOUT
+       re-framing — setOpen would recompute the camera and hide the very
+       defect under test, so the fold is parked and the flight arrived. */
+    out.firstEntry={};
+    M.arch().migIds.forEach(function(id){
+      try{
+        M.setOpen(0); M.go('universe',null); M.setOpen(0);
+        M.go('region', id);
+        M.parkMorph(1,1);
+        M.arrive();
+        M.settle(30);
+        var pr=M.project(id);
+        out.firstEntry[id]= pr ? {on:!!pr.onScreen, x:Math.round(pr.x), y:Math.round(pr.y), threw:false}
+                               : {on:false, x:null, y:null, threw:false};
+      }catch(e){
+        out.firstEntry[id]={on:false, x:null, y:null, threw:(e&&e.message)||String(e)};
+      }
+    });
+
     /* and back to the mind */
-    M.go('universe'); M.settle(80);
+    M.setOpen(1); M.go('universe'); M.settle(80);
     out.returned={ morph:M.morph(), mind:M.mind() };
     out.perf=M.perf();
   }catch(e){ out.ERROR=(e&&e.message)||String(e); }
@@ -104,7 +136,7 @@ const r = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&')
 if (r.ERROR) { console.error('  ' + r.ERROR); process.exit(1); }
 
 let bad = 0;
-const TOTAL = 8;
+const TOTAL = 10;
 function ck(id, ok, msg) {
   if (!ok) bad++;
   console.log('  ' + (ok ? 'PASS' : 'FAIL') + '  ' + id.padEnd(4) + '  ' + msg);
@@ -179,6 +211,48 @@ ck('T7', fits.every(f => f.offScreen <= 1) && r.fits.observation.offScreen === 0
 ck('T8', r.returned.morph.to === 0 && r.returned.mind.region === null,
    'returning aims the mind back at closed — heading to ' +
    r.returned.morph.to + ' with region ' + r.returned.mind.region);
+
+/* T9 — THE FIRST SELECTION FROM THE CLOSED MIND ARRIVES AT THE WORLD.
+
+   frameFor reads n.pos, which applyMorph rewrites in place as the mind folds,
+   so it answers "where is this object RIGHT NOW". travelTo started the fold
+   and chose the camera's destination in the same tick, so from the closed
+   menu every world was framed at its position INSIDE THE BRAIN — the place it
+   was about to leave — and the flight landed 167 to 528 units from where the
+   world actually arrived, against worlds about 100 across.
+
+   Measured on this viewport before the fix: thirteen of fifteen regions
+   landed completely off screen (philosophy at y=2710, observation at
+   -6070,-38218, my-works at 3686,3058) and learning landed at x=91, behind
+   the region sheet. LOVE was the only one correct, and not by design: its
+   branch frames from BINARY[id].centre, a snapshot taken at build time while
+   the scene still stood at universe positions, so it is the one frame source
+   that never reads the live n.pos.
+
+   x > 400 rather than merely "on screen", because the sheet owns the left
+   27% of a 1440px window and a world framed underneath it is exactly as
+   invisible as one framed outside the viewport. */
+const feIds = Object.keys(r.firstEntry || {});
+const feBad = feIds.filter(id => !r.firstEntry[id].on || r.firstEntry[id].x <= 400);
+ck('T9', feIds.length === 15 && feBad.length === 0,
+   'the first selection from the CLOSED mind arrives at the world for all ' +
+   feIds.length + ' regions, clear of the sheet' +
+   (feBad.length ? ' — MISSED: ' + feBad.map(id => id + ' at ' +
+      r.firstEntry[id].x + ',' + r.firstEntry[id].y).join(', ')
+    : ' (all at x' + r.firstEntry[feIds[0]].x + ')'));
+
+/* T10 — and a region is allowed to be empty.
+
+   group() returns null for a section with nothing in it, deliberately, so an
+   empty heading is never painted — but paintDOM appended that null without
+   checking. MUSIC has no concepts and no writings by design, so choosing
+   MUSIC or PSYCHOLOGY threw inside paintDOM and left the sheet half-painted.
+   Found by sweeping all fifteen rather than the three worlds that are built. */
+const threw = feIds.filter(id => r.firstEntry[id].threw);
+ck('T10', threw.length === 0,
+   'every region can be chosen, including the ones with nothing in them yet' +
+   (threw.length ? ' — THREW: ' + threw.map(id => id + ': ' +
+      String(r.firstEntry[id].threw).slice(0, 44)).join('; ') : ''));
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' travel invariants hold');
 console.log(bad ? '  ' + bad + ' PROBLEM(S)'

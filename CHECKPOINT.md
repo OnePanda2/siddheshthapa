@@ -55,10 +55,12 @@ LOVE → Kepler-16, OBSERVATION → Ursa Major. Real astronomy, real provenance.
 | worldframecheck | 8/8 |
 | **total** | **105/105** |
 
-*(The suite has since grown to 143/143 across twelve check suites, with 87
+*(The suite has since grown to 145/145 across twelve check suites, with 89
 mutations verified: `travelcheck` was added when the MIG zoom was fixed,
-`braincheck` was rewritten for the constellation, and `emblemcheck` was added
-when the region emblems turned out to be invisible in the menu.)*
+`braincheck` was rewritten for the constellation, `emblemcheck` was added when
+the region emblems turned out to be invisible in the menu, and `travelcheck`
+grew T9/T10 when the first selection from the CLOSED mind turned out to arrive
+at the wrong place for fourteen of the fifteen regions.)*
 
 - idle = **0 renders** over two seconds
 - draw calls 6 — three for the mind, three for the sky
@@ -106,6 +108,31 @@ to undo anything here.
    unconditionally by a rule that should only have applied inside its own
    world. Now 129–182 across all fifteen, with hue preserved. Guarded by
    `emblemcheck` / `emblemmutate`, 6/6.
+7. ~~**The first selection from the closed mind arrived at empty space.**~~
+   **FIXED.** There are two menu states, and only one of them worked. From the
+   INNER menu — reached by the back button, which never touches the fold, so
+   the mind stays unfolded — choosing a region was always correct. From the
+   OUTER menu, the closed brain a visitor sees first, it was correct only for
+   LOVE. `frameFor` reads `n.pos`, and `applyMorph` rewrites `n.pos` in place
+   as the mind folds, so it means "where is this object RIGHT NOW".
+   `travelTo` started the fold and chose the camera's destination in the same
+   tick, framing every world at its position INSIDE the brain — the place it
+   was about to leave — and never recomputing. Measured at 1440x900: thirteen
+   of fifteen regions landed completely off screen (philosophy at y=2710,
+   observation at -6070,-38218), `learning` landed behind the region sheet,
+   and only LOVE was right — because its branch frames from
+   `BINARY[id].centre`, a snapshot taken at build time while the scene still
+   stood at universe positions, so it is the one frame source that never reads
+   the live `n.pos`. Every suite passed throughout, because under
+   `prefers-reduced-motion` `travelTo` folds BEFORE it frames, so the checks
+   only ever measured the one path where the ordering does not matter. Fixed
+   by evaluating the frame at the destination fold (`frameForAt`). Guarded by
+   `travelcheck` T9, which sweeps all fifteen with motion enabled.
+8. ~~**Choosing MUSIC or PSYCHOLOGY threw.**~~ **FIXED**, found by sweeping all
+   fifteen regions rather than the three that are built. `group()` returns
+   `null` for a section with nothing in it, deliberately, so an empty heading
+   is never painted — but `paintDOM` appended that null unchecked, and a
+   region is allowed to be empty. Guarded by `travelcheck` T10.
 
 ---
 

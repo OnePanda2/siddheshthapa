@@ -45,7 +45,20 @@ const M = [
   { id:'T8', why:'never close the mind again once it has opened',
     find:"  var wantOpen = (mode==='universe' && !id) ? 0 : 1;",
     repl:"  var wantOpen = 1;",
-    alt:true }
+    alt:true },
+
+  /* THE SECOND BUG THIS SUITE EXISTS FOR. Framing from the departure fold
+     instead of the destination fold sends the camera to where the world was
+     before it unfolded — inside the brain. Everything except LOVE lands off
+     screen, and LOVE only survives because its branch frames from a snapshot
+     rather than from the live n.pos. */
+  { id:'T9', why:'frame each world where it was before unfolding, not where it arrives',
+    find:'  var f=frameForAt(mode, id||state.region, wantOpen);',
+    repl:'  var f=frameFor(mode, id||state.region);' },
+
+  { id:'T10', why:'append an empty section unchecked, so a region with nothing in it throws',
+    find:"    put(group('Concepts', mem.filter(function(id){return byId[id].t==='minor';})",
+    repl:"    elGroups.appendChild(group('Concepts', mem.filter(function(id){return byId[id].t==='minor';})" }
 ];
 
 /* T2 and T8 share an anchor, so T8 carries a marker and is applied by index */

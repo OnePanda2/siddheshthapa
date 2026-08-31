@@ -2239,6 +2239,36 @@ function frameFor(mode,id){
   var out=n.pos.clone().normalize().multiplyScalar(mode==='region'?62:26);
   return {p:new THREE.Vector3().addVectors(n.pos,out), a:n.pos.clone()};
 }
+/* FRAME THE DESTINATION, NOT THE DEPARTURE.
+
+   Every branch of frameFor above reads n.pos, and n.pos is not a fixed
+   coordinate: applyMorph rewrites it in place as the mind folds, so it means
+   "where this object is RIGHT NOW". Asking it where a world is while the mind
+   is still folded answers with the world's position INSIDE THE BRAIN — the
+   place it is about to leave.
+
+   That is what made the first selection from the closed mind arrive at empty
+   space. travelTo starts the fold and picks the camera's destination in the
+   same tick, so the flight was aimed 167 to 528 units away from where the
+   world would be 1150ms later, against worlds about 100 across. LOVE was the
+   only region unaffected, and not by design: its branch frames from
+   BINARY[id].centre, a snapshot taken at build time while the scene still
+   stood at universe positions, so it is the one frame source that does not
+   read the live n.pos.
+
+   The bug was invisible to every suite because under prefers-reduced-motion
+   travelTo folds IMMEDIATELY, before it frames — so the checks measured the
+   one path where the ordering does not matter.
+
+   Evaluating at the destination fold costs one lerp per node and touches no
+   buffer or uniform: applyMorph moves positions only. */
+function frameForAt(mode,id,openV){
+  if(Math.abs(openV-mindOpen)<1e-6) return frameFor(mode,id);
+  var save=mindOpen;
+  mindOpen=openV; applyMorph();
+  try { return frameFor(mode,id); }
+  finally { mindOpen=save; applyMorph(); }
+}
 function travelTo(mode,id,push){
   if(push!==false) history.push({mode:state.mode, focus:state.focus, region:state.region});
   /* the brain opens into the world you chose, and closes behind you */
@@ -2266,7 +2296,7 @@ function travelTo(mode,id,push){
   if(mode==='region'){ state.region=id; state.focus=null; }
   else if(mode==='concept'){ state.focus=id; state.region=byId[id]?byId[id].mig:state.region; }
   else if(mode==='universe'){ state.region=null; state.focus=null; }
-  var f=frameFor(mode, id||state.region);
+  var f=frameForAt(mode, id||state.region, wantOpen);
   wantPos.copy(f.p); wantAim.copy(f.a);
   invalidate(190);
   if(reduced||LITE){ camPos.copy(wantPos); camAim.copy(wantAim); FLIGHT_ON=false; }
@@ -2336,6 +2366,13 @@ function group(title, rows){
   rows.forEach(function(r){ ul.appendChild(r); });
   d.appendChild(ul); return d;
 }
+/* group() returns null for a section with nothing in it, deliberately, so an
+   empty heading is never painted. Every call site then appended the result
+   without checking, which throws — and a region is allowed to be empty. MUSIC
+   has no concepts and no writings by design ("deliberately EMPTY of writings.
+   A bare rhythmic pulse, honestly sparse"), so choosing MUSIC or PSYCHOLOGY
+   threw inside paintDOM and left the sheet half-painted. */
+function put(el){ if(el) elGroups.appendChild(el); }
 function esc(s){ return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
 
 function paintDOM(){
@@ -2358,7 +2395,7 @@ function paintDOM(){
       var w=mem.filter(function(id){return byId[id].src;}).length;
       return row(m, c+' concepts · '+w+' writings', function(){ travelTo('region',m.id); });
     });
-    elGroups.appendChild(group('Regions',rows));
+    put(group('Regions',rows));
     say('The whole mind. '+MIGS.length+' regions.');
     return;
   }
@@ -2368,10 +2405,10 @@ function paintDOM(){
     elWhere.textContent=m.label;
     elGloss.textContent=m.line||'';
     var mem=owned[m.id]||[];
-    elGroups.appendChild(group('Concepts', mem.filter(function(id){return byId[id].t==='minor';})
+    put(group('Concepts', mem.filter(function(id){return byId[id].t==='minor';})
       .map(function(id){ var n=byId[id];
         return row(n, adj[id].length+' connections', function(){ travelTo('concept',id); }); })));
-    elGroups.appendChild(group('Writings', mem.filter(function(id){return byId[id].src;})
+    put(group('Writings', mem.filter(function(id){return byId[id].src;})
       .map(function(id){ var n=byId[id];
         return row(n, esc(n.t)+' · '+esc(n.src), function(){ openReader(id); }); })));
     say('Region '+m.label+'.');
@@ -2381,14 +2418,14 @@ function paintDOM(){
   elTier.textContent=esc(n.t)+(n.state?' · '+esc(n.state):'');
   elWhere.textContent=n.label;
   elGloss.textContent=n.line||'';
-  elGroups.appendChild(group('Connects to', adj[n.id].map(function(k){
+  put(group('Connects to', adj[n.id].map(function(k){
     var o=byId[k.o];
     var meta=(k.dir>0? '<span class="verb">'+esc(k.v)+'</span> '+esc(o.label)
                      : esc(o.label)+' <span class="verb">'+esc(k.v)+'</span> this')
              +(o.mig!==n.mig? ' · crosses into '+esc(byId[o.mig].label.toLowerCase()) : '');
     return row(o, meta, function(){ o.src? openReader(o.id) : travelTo('concept',o.id); });
   })));
-  if(n.src) elGroups.appendChild(group('This writing',[ row(n,'Open the source — '+esc(n.src),
+  if(n.src) put(group('This writing',[ row(n,'Open the source — '+esc(n.src),
     function(){ openReader(n.id); }) ]));
   say(n.label+'. '+adj[n.id].length+' connections.');
 }
