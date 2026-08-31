@@ -14,6 +14,11 @@ const APP = 'src/v02-app.js';
 const ONLY = (process.argv[2] && process.argv[2] !== '--dry') ? process.argv[2] : null;
 const DRY = process.argv.includes('--dry');
 
+/* the two lines that brighten a region emblem in the menu. Several
+   mutations replace this same pair, each with a different wrong answer. */
+const LIFT = ["      '  vec3 tNorm = tint / max(max(tint.r, tint.g), max(tint.b, 0.004));',",
+              "      '  vTint = mix(tNorm, tint, mindOpen);',"].join(String.fromCharCode(10));
+
 const M = [
   /* Moving the vertex in the position buffer is NOT enough to hide a region:
      the morph rewrites every position each frame, so the edit is undone before
@@ -26,7 +31,7 @@ const M = [
   /* THE BUG, first half. Without the lift the navigation targets are drawn
      dimmer than the constellation's own decoration. */
   { id:'E2', why:'remove the luminance lift, leaving emblems dimmer than the decoration',
-    find: "      '  vTint=min(tint*mix(3.4, 1.0, mindOpen), vec3(1.0));',",
+    find: LIFT,
     repl: "      '  vTint=tint;'," },
 
   /* THE BUG, second half. OBSERVATION alone was zeroed unconditionally, so one
@@ -39,7 +44,7 @@ const M = [
   /* The cheap way to pass a brightness floor. This must NOT be allowed to look
      like a fix. */
   { id:'E4', why:'buy brightness by washing every region to the same pale dot',
-    find: "      '  vTint=min(tint*mix(3.4, 1.0, mindOpen), vec3(1.0));',",
+    find: LIFT,
     repl: "      '  vTint=vec3(1.0);',",
     alt:true },
 
@@ -47,6 +52,15 @@ const M = [
     find: "      '  here *= (1.0 - noCentre*mindOpen);',",
     repl: "      '  here *= (1.0 - mindOpen);',",
     alt:true },
+
+  /* THE COLLAPSE. Multiplying each channel and clamping at 1.0 is how the
+     emblems came to look alike: any colour with two strong channels saturates
+     both, so every warm palette lands on one gold and every cool one on one
+     teal. It still passes E2 and E4 — the dots are bright, and each keeps SOME
+     colour — which is exactly why E7 had to exist. */
+  { id:'E7', why:'clip the luminance lift per channel, collapsing distinct palettes onto the same hues',
+    find: LIFT,
+    repl: "      '  vTint=min(tint*mix(3.4, 1.0, mindOpen), vec3(1.0));'," },
 
   /* The opposite failure, and the reason E2 is not simply "make every centre
      bright": fabricating a star at the middle of Ursa Major. */

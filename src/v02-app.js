@@ -842,12 +842,12 @@ var OBS_VARIANTS={
    verdigris. The contrast between a hot white star and its own red planets is
    the astronomy, not a mood. */
 var MOVIES_VARIANTS={
-  a:{ name:'deep blue-white + ember',
-      fog:0xc4ccd6, star:0x2f6aa8, body:0xb85a34, orbit:0x3d5c85, accent:0xc86a38 },
-  b:{ name:'cold blue + infrared',
-      fog:0xbdc9d8, star:0x265f9c, body:0xc26139, orbit:0x44648c, accent:0xd2743d },
-  c:{ name:'steel + coal ember',
-      fog:0xc8ced8, star:0x35719f, body:0xa85231, orbit:0x38547c, accent:0xb85f32 }
+  a:{ name:'azure + ember',
+      fog:0xc4ccd6, star:0x1f9fc0, body:0xb85a34, orbit:0x3d5c85, accent:0xc86a38 },
+  b:{ name:'colder azure + infrared',
+      fog:0xbdc9d8, star:0x1893bc, body:0xc26139, orbit:0x44648c, accent:0xd2743d },
+  c:{ name:'pale azure + coal ember',
+      fog:0xc8ced8, star:0x2ba9c6, body:0xa85231, orbit:0x38547c, accent:0xb85f32 }
 };
 /* LIFE inverts MOVIES, and the astronomy is why. Kepler-33 is an old
    Sun-like star slightly evolved off the main sequence — yellow-white, warm —
@@ -869,12 +869,12 @@ var LIFE_VARIANTS={
    smaller worlds, lit only by that red light, so they are cool grey-violet
    rather than warm. */
 var TECH_VARIANTS={
-  a:{ name:'red dwarf + cold violet',
-      fog:0xd4bebe, star:0x8a2f2a, body:0x53607a, orbit:0x7a3a34, accent:0x9c3b2c },
-  b:{ name:'deep crimson + slate',
-      fog:0xd0b8ba, star:0x7d2725, body:0x4b5872, orbit:0x71332f, accent:0x8f3326 },
-  c:{ name:'rust + blue-grey',
-      fog:0xd8c4bc, star:0x94382a, body:0x5a6880, orbit:0x84443a, accent:0xa64832 }
+  a:{ name:'crimson dwarf + cold violet',
+      fog:0xd4bebe, star:0x9c3a48, body:0x53607a, orbit:0x7a3a34, accent:0x9c3b2c },
+  b:{ name:'deeper crimson + slate',
+      fog:0xd0b8ba, star:0x8e3242, body:0x4b5872, orbit:0x71332f, accent:0x8f3326 },
+  c:{ name:'rose-red + blue-grey',
+      fog:0xd8c4bc, star:0xa8455a, body:0x5a6880, orbit:0x84443a, accent:0xa64832 }
 };
 var TECH_PICK=(function(){
   var m=/(^|[#&])techpal:([abc])/.exec(location.hash||'');
@@ -1700,7 +1700,19 @@ if(glOK){
          glance. Scaling keeps the colour and only raises its luminance, so
          Kepler-16 stays amber and Ursa Major stays verdigris while both
          become bright enough to find. */
-      '  vTint=min(tint*mix(3.4, 1.0, mindOpen), vec3(1.0));',
+      /* NORMALISED, NOT CLIPPED. Multiplying each channel by 3.4 and clamping
+         at 1.0 raises brightness by DESTROYING hue: any colour with two strong
+         channels saturates both and lands in the same place, so every warm
+         palette collapsed to one olive-gold and every cool one to one teal.
+         LIFE and LOVE measured 10.5 apart in CIE Lab and MOVIES and
+         OBSERVATION 8.7 — differences a person cannot see — and an ember
+         orange for MOVIES came out the same gold as LOVE.
+
+         Dividing by the largest channel instead scales the colour until it is
+         as bright as it can be while its ratios are exactly preserved. Full
+         brightness, hue untouched, and the palettes separate on their own. */
+      '  vec3 tNorm = tint / max(max(tint.r, tint.g), max(tint.b, 0.004));',
+      '  vTint = mix(tNorm, tint, mindOpen);',
       // inside a world everything elsewhere recedes but never vanishes: the
       // mind must stay felt while one region of it is being read
       '  float here = (focusRegion<0.0 || abs(region-focusRegion)<0.5) ? 1.0 : 0.13;',

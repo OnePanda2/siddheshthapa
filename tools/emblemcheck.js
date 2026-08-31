@@ -17,6 +17,7 @@
    E4  emblems keep their HUE — fifteen identical pale dots carry no identity
    E5  PHILOSOPHY keeps its central star when its world opens
    E6  OBSERVATION gains no fabricated centre — Ursa Major has no central star
+   E7  no two regions that HAVE an identity look alike
 
    E4 is what stops E2 being gamed. The cheap way to pass a brightness floor is
    to mix every region toward white, which would satisfy E1-E3 while destroying
@@ -44,9 +45,12 @@ const PROBE = `(function(){
   M.enter(); M.settle(280);
 
   var menu={}, ids=M.arch().migIds;
+  var prof=M.worlds().profiles;
   ids.forEach(function(id){
     var b=M.spriteBlobs(id, ${BOX});
-    menu[id]= b ? {max:b.maxSignal, sum:b.sumSignal, chroma:b.chroma, rgb:b.rgb} : null;
+    menu[id]= b ? {max:b.maxSignal, sum:b.sumSignal, chroma:b.chroma, rgb:b.rgb,
+                   own:(prof[id]&&prof[id].palette)==='own',
+                   at:[Math.round(b.at[0]),Math.round(b.at[1])]} : null;
   });
 
   M.go('region','observation'); M.settle(300);
@@ -144,6 +148,68 @@ ck('E6', !!r.obsWorld && r.obsWorld.max < 38 && r.obsWorld.sum <= 2,
    'OBSERVATION invents no central star inside its world — Ursa Major has none (' +
    (r.obsWorld ? r.obsWorld.max + ' peak / ' + r.obsWorld.sum + ' total' : 'n/a') +
    ', must stay under 38 / 2)');
+
+/* E7 — NO TWO REGIONS THAT HAVE AN IDENTITY LOOK ALIKE.
+
+   E4 asks whether each emblem kept a colour. It never asked whether any two
+   were the same colour, and with six charted worlds they were: LIFE and LOVE
+   measured 10.5 apart in CIE Lab and MOVIES and OBSERVATION 8.7 — differences
+   a person does not see on a small glowing dot.
+
+   The cause was the menu's luminance lift, which multiplied each channel and
+   clamped at 1.0. That raises brightness by destroying hue: any colour with
+   two strong channels saturates both, so every warm palette collapsed into one
+   olive-gold and every cool one into one teal, and an ember orange for MOVIES
+   came out the same colour as LOVE. Normalising by the largest channel instead
+   of clipping preserves the ratios exactly, and the six palettes separated on
+   their own.
+
+   Measured in CIE Lab off the rendered pixels, not compared as hex literals —
+   two different hex values can land on the same screen colour, which is the
+   whole failure being tested for.
+
+   The NINE latent regions are excluded, and deliberately: they share one
+   neutral palette because they have no world yet, which the source states in
+   as many words — "inventing thirteen palettes before their geometry exists
+   would be decoration". They look alike because they ARE alike: not yet
+   charted. E7 asserts that too, rather than leaving it to chance. */
+function toLab(c) {
+  const f = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const R = f(c[0]), G = f(c[1]), B = f(c[2]);
+  let X = (R * 0.4124 + G * 0.3576 + B * 0.1805) / 0.95047;
+  let Y = (R * 0.2126 + G * 0.7152 + B * 0.0722);
+  let Z = (R * 0.0193 + G * 0.1192 + B * 0.9505) / 1.08883;
+  const g = t => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
+  const fx = g(X), fy = g(Y), fz = g(Z);
+  return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+}
+const dE = (a, b) => { const p = toLab(a), q = toLab(b);
+  return Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]); };
+
+/* 18 is the bar. Below about 10 two dots read as the same colour; the six
+   charted worlds now sit at 22 and above, so this has real margin without
+   being tuned to exactly what today's palette happens to score. */
+const DE_MIN = 18;
+const owned = seen.filter(id => MENU[id].own);
+const clashes = [];
+for (let i = 0; i < owned.length; i++)
+  for (let j = i + 1; j < owned.length; j++) {
+    const d = dE(MENU[owned[i]].rgb, MENU[owned[j]].rgb);
+    if (d < DE_MIN) clashes.push(owned[i] + '/' + owned[j] + ' ' + d.toFixed(1));
+  }
+let closest = Infinity, closestPair = '';
+for (let i = 0; i < owned.length; i++)
+  for (let j = i + 1; j < owned.length; j++) {
+    const d = dE(MENU[owned[i]].rgb, MENU[owned[j]].rgb);
+    if (d < closest) { closest = d; closestPair = owned[i] + '/' + owned[j]; }
+  }
+ck('E7', owned.length >= 6 && clashes.length === 0,
+   'no two charted regions look alike — ' + owned.length +
+   ' worlds with their own palette, closest pair ' + closestPair + ' at ' +
+   closest.toFixed(1) + ' deltaE against a floor of ' + DE_MIN +
+   (clashes.length ? ' — TOO CLOSE: ' + clashes.join(', ') : '') +
+   '; the other ' + (seen.length - owned.length) +
+   ' share the neutral palette because they are not yet charted');
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' emblem invariants hold');
 if (!bad) console.log('  menu ' + lo + '-' + hi + '  ·  in-world  philosophy ' +
