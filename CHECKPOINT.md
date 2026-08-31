@@ -55,14 +55,15 @@ LOVE → Kepler-16, OBSERVATION → Ursa Major. Real astronomy, real provenance.
 | worldframecheck | 8/8 |
 | **total** | **105/105** |
 
-*(The suite has since grown to 146/146 across twelve check suites, with 90
+*(The suite has since grown to 148/148 across twelve check suites, with 92
 mutations verified: `travelcheck` was added when the MIG zoom was fixed,
 `braincheck` was rewritten for the constellation, `emblemcheck` was added when
 the region emblems turned out to be invisible in the menu, and `travelcheck`
 grew T9/T10/T11 when the first selection from the CLOSED mind turned out to
 arrive at the wrong place for fourteen of the fifteen regions on a desktop and,
 separately, under the sheet for twelve of them on a phone. `travelcheck` now
-runs at two viewports.)*
+runs at two viewports, and `worldframecheck` gained WF9/WF10 for the narrow
+laptop, which now runs at three.)*
 
 - idle = **0 renders** over two seconds
 - draw calls 6 — three for the mind, three for the sky
@@ -139,7 +140,19 @@ to undo anything here.
    region's own radial and a fixed world-Y offset means a different screen
    shift per region. Guarded by `travelcheck` T11, kept separate from T9 so
    the phone case cannot be carried by the desktop one.
-8. ~~**Choosing MUSIC or PSYCHOLOGY threw.**~~ **FIXED**, found by sweeping all
+9. ~~**Narrow laptops composed worlds half under the sheet.**~~ **FIXED.** The
+   sheet is a FIXED 380px panel while the window is not, so the share of the
+   frame it takes grows as the window shrinks — 27% at 1440px, 43% at 900px.
+   Two things assumed otherwise: `fitDistance` reserved a constant 38% for it,
+   and every world frame aimed dead at its subject, centring it in the WINDOW
+   rather than in the part the panel leaves. Measured at 884x605, readable
+   principal bodies were 51/79 — LEARNING 1/5, BUSINESS 2/8, LOVE 2/5 against
+   its 0.60 bar, OBSERVATION 6/9 when it must be whole. Now 70/79, with every
+   world at or above the same bar the wide desktop has to meet. Wide windows
+   are untouched: the shift computes to zero above about 1150px. Guarded by
+   `worldframecheck` WF9 (composition) and WF10 (the fit), kept separate
+   because WF9 alone still passed with the fit's correction removed.
+10. ~~**Choosing MUSIC or PSYCHOLOGY threw.**~~ **FIXED**, found by sweeping all
    fifteen regions rather than the three that are built. `group()` returns
    `null` for a section with nothing in it, deliberately, so an empty heading
    is never painted — but `paintDOM` appended that null unchecked, and a

@@ -46,10 +46,18 @@ function run(W, H) {
 
 const D = run(1440, 900);
 const P = run(375, 812);
-if (D.ERROR || P.ERROR) { console.error('  ' + (D.ERROR || P.ERROR)); process.exit(1); }
+/* THE NARROW LAPTOP. The sheet is a FIXED 380px panel while the window is
+   not, so the share of the frame it takes grows as the window shrinks — and
+   between the desktop and the phone there is a whole class of window where
+   the panel is neither a quarter of the width nor the full width. Nothing
+   measured it, and it was the worst-composed size in the product. */
+const N = run(900, 700);
+if (D.ERROR || P.ERROR || N.ERROR) {
+  console.error('  ' + (D.ERROR || P.ERROR || N.ERROR)); process.exit(1);
+}
 
 let bad = 0;
-const TOTAL = 8;
+const TOTAL = 10;
 function ck(id, ok, msg) {
   if (!ok) bad++;
   console.log('  ' + (ok ? 'PASS' : 'FAIL') + '  ' + id.padEnd(4) + '  ' + msg);
@@ -141,7 +149,57 @@ ck('WF8', D.after.mind.open < 0.02 && D.after.mind.region === null &&
    D.after.mind.region + ', the organ back in frame at ' + D.after.organ.lateralDeg +
    ' degrees off lateral');
 
+/* WF9 — and the narrow laptop is held to the SAME standard as the wide one.
+
+   Between a desktop and a phone sits a window where the fixed 380px panel
+   takes 44% of the width rather than 27%, and two separate things assumed it
+   would not: the fit reserved a constant fraction for it, and every world
+   frame aimed dead at its subject, centring it in the WINDOW rather than in
+   the part of the window the panel leaves. Measured at 884x605 before the
+   fix, against the very bar WF2 applies at 1440: LOVE 2/5 against a bar of
+   0.60, and OBSERVATION — a fixed figure that must be whole — 6/9. Both are
+   failures at the standard the wide desktop already had to meet.
+
+   The same bar is used deliberately rather than a softened one. A smaller
+   window is a reason to stand further back and compose against the panel, not
+   a reason to accept a world half hidden underneath it. */
+const nw = Object.keys(N.worlds).map(k => N.worlds[k]);
+ck('WF9', nw.every(f => f.principal.inSafe / f.principal.total >= bar(f)) &&
+          nw.every(f => f.moves || f.principal.offScreen === 0),
+   'a narrow laptop is composed to the same standard as a wide one at ' +
+   N.w + 'x' + N.h + ' — ' +
+   nw.map(f => f.id + ' ' + f.principal.inSafe + '/' + f.principal.total +
+               (f.moves ? ' (bar ' + bar(f) + ')' : ' (whole)')).join(', ') +
+   '; the panel takes ' + Math.round(nw[0].safe.x0 / N.w * 100) + '% of this width ' +
+   'against ' + Math.round(all[0].safe.x0 / D.w * 100) + '% of the wide one');
+
+/* WF10 — and the FIT reserves the panel's real width, not a constant fraction.
+
+   WF9 is carried by the composition shift alone: sliding a world out from
+   under the panel satisfies every bar even if the fit still believes the
+   panel is 38% of any window. That leaves the fit's own correction unbound,
+   and unbound code rots.
+
+   LOVE is the sentinel because its composition is the widest relative to its
+   centre — Kepler-16's first orbit sits at 3.15x the stellar separation — so
+   it is the first world to overflow a frame that was fitted for more width
+   than it has. With the fit reserving the panel's true share it keeps all
+   four readable bodies it has on a wide desktop; with the constant fraction
+   restored it drops to three, landing exactly ON its bar instead of above it.
+
+   PHILOSOPHY is deliberately not held to this: it is denser, and it gives up
+   one more body to a narrower window whatever the fit does. */
+const loveD = D.worlds.love, loveN = N.worlds.love;
+ck('WF10', loveN.principal.inSafe >= loveD.principal.inSafe &&
+           loveN.camDist > loveD.camDist,
+   'a narrower window is fitted from further back rather than framed for width ' +
+   'it does not have — LOVE keeps ' + loveN.principal.inSafe + '/' +
+   loveN.principal.total + ' readable at ' + N.w + ', the same as ' +
+   loveD.principal.inSafe + '/' + loveD.principal.total + ' at ' + D.w +
+   ', standing at ' + loveN.camDist + ' against ' + loveD.camDist);
+
 console.log('\n  1440: ' + all.map(f => f.id + ' ' + f.principal.inSafe + '/' + f.principal.total + ' @' + f.camDist).join(' · '));
+console.log('  900 : ' + nw.map(f => f.id + ' ' + f.principal.inSafe + '/' + f.principal.total + ' @' + f.camDist).join(' · '));
 console.log('  375 : ' + pw.map(f => f.id + ' ' + f.principal.inSafe + '/' + f.principal.total + ' @' + f.camDist).join(' · '));
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' world-framing invariants hold');
 console.log(bad ? '  ' + bad + ' PROBLEM(S)' : '  choosing a world shows you that world');

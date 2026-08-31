@@ -20,7 +20,7 @@ const M = [
     repl:'  var d=preferred*0.35;' },
 
   { id:'WF3', why:'pretend the sheet is not there, so the safe area becomes the window',
-    find:'    var safe={ x0:phone?8:Math.round(W*0.27), x1:W-8,\n               y0:8, y1:phone?Math.round(H*0.40):H-8 };',
+    find:'    var safe={ x0:phone?8:Math.round(shR?shR.right+8:W*0.27), x1:W-8,\n               y0:8, y1:phone?Math.round(shR?shR.top-8:H*0.40):H-8 };',
     repl:'    var safe={ x0:0, x1:W, y0:0, y1:H };' },
 
   { id:'WF4', why:'give the phone the desktop’s framing instead of its own',
@@ -42,6 +42,16 @@ const M = [
   { id:'WF7', why:'remove the fit so the constellation is whole only by luck',
     find:'  var need=moves ? fitDistance(migId)*bias\n                 : Math.max(fitDistance(migId)*bias, fitDistance(migId,true));',
     repl:'  var need=0;' },
+
+  /* NARROW LAPTOPS. Two separate assumptions that the sheet is a constant
+     FRACTION of the window rather than a fixed 380px panel. */
+  { id:'WF9', why:'compose every world against the window instead of against the sheet',
+    find:'  if(shiftPx<1) return f;',
+    repl:'  if(shiftPx>=0) return f;' },
+
+  { id:'WF10', why:'reserve a constant fraction for a panel whose width is fixed',
+    find:'    if(shB && vpW>0) safeW=Math.min(safeW, Math.max(0.30, 1-(shB.right/vpW)-0.06));',
+    repl:'    if(shB && vpW>0) safeW=safeW;' },
 
   { id:'WF8', why:'leave the selected world’s camera driving after the return',
     find:'  var wantOpen = (mode===\'universe\' && !id) ? 0 : 1;',

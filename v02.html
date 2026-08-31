@@ -3825,7 +3825,23 @@ function fitDistance(migId, whole){
   /* two fits. The READABLE one asks for the world to land where a person is
      looking; the WHOLE one asks only that it be on the screen at all. */
   var safeH=whole?0.96:(phone?0.34:0.86);
+  /* THE PANEL IS A FIXED WIDTH, THE WINDOW IS NOT.
+
+     0.62 reserved a constant 38% of the frame for a sheet that is actually a
+     fixed 380px: right at 1400px wide, and far too little at 900, where the
+     same panel takes 44%. So a world was framed to fit a width it did not
+     have, and the overflow went under the sheet — measured at 884x605,
+     LEARNING put 4 of its 5 principal bodies behind the panel and BUSINESS 6
+     of 8, while at 1424 nearly everything was readable.
+
+     Taking the smaller of the two leaves every wide desktop framed exactly as
+     it was and only tightens the frame once the panel genuinely crowds it. */
   var safeW=whole?0.96:(phone?0.86:0.62);
+  if(!whole && !phone){
+    var shE=document.getElementById('semantic');
+    var shB=(shE && shE.getBoundingClientRect) ? shE.getBoundingClientRect() : null;
+    if(shB && vpW>0) safeW=Math.min(safeW, Math.max(0.30, 1-(shB.right/vpW)-0.06));
+  }
   var tanV=Math.tan(vHalf)*safeH;
   var tanH=Math.tan(vHalf)*camera.aspect*safeW;
   var d=b.radius/Math.max(0.001,Math.min(tanV,tanH));
@@ -3859,7 +3875,46 @@ function frameWorldPos(migId, centre, dir, preferred){
            d:d, preferred:preferred, need:need };
 }
 
-function frameFor(mode,id){
+/* COMPOSE AGAINST THE SHEET, NOT AGAINST THE WINDOW.
+
+   Every world frame below aims dead at its subject, which centres it in the
+   WINDOW — but the readable area is the window minus a fixed 380px panel, and
+   those two centres are not the same place. On a wide desktop it does not
+   matter: the world is small enough inside the space that is left that all of
+   it clears. As the window narrows the panel takes a larger and larger share
+   until the world is composed half underneath it.
+
+   Standing further back — what fitDistance now does — shrinks the world but
+   does not move it, so it is only half the answer. This slides the whole
+   frame, camera and aim together, exactly as the brain view already does for
+   the same reason.
+
+   The shift engages only when the panel actually crowds the subject, so every
+   window past about 1150px is composed precisely as it was before. The phone
+   is excluded: its sheet is BELOW rather than beside, and the lift for that
+   is applied per-branch in the vertical. */
+function composeForSheet(mode,f){
+  if(mode==='universe' || !camera || !renderer || !f) return f;
+  if(window.innerWidth<768) return f;
+  var Wpx=renderer.domElement.clientWidth, Hpx=renderer.domElement.clientHeight;
+  if(!(Wpx>0 && Hpx>0)) return f;
+  var el=document.getElementById('semantic');
+  var pr=(el && el.getBoundingClientRect) ? el.getBoundingClientRect() : null;
+  var panelR=pr?pr.right:Wpx*0.27;
+  var shiftPx=Math.max(Wpx/2, panelR+0.16*Wpx)-Wpx/2;
+  if(shiftPx<1) return f;
+  var d=f.p.distanceTo(f.a);
+  if(!(d>0)) return f;
+  var vd=new THREE.Vector3().subVectors(f.a,f.p).normalize();
+  var rt=new THREE.Vector3().crossVectors(vd,new THREE.Vector3(0,1,0));
+  if(rt.lengthSq()<1e-6) return f;
+  /* screen-space px to world units at the subject's own depth */
+  rt.normalize().multiplyScalar(shiftPx*(2*d*Math.tan((camera.fov*Math.PI/180)/2)/Hpx));
+  f.p.sub(rt); f.a.sub(rt);
+  return f;
+}
+function frameFor(mode,id){ return composeForSheet(mode, frameForRaw(mode,id)); }
+function frameForRaw(mode,id){
   /* the whole-mind frame follows the FOLD STATE: the brain while it is closed,
      and the wider universe frame if it is ever expanded without a region
      selected (which only a harness does, but the camera must still be sane). */
@@ -4759,8 +4814,16 @@ window.__v02={
        area rather than merely on screen */
     var W=renderer?renderer.domElement.clientWidth:0, H=renderer?renderer.domElement.clientHeight:0;
     var phone=window.innerWidth<768;
-    var safe={ x0:phone?8:Math.round(W*0.27), x1:W-8,
-               y0:8, y1:phone?Math.round(H*0.40):H-8 };
+    /* THE SHEET IS MEASURED, NOT ASSUMED. It used to be described as 27% of
+       the width, but it is a FIXED 380px panel: that fraction is right at
+       1400px and badly wrong at 800, where the panel really takes 47%. A
+       readable-area test that under-states the panel reports a world as
+       readable while half of it sits underneath. The fractions remain as the
+       fallback for when the sheet has not been laid out yet. */
+    var shEl=document.getElementById('semantic');
+    var shR=(shEl && shEl.getBoundingClientRect) ? shEl.getBoundingClientRect() : null;
+    var safe={ x0:phone?8:Math.round(shR?shR.right+8:W*0.27), x1:W-8,
+               y0:8, y1:phone?Math.round(shR?shR.top-8:H*0.40):H-8 };
     /* PRINCIPAL bodies are counted separately from everything else, because
        they are what the framing rule actually measures. A dense world's outer
        writings sit beyond its orbits by design and were never inside the
