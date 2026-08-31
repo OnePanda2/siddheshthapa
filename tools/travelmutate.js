@@ -56,6 +56,13 @@ const M = [
     find:'  var f=frameForAt(mode, id||state.region, wantOpen);',
     repl:'  var f=frameFor(mode, id||state.region);' },
 
+  /* THE PHONE HALF. The generic branch is the one twelve regions take, and on
+     a phone the sheet is below rather than beside — so removing its lift puts
+     those twelve back under the panel while the desktop stays perfect. */
+  { id:'T11', why:'stop lifting the generic worlds on a phone, putting them under the sheet',
+    find:'    if(upS.lengthSq()>1e-6) aimN.addScaledVector(upS.normalize(), -dOut*0.22);',
+    repl:'    if(upS.lengthSq()>1e-6) aimN.addScaledVector(upS.normalize(), 0.0);' },
+
   { id:'T10', why:'append an empty section unchecked, so a region with nothing in it throws',
     find:"    put(group('Concepts', mem.filter(function(id){return byId[id].t==='minor';})",
     repl:"    elGroups.appendChild(group('Concepts', mem.filter(function(id){return byId[id].t==='minor';})" }

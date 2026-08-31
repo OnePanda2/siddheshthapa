@@ -105,12 +105,20 @@ setTimeout(async function(){
         M.arrive();
         M.settle(30);
         var pr=M.project(id);
-        out.firstEntry[id]= pr ? {on:!!pr.onScreen, x:Math.round(pr.x), y:Math.round(pr.y), threw:false}
+        /* the sheet is measured PER REGION, not once: it is as tall as the
+           region's own contents, so MUSIC with nothing in it and PHILOSOPHY
+           with 21 objects do not leave the same space to arrive in */
+        var sr=document.getElementById('semantic').getBoundingClientRect();
+        out.firstEntry[id]= pr ? {on:!!pr.onScreen, x:Math.round(pr.x), y:Math.round(pr.y),
+                                  shTop:Math.round(sr.top), shRight:Math.round(sr.right),
+                                  threw:false}
                                : {on:false, x:null, y:null, threw:false};
       }catch(e){
         out.firstEntry[id]={on:false, x:null, y:null, threw:(e&&e.message)||String(e)};
       }
     });
+    out.vw=window.innerWidth; out.vh=window.innerHeight;
+    out.phone=window.innerWidth<768;
 
     /* and back to the mind */
     M.setOpen(1); M.go('universe'); M.settle(80);
@@ -122,21 +130,30 @@ setTimeout(async function(){
 
 /* NO --force-prefers-reduced-motion. Under reduced motion the mind snaps and
    the camera teleports, which is exactly why neither bug was ever caught. */
-const dom = execSync('"' + CHROME + '" --headless=new --hide-scrollbars' +
-  ' --user-data-dir="' + tmp + '/cr" --no-first-run --no-default-browser-check' +
-  ' --disable-extensions --disable-background-networking --disable-sync' +
-  ' --window-size=' + W + ',' + H + ' --virtual-time-budget=7000' +
-  ' --dump-dom "file:///' + tmp + '/p.html"',
-  { encoding: 'utf8', maxBuffer: 1e8, timeout: 300000 });
+function run(w, h, tag) {
+  const dom = execSync('"' + CHROME + '" --headless=new --hide-scrollbars' +
+    ' --user-data-dir="' + tmp + '/cr-' + tag + '" --no-first-run --no-default-browser-check' +
+    ' --disable-extensions --disable-background-networking --disable-sync' +
+    ' --window-size=' + w + ',' + h + ' --virtual-time-budget=7000' +
+    ' --dump-dom "file:///' + tmp + '/p.html"',
+    { encoding: 'utf8', maxBuffer: 1e8, timeout: 300000 });
+  const mm = dom.match(/<title>([\s\S]*?)<\/title>/);
+  if (!mm) { console.error('  the page never reported at ' + w + 'x' + h); process.exit(1); }
+  const rr = JSON.parse(mm[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&')
+                             .replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
+  if (rr.ERROR) { console.error('  ' + rr.ERROR + ' at ' + w + 'x' + h); process.exit(1); }
+  return rr;
+}
 
-const m = dom.match(/<title>([\s\S]*?)<\/title>/);
-if (!m) { console.error('  the page never reported'); process.exit(1); }
-const r = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&')
-                         .replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
-if (r.ERROR) { console.error('  ' + r.ERROR); process.exit(1); }
+const r = run(W, H, 'desk');
+/* THE SECOND VIEWPORT. Framing is composed against the sheet, and the sheet
+   moves: beside the mind on a desktop, BELOW it on a phone. A first-entry
+   sweep at one width therefore proves nothing about the other, and the phone
+   is where the generic branch was landing worlds under the panel. */
+const rp = run(390, 844, 'phone');
 
 let bad = 0;
-const TOTAL = 10;
+const TOTAL = 11;
 function ck(id, ok, msg) {
   if (!ok) bad++;
   console.log('  ' + (ok ? 'PASS' : 'FAIL') + '  ' + id.padEnd(4) + '  ' + msg);
@@ -229,17 +246,37 @@ ck('T8', r.returned.morph.to === 0 && r.returned.mind.region === null,
    the scene still stood at universe positions, so it is the one frame source
    that never reads the live n.pos.
 
-   x > 400 rather than merely "on screen", because the sheet owns the left
-   27% of a 1440px window and a world framed underneath it is exactly as
-   invisible as one framed outside the viewport. */
-const feIds = Object.keys(r.firstEntry || {});
-const feBad = feIds.filter(id => !r.firstEntry[id].on || r.firstEntry[id].x <= 400);
-ck('T9', feIds.length === 15 && feBad.length === 0,
-   'the first selection from the CLOSED mind arrives at the world for all ' +
-   feIds.length + ' regions, clear of the sheet' +
-   (feBad.length ? ' — MISSED: ' + feBad.map(id => id + ' at ' +
-      r.firstEntry[id].x + ',' + r.firstEntry[id].y).join(', ')
-    : ' (all at x' + r.firstEntry[feIds[0]].x + ')'));
+   Held to CLEAR OF THE SHEET rather than merely "on screen", because a world
+   framed underneath the panel is exactly as invisible as one framed outside
+   the viewport — and the panel is measured, not assumed, since it is as tall
+   as the region's own contents.
+
+   Checked at BOTH widths, because the composition flips: on a desktop the
+   sheet is beside the mind and the world must clear its right edge; on a
+   phone it is below, and the world must sit above its top. The phone was a
+   separate failure of the same shape — the three charted worlds each drop
+   their aim for it, but the generic branch the other twelve take did not, so
+   they arrived centred vertically and therefore under the panel. */
+function feMiss(res) {
+  const ids = Object.keys(res.firstEntry || {});
+  return { ids, bad: ids.filter(id => {
+    const f = res.firstEntry[id];
+    if (!f.on) return true;
+    return res.phone ? !(f.y < f.shTop - 8) : !(f.x > f.shRight + 8);
+  })};
+}
+/* T9 and T11 are kept APART rather than combined, because a single assertion
+   spanning both widths is only ever as strong as its weaker half: the desktop
+   mutation would carry it while the phone clause sat unverified. */
+const feD = feMiss(r), feP = feMiss(rp);
+const show = (res, o) => o.bad.map(id => id + ' at ' + res.firstEntry[id].x + ',' +
+                                    res.firstEntry[id].y).join(', ');
+ck('T9', feD.ids.length === 15 && feD.bad.length === 0,
+   'the first selection from the CLOSED mind arrives clear of the sheet for ' +
+   'all 15 regions at ' + r.vw + 'x' + r.vh +
+   (feD.bad.length ? ' — MISSED: ' + show(r, feD)
+    : ' (x' + r.firstEntry.learning.x + ', past a sheet ending at ' +
+      r.firstEntry.learning.shRight + ')'));
 
 /* T10 — and a region is allowed to be empty.
 
@@ -248,11 +285,32 @@ ck('T9', feIds.length === 15 && feBad.length === 0,
    checking. MUSIC has no concepts and no writings by design, so choosing
    MUSIC or PSYCHOLOGY threw inside paintDOM and left the sheet half-painted.
    Found by sweeping all fifteen rather than the three worlds that are built. */
-const threw = feIds.filter(id => r.firstEntry[id].threw);
+const threw = feD.ids.filter(id => r.firstEntry[id].threw || rp.firstEntry[id].threw);
 ck('T10', threw.length === 0,
-   'every region can be chosen, including the ones with nothing in them yet' +
+   'every region can be chosen at either width, including the ones with ' +
+   'nothing in them yet' +
    (threw.length ? ' — THREW: ' + threw.map(id => id + ': ' +
-      String(r.firstEntry[id].threw).slice(0, 44)).join('; ') : ''));
+      String(r.firstEntry[id].threw || rp.firstEntry[id].threw).slice(0, 44)).join('; ') : ''));
+
+/* T11 — and the same thing on a phone, where the composition flips.
+
+   The sheet is BELOW the mind there, not beside it, so a world framed dead
+   centre is a world under the panel. Each of the three charted branches drops
+   its aim for exactly this reason; the generic branch the other twelve
+   regions take did not, so at a 500x749 viewport twelve of fifteen arrived at
+   y=375 against a sheet starting at y=315 — on screen, and invisible.
+
+   The lift runs along screen up rather than world up: this branch stands the
+   camera on the region's own radial, so with a fixed world-Y offset the same
+   number means a different screen shift per region, and BUILDING — the most
+   steeply inclined — still landed 6px inside the sheet while the other
+   fourteen cleared it. */
+ck('T11', feP.ids.length === 15 && feP.bad.length === 0,
+   'and on a phone, where the sheet is below rather than beside — all 15 ' +
+   'arrive above it at ' + rp.vw + 'x' + rp.vh +
+   (feP.bad.length ? ' — MISSED: ' + show(rp, feP)
+    : ' (y' + rp.firstEntry.learning.y + ', above a sheet starting at ' +
+      rp.firstEntry.learning.shTop + ')'));
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' travel invariants hold');
 console.log(bad ? '  ' + bad + ' PROBLEM(S)'

@@ -2236,8 +2236,34 @@ function frameFor(mode,id){
     if(phone) aim.y-=fwP.d*0.30;
     return {p:fwP.p, a:aim};
   }
-  var out=n.pos.clone().normalize().multiplyScalar(mode==='region'?62:26);
-  return {p:new THREE.Vector3().addVectors(n.pos,out), a:n.pos.clone()};
+  /* THE FALLBACK OWES THE PHONE THE SAME CORRECTION THE CHARTED WORLDS MAKE.
+
+     The three branches above each drop their aim on a phone, because the sheet
+     owns the lower three fifths there and a world aimed dead centre is a world
+     under the panel. This branch — the one the twelve uncharted regions take —
+     aimed straight at the node, so on a phone they arrived centred vertically
+     and therefore behind the sheet: measured at a 500x749 viewport, twelve of
+     fifteen landed at y=375 against a sheet starting at y=315, while
+     PHILOSOPHY, LOVE and OBSERVATION cleared it because they have branches of
+     their own. On a desktop the sheet is beside rather than below, so the same
+     framing is correct there and is left alone.
+     The lift runs along SCREEN up, not world up. This branch stands the camera
+     on the region's own radial, so that radial's tilt differs region by region
+     and a fixed world-Y offset turns into a different screen shift for each
+     one — with a constant 0.24 the fourteen cleared the sheet but BUILDING,
+     whose radial is the most steeply inclined, still landed 6px inside it.
+     Projecting world up onto the view plane makes the correction mean the same
+     thing everywhere. */
+  var dOut=(mode==='region'?62:26);
+  var out=n.pos.clone().normalize().multiplyScalar(dOut);
+  var aimN=n.pos.clone();
+  if(window.innerWidth<768){
+    var vd=out.clone().normalize().negate();            // camera toward the world
+    var upS=new THREE.Vector3(0,1,0);
+    upS.addScaledVector(vd, -upS.dot(vd));              // world up, on the view plane
+    if(upS.lengthSq()>1e-6) aimN.addScaledVector(upS.normalize(), -dOut*0.22);
+  }
+  return {p:new THREE.Vector3().addVectors(n.pos,out), a:aimN};
 }
 /* FRAME THE DESTINATION, NOT THE DEPARTURE.
 

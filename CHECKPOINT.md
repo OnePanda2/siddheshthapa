@@ -55,12 +55,14 @@ LOVE → Kepler-16, OBSERVATION → Ursa Major. Real astronomy, real provenance.
 | worldframecheck | 8/8 |
 | **total** | **105/105** |
 
-*(The suite has since grown to 145/145 across twelve check suites, with 89
+*(The suite has since grown to 146/146 across twelve check suites, with 90
 mutations verified: `travelcheck` was added when the MIG zoom was fixed,
 `braincheck` was rewritten for the constellation, `emblemcheck` was added when
 the region emblems turned out to be invisible in the menu, and `travelcheck`
-grew T9/T10 when the first selection from the CLOSED mind turned out to arrive
-at the wrong place for fourteen of the fifteen regions.)*
+grew T9/T10/T11 when the first selection from the CLOSED mind turned out to
+arrive at the wrong place for fourteen of the fifteen regions on a desktop and,
+separately, under the sheet for twelve of them on a phone. `travelcheck` now
+runs at two viewports.)*
 
 - idle = **0 renders** over two seconds
 - draw calls 6 — three for the mind, three for the sky
@@ -128,6 +130,15 @@ to undo anything here.
    only ever measured the one path where the ordering does not matter. Fixed
    by evaluating the frame at the destination fold (`frameForAt`). Guarded by
    `travelcheck` T9, which sweeps all fifteen with motion enabled.
+   The phone had the same failure in the other axis: the sheet sits BELOW the
+   mind there, and each of the three charted branches drops its aim to clear
+   it, but the generic branch the other twelve regions take did not — so they
+   arrived centred vertically and therefore under the panel (y=375 against a
+   sheet starting at y=315, at 500x749). The lift added to that branch runs
+   along SCREEN up rather than world up, because the camera stands on each
+   region's own radial and a fixed world-Y offset means a different screen
+   shift per region. Guarded by `travelcheck` T11, kept separate from T9 so
+   the phone case cannot be carried by the desktop one.
 8. ~~**Choosing MUSIC or PSYCHOLOGY threw.**~~ **FIXED**, found by sweeping all
    fifteen regions rather than the three that are built. `group()` returns
    `null` for a section with nothing in it, deliberately, so an empty heading
