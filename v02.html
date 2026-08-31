@@ -1580,12 +1580,13 @@ function faceDir(u,v){
 }
 function buildBrainCurves(viewDir, detail){
   var P=[], E=[], seen={}, curves=[];
+  BRAIN_CHAINS=[];
   function ekey(a,b){ return a<b ? a+'_'+b : b+'_'+a; }
   function link(a,b){ var k=ekey(a,b); if(!seen[k]){seen[k]=1; E.push([a,b]);} }
   /* Catmull-Rom through control directions, resampled onto the surface, so a
      boundary curves the way the form curves instead of cutting across it —
      which is what turned the landmark version into a faceted polyhedron. */
-  function chain(ctrl, cnt, closed){
+  function chain(ctrl, cnt, closed, name){
     var idx=[];
     function at(t){
       var m=ctrl.length, f=t*(closed?m:(m-1)), i=Math.floor(f), u=f-i;
@@ -1602,6 +1603,23 @@ function buildBrainCurves(viewDir, detail){
     for(var i=0;i<cnt;i++){ idx.push(P.length); P.push(brainShell(at(closed?i/cnt:i/(cnt-1)))); }
     for(var j=0;j<idx.length-1;j++) link(idx[j],idx[j+1]);
     if(closed) link(idx[idx.length-1],idx[0]);
+    /* named, so the drawing can be described rather than merely counted. Every
+       chain in the figure is a real anatomical boundary and says which. */
+    if(name){
+      /* where this chain actually sits on the form, so its ARRANGEMENT can be
+         asserted and not merely its existence: a temporal chain drawn above
+         the Sylvian fissure would still be present, and still be wrong. */
+      var lo=[1e9,1e9], hi=[-1e9,-1e9];
+      idx.forEach(function(j){
+        var d=P[j].clone().normalize();
+        lo[0]=Math.min(lo[0],d.z); hi[0]=Math.max(hi[0],d.z);
+        lo[1]=Math.min(lo[1],d.y); hi[1]=Math.max(hi[1],d.y);
+      });
+      BRAIN_CHAINS.push({ id:name, stars:idx.length, closed:!!closed,
+                          side:(name.slice(-1)==='R'?-1:1),
+                          u:[+lo[0].toFixed(2),+hi[0].toFixed(2)],
+                          v:[+lo[1].toFixed(2),+hi[1].toFixed(2)] });
+    }
     return idx;
   }
   function mirror(c){ return c.map(function(p){ return [-p[0],p[1],p[2]]; }); }
@@ -1614,7 +1632,7 @@ function buildBrainCurves(viewDir, detail){
   function profileRing(side){
     var c=[];
     for(var a=0;a<12;a++){ var t=a/12*6.283185; c.push([0.62*side, Math.sin(t), Math.cos(t)]); }
-    return chain(c, N(18), true);
+    return chain(c, N(18), true, 'profile-'+(side>0?'L':'R'));
   }
   var proL=profileRing(1), proR=profileRing(-1);
 
@@ -1622,29 +1640,29 @@ function buildBrainCurves(viewDir, detail){
      what makes the view from ABOVE two hemispheres instead of one oval. */
   var rimC=[[0.15,0.36,0.88],[0.17,0.74,0.62],[0.17,0.96,0.10],
             [0.16,0.88,-0.44],[0.14,0.46,-0.84]];
-  var rimL=chain(rimC,N(9),false), rimR=chain(mirror(rimC),N(9),false);
+  var rimL=chain(rimC,N(9),false,'fissure-L'), rimR=chain(mirror(rimC),N(9),false,'fissure-R');
 
   /* 3. THE SYLVIAN FISSURE — the cleft that frees the temporal lobe, and the
      most identifying single mark on a lateral view. */
   var sylC=[[0.70,-0.20,0.58],[0.84,-0.16,0.28],[0.90,-0.08,-0.06],
             [0.82,0.02,-0.34],[0.66,0.10,-0.56]];
-  var sylL=chain(sylC,N(8),false), sylR=chain(mirror(sylC),N(8),false);
+  var sylL=chain(sylC,N(8),false,'sylvian-L'), sylR=chain(mirror(sylC),N(8),false,'sylvian-R');
 
   /* 4. THE TEMPORAL LOBE'S LOWER EDGE, so the mass below the fissure is a lobe
      with a bottom rather than an open corner. */
   var tmpC=[[0.54,-0.56,0.52],[0.70,-0.56,0.16],[0.72,-0.52,-0.20],[0.56,-0.46,-0.50]];
-  var tmpL=chain(tmpC,N(7),false), tmpR=chain(mirror(tmpC),N(7),false);
+  var tmpL=chain(tmpC,N(7),false,'temporal-L'), tmpR=chain(mirror(tmpC),N(7),false,'temporal-R');
 
   /* 5. THE CEREBELLUM — its own arc behind and below the notch, so it reads as
      a separate organ rather than more occipital lobe. */
   var cbC=[[0.46,-0.36,-0.70],[0.50,-0.58,-0.78],[0.36,-0.76,-0.74],[0.14,-0.82,-0.58]];
-  var cbL=chain(cbC,N(5),false), cbR=chain(mirror(cbC),N(5),false);
+  var cbL=chain(cbC,N(5),false,'cerebellar-L'), cbR=chain(mirror(cbC),N(5),false,'cerebellar-R');
 
   /* 6. THE CENTRAL SULCUS — the diagonal running down and forward from the
      crown. Two marks at an angle read as anatomy; two parallel ones read as a
      contour map. */
   var csC=[[0.34,0.90,-0.20],[0.62,0.62,-0.04],[0.80,0.28,0.08]];
-  var csL=chain(csC,N(5),false), csR=chain(mirror(csC),N(5),false);
+  var csL=chain(csC,N(5),false,'central-L'), csR=chain(mirror(csC),N(5),false,'central-R');
 
   /* Short joins only, between stars already near each other. Never a chord
      across the interior: that is exactly what flattened the landmark version
@@ -2901,7 +2919,7 @@ function brainView(){
   return v.normalize();
 }
 /* the constellation's own vertices, filled by buildBrainCurves */
-var BRAIN_STARS=[], starField=null;
+var BRAIN_STARS=[], BRAIN_CHAINS=[], starField=null;
 var RENDERS=0;
 /* eased so naming a region is a settle rather than a flicker */
 var BRAIN_ASK=0, BRAIN_ASK_TO=0;
@@ -4730,23 +4748,32 @@ window.__v02={
   organ:function(){
     var o={ exists:true, isMesh:false, drawCalls:0 };
     var curves=buildBrainCurves(BRAIN_VIEW, window.innerWidth<768?0.5:1);
-    o.curves=curves.length;
-    o.named=curves.map(function(c){ return c.id; });
-    o.byLayer={};
-    curves.forEach(function(c){ o.byLayer[c.layer]=(o.byLayer[c.layer]||0)+1; });
+    /* A CONSTELLATION IS STARS AND SEGMENTS, so it is described as such.
+
+       This used to report 122 "curves" all called 'seg' — the number of line
+       segments, which tells you nothing: a cage, a cloud and a brain would all
+       give the same number. What the drawing consists of is a set of NAMED
+       chains, each a real anatomical boundary, drawn between stars. */
+    o.segments=curves.length;
+    o.stars=BRAIN_STARS.length;
+    o.chains=BRAIN_CHAINS.map(function(c){ return c.id; });
+    o.chainStars={}; BRAIN_CHAINS.forEach(function(c){ o.chainStars[c.id]=c.stars; });
+    o.curves=BRAIN_CHAINS.length;
+    o.named=o.chains;
     /* the drawing's own extent, and how much of it is DEPTH — a flat drawing
        pinned to a plane would have none */
     var mnx=1e9,mxx=-1e9,mny=1e9,mxy=-1e9,mnz=1e9,mxz=-1e9;
     var near=0,far=0,minAbsX=1e9,pts=0;
-    curves.forEach(function(c){
-      c.pts.forEach(function(p){
-        pts++;
-        if(p.x<mnx)mnx=p.x; if(p.x>mxx)mxx=p.x;
-        if(p.y<mny)mny=p.y; if(p.y>mxy)mxy=p.y;
-        if(p.z<mnz)mnz=p.z; if(p.z>mxz)mxz=p.z;
-        if(p.x>0)near++; else far++;
-        if(Math.abs(p.x)<minAbsX) minAbsX=Math.abs(p.x);
-      });
+    /* measured over the STARS, each counted once. Walking the segments counts
+       every star twice, and once more for each extra line meeting at it, which
+       silently weights the reading by how connected a place happens to be. */
+    BRAIN_STARS.forEach(function(p){
+      pts++;
+      if(p.x<mnx)mnx=p.x; if(p.x>mxx)mxx=p.x;
+      if(p.y<mny)mny=p.y; if(p.y>mxy)mxy=p.y;
+      if(p.z<mnz)mnz=p.z; if(p.z>mxz)mxz=p.z;
+      if(p.x>0)near++; else far++;
+      if(Math.abs(p.x)<minAbsX) minAbsX=Math.abs(p.x);
     });
     o.points=pts;
     o.bbox={ w:+(mxx-mnx).toFixed(1), h:+(mxy-mny).toFixed(1), d:+(mxz-mnz).toFixed(1) };
@@ -4779,21 +4806,8 @@ window.__v02={
     /* where each named region of the drawing actually lands on the face, so a
        check can prove the temporal, frontal and cerebellar marks exist WHERE
        they are claimed to rather than merely existing */
-    function span(id){
-      var c=null;
-      curves.forEach(function(x){ if(x.id===id) c=x; });
-      if(!c) return null;
-      var lo=[1e9,1e9], hi=[-1e9,-1e9];
-      c.pts.forEach(function(p){
-        var d=p.clone().normalize();
-        lo[0]=Math.min(lo[0],d.z); hi[0]=Math.max(hi[0],d.z);
-        lo[1]=Math.min(lo[1],d.y); hi[1]=Math.max(hi[1],d.y);
-      });
-      return { u:[+lo[0].toFixed(2),+hi[0].toFixed(2)], v:[+lo[1].toFixed(2),+hi[1].toFixed(2)] };
-    }
-    o.spans={ sylvian:span('sylvian'), central:span('central'),
-              temporal:span('superior-temporal'), frontal:span('superior-frontal'),
-              cerebellar:span('cerebellar-edge'), midline:span('midline') };
+    o.spans={};
+    BRAIN_CHAINS.forEach(function(c){ o.spans[c.id]={u:c.u, v:c.v}; });
 
     if(camera){
       var dir=camera.position.clone().sub(camAim).normalize();

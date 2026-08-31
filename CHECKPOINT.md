@@ -55,8 +55,8 @@ LOVE → Kepler-16, OBSERVATION → Ursa Major. Real astronomy, real provenance.
 | worldframecheck | 8/8 |
 | **total** | **105/105** |
 
-*(The suite has since grown to 113/113 with `travelcheck`, added when the MIG
-zoom was fixed.)*
+*(The suite has since grown to 133/133: `travelcheck` was added when the MIG
+zoom was fixed, and `braincheck` was rewritten for the constellation.)*
 
 - idle = **0 renders** over two seconds
 - draw calls 6 — three for the mind, three for the sky
@@ -75,9 +75,12 @@ to undo anything here.
    chosen while a transition was already running was silently discarded, and a
    degenerate viewport could fling the camera 93,812 units from a world 105
    across. The camera now flies with an eased, bounded journey.
-2. **`braincheck` and `brainmutate` are stale.** They assert the old anatomical
-   sulci by name; those names no longer exist. 4 of 20 fail on naming, not on
-   the design. The brain currently has no dedicated test coverage.
+2. ~~**`braincheck` and `brainmutate` are stale.**~~ **FIXED** after this
+   checkpoint. Both rewritten for the constellation: the figure now reports
+   itself as 12 named chains and 104 stars rather than 122 things called
+   'seg', and the assertions test the chains' ARRANGEMENT — the temporal chain
+   below the Sylvian, the cerebellar chain at the back and below — not merely
+   their presence. 20/20, mutation-verified.
 3. **Phone labels crowd.** Fifteen region names over a small figure overlap.
 4. **The full six-width visual matrix has not been re-run** since the sky went
    in, and the mutation suites have not been re-run since the brightness metric
