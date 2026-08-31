@@ -1,0 +1,49 @@
+BASELINE
+  green
+
+OK   assertion 1  SOURCE authenticity — text must equal n.src
+     applied=true failed=true rightReason=true restored=true passesAfter=true
+OK   assertion 2  CROSS authenticity — named region must be really reached
+     applied=true failed=true rightReason=true restored=true passesAfter=true
+OK   assertion 2b  CROSS authenticity — the "+n" remainder must be true
+     applied=true failed=true rightReason=true restored=true passesAfter=true
+OK   assertion 3  CROSS existence — the layer may not silently render nothing
+     applied=true failed=true rightReason=true restored=true passesAfter=true
+OK   assertion 4  no fabricated footnote / "cf. N" marks
+     applied=true failed=true rightReason=true restored=true passesAfter=true
+OK   assertion 5  marks stay inside the annotation margins
+     applied=true failed=true rightReason=true restored=true passesAfter=true
+OK   assertion 6  no mark on the reading panel
+     applied=true failed=true rightReason=true restored=true passesAfter=true
+[10488:14180:0817/160106.284:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: PHONE_REGISTRATION_ERROR
+[10488:14180:0817/160106.288:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: PHONE_REGISTRATION_ERROR
+[10488:14180:0817/160106.289:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: PHONE_REGISTRATION_ERROR
+[10488:14180:0817/160134.372:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[3340:13168:0817/160327.624:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: PHONE_REGISTRATION_ERROR
+[3340:13168:0817/160327.686:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: PHONE_REGISTRATION_ERROR
+OK   assertion 7  no mark over a drawn graph label  @2560x1080
+     applied=true failed=true rightReason=true restored=true passesAfter=true
+OK   assertion 8  marginalia responds to a change of focus
+     applied=true failed=true rightReason=true restored=true passesAfter=true
+OK   assertion 9  marginalia stays subordinate to the fragments
+     applied=true failed=true rightReason=true restored=true passesAfter=true
+OK   assertion 11  the layer renders at all where there is room for it
+     applied=true failed=true rightReason=true restored=true passesAfter=true
+OK   assertion 10  marginalia is not clickable
+     applied=true failed=true rightReason=true restored=true passesAfter=true
+
+──────── SUMMARY ────────
+PASS  assertion 1   SOURCE authenticity — text must equal n.src
+PASS  assertion 2   CROSS authenticity — named region must be really reached
+PASS  assertion 2b  CROSS authenticity — the "+n" remainder must be true
+PASS  assertion 3   CROSS existence — the layer may not silently render nothing
+PASS  assertion 4   no fabricated footnote / "cf. N" marks
+PASS  assertion 5   marks stay inside the annotation margins
+PASS  assertion 6   no mark on the reading panel
+PASS  assertion 7   no mark over a drawn graph label
+PASS  assertion 8   marginalia responds to a change of focus
+PASS  assertion 9   marginalia stays subordinate to the fragments
+PASS  assertion 11  the layer renders at all where there is room for it
+PASS  assertion 10  marginalia is not clickable
+
+12/12 assertions mutation-verified

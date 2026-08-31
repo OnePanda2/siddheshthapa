@@ -1,0 +1,435 @@
+{
+ "_note": "Ursa Major field. Star positions, parallaxes and magnitudes are MEASURED values retrieved from SIMBAD. Nothing in this file was typed from memory. Constellation LINES are not astronomy and are not stored here — see MIG_CONSTELLATION_RESEARCH.md.",
+ "_source": "SIMBAD Astronomical Database — CDS (Strasbourg), TAP service",
+ "_sourceUrl": "https://simbad.cds.unistra.fr/simbad/sim-tap/sync",
+ "_sourceCredit": "Wenger et al. 2000, A&AS 143, 9 — \"The SIMBAD astronomical database\"",
+ "_retrieved": "2026-08-21",
+ "measured": {
+  "_what": "ra/dec (ICRS degrees), parallax (mas), spectral type, V magnitude — straight from SIMBAD",
+  "asterism": "Big Dipper / Plough, the seven-star asterism within the constellation Ursa Major",
+  "stars": [
+   {
+    "id": "* eta UMa",
+    "proper": "Alkaid",
+    "bayer": "eta UMa",
+    "raDeg": 206.88515734206297,
+    "decDeg": 49.31326672942533,
+    "parallaxMas": 31.38,
+    "spectralType": "B3V",
+    "vMag": 1.86,
+    "vMagDerived": null,
+    "distancePc": 31.867,
+    "distanceLy": 103.94
+   },
+   {
+    "id": "* zet UMa",
+    "proper": "Mizar",
+    "bayer": "zeta UMa",
+    "raDeg": 200.98141866666666,
+    "decDeg": 54.92535197222222,
+    "parallaxMas": 38.01,
+    "spectralType": null,
+    "vMag": null,
+    "vMagDerived": 2.007,
+    "distancePc": 26.309,
+    "distanceLy": 85.81
+   },
+   {
+    "id": "* eps UMa",
+    "proper": "Alioth",
+    "bayer": "epsilon UMa",
+    "raDeg": 193.5072899675,
+    "decDeg": 55.95982295694445,
+    "parallaxMas": 39.51,
+    "spectralType": "A1III-IVpkB9",
+    "vMag": 1.77,
+    "vMagDerived": null,
+    "distancePc": 25.31,
+    "distanceLy": 82.55
+   },
+   {
+    "id": "* del UMa",
+    "proper": "Megrez",
+    "bayer": "delta UMa",
+    "raDeg": 183.85649936126705,
+    "decDeg": 57.03261697773611,
+    "parallaxMas": 40.3279,
+    "spectralType": "A2Vn",
+    "vMag": 3.32,
+    "vMagDerived": null,
+    "distancePc": 24.797,
+    "distanceLy": 80.88
+   },
+   {
+    "id": "* gam UMa",
+    "proper": "Phecda",
+    "bayer": "gamma UMa",
+    "raDeg": 178.45769715249997,
+    "decDeg": 53.69475972916666,
+    "parallaxMas": 39.21,
+    "spectralType": "A0V",
+    "vMag": 2.44,
+    "vMagDerived": null,
+    "distancePc": 25.504,
+    "distanceLy": 83.18
+   },
+   {
+    "id": "* bet UMa",
+    "proper": "Merak",
+    "bayer": "beta UMa",
+    "raDeg": 165.46033229797294,
+    "decDeg": 56.382433649496384,
+    "parallaxMas": 38.6031,
+    "spectralType": "A1IVps",
+    "vMag": 2.37,
+    "vMagDerived": null,
+    "distancePc": 25.905,
+    "distanceLy": 84.49
+   },
+   {
+    "id": "* alf UMa",
+    "proper": "Dubhe",
+    "bayer": "alpha UMa",
+    "raDeg": 165.9319646738126,
+    "decDeg": 61.751034687818226,
+    "parallaxMas": 26.54,
+    "spectralType": "G9III+A7.5",
+    "vMag": 1.79,
+    "vMagDerived": null,
+    "distancePc": 37.679,
+    "distanceLy": 122.89
+   },
+   {
+    "id": "* 80 UMa",
+    "proper": "Alcor",
+    "bayer": "80 UMa",
+    "raDeg": 201.30640763875,
+    "decDeg": 54.98795966138889,
+    "parallaxMas": 39.91,
+    "spectralType": "A5V+M3-4V",
+    "vMag": 4.01,
+    "vMagDerived": null,
+    "distancePc": 25.056,
+    "distanceLy": 81.72
+   }
+  ]
+ },
+ "derived": {
+  "_formula": "distance_pc = 1000 / parallax_mas ; distance_ly = distance_pc * 3.26156",
+  "_mizar": "The naked-eye entry for zeta UMa carries no V magnitude because SIMBAD resolves it as a pair. Combined magnitude derived from the MEASURED components zeta-1 (V=2.22) and zeta-2 (V=3.88) by flux addition: m = -2.5*log10(10^(-0.4*m1) + 10^(-0.4*m2)) = 2.007",
+  "mizarCombinedV": 2.007,
+  "distanceSpreadLy": {
+   "nearest": 80.88,
+   "farthest": 122.89,
+   "_meaning": "The figure is NOT a physical object. Five middle stars plus Alcor lie within a few light years of each other (the Ursa Major Moving Group); Dubhe and Alkaid are tens of light years further away and are not members. The shape exists only from here."
+  },
+  "trueExtentLy": {
+   "transverseX": 43.8,
+   "transverseY": 24.8,
+   "depth": 39.2,
+   "depthOverWidth": 0.9,
+   "_formula": "RA/Dec/distance -> Cartesian light years, rotated so the mean line of sight is the depth axis",
+   "_meaning": "The figure is very nearly as DEEP as it is WIDE. No depth exaggeration is required or used: the renderer applies true relative 3D scale with a single map constant, exactly as WORLD_SCALE does for the other worlds."
+  },
+  "meanDistanceLy": 90.683,
+  "_meanDistanceUse": "The ideal viewpoint sits at this distance along the depth axis — the scaled equivalent of where Earth actually stands. The figure resolves there because that is where the pattern was drawn from."
+ },
+ "background": {
+  "_what": "Every SIMBAD object in RA 160-212, Dec 44-66 with V < 6.0 — the naked-eye limit. Atmospheric context only.",
+  "_rule": "These are RENDER-ONLY. They never enter the graph, the menu, or the pick list.",
+  "count": 53,
+  "stars": [
+   {
+    "raDeg": 211.09732,
+    "decDeg": 64.37587,
+    "vMag": 3.68
+   },
+   {
+    "raDeg": 205.37455,
+    "decDeg": 64.82241,
+    "vMag": 5.85
+   },
+   {
+    "raDeg": 207.85797,
+    "decDeg": 64.72328,
+    "vMag": 4.66
+   },
+   {
+    "raDeg": 193.86895,
+    "decDeg": 65.43847,
+    "vMag": 5.225
+   },
+   {
+    "raDeg": 207.43965,
+    "decDeg": 61.48931,
+    "vMag": 5.964
+   },
+   {
+    "raDeg": 191.82896,
+    "decDeg": 62.78115,
+    "vMag": 5.89
+   },
+   {
+    "raDeg": 165.93195,
+    "decDeg": 61.75103,
+    "vMag": 1.87
+   },
+   {
+    "raDeg": 165.93166,
+    "decDeg": 61.75087,
+    "vMag": 4.86
+   },
+   {
+    "raDeg": 165.93196,
+    "decDeg": 61.75103,
+    "vMag": 1.79
+   },
+   {
+    "raDeg": 202.11286,
+    "decDeg": 59.94579,
+    "vMag": 5.4
+   },
+   {
+    "raDeg": 192.16436,
+    "decDeg": 60.31973,
+    "vMag": 5.831
+   },
+   {
+    "raDeg": 189.09777,
+    "decDeg": 59.48694,
+    "vMag": 5.5
+   },
+   {
+    "raDeg": 173.08647,
+    "decDeg": 61.08275,
+    "vMag": 5.64
+   },
+   {
+    "raDeg": 162.84884,
+    "decDeg": 59.32012,
+    "vMag": 5.562
+   },
+   {
+    "raDeg": 208.46256,
+    "decDeg": 53.72868,
+    "vMag": 5.695
+   },
+   {
+    "raDeg": 206.64857,
+    "decDeg": 54.43268,
+    "vMag": 5.675
+   },
+   {
+    "raDeg": 200.98467,
+    "decDeg": 54.92181,
+    "vMag": 3.88
+   },
+   {
+    "raDeg": 200.98143,
+    "decDeg": 54.92536,
+    "vMag": 2.22
+   },
+   {
+    "raDeg": 201.30641,
+    "decDeg": 54.98796,
+    "vMag": 4.01
+   },
+   {
+    "raDeg": 203.53044,
+    "decDeg": 55.34843,
+    "vMag": 5.588
+   },
+   {
+    "raDeg": 205.18447,
+    "decDeg": 54.68164,
+    "vMag": 4.66
+   },
+   {
+    "raDeg": 195.18208,
+    "decDeg": 56.36634,
+    "vMag": 4.93
+   },
+   {
+    "raDeg": 195.18199,
+    "decDeg": 56.36635,
+    "vMag": 5.02
+   },
+   {
+    "raDeg": 193.50729,
+    "decDeg": 55.95982,
+    "vMag": 1.77
+   },
+   {
+    "raDeg": 187.48884,
+    "decDeg": 58.40574,
+    "vMag": 5.347
+   },
+   {
+    "raDeg": 185.21201,
+    "decDeg": 57.86412,
+    "vMag": 5.524
+   },
+   {
+    "raDeg": 186.26337,
+    "decDeg": 56.77783,
+    "vMag": 5.81
+   },
+   {
+    "raDeg": 183.8565,
+    "decDeg": 57.03262,
+    "vMag": 3.32
+   },
+   {
+    "raDeg": 178.9934,
+    "decDeg": 56.59856,
+    "vMag": 5.824
+   },
+   {
+    "raDeg": 162.79587,
+    "decDeg": 56.58226,
+    "vMag": 5.661
+   },
+   {
+    "raDeg": 165.46033,
+    "decDeg": 56.38243,
+    "vMag": 2.37
+   },
+   {
+    "raDeg": 160.93053,
+    "decDeg": 57.1992,
+    "vMag": 5.782
+   },
+   {
+    "raDeg": 204.87687,
+    "decDeg": 52.92121,
+    "vMag": 5.456
+   },
+   {
+    "raDeg": 186.89626,
+    "decDeg": 55.71272,
+    "vMag": 5.7
+   },
+   {
+    "raDeg": 178.4577,
+    "decDeg": 53.69476,
+    "vMag": 2.44
+   },
+   {
+    "raDeg": 176.73176,
+    "decDeg": 55.62819,
+    "vMag": 5.254
+   },
+   {
+    "raDeg": 173.77035,
+    "decDeg": 54.7854,
+    "vMag": 5.628
+   },
+   {
+    "raDeg": 171.48796,
+    "decDeg": 55.85046,
+    "vMag": 5.7
+   },
+   {
+    "raDeg": 163.39355,
+    "decDeg": 54.58513,
+    "vMag": 5.111
+   },
+   {
+    "raDeg": 206.88516,
+    "decDeg": 49.31327,
+    "vMag": 1.86
+   },
+   {
+    "raDeg": 203.61358,
+    "decDeg": 49.01597,
+    "vMag": 4.7
+   },
+   {
+    "raDeg": 199.56046,
+    "decDeg": 49.68206,
+    "vMag": 5.15
+   },
+   {
+    "raDeg": 184.37333,
+    "decDeg": 53.19133,
+    "vMag": 5.81
+   },
+   {
+    "raDeg": 186.00623,
+    "decDeg": 51.56226,
+    "vMag": 4.761
+   },
+   {
+    "raDeg": 201.56918,
+    "decDeg": 46.02806,
+    "vMag": 5.873
+   },
+   {
+    "raDeg": 193.7355,
+    "decDeg": 47.19672,
+    "vMag": 5.84
+   },
+   {
+    "raDeg": 184.95296,
+    "decDeg": 48.98415,
+    "vMag": 5.29
+   },
+   {
+    "raDeg": 176.51256,
+    "decDeg": 47.7794,
+    "vMag": 3.72
+   },
+   {
+    "raDeg": 169.17438,
+    "decDeg": 49.47625,
+    "vMag": 5.873
+   },
+   {
+    "raDeg": 196.46778,
+    "decDeg": 45.26855,
+    "vMag": 5.637
+   },
+   {
+    "raDeg": 191.28261,
+    "decDeg": 45.44026,
+    "vMag": 4.87
+   },
+   {
+    "raDeg": 167.41587,
+    "decDeg": 44.49849,
+    "vMag": 3.01
+   },
+   {
+    "raDeg": 165.06127,
+    "decDeg": 45.52627,
+    "vMag": 5.448
+   }
+  ],
+  "rawFieldRows": 53,
+  "namedOrComponentRows": 11,
+  "atmosphericCount": 42,
+  "_countNote": "The field query returned 53 rows. 11 of them are the eight named stars or their resolved components (Dubhe appears three times, Mizar twice), and the renderer drops them by coordinate match within 0.02 deg — drawing them would render the constellation twice and let the sky compete with the figure. 42 rows are genuine atmospheric background."
+ },
+ "unverified": {
+  "properNames": "The proper names (Dubhe, Merak, ...) are traditional and were supplied by this file, not returned by the query. The Bayer designations ARE the queried identifiers.",
+  "asterismLineOrder": "The order in which the seven stars are traditionally joined is a cultural convention, not a measurement. It is recorded in the research document, never here.",
+  "asterismDrawOrder": [
+   "Alkaid",
+   "Mizar",
+   "Alioth",
+   "Megrez",
+   "Phecda",
+   "Merak",
+   "Dubhe"
+  ],
+  "asterismDrawOrderNote": "Handle tip to bowl lip, the conventional traversal of the Big Dipper. A cultural convention, NOT a measurement, and never drawn as astronomy. Used only to fix the graph-object-to-star sequence.",
+  "offAsterismStar": "Alcor",
+  "offAsterismNote": "Alcor is a real star of the field but is NOT part of the seven-star asterism. It receives the graph object that has no relationship inside its own region."
+ },
+ "illustrative": {
+  "_warning": "NOT ASTRONOMY. Rendering choices only. Must never be presented as measured.",
+  "sceneUnitsPerLightYear": "a map scale, like WORLD_SCALE for the other worlds — it sets size, never ratios",
+  "backgroundStarDepth": "The 53 background stars have no parallax in this dataset, so they carry NO measured distance. They are placed behind the figure at a declared depth. Their RA/Dec are measured; their depth is not.",
+  "fieldRoll": "the angle the plate is presented at — cosmetic"
+ }
+}
