@@ -255,11 +255,23 @@ ck('CST-14', (r.menu || []).length === MIG_TOTAL,
    'the Main Mind Menu still exposes all ' + (r.menu || []).length + ' MIGs');
 
 // CST-15
+/* Each region is compared to ITSELF, not to the other one.
+
+   This used to require the hovered region's absolute total to beat an
+   unhovered region's by 30. That is confounded: the two measurements are of
+   two different neighbourhoods, and each contains a different amount of
+   unrelated constellation light, so brightening a star anywhere near
+   Philosophy moved a number that is supposed to be about Observation. What
+   the claim actually needs is that the named region rises decisively while
+   the one nobody named does not rise at all. */
 ck('CST-15', r.hObs.st.hoverRegion >= 0 && r.base.st.hoverRegion === -1 &&
-            r.rel.st.hoverRegion === -1 && r.hObs.obs > r.base.obs &&
-            r.hObs.obs - r.hObs.phil > 30 && near(r.rel.obs, r.base.obs, 2),
+            r.rel.st.hoverRegion === -1 &&
+            r.hObs.obs > r.base.obs * 2.5 &&
+            r.hObs.phil <= r.base.phil &&
+            near(r.rel.obs, r.base.obs, 2),
    'the highlight is deterministic and reversible — OBSERVATION ' + r.base.obs + ' → ' +
-   r.hObs.obs + ' (Philosophy ' + r.hObs.phil + ' behind it), released back to ' + r.rel.obs);
+   r.hObs.obs + ' when named, while Philosophy holds at ' + r.base.phil + ' → ' +
+   r.hObs.phil + ' having not been named; released back to ' + r.rel.obs);
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' constellation invariants hold');
 console.log('  ' + K.system + ' · ' + stars.length + ' stars · ' + drawn.length +

@@ -2481,13 +2481,24 @@ var MIG_VISUAL={
   'psychology'  :{family:'nascent',  branches:0, len:0.00, spread:0.00, rings:0, core:0.30}
 };
 
+/* The star values are LIGHTER than the bodies orbiting them, which is the
+   opposite of how they began.
+
+   These hues were chosen for ink on a pale page, where a star was the densest
+   mark in its system — the darkest thing on white. On a night sky that
+   relationship inverts: the densest ink becomes the dimmest light, so
+   TRAPPIST-1 rendered as a dark silhouette while its own planets glowed
+   around it, and the centre of the world looked like it had gone missing.
+
+   Only the star values change, and each keeps its variant's hue. The bodies,
+   orbits, fog and accents are untouched. */
 var PHIL_VARIANTS={
   a:{ name:'cobalt + indigo',
-      fog:0xa8b6d4, star:0x1b2f6b, body:0x35508f, orbit:0x3c5ba9, accent:0x2b4fa8 },
+      fog:0xa8b6d4, star:0x7d97e6, body:0x35508f, orbit:0x3c5ba9, accent:0x2b4fa8 },
   b:{ name:'electric blue + violet',
-      fog:0xb2b0da, star:0x2a1f6e, body:0x4741a3, orbit:0x5a4fc0, accent:0x5136c9 },
+      fog:0xb2b0da, star:0x8f84e4, body:0x4741a3, orbit:0x5a4fc0, accent:0x5136c9 },
   c:{ name:'deep navy depth + cyan/violet',
-      fog:0x9fb4c8, star:0x0f2340, body:0x2d5f7a, orbit:0x2f6f8f, accent:0x1d7fa8 }
+      fog:0x9fb4c8, star:0x74aede, body:0x2d5f7a, orbit:0x2f6f8f, accent:0x1d7fa8 }
 };
 /* LOVE is warm because its stars are: the primary is a measured 4450 K
    K-dwarf, and the 0.20-solar secondary is necessarily cooler and redder. The
