@@ -31,6 +31,10 @@
    A23 Kepler-33's rendered spacing IS its measured spacing
    A24 the THREE planetary worlds occupy three distinct spacing regimes, in
        order, so a set of worlds is not one idea rendered three times
+   A25 TECHNOLOGY uses GJ 876, with provenance and an exact 4<->4 mapping
+   A26 GJ 876's rendered spacing IS its measured spacing
+   A27 GJ 876's 1:2:4 Laplace resonance is verifiable from the DRAWN radii
+       through Kepler's third law — the first world whose signature is motion
 
    usage: node tools/astronomycheck.js [v02.html]
 */
@@ -317,6 +321,67 @@ ck('A24', tKep < tTra && tTra < tHR && tKep < 0.85 && tHR > 1.15,
    'the three planetary worlds are three regimes in order — Kepler-33 ' +
    tKep.toFixed(2) + ' (compresses) < TRAPPIST-1 ' + tTra.toFixed(2) +
    ' (nearly even) < HR 8799 ' + tHR.toFixed(2) + ' (opens)');
+
+/* ── THE SIXTH WORLD ──────────────────────────────────────────────────
+   TECHNOLOGY is GJ 876, and it is the first world whose signature is DYNAMICAL
+   rather than sequential: its outer three planets are locked in a 1:2:4
+   Laplace resonance. */
+const tcAssigned = A.assigned.technology, tcOrbits = (A.orbits.technology || []);
+const tcAsc = tcOrbits.slice().sort((a, b) => a.slot - b.slot);
+
+// A25 — the system, its provenance, and an exact 4<->4 mapping
+const tcConcepts = tcOrbits.filter(o => o.t === 'minor');
+ck('A25', tcAssigned && tcAssigned.system === 'GJ 876' &&
+          Array.isArray(tcAssigned.axes) && tcAssigned.axes.length === 4 &&
+          Array.isArray(tcAssigned.periods) && tcAssigned.periods.length === 4 &&
+          tcConcepts.length === 4 && new Set(tcAsc.map(o => o.slot)).size === 4,
+   'TECHNOLOGY uses ' + (tcAssigned ? tcAssigned.system : 'nothing') + ' — ' +
+   (tcAssigned ? tcAssigned.axes.length : 0) + ' measured axes and periods for ' +
+   tcConcepts.length + ' concepts, each on its own orbit');
+
+// A26 — and the spacing is the measurement
+let tcOK = false, tcDetail = 'no data';
+if (tcAssigned && tcAssigned.axes && tcAsc.length === tcAssigned.axes.length) {
+  const want = tcAssigned.axes.map(v => +(v / tcAssigned.axes[0]).toFixed(3));
+  const got = tcAsc.map(o => +(o.r / tcAsc[0].r).toFixed(3));
+  tcOK = want.every((v, i) => Math.abs(v - got[i]) < 0.005);
+  tcDetail = 'measured ' + want.join(' ') + '  ·  rendered ' + got.join(' ');
+}
+ck('A26', tcOK, 'GJ 876 is rendered at its measured spacing — ' + tcDetail);
+
+/* A27 — THE RESONANCE IS IN THE PICTURE, NOT JUST IN THE DATA.
+
+   Every other world's signature is a sequence: how the gaps grow or shrink.
+   GJ 876's is a relationship between MOTIONS — its outer three planets orbit
+   in a 1:2:4 Laplace resonance, so each completes exactly half as many turns
+   as the one inside it. That is a fact about time, and nothing in this
+   renderer animates, so the obvious worry is that the claim is decorative.
+
+   It is not, because Kepler's third law ties the two together: a period ratio
+   fixes a radius ratio, a ∝ P^(2/3). So the resonance is verifiable from the
+   RENDERED RADII alone, and this assertion derives the prediction from the
+   measured periods and holds the drawn geometry to it. AI sits alone far
+   inside; AUTOMATION, SYSTEMS and AGENTS are the locked trio.
+
+   Two claims, deliberately separate: that the periods really are a resonance,
+   and that the picture encodes it. */
+let resOK = false, resDetail = 'no data';
+if (tcAssigned && tcAssigned.periods && tcAsc.length === 4) {
+  const P = tcAssigned.periods.slice(1);          // the locked trio
+  const pr = P.map(v => v / P[0]);                // 1 : ~2 : ~4
+  const isResonant = Math.abs(pr[1] - 2) / 2 < 0.04 && Math.abs(pr[2] - 4) / 4 < 0.04;
+  const predicted = pr.map(v => Math.pow(v, 2 / 3));
+  const drawn = tcAsc.slice(1).map(o => o.r / tcAsc[1].r);
+  const worst = Math.max.apply(null,
+    predicted.map((v, i) => Math.abs(drawn[i] - v) / v));
+  resOK = isResonant && worst < 0.01;
+  resDetail = 'periods ' + pr.map(v => v.toFixed(2)).join(':') +
+              ' against 1:2:4, and the drawn radii ' +
+              drawn.map(v => v.toFixed(3)).join(' ') + ' against Kepler-III\'s ' +
+              predicted.map(v => v.toFixed(3)).join(' ') +
+              ' — worst ' + (worst * 100).toFixed(2) + '%';
+}
+ck('A27', resOK, 'the Laplace resonance is visible in the drawn geometry — ' + resDetail);
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' astronomy invariants hold');
 console.log('  draw calls ' + r.perf.calls + ' · geometries ' + r.perf.geometries +

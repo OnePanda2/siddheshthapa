@@ -139,8 +139,8 @@ const MUTATIONS = [
     repl: `      fm=0.008+0.992*Math.max(0,Math.min(1,(430-camPos.length())/210));  // the old bug` },
 
   { n: 'R2', file: APP, name: "Philosophy's own range is used",
-    find: `      : (type==='planetary') ? 115`,
-    repl: `      : (type==='planetary') ? 6                 // mutation: a useless range` },
+    find: `               : (type==='planetary') ? outerOrbit(m.id,tpl)*1.65*biasScale`,
+    repl: `               : (type==='planetary') ? 6                 // mutation: a useless range` },
 
   { n: 'R3', file: APP, name: "Love's own range is used",
     find: `               : (type==='circumbinary') ? 2.5*scaleFor(m.id)*0.70+2.5*scaleFor(m.id)*0.42`,

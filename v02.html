@@ -1424,7 +1424,7 @@ var ASTRO={}; (ASTRO_DATA.systems||[]).forEach(function(sy){ ASTRO[sy.system]=sy
 /* Two worlds are assigned, chosen to be structurally opposite: one star with
    seven packed orbits, against two stars with a hollow centre. */
 var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799',
-                 'life':'Kepler-33' };
+                 'life':'Kepler-33', 'technology':'GJ 876' };
 function templateFor(migId){ return ASTRO[MIG_SYSTEM[migId]]||null; }
 
 var ORBIT_R0=13;                     // the innermost orbit, in scene units
@@ -1444,7 +1444,12 @@ var SYS_TILT=0.42;                   // one shared viewing tilt, ~24 degrees
    COMPRESS harder than TRAPPIST-1's — 1.76 down to 1.19 against 1.37 down to
    1.22 — so it is the most compressive system in the set, not a smaller copy
    of Philosophy. */
-var WORLD_SCALE={ 'philosophy':13, 'love':52, 'movies':18, 'life':15 };
+/* TECHNOLOGY is GJ 876, and it is the widest span in the set at 16.1x: one
+   very close inner body, then three locked together far outside it. A smaller
+   base radius than the others because that span multiplies it — 9 puts the
+   outer orbit at 145 rather than 209. */
+var WORLD_SCALE={ 'philosophy':13, 'love':52, 'movies':18, 'life':15,
+                  'technology':9 };
 function scaleFor(migId){ return WORLD_SCALE[migId]||ORBIT_R0; }
 
 /* TRAPPIST-1 is famously coplanar — mutual inclinations under ~0.1 degrees —
@@ -2580,6 +2585,24 @@ var LIFE_VARIANTS={
   c:{ name:'wheat + deep blue-grey',
       fog:0xd6ccb8, star:0x866c26, body:0x3f5468, orbit:0x74602f, accent:0x957726 }
 };
+/* TECHNOLOGY is an M4V red dwarf — about 3200K, the coolest and dimmest star
+   in the set, and the reason its planets orbit so close. So this world is red
+   where LOVE is amber and LIFE is gold: a deeper, cooler red than either, the
+   colour of a star that barely burns. Its bodies are two gas giants and two
+   smaller worlds, lit only by that red light, so they are cool grey-violet
+   rather than warm. */
+var TECH_VARIANTS={
+  a:{ name:'red dwarf + cold violet',
+      fog:0xd4bebe, star:0x8a2f2a, body:0x53607a, orbit:0x7a3a34, accent:0x9c3b2c },
+  b:{ name:'deep crimson + slate',
+      fog:0xd0b8ba, star:0x7d2725, body:0x4b5872, orbit:0x71332f, accent:0x8f3326 },
+  c:{ name:'rust + blue-grey',
+      fog:0xd8c4bc, star:0x94382a, body:0x5a6880, orbit:0x84443a, accent:0xa64832 }
+};
+var TECH_PICK=(function(){
+  var m=/(^|[#&])techpal:([abc])/.exec(location.hash||'');
+  return m?m[2]:'a';
+})();
 var LIFE_PICK=(function(){
   var m=/(^|[#&])lifepal:([abc])/.exec(location.hash||'');
   return m?m[2]:'a';
@@ -2619,6 +2642,9 @@ var MIG_PALETTE={};
   var lf=LIFE_VARIANTS[LIFE_PICK]||LIFE_VARIANTS.a;
   MIG_PALETTE['life']={fog:lf.fog, star:lf.star, body:lf.body,
                        orbit:lf.orbit, accent:lf.accent};
+  var tc=TECH_VARIANTS[TECH_PICK]||TECH_VARIANTS.a;
+  MIG_PALETTE['technology']={fog:tc.fog, star:tc.star, body:tc.body,
+                             orbit:tc.orbit, accent:tc.accent};
 })();
 /* every other MIG keeps the neutral atmosphere until its own world is built —
    inventing thirteen palettes before their geometry exists would be decoration */
@@ -2629,7 +2655,13 @@ function paletteOf(migId){ return MIG_PALETTE[migId]||NEUTRAL_PALETTE; }
    visual interpretation of it. Every field the renderer actually consults
    lives here, so a new world is a profile rather than a new branch. */
 var WORLD_TYPES=['planetary','circumbinary','constellation','latent'];
-var WORLD_BIAS={ 'movies':0.90, 'life':1.20 };
+/* the radius of a world's outermost measured orbit, in scene units */
+function outerOrbit(mid,tpl){
+  if(!tpl||!tpl.semiMajorAxisAU||!tpl.semiMajorAxisAU.length) return 0;
+  var a=tpl.semiMajorAxisAU;
+  return scaleFor(mid)*(a[a.length-1]/a[0]);
+}
+var WORLD_BIAS={ 'movies':0.90, 'life':1.20, 'technology':0.80 };
 var MIG_WORLD_PROFILE={};
 (function(){
   MIGS.forEach(function(m){
@@ -2656,7 +2688,17 @@ var MIG_WORLD_PROFILE={};
     var biasScale = (WORLD_BIAS[m.id]!==undefined ? WORLD_BIAS[m.id] : typeBias)/typeBias;
     var arrive = kon ? (CONST_DATA.derived.meanDistanceLy*CONST_SCALE)
                : (type==='circumbinary') ? 2.5*scaleFor(m.id)*0.70+2.5*scaleFor(m.id)*0.42
-               : (type==='planetary') ? 115*biasScale
+               /* DERIVED FROM THE WORLD, NOT A CONSTANT PER TYPE.
+
+                  115 was TRAPPIST-1's arrival distance written down as if it
+                  were every planetary world's. It is not: GJ 876's outer orbit
+                  is 145 scene units against TRAPPIST-1's 70, so it is framed
+                  from twice as far and every range keyed to 115 fell short —
+                  the labels stopped resolving before the camera arrived. The
+                  outer orbit is known here, and 1.65x it reproduces
+                  TRAPPIST-1's own 115 exactly, so the approved world is
+                  unchanged and the others finally scale. */
+               : (type==='planetary') ? outerOrbit(m.id,tpl)*1.65*biasScale
                : 96;
     MIG_WORLD_PROFILE[m.id]={
       worldType:type,
@@ -2676,8 +2718,12 @@ var MIG_WORLD_PROFILE={};
          own arrival distance, so every world's relationships are equally
          legible when you get there — the shared rule, parameterised. */
       relationshipStyle:{ range:+(arrive*2.2).toFixed(1), arrival:+arrive.toFixed(1) },
+      /* Keyed to the world's own ARRIVAL DISTANCE, the same way its
+         relationship range already is — a range measured in scene units means
+         nothing until you say how far away the camera stands. 1.39x and 0.70x
+         reproduce TRAPPIST-1's approved 160 and 80 exactly from its 115. */
       labelStyle: type==='constellation' ? {minor:470, writing:190}
-                : {minor:Math.round(160*biasScale), writing:Math.round(80*biasScale)},
+                : {minor:Math.round(arrive*1.39), writing:Math.round(arrive*0.70)},
       /* how much of the world must fit the readable area. A constellation is a
          FIGURE and must be whole; a dense planetary system is allowed to crop
          its outer orbits, which is what its approved composition does. */
@@ -3258,6 +3304,21 @@ if(glOK){
     NOCTR[i]=(n.t==='mig'&&CONSTELLATIONS[n.id])?1:0;
     if(n.star!==undefined) EMPH[i]=n.offAsterism?1.35:1.12;
     if(n.t==='mig'&&BINARY[n.id]){ CAP[i]=68; }
+    /* AND THE SAME RULE WHEREVER A STAR WOULD EAT ITS OWN INNER BODY.
+
+       LOVE caps its primary so the companion separates instead of being
+       swallowed. GJ 876 needs it for the same reason from the opposite cause:
+       its innermost planet orbits at 1/16 of the world's span — a real
+       property, a 1.94-day orbit at 0.021 AU — so at arrival it lands inside
+       the star's own glow, and AI was drawn on top of TECHNOLOGY.
+
+       Judged by the world's own proportions rather than by name: a star is
+       capped when its innermost orbit is under an eighth of its outermost.
+       TRAPPIST-1 sits at 0.19 and Kepler-33 at 0.27, so neither moves. */
+    else if(n.t==='mig'&&templateFor(n.id)){
+      var tI=templateFor(n.id), aI=tI.semiMajorAxisAU;
+      if(aI && aI.length>1 && (aI[0]/aI[aI.length-1])<0.12) CAP[i]=68;
+    }
     else if(BINARY[n.mig]){ CAP[i]=50; }     // and never larger than its stars
     else if(n.star!==undefined){ CAP[i]=124; }   // room for real magnitude to show
   });
@@ -5428,8 +5489,13 @@ window.__v02={
              source:ASTRO_DATA._sourceType||null, retrieved:ASTRO_DATA._retrieved||null}};
     Object.keys(MIG_SYSTEM).forEach(function(mid){
       var tpl=templateFor(mid);
+      /* periods as well as axes, because GJ 876's identity is a RESONANCE —
+         a relationship between orbital periods — and a check cannot verify
+         that the rendered radii encode it without the periods to derive it
+         from. */
       out.assigned[mid]=tpl?{system:tpl.system, planets:tpl.planetCount,
-        axes:tpl.semiMajorAxisAU, confidence:tpl.confidence, sourceType:tpl.sourceType}:null;
+        axes:tpl.semiMajorAxisAU, periods:tpl.orbitalPeriodDays||null,
+        confidence:tpl.confidence, sourceType:tpl.sourceType}:null;
     });
     Object.keys(ORBITS).forEach(function(mid){
       var centre=byId[mid].pos;

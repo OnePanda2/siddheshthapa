@@ -124,8 +124,8 @@ const MUTATIONS = [
      back to the latent placeholder it was. */
   { n: 'A22', name: 'LIFE uses Kepler-33',
     file: APP,
-    find: "var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799',\n                 'life':'Kepler-33' };",
-    repl: "var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799' };",
+    find: "'life':'Kepler-33',",
+    repl: "",
     expect: 'LIFE uses' },
 
   /* A23 needs no mutation for the same reason A20 does not: LIFE shares the
@@ -140,6 +140,27 @@ const MUTATIONS = [
     find: ['"semiMajorAxisAU": [','    0.0677,','    0.1189,','    0.1662,','    0.2138,','    0.2535','   ],'].join('\n'),
     repl: ['"semiMajorAxisAU": [','    0.0677,','    0.0800,','    0.1100,','    0.1700,','    0.3000','   ],'].join('\n'),
     expect: 'three regimes in order' },
+
+  /* THE SIXTH WORLD. Take the system away and TECHNOLOGY falls back to the
+     latent placeholder it was. */
+  { n: 'A25', name: 'TECHNOLOGY uses GJ 876',
+    file: APP,
+    find: " 'technology':'GJ 876' };",
+    repl: " };",
+    expect: 'TECHNOLOGY uses' },
+
+  /* A26 needs no mutation, for the third time and the same reason: TECHNOLOGY
+     shares the one code path, so A7's mutation fails it too.
+
+     A27 is bound by the PERIODS. Take the outer three out of their 1:2:4 chain
+     and the resonance stops being one — the radii on screen still match the
+     axes they were given, so nothing else notices, which is exactly the gap
+     A27 was written to close. */
+  { n: 'A27', name: 'the Laplace resonance is visible in the drawn geometry',
+    file: DATA,
+    find: ['"orbitalPeriodDays": [','    1.93778,','    30.0881,','    61.1166,','    124.26','   ],'].join('\n'),
+    repl: ['"orbitalPeriodDays": [','    1.93778,','    30.0881,','    55.0000,','    95.0000','   ],'].join('\n'),
+    expect: 'Laplace resonance' },
 
   { n: 'A3', name: 'exactly seven Philosophy concepts',
     file: APP,
