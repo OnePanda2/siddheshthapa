@@ -60,6 +60,38 @@ const PROBE = `(function(){
     menu[id]= b ? {max:b.maxSignal, rgb:b.rgb} : null;
   });
 
+  /* LABELS MUST NOT SIT ON TOP OF EACH OTHER, AT ANY WIDTH.
+
+     Measured from the transform each label was actually given, not from
+     getBoundingClientRect — which returns the untransformed box here and
+     reported all 105 pairs colliding at both widths, a number so obviously
+     wrong it was the only reason the real figure got checked. */
+  function boxes(){
+    return [].filter.call(document.querySelectorAll('.lb'),
+        function(e){ return e.style.display!=='none'; })
+      .map(function(e){
+        /* parsed, not matched: this probe is embedded in a template literal,
+           which consumes a regex's backslashes before the browser sees them —
+           the pattern silently became one that matches nothing, every box read
+           as (0,0), and all 105 pairs looked like collisions */
+        var tr=e.style.transform, k=tr.lastIndexOf('translate(');
+        var n=tr.slice(k+10).split(',');
+        var w=e.offsetWidth, h=e.offsetHeight;
+        return { x:(parseFloat(n[0])||0)-w/2, y:(parseFloat(n[1])||0)-h/2, w:w, h:h };
+      });
+  }
+  function overlaps(bs){
+    var n=0;
+    for(var i=0;i<bs.length;i++) for(var j=i+1;j<bs.length;j++){
+      var a=bs[i], b=bs[j];
+      if(Math.min(a.x+a.w,b.x+b.w)>Math.max(a.x,b.x) &&
+         Math.min(a.y+a.h,b.y+b.h)>Math.max(a.y,b.y)) n++;
+    }
+    return n;
+  }
+  var menuBoxes=boxes();
+  var labelOverlapMenu=overlaps(menuBoxes), menuLabels=menuBoxes.length;
+
   var worlds={};
   ids.forEach(function(id){
     try{
@@ -80,7 +112,12 @@ const PROBE = `(function(){
     }catch(e){ worlds[id]={threw:(e&&e.message)||String(e)}; }
   });
   M.setOpen(1); M.go('universe',null); M.settle(60);
-  return {worlds:worlds, menu:menu, errs:errs, perf:M.perf()};
+  M.go('region','philosophy'); M.settle(80);
+  var labelOverlapWorld=overlaps(boxes());
+  M.setOpen(1); M.go('universe',null); M.settle(60);
+  return {worlds:worlds, menu:menu, errs:errs, perf:M.perf(),
+          menuLabels:menuLabels, labelOverlapMenu:labelOverlapMenu,
+          labelOverlapWorld:labelOverlapWorld};
 })()`;
 
 const page = tmp + '/s.html';
@@ -126,6 +163,11 @@ const dark = menuIds.filter(id => !out.menu[id] || out.menu[id].max < 100);
 say(dark.length === 0,
     'all ' + menuIds.length + ' emblems findable in the menu' +
     (dark.length ? ' — DIM: ' + dark.join(', ') : ''));
+
+say(out.labelOverlapMenu === 0 && out.labelOverlapWorld === 0,
+    'no two labels sit on top of each other — ' + out.menuLabels +
+    ' names in the menu, ' + out.labelOverlapMenu + ' overlapping there and ' +
+    out.labelOverlapWorld + ' inside a world');
 
 for (const id of Object.keys(out.worlds)) {
   const w = out.worlds[id];

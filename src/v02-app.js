@@ -3294,7 +3294,7 @@ function labelFor(n,cls){
             var src=sourceLabelOf(n.id);
             if(src==='not yet charted') src=null;
             if(src){ var sp=document.createElement('span'); sp.className='lb-src';
-                     sp.textContent=src; e.appendChild(sp); }
+                     sp.textContent=src; e.appendChild(sp); e.__src=sp; }
           } else { e.textContent=n.label; }
           labelLayer.appendChild(e); labelEls[n.id]=e; }
   return e;
@@ -3400,23 +3400,58 @@ function layLabels(){
 function place_(list){
   list.sort(function(a,b){ return (a.rank-b.rank) || (a.d-b.d); });
   var done=[];
-  var STEP=13, TRIES=[0,1,-1,2,-2,3,-3,4,-4,5,-5];
+  /* THE SHEET IS AN OBSTACLE, NOT EMPTY SPACE. Seeding it as an already-placed
+     box means the existing search walks labels out of it rather than a special
+     case being written for the panel. SOCIETY's name ran 12px under it on a
+     phone and had its source line sliced off. */
+  var shEl=document.getElementById('semantic');
+  var shR=(shEl && shEl.getBoundingClientRect) ? shEl.getBoundingClientRect() : null;
+  if(shR && shR.width>0 && shR.height>0){
+    done.push({ x:shR.left+shR.width/2, y:shR.top+shR.height/2,
+                hw:shR.width/2, hh:shR.height/2 });
+  }
+  /* VERTICAL FIRST, THEN SIDEWAYS, because a label belongs under the thing it
+     names and moving it along Y keeps that reading. Sideways is the fallback
+     for the case vertical cannot solve: on a phone the organ is compressed
+     into a third of the height, and BUSINESS and BUILDING sat close enough in
+     X that every free Y slot within reach was already taken. One residual
+     overlap, 28x15 pixels — the search simply ran out of room, so it is given
+     more of it in the direction it had not tried. */
+  var STEP=13, SIDE=22;
+  var OFFS=[[0,0]];
+  for(var t=1;t<=6;t++){ OFFS.push([0,t*STEP]); OFFS.push([0,-t*STEP]); }
+  for(var u=1;u<=3;u++)
+    for(var v=0;v<=4;v++){
+      OFFS.push([ u*SIDE, v*STEP]); OFFS.push([-u*SIDE, v*STEP]);
+      if(v){ OFFS.push([ u*SIDE,-v*STEP]); OFFS.push([-u*SIDE,-v*STEP]); }
+    }
   for(var i=0;i<list.length;i++){
     var it=list[i], e=it.e;
+    /* A PHONE DROPS THE SOURCE LINE. The region list under the organ already
+       states what each world borrows, in type that can actually be read, and
+       repeating it in six-pixel letters over a busy figure is the same noise
+       the "not yet charted" line was removed for. Dropping it halves a label's
+       height, which is most of the crowding on a screen where fifteen
+       two-line names share three hundred pixels. */
+    var wantSrc = window.innerWidth >= 768;
+    if(e.__src && e.__srcOn !== wantSrc){
+      e.__src.style.display = wantSrc ? '' : 'none';
+      e.__srcOn = wantSrc; e.__w = undefined;
+    }
     if(e.__w===undefined || e.__txt!==e.textContent){
       e.__w=e.offsetWidth||60; e.__h=e.offsetHeight||14; e.__txt=e.textContent;
     }
-    var hw=e.__w/2, hh=e.__h/2, y=it.y;
-    for(var t=0;t<TRIES.length;t++){
-      var cand=it.y+TRIES[t]*STEP, ok=true;
+    var hw=e.__w/2, hh=e.__h/2, x=it.x, y=it.y;
+    for(var t2=0;t2<OFFS.length;t2++){
+      var cx=it.x+OFFS[t2][0], cy=it.y+OFFS[t2][1], ok=true;
       for(var j=0;j<done.length;j++){
         var o=done[j];
-        if(Math.abs(it.x-o.x) < hw+o.hw+4 && Math.abs(cand-o.y) < hh+o.hh+2){ ok=false; break; }
+        if(Math.abs(cx-o.x) < hw+o.hw+4 && Math.abs(cy-o.y) < hh+o.hh+2){ ok=false; break; }
       }
-      if(ok){ y=cand; break; }
+      if(ok){ x=cx; y=cy; break; }
     }
-    done.push({x:it.x, y:y, hw:hw, hh:hh});
-    e.style.transform='translate(-50%,-50%) translate('+it.x.toFixed(1)+'px,'+y.toFixed(1)+'px)';
+    done.push({x:x, y:y, hw:hw, hh:hh});
+    e.style.transform='translate(-50%,-50%) translate('+x.toFixed(1)+'px,'+y.toFixed(1)+'px)';
   }
 }
 

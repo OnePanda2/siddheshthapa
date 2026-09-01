@@ -124,6 +124,46 @@ setTimeout(async function(){
     M.setOpen(1); M.go('universe'); M.settle(80);
     out.returned={ morph:M.morph(), mind:M.mind() };
     out.perf=M.perf();
+
+    /* MEASURED LAST, ON PURPOSE. This block establishes its own state —
+       the closed menu, fold parked, flight landed — and parking the fold
+       leaves a morph target behind. Sitting earlier in the probe, that
+       stale target was still there when T8 read the return and T8 passed
+       while the mutation that removes the mind's close was live. Nothing
+       reads the scene after this point, so nothing can be contaminated. */
+    /* THE NAMES IN THE OUTER MENU MUST BE WHOLLY ABOVE THE SHEET.
+
+       Overlap between two labels was already asserted; a label sliding UNDER
+       the panel is a different failure and was not. On a phone the sheet is
+       below the organ, every region name carried a second line naming its
+       system, and SOCIETY's ran twelve pixels past the sheet's top edge with
+       its source line sliced in half. Measured from the transform each label
+       was actually given, parsed rather than matched, because this probe sits
+       inside a template literal that eats a regex's backslashes. */
+    /* LANDED, NOT MID-FLIGHT. This suite runs with motion enabled on purpose,
+       so a plain settle after go('universe') measures a camera still on its
+       way home — the first version of this read ART inside the column at a
+       desktop width where the resting menu has nothing there at all. The fold
+       is parked and the flight arrived, the same way T9 and T11 measure a
+       destination rather than a departure. */
+    M.setOpen(0); M.go('universe',null);
+    M.parkMorph(0,0); M.arrive(); M.settle(120);
+    var shR=document.getElementById('semantic').getBoundingClientRect();
+    out.sheet={ top:Math.round(shR.top), right:Math.round(shR.right) };
+    out.buried=[];
+    [].forEach.call(document.querySelectorAll('.lb'), function(e){
+      if(e.style.display==='none') return;
+      var tr=e.style.transform, k=tr.lastIndexOf('translate(');
+      if(k<0) return;
+      var n=tr.slice(k+10).split(',');
+      var cx=parseFloat(n[0])||0, cy=parseFloat(n[1])||0;
+      var w=e.offsetWidth, h=e.offsetHeight;
+      var L=cx-w/2, R=cx+w/2, T=cy-h/2, B=cy+h/2;
+      var hits = (window.innerWidth<768)
+        ? (B > shR.top && R > shR.left && L < shR.right)
+        : (L < shR.right && B > shR.top && T < shR.bottom);
+      if(hits) out.buried.push(e.textContent.trim().split(String.fromCharCode(10))[0]);
+    });
   }catch(e){ out.ERROR=(e&&e.message)||String(e); }
   document.title=JSON.stringify(out);
 },300);</script>`, 'utf8');
@@ -153,7 +193,7 @@ const r = run(W, H, 'desk');
 const rp = run(390, 844, 'phone');
 
 let bad = 0;
-const TOTAL = 11;
+const TOTAL = 12;
 function ck(id, ok, msg) {
   if (!ok) bad++;
   console.log('  ' + (ok ? 'PASS' : 'FAIL') + '  ' + id.padEnd(4) + '  ' + msg);
@@ -311,6 +351,27 @@ ck('T11', feP.ids.length === 15 && feP.bad.length === 0,
    (feP.bad.length ? ' — MISSED: ' + show(rp, feP)
     : ' (y' + rp.firstEntry.learning.y + ', above a sheet starting at ' +
       rp.firstEntry.learning.shTop + ')'));
+
+/* T12 — AND ONCE THERE, THE NAMES ARE NOT BURIED BY THE PANEL.
+
+   The menu is not only a picture, it is the navigation, and a name a visitor
+   cannot read is a target they cannot choose. Two labels landing on each
+   other was already covered; a label sliding under the sheet was not, and on
+   a phone SOCIETY's did — twelve pixels in, with the line naming its system
+   cut in half.
+
+   THE PHONE ONLY, deliberately. The desktop is measured too and reported
+   below, but it is not asserted: there the sheet is a column on the left
+   while every region name sits over the organ on the right, and with BOTH
+   guards removed not one desktop label moved into it. An assertion that
+   cannot be made to fail is not a guard, and counting it as one would
+   overstate what this suite covers. */
+ck('T12', rp.buried.length === 0,
+   'no region name is buried by the sheet on a phone — 15 names clear of a ' +
+   'sheet starting at y' + rp.sheet.top + ' at ' + rp.vw + 'x' + rp.vh +
+   ' (desktop measured too, ' + r.buried.length + ' in a column ending at x' +
+   r.sheet.right + ', not asserted — nothing there can reach it)' +
+   (rp.buried.length ? ' — BURIED: ' + rp.buried.join(', ') : ''));
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' travel invariants hold');
 console.log(bad ? '  ' + bad + ' PROBLEM(S)'

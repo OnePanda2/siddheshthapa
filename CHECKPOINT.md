@@ -55,13 +55,15 @@ LOVE → Kepler-16, OBSERVATION → Ursa Major. Real astronomy, real provenance.
 | worldframecheck | 8/8 |
 | **total** | **105/105** |
 
-*(The suite has since grown to 187/187 across twelve check suites, with 116
+*(The suite has since grown to 188/188 across twelve check suites, with 117
 mutations verified: `travelcheck` was added when the MIG zoom was fixed,
 `braincheck` was rewritten for the constellation, `emblemcheck` was added when
 the region emblems turned out to be invisible in the menu, and `travelcheck`
 grew T9/T10/T11 when the first selection from the CLOSED mind turned out to
 arrive at the wrong place for fourteen of the fifteen regions on a desktop and,
-separately, under the sheet for twelve of them on a phone. `travelcheck` now
+separately, under the sheet for twelve of them on a phone, and T12 when the
+region NAMES turned out to crowd and to slide under the sheet there too.
+`travelcheck` now
 runs at two viewports, and `worldframecheck` gained WF9/WF10 for the narrow
 laptop and WF11/WF12 for the per-world bias, and now runs at three.)*
 
@@ -88,7 +90,26 @@ to undo anything here.
    'seg', and the assertions test the chains' ARRANGEMENT — the temporal chain
    below the Sylvian, the cerebellar chain at the back and below — not merely
    their presence. 20/20, mutation-verified.
-3. **Phone labels crowd.** Fifteen region names over a small figure overlap.
+3. ~~**Phone labels crowd.**~~ **FIXED.** Two separate failures were behind
+   the one complaint. Names landed on each other — the de-collision searched
+   vertically only, so BUSINESS and BUILDING shared 28x15px with nowhere above
+   or below to go; it now tries sideways once the column is exhausted.
+   And SOCIETY's name ran twelve pixels UNDER the sheet with the line naming
+   its system sliced in half, because every region carried a second line and
+   the layout treated the panel as empty screen. On a phone that line is now
+   dropped — the region list below states each system in type that can be
+   read, and repeating it in six-pixel letters over a busy figure is the noise
+   the "not yet charted" line was already removed for — which halves a label
+   to 13px; and the sheet is seeded into the layout as occupied space, so
+   labels are walked out of it rather than over it. Zero overlaps at all six
+   matrix widths. Guarded by `travelcheck` T12, and by the overlap assertion
+   in `smoke`, which measures the transform each label was actually given:
+   `getBoundingClientRect` returns the UNTRANSFORMED box here and reported all
+   105 pairs colliding, a figure wrong enough to be worth checking.
+   The desktop is measured too but deliberately NOT asserted — there the sheet
+   is a column on the left while every name sits over the organ on the right,
+   and with both guards removed not one desktop label moved into it. An
+   assertion that cannot be made to fail is not a guard.
 4. ~~**The mutation suites have not been re-run** since the brightness metric
    was inverted.~~ **DONE** — all 87 re-verified. One assertion had gone quiet
    and was repaired: `worldcheck` H2 claimed to test that hovering a region

@@ -65,8 +65,31 @@ const M = [
 
   { id:'T10', why:'append an empty section unchecked, so a region with nothing in it throws',
     find:"    put(group('Concepts', mem.filter(function(id){return byId[id].t==='minor';})",
-    repl:"    elGroups.appendChild(group('Concepts', mem.filter(function(id){return byId[id].t==='minor';})" }
+    repl:"    elGroups.appendChild(group('Concepts', mem.filter(function(id){return byId[id].t==='minor';})" },
+
+  /* BOTH GUARDS AT ONCE, because either one alone is sufficient and a
+     mutation that removes only one proves nothing — both were tried
+     separately first, and T12 survived both times.
+
+     Restoring the second line grows every region name from 13px back to 22px;
+     no longer seeding the sheet leaves the layout believing the panel is
+     empty screen. Together they are the state the phone was actually in when
+     SOCIETY's name ran twelve pixels under the sheet with the line naming its
+     system cut in half. Redundant guards are worth keeping — a mutation that
+     pretends to test one of them is not. */
+  { id:'T12', why:'put the second line back AND let the layout treat the sheet as empty space',
+    steps:[
+      { find:'    var wantSrc = window.innerWidth >= 768;',
+        repl:'    var wantSrc = true;' },
+      { find:`    done.push({ x:shR.left+shR.width/2, y:shR.top+shR.height/2,
+                hw:shR.width/2, hh:shR.height/2 });`,
+        repl:'    void 0;' }
+    ] }
 ];
+
+/* one anchor or several — a mutation may need to restore a state that more
+   than one guard independently prevents */
+M.forEach(m => { if (!m.steps) m.steps = [{ find: m.find, repl: m.repl }]; });
 
 /* T2 and T8 share an anchor, so T8 carries a marker and is applied by index */
 const list = ONLY ? M.filter(m => m.id === ONLY) : M;
@@ -76,8 +99,10 @@ const original = fs.readFileSync(APP, 'utf8');
 let bad = 0;
 if (DRY) {
   M.forEach(m => {
-    const hits = original.split(m.find).length - 1;
-    if (hits !== 1) { bad++; console.log('  x' + hits + '  ' + m.id + '  "' + m.find.slice(0, 58) + '"'); }
+    m.steps.forEach(s => {
+      const hits = original.split(s.find).length - 1;
+      if (hits !== 1) { bad++; console.log('  x' + hits + '  ' + m.id + '  "' + s.find.slice(0, 58) + '"'); }
+    });
   });
   console.log(bad ? '\n' + bad + ' BAD ANCHOR(S) of ' + M.length
                   : '\nall ' + M.length + ' anchors match exactly once');
@@ -87,13 +112,18 @@ if (DRY) {
 let verified = 0;
 try {
   for (const m of list) {
-    const hits = original.split(m.find).length - 1;
-    if (hits !== 1) {
-      bad++;
-      console.log('BAD  ' + m.id.padEnd(4) + ' anchor matched ' + hits + ' times — UNVERIFIED');
-      continue;
+    let mutated = original, miss = 0;
+    for (const s of m.steps) {
+      const hits = mutated.split(s.find).length - 1;
+      if (hits !== 1) {
+        miss++;
+        console.log('BAD  ' + m.id.padEnd(4) + ' anchor matched ' + hits + ' times — UNVERIFIED');
+        break;
+      }
+      mutated = mutated.replace(s.find, s.repl);
     }
-    fs.writeFileSync(APP, original.replace(m.find, m.repl), 'utf8');
+    if (miss) { bad++; continue; }
+    fs.writeFileSync(APP, mutated, 'utf8');
     execSync('node tools/build-v02.js', { stdio: 'pipe' });
     let failed = false, line = '';
     try {
