@@ -137,7 +137,8 @@ var ASTRO={}; (ASTRO_DATA.systems||[]).forEach(function(sy){ ASTRO[sy.system]=sy
 var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799',
                  'life':'Kepler-33', 'technology':'GJ 876', 'business':'55 Cnc',
                  'society':'Kepler-11', 'building':'HD 10180',
-                 'learning':'K2-138', 'behaviour':'TOI-178' };
+                 'learning':'K2-138', 'behaviour':'TOI-178',
+                 'food':'HD 219134' };
 function templateFor(migId){ return ASTRO[MIG_SYSTEM[migId]]||null; }
 
 var ORBIT_R0=13;                     // the innermost orbit, in scene units
@@ -166,7 +167,8 @@ var SYS_TILT=0.42;                   // one shared viewing tilt, ~24 degrees
    radius, because that span multiplies it. */
 var WORLD_SCALE={ 'philosophy':13, 'love':52, 'movies':18, 'life':15,
                   'technology':9, 'business':1.1, 'society':16,
-                  'building':11, 'learning':20, 'behaviour':17 };
+                  'building':11, 'learning':20, 'behaviour':17,
+                  'food':13 };
 function scaleFor(migId){ return WORLD_SCALE[migId]||ORBIT_R0; }
 
 /* TRAPPIST-1 is famously coplanar — mutual inclinations under ~0.1 degrees —
@@ -1050,6 +1052,29 @@ var BEHAV_VARIANTS={
   c:{ name:'warmer spring green',
       fog:0xc8d4d0, star:0x8cf49c, body:0x5a6878, orbit:0x708098, accent:0xb0c4dc }
 };
+/* FOOD is HD 219134 — five planets packed inside 0.38 AU and then one lone
+   body at 3.11, an eight-fold jump. TASTE, RITUAL, CULTURE and FAMILY sit in
+   the compact core, which is the part of that system this region is.
+
+   Twelfth colour, and the space is now genuinely tight. Orange was the obvious
+   one and is squeezed between LIFE's gold and LOVE's rust: the best orange
+   found cleared the distinctness floor by 0.3. This lavender clears it by 2.2
+   and the chroma floor by 4 — both narrow, and the reason a thirteenth charted
+   world will need the palette re-spaced rather than extended. Like BEHAVIOUR's
+   green it is chosen for distinguishability; HD 219134 is a K3 dwarf and
+   orange. */
+var FOOD_VARIANTS={
+  a:{ name:'pale lavender + earth',
+      fog:0xd8c8b8, star:0xd8c8ff, body:0x6a5a48, orbit:0x8a6a3c, accent:0xd08a30 },
+  b:{ name:'cooler lavender',
+      fog:0xd4c4c8, star:0xd0c4fa, body:0x645440, orbit:0x846438, accent:0xc8822c },
+  c:{ name:'warmer lavender',
+      fog:0xdccbc4, star:0xe0d0ff, body:0x706050, orbit:0x907040, accent:0xd89238 }
+};
+var FOOD_PICK=(function(){
+  var m=/(^|[#&])foodpal:([abc])/.exec(location.hash||'');
+  return m?m[2]:'a';
+})();
 var BEHAV_PICK=(function(){
   var m=/(^|[#&])behavpal:([abc])/.exec(location.hash||'');
   return m?m[2]:'a';
@@ -1131,6 +1156,9 @@ var MIG_PALETTE={};
   var bh=BEHAV_VARIANTS[BEHAV_PICK]||BEHAV_VARIANTS.a;
   MIG_PALETTE['behaviour']={fog:bh.fog, star:bh.star, body:bh.body,
                             orbit:bh.orbit, accent:bh.accent};
+  var fd=FOOD_VARIANTS[FOOD_PICK]||FOOD_VARIANTS.a;
+  MIG_PALETTE['food']={fog:fd.fog, star:fd.star, body:fd.body,
+                       orbit:fd.orbit, accent:fd.accent};
 })();
 /* every other MIG keeps the neutral atmosphere until its own world is built —
    inventing thirteen palettes before their geometry exists would be decoration */
@@ -1163,7 +1191,7 @@ function outerOrbit(mid,tpl){
   return slots[slots.length-1];
 }
 var WORLD_BIAS={ 'movies':0.90, 'life':1.20, 'technology':0.80,
-                 'business':0.10, 'learning':0.90 };
+                 'business':0.10, 'learning':0.90, 'food':0.90 };
 var MIG_WORLD_PROFILE={};
 (function(){
   MIGS.forEach(function(m){

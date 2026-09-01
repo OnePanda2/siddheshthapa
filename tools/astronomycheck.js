@@ -54,6 +54,8 @@
        resonance it is known for
    A37 one system, one region — no two regions share a source, and every one
        carries a recorded confidence
+   A38 FOOD uses HD 219134, and the outlier that system is named for is in the
+       measurements rather than in its description
 
    usage: node tools/astronomycheck.js [v02.html]
 */
@@ -633,6 +635,33 @@ ck('A37', dupes.length === 0 && noConfidence.length === 0 && used.length >= 10,
    'and every one carries a recorded confidence' +
    (dupes.length ? ' — REUSED: ' + dupes.join(', ') : '') +
    (noConfidence.length ? ' — NO CONFIDENCE: ' + noConfidence.join(', ') : ''));
+
+/* ── THE TWELFTH WORLD ────────────────────────────────────────────────
+   FOOD is HD 219134: five planets inside 0.38 AU and then one alone at 3.11.
+   TASTE, RITUAL, CULTURE and FAMILY are the compact core. */
+const fdAssigned = A.assigned.food, fdAsc = (A.orbits.food || [])
+  .slice().sort((a, b) => a.slot - b.slot);
+
+/* A38 — the region takes the core, and the outlier is real rather than a
+   description. Checked as a RATIO between consecutive measured axes: the jump
+   from the fifth planet to the sixth has to dwarf every gap before it, which
+   is what "a system with an outlier" means when it is a measurement instead of
+   a phrase. */
+let fdOutlier = false, fdDetail = 'no data';
+if (fdAssigned && fdAssigned.axes && fdAssigned.axes.length === 6) {
+  const a2 = fdAssigned.axes;
+  const gaps = a2.slice(1).map((v, i) => v / a2[i]);
+  const inner = gaps.slice(0, 4), last = gaps[4];
+  fdOutlier = last > Math.max.apply(null, inner) * 3;
+  fdDetail = 'inner gaps ' + inner.map(v => v.toFixed(2)).join(', ') +
+             ' then ' + last.toFixed(2) + ' out to the sixth';
+}
+ck('A38', fdAssigned && fdAssigned.system === 'HD 219134' &&
+          fdAsc.length === 4 && new Set(fdAsc.map(o => +o.r.toFixed(3))).size === 4 &&
+          fdOutlier,
+   'FOOD uses ' + (fdAssigned ? fdAssigned.system : 'nothing') + ' — ' +
+   fdAsc.length + ' concepts in its compact core, and the outlier it is ' +
+   'named for is in the measurements: ' + fdDetail);
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' astronomy invariants hold');
 console.log('  draw calls ' + r.perf.calls + ' · geometries ' + r.perf.geometries +
