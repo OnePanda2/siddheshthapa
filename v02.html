@@ -1431,7 +1431,8 @@ var ASTRO={}; (ASTRO_DATA.systems||[]).forEach(function(sy){ ASTRO[sy.system]=sy
 /* Two worlds are assigned, chosen to be structurally opposite: one star with
    seven packed orbits, against two stars with a hollow centre. */
 var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799',
-                 'life':'Kepler-33', 'technology':'GJ 876', 'business':'55 Cnc' };
+                 'life':'Kepler-33', 'technology':'GJ 876', 'business':'55 Cnc',
+                 'society':'Kepler-11' };
 function templateFor(migId){ return ASTRO[MIG_SYSTEM[migId]]||null; }
 
 var ORBIT_R0=13;                     // the innermost orbit, in scene units
@@ -1459,7 +1460,7 @@ var SYS_TILT=0.42;                   // one shared viewing tilt, ~24 degrees
    ultra-short-period body at 0.015 AU to a giant at 5.6 AU. A small base
    radius, because that span multiplies it. */
 var WORLD_SCALE={ 'philosophy':13, 'love':52, 'movies':18, 'life':15,
-                  'technology':9, 'business':1.1 };
+                  'technology':9, 'business':1.1, 'society':16 };
 function scaleFor(migId){ return WORLD_SCALE[migId]||ORBIT_R0; }
 
 /* TRAPPIST-1 is famously coplanar — mutual inclinations under ~0.1 degrees —
@@ -2703,6 +2704,25 @@ var BIZ_VARIANTS={
   c:{ name:'orchid + slate',
       fog:0xd4c8d8, star:0x97388a, body:0x645874, orbit:0x744276, accent:0xa84a94 }
 };
+/* SOCIETY is Kepler-11, six planets packed inside an orbit smaller than
+   Venus's and lying in almost exactly one plane — the flattest, most layered
+   multi-planet system in the set, which is what a region of institutions,
+   incentives and tribalism is. Its worlds are the low-density kind, puffy with
+   thick hydrogen envelopes rather than rock, so the palette is a pale green
+   haze: the one part of the space the other seven leave open, and OBSERVATION's
+   verdigris is a cold blue-green against this warmer one. */
+var SOC_VARIANTS={
+  a:{ name:'pale green haze + moss',
+      fog:0xc6d2c0, star:0x4f7a2c, body:0x5d6b4a, orbit:0x486a30, accent:0x639436 },
+  b:{ name:'deeper green + olive',
+      fog:0xc0cdba, star:0x456d26, body:0x556243, orbit:0x415f2b, accent:0x59872f },
+  c:{ name:'sage + bright leaf',
+      fog:0xccd6c6, star:0x5a8834, body:0x667352, orbit:0x517537, accent:0x6da33e }
+};
+var SOC_PICK=(function(){
+  var m=/(^|[#&])socpal:([abc])/.exec(location.hash||'');
+  return m?m[2]:'a';
+})();
 var BIZ_PICK=(function(){
   var m=/(^|[#&])bizpal:([abc])/.exec(location.hash||'');
   return m?m[2]:'a';
@@ -2756,6 +2776,9 @@ var MIG_PALETTE={};
   var bz=BIZ_VARIANTS[BIZ_PICK]||BIZ_VARIANTS.a;
   MIG_PALETTE['business']={fog:bz.fog, star:bz.star, body:bz.body,
                            orbit:bz.orbit, accent:bz.accent};
+  var sc=SOC_VARIANTS[SOC_PICK]||SOC_VARIANTS.a;
+  MIG_PALETTE['society']={fog:sc.fog, star:sc.star, body:sc.body,
+                          orbit:sc.orbit, accent:sc.accent};
 })();
 /* every other MIG keeps the neutral atmosphere until its own world is built —
    inventing thirteen palettes before their geometry exists would be decoration */

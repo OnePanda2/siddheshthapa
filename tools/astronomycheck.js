@@ -40,6 +40,10 @@
    A30 and the two orbits beyond them are DECLARED illustrative, never
        presented as measured — the assertion that keeps the project honest
        when the data runs out
+   A31 SOCIETY uses Kepler-11 — the opposite problem, five ideas for six
+       measured orbits
+   A32 and it uses the measured five, leaving the sixth empty rather than
+       stretching five across six
 
    usage: node tools/astronomycheck.js [v02.html]
 */
@@ -447,6 +451,46 @@ ck('A30', stepOK && !!ill && /NOT ASTRONOMY/.test(ill._warning || '') &&
    ', flagged NOT ASTRONOMY in the data, and the system itself carries ' +
    'confidence "' + (bzAssigned ? bzAssigned.confidence : '?') +
    '" rather than being presented as firm');
+
+/* ── THE EIGHTH WORLD, AND THE OTHER WAY THE DATA CAN FAIL TO FIT ────
+   BUSINESS had more concepts than the archive had geometry. SOCIETY has
+   fewer: Kepler-11 publishes six measured orbits and the region carries five
+   ideas. The wrong answers are symmetrical too — inventing a sixth concept, or
+   stretching five across six orbits so the spacing stops being the
+   measurement. The right answer is to use the inner five as measured and leave
+   the sixth orbit empty, which is what a system with more planets than this
+   region has ideas actually looks like. */
+const soAssigned = A.assigned.society, soOrbits = (A.orbits.society || []);
+const soAsc = soOrbits.slice().sort((a, b) => a.slot - b.slot);
+const soConcepts = soOrbits.filter(o => o.t === 'minor');
+
+// A31 — the system, and five ideas on five of its six orbits, none stacked
+ck('A31', soAssigned && soAssigned.system === 'Kepler-11' &&
+          soAssigned.axes.length === 6 && soConcepts.length === 5 &&
+          new Set(soAsc.map(o => o.slot)).size === 5 &&
+          new Set(soAsc.map(o => o.r)).size === 5,
+   'SOCIETY uses ' + (soAssigned ? soAssigned.system : 'nothing') + ' — ' +
+   soConcepts.length + ' concepts on ' + new Set(soAsc.map(o => o.slot)).size +
+   ' of its ' + (soAssigned ? soAssigned.axes.length : 0) +
+   ' measured orbits, each at its own radius');
+
+/* A32 — the five it uses are the measured five, and the sixth is left empty
+   rather than filled. Checked as RADII, not as slot numbers: stretching five
+   concepts evenly across six orbits would still give five distinct slots and
+   would no longer be Kepler-11. */
+let soOK = false, soDetail = 'no data';
+if (soAssigned && soAssigned.axes && soAsc.length === 5) {
+  const want = soAssigned.axes.slice(0, 5).map(v => +(v / soAssigned.axes[0]).toFixed(3));
+  const got = soAsc.map(o => +(o.r / soAsc[0].r).toFixed(3));
+  const outerUnused = soAsc[4].r / soAsc[0].r <
+                      soAssigned.axes[5] / soAssigned.axes[0] - 0.01;
+  soOK = want.every((v, i) => Math.abs(v - got[i]) < 0.005) && outerUnused;
+  soDetail = 'measured ' + want.join(' ') + '  ·  rendered ' + got.join(' ') +
+             '  ·  the sixth orbit at ' +
+             (soAssigned.axes[5] / soAssigned.axes[0]).toFixed(3) + ' carries nothing';
+}
+ck('A32', soOK, 'the inner five are the measured five and the sixth is left ' +
+   'empty rather than filled — ' + soDetail);
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' astronomy invariants hold');
 console.log('  draw calls ' + r.perf.calls + ' · geometries ' + r.perf.geometries +
