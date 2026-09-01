@@ -1,7 +1,7 @@
 /* Probe the EXACT path a screenshot takes: navigate by hash, settle, read back
    the canvas. usage: node .p3/hashprobe.js "lite&focus:love" */
 const fs = require('fs'), os = require('os'), { execSync } = require('child_process');
-const tmp = (os.tmpdir() + '/hp-' + process.pid).replace(/\\/g, '/');
+const tmp = (require('../tools/scratch.js').root() + '/hp-' + process.pid).replace(/\\/g, '/');
 fs.mkdirSync(tmp, { recursive: true });
 const page = tmp + '/h.html';
 fs.writeFileSync(page, fs.readFileSync('v02.html', 'utf8') + `

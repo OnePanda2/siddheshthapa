@@ -33,7 +33,7 @@
 const fs = require('fs'), os = require('os'), { execSync } = require('child_process');
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const FILE = process.argv[2] || 'v02.html';
-const tmp = (os.tmpdir() + '/wc-' + process.pid).replace(/\\/g, '/');
+const tmp = (require('./scratch.js').root() + '/wc-' + process.pid).replace(/\\/g, '/');
 fs.mkdirSync(tmp, { recursive: true });
 
 const PROBE = `(function(){

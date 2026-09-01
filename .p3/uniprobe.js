@@ -1,5 +1,5 @@
 const fs = require('fs'), os = require('os'), { execSync } = require('child_process');
-const tmp = (os.tmpdir() + '/uq-' + process.pid).replace(/\\/g, '/');
+const tmp = (require('../tools/scratch.js').root() + '/uq-' + process.pid).replace(/\\/g, '/');
 fs.mkdirSync(tmp, { recursive: true });
 const page = tmp + '/q.html';
 fs.writeFileSync(page, fs.readFileSync('v02.html', 'utf8') + `

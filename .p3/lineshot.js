@@ -6,7 +6,7 @@ const [view, out, w, h] = process.argv.slice(2);
 const W = +(w || 1200), H = +(h || 820);
 execSync('node "' + path.join(__dirname, 'lineproto.js') + '" ' + (view || 'lateral') + ' ' + W + ' ' + H,
   { stdio: 'pipe' });
-const tmp = (os.tmpdir() + '/bp-' + process.pid).split('\\').join('/');
+const tmp = (require('../tools/scratch.js').root() + '/bp-' + process.pid).split('\\').join('/');
 fs.mkdirSync(tmp, { recursive: true });
 fs.copyFileSync(path.join(__dirname,'lineproto.html'), tmp + '/b.html');
 execSync('"' + CHROME + '" --headless=new --hide-scrollbars' +

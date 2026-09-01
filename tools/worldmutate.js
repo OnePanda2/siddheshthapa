@@ -50,10 +50,14 @@ const MUTATIONS = [
     find: `  p.x += (x>=0?1:-1)*(0.030+0.022*bsmooth(0.15,1.0,y));   /* a cleft, not a chasm */`,
     repl: `  p.x += 0.0;                                  // mutation: no fissure` },
 
+  /* Dropped in the GRID pass, the way a region genuinely absent would be.
+     Returning early from the placement instead left the region with grid
+     coordinates but no position, which took the whole page down — and a crash
+     is not the assertion catching anything. */
   { n: 'M2', file: APP, name: 'every MIG is in the brain',
-    find: `  m.bPos=brainShell(dir).multiplyScalar(rad);`,
-    repl: `  if(m.id==='food') return;                    // mutation: leave one out
-  m.bPos=brainShell(dir).multiplyScalar(rad);` },
+    find: `  m.bDepth=0.62+((i*13)%4)/4*0.94;`,
+    repl: `  m.bDepth=0.62+((i*13)%4)/4*0.94;
+  if(m.id==='food') m.bY=undefined;            // mutation: leave one out` },
 
   { n: 'M3', file: APP, name: 'hover identifies a region while the mind is closed',
     find: `  if(pts) pts.material.uniforms.hoverRegion.value=idx;`,
@@ -75,7 +79,7 @@ const MUTATIONS = [
     repl: `  var wantOpen = 1;                      // mutation: always expanded` },
 
   { n: 'M5b', assert: 'M5', file: APP, name: 'the regions actually travel',
-    find: `  m.bPos=brainShell(dir).multiplyScalar(rad);`,
+    find: `    m.bPos=brainShell(dir).multiplyScalar(m.bRad);`,
     repl: `  m.bPos=m.uPos.clone();                       // mutation: brain == universe` },
 
   { n: 'H1', file: APP, name: 'a hover maps to exactly one MIG',

@@ -1,5 +1,5 @@
 const fs = require('fs'), os = require('os'), { execSync } = require('child_process');
-const tmp = (os.tmpdir() + '/perf-' + process.pid).replace(/\\/g, '/');
+const tmp = (require('../tools/scratch.js').root() + '/perf-' + process.pid).replace(/\\/g, '/');
 fs.mkdirSync(tmp, { recursive: true });
 const page = tmp + '/p.html';
 /* measured WITHOUT reduced-motion and WITHOUT lite, so the real render loop

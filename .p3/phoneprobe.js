@@ -1,6 +1,6 @@
 /* Where do the eight stars actually land on a phone? */
 const fs = require('fs'), os = require('os'), { execSync } = require('child_process');
-const tmp = (os.tmpdir() + '/ph-' + process.pid).replace(/\\/g, '/');
+const tmp = (require('../tools/scratch.js').root() + '/ph-' + process.pid).replace(/\\/g, '/');
 fs.mkdirSync(tmp, { recursive: true });
 const page = tmp + '/p.html';
 fs.writeFileSync(page, fs.readFileSync('v02.html', 'utf8') + `

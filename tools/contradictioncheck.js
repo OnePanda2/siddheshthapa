@@ -19,7 +19,7 @@ const W = +(process.argv[3] || 1440), H = +(process.argv[4] || 900);
 const CONTRAS = process.argv[5] ? [process.argv[5]]
               : ['c-curiosity', 'c-money-value', 'c-cynical', 'c-absurd', 'c-independence', 'c-weakness'];
 
-const tmp = (os.tmpdir() + '/contracheck-' + process.pid).replace(/\\/g, '/');
+const tmp = (require('./scratch.js').root() + '/contracheck-' + process.pid).replace(/\\/g, '/');
 fs.mkdirSync(tmp, { recursive: true });
 
 const probeFor = id => `(function(){

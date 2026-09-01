@@ -5,7 +5,7 @@
 const fs = require('fs'), os = require('os'), { execSync } = require('child_process');
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const [W, H, out, driver, noenter] = process.argv.slice(2);
-const tmp = (os.tmpdir() + '/s2-' + process.pid).replace(/\\/g, '/');
+const tmp = (require('../tools/scratch.js').root() + '/s2-' + process.pid).replace(/\\/g, '/');
 fs.mkdirSync(tmp, { recursive: true });
 const page = tmp + '/s.html';
 const enterLine = (noenter === 'noenter') ? '' : 'M.enter(); M.settle(60);';

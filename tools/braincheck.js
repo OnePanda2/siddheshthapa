@@ -25,7 +25,7 @@ const W = 1440, H = 900;
 /* the declared budget, from BRAIN-VISUAL-SPEC. A ceiling, not a target. */
 const BUDGET = { chainsMin: 8, chainsMax: 18, starsMin: 70, starsMax: 150 };
 
-const tmp = (os.tmpdir() + '/bc-' + process.pid).split('\\').join('/');
+const tmp = (require('./scratch.js').root() + '/bc-' + process.pid).split('\\').join('/');
 fs.mkdirSync(tmp, { recursive: true });
 fs.writeFileSync(tmp + '/p.html', fs.readFileSync(FILE, 'utf8') + `
 <script>setTimeout(function(){
@@ -39,6 +39,12 @@ fs.writeFileSync(tmp + '/p.html', fs.readFileSync(FILE, 'utf8') + `
     M.enter(); M.settle(260);
     out.mmm={ organ:M.organ(), mind:M.mind(), brain:M.brain(), arch:M.arch(),
               menu:M.menuRows() };
+    /* where each region NAME lands, in pixels, in the view a visitor opens on */
+    out.mmm.proj=M.arch().migIds.map(function(id){
+      var p=M.project(id);
+      return {id:id, on:!!(p&&p.onScreen),
+              x:p?Math.round(p.x):null, y:p?Math.round(p.y):null};
+    });
     delete out.mmm.organ.profile;
     M.go('region','philosophy'); M.settle(220);
     out.inWorld={ organ:M.organ(), mind:M.mind() };
@@ -65,7 +71,7 @@ const r = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&')
 if (r.ERROR) { console.error('  ' + r.ERROR); process.exit(1); }
 
 let bad = 0;
-const TOTAL = 20;
+const TOTAL = 21;
 function ck(id, ok, msg) {
   if (!ok) bad++;
   console.log('  ' + (ok ? 'PASS' : 'FAIL') + '  ' + id.padEnd(4) + '  ' + msg);
@@ -250,6 +256,33 @@ ck('B20', IN.stars === O.stars &&
 console.log('\n  figure: ' + O.stars + ' stars · ' + O.segments + ' segments · ' +
             O.curves + ' named chains · 0 draw calls of its own');
 console.log('  chains: ' + (O.chains || []).join(' · '));
+/* B21 — TWO REGION NAMES MUST NOT LAND ON THE SAME PLACE.
+
+   Fifteen names are drawn over the figure and nothing measured whether any two
+   of them collided. Two pairs did. The layout alternates hemispheres, and the
+   reason recorded for that was it "stops two names from ever landing on the
+   same pixel" — but alternating varies X and the default camera looks straight
+   down X, so it produced the collisions rather than preventing them.
+   PHILOSOPHY at x +18.5 and BUSINESS at x -64.7 sat 5.3 units apart in the
+   plane the viewer sees, out of a brain 156 tall, with their labels drawn one
+   on top of the other. MY WORKS and SOCIETY, 5.8.
+
+   Measured in PIXELS on the projected positions, because pixels are what
+   collide. A 3D separation proves nothing here: the two worst offenders were
+   83 units apart in space and still on the same pixel, which is the entire
+   point — depth is exactly the axis a lateral camera cannot show. */
+const proj = (r.mmm.proj || []).filter(p => p.on);
+let nearest = Infinity, nearestPair = '';
+for (let i = 0; i < proj.length; i++)
+  for (let j = i + 1; j < proj.length; j++) {
+    const d = Math.hypot(proj[i].x - proj[j].x, proj[i].y - proj[j].y);
+    if (d < nearest) { nearest = d; nearestPair = proj[i].id + '/' + proj[j].id; }
+  }
+ck('B21', proj.length === r.mmm.arch.migCount && nearest >= 30,
+   'no two region names land on the same place — all ' + proj.length +
+   ' are on screen and the closest pair, ' + nearestPair + ', is ' +
+   Math.round(nearest) + 'px apart against a floor of 30');
+
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' brain invariants hold');
 console.log(bad ? '  ' + bad + ' PROBLEM(S)'
                 : '  the brain is a constellation, and every chain in it has a name');

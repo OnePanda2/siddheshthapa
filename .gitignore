@@ -16,3 +16,6 @@ node_modules/
 .DS_Store
 Thumbs.db
 *.log
+
+# headless-Chrome working files; created and swept by tools/scratch.js
+.scratch/

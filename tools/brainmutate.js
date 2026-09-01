@@ -101,6 +101,13 @@ const M = [
     find: "  if(p.worldType==='latent' || !p.astronomyTemplate) return 'not yet charted';",
     repl: "  if(p.worldType==='latent' || !p.astronomyTemplate) return 'HR 8799';" },
 
+  /* Alternating hemispheres was supposed to keep names apart and instead put
+     them in line with the camera. Turning the separation off restores exactly
+     that: two pairs of region names drawn on top of each other. */
+  { id: 'B21', why: 'stop spreading the regions in the plane the lateral view keeps',
+    find: "m.bY!==undefined; }), MIN=30;",
+    repl: "m.bY!==undefined; }), MIN=0;" },
+
   { id: 'B20', why: 'let visiting a world rewrite the anatomy behind it',
     find: "  var csL=chain(csC,N(5),false,'central-L'), csR=chain(mirror(csC),N(5),false,'central-R');",
     repl: "  var csL=chain(csC,N(5),false,'central-L'), csR=chain(mirror(csC),N(5),false,'central-R');\n  if(typeof state!=='undefined' && state.region) BRAIN_CHAINS.pop();" }

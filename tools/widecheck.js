@@ -24,7 +24,7 @@ const file = process.argv[2] || 'preview.html';
 const W = +(process.argv[3] || 2560), H = +(process.argv[4] || 1080);
 const STATES = ['philosophy', 'business', 'music', 'my-works', 'curiosity'];
 
-const tmp = (os.tmpdir() + '/widecheck').replace(/\\/g, '/');
+const tmp = (require('./scratch.js').root() + '/widecheck').replace(/\\/g, '/');
 fs.mkdirSync(tmp, { recursive: true });
 
 /* Boot straight into the state with #focus:<id> rather than loading the map

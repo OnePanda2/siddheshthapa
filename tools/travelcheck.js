@@ -30,7 +30,7 @@ const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application
 const FILE = process.argv[2] || 'v02.html';
 const W = 1440, H = 900;
 
-const tmp = (os.tmpdir() + '/tv-' + process.pid).split('\\').join('/');
+const tmp = (require('./scratch.js').root() + '/tv-' + process.pid).split('\\').join('/');
 fs.mkdirSync(tmp, { recursive: true });
 fs.writeFileSync(tmp + '/p.html', fs.readFileSync(FILE, 'utf8') + `
 <script>

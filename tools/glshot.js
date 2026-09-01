@@ -5,7 +5,7 @@ const fs = require('fs'), os = require('os'), { execSync } = require('child_proc
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const [W, H, hash, out, file] = process.argv.slice(2);
 const FILE = file || 'v02.html';
-const tmp = (os.tmpdir() + '/glshot-' + process.pid).replace(/\\/g, '/');
+const tmp = (require('./scratch.js').root() + '/glshot-' + process.pid).replace(/\\/g, '/');
 fs.mkdirSync(tmp, { recursive: true });
 
 /* settle the camera before the shutter: lite mode renders on demand, so drive

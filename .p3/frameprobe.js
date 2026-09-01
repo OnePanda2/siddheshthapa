@@ -1,7 +1,7 @@
 /* How much of each world actually lands in the READABLE area?
    usage: node .p3/frameprobe.js [w] [h] */
 const fs = require('fs'), os = require('os'), { execSync } = require('child_process');
-const tmp = (os.tmpdir() + '/fr-' + process.pid).replace(/\\/g, '/');
+const tmp = (require('../tools/scratch.js').root() + '/fr-' + process.pid).replace(/\\/g, '/');
 fs.mkdirSync(tmp, { recursive: true });
 const page = tmp + '/f.html';
 fs.writeFileSync(page, fs.readFileSync('v02.html', 'utf8') + `

@@ -2426,15 +2426,75 @@ MIGS.forEach(function(m,i){
   cy+=(((i*11)%7)/7-0.5)*0.20;
   /* front is +Z and the crown is +Y, so a column walks the brain back to front
      and a row walks it top to bottom */
-  var z=(0.5-cx)*2.05, y=(0.56-cy)*1.62;
-  /* the hemispheres alternate, which puts neighbours at different depths and
-     stops two names from ever landing on the same pixel */
-  var side=(i%2===0)?1:-1;
-  var lat=0.20+((i*13)%4)/4*0.30;
-  var dir=new THREE.Vector3(lat*side,y,z).normalize();
-  var rad=0.72+((i*5)%3)/3*0.13;
-  m.bPos=brainShell(dir).multiplyScalar(rad);
+  m.bY=(0.56-cy)*1.62;
+  m.bZ=(0.5-cx)*2.05;
+  m.bSide=(i%2===0)?1:-1;
+  m.bRad=0.72+((i*5)%3)/3*0.13;
+  m.bDepth=0.62+((i*13)%4)/4*0.94;
 });
+/* TWO NAMES MUST NOT LAND ON THE SAME PIXEL, AND ONLY ONE PLANE DECIDES THAT.
+
+   Alternating hemispheres was supposed to prevent it — "puts neighbours at
+   different depths and stops two names from ever landing on the same pixel".
+   It does the opposite. Alternating varies X, the default camera is LATERAL,
+   and a lateral camera looks straight down X. Two regions on opposite sides at
+   the same height and depth-along-Z are exactly in line with the viewer, and
+   they collide BECAUSE they were put on opposite sides. PHILOSOPHY at x +18.5
+   and BUSINESS at x -64.7 sat 5.3 units apart in the plane the viewer sees,
+   out of a brain 156 tall, with their labels drawn on top of each other.
+   MY WORKS and SOCIETY, 5.8.
+
+   Two things were mixed into one step and had to be separated:
+
+     - the per-region lateral offset was folded into the direction BEFORE it
+       was normalised, and normalising divides all three components by the
+       vector's length, so a region given more depth had its y and z shrunk
+       more than its neighbours. Depth variety was quietly dragging regions
+       around the projected plane. It is now applied along X afterwards, where
+       the view cannot see it;
+
+     - the deterministic jitter is large next to a grid cell — up to 0.10 of a
+       row that is 0.33 tall — so two adjacent cells could still close up. The
+       jitter stays, because it is what keeps the layout from looking like a
+       spreadsheet, and instead any pair that comes too close is pushed apart
+       IN THE GRID, before the shell mapping, so the mapping still happens once
+       and nothing is placed by hand. */
+(function spreadInTheViewedPlane(){
+  /* a region that never got grid coordinates was skipped above and must stay
+     skipped — otherwise it re-enters here with an undefined position */
+  var P=MIGS.filter(function(m){ return m.uPos && m.bY!==undefined; }), MIN=30;
+  function place(m){
+    var dir=new THREE.Vector3(0.32*m.bSide, m.bY, m.bZ).normalize();
+    m.bPos=brainShell(dir).multiplyScalar(m.bRad);
+    /* depth last, on the axis the lateral view collapses */
+    m.bPos.x *= m.bDepth;
+  }
+  /* Measured on the PLACED positions, not on the grid behind them. The shell
+     is not a sphere and normalising is not linear, so two regions pushed apart
+     in the grid can be brought back together by the mapping — separating in
+     grid space alone fixed PHILOSOPHY and BUSINESS and left MY WORKS and
+     SOCIETY 4 units apart. So each round places every region, measures what
+     the viewer would actually see, and feeds the correction back into the grid
+     coordinates before placing again. 30 units against a median separation of
+     145: enough that two names never share a pixel, small enough that the
+     arrangement the index chose is what survives. */
+  for(var round=0; round<40; round++){
+    P.forEach(place);
+    var moved=false;
+    for(var a=0;a<P.length;a++) for(var b=a+1;b<P.length;b++){
+      var p=P[a].bPos, q=P[b].bPos;
+      var dy=p.y-q.y, dz=p.z-q.z, d=Math.sqrt(dy*dy+dz*dz);
+      if(d>=MIN) continue;
+      if(d<1e-6){ dy=1; dz=0; d=1; }            // exactly in line: pick an axis
+      var k=(MIN-d)/d*0.006;                    // world units back into grid units
+      P[a].bY+=dy*k; P[a].bZ+=dz*k;
+      P[b].bY-=dy*k; P[b].bZ-=dz*k;
+      moved=true;
+    }
+    if(!moved) break;
+  }
+  P.forEach(place);
+})();
 var BRAIN_SPREAD=0.46;
 NODES.forEach(function(nd,k){
   if(nd.t==='mig') return;

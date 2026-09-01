@@ -30,7 +30,7 @@ const fs = require('fs'), os = require('os'), { execSync } = require('child_proc
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const FILE = process.argv[2] || 'v02.html';
 const DATA = 'data/constellation-ursa-major.json';
-const tmp = (os.tmpdir() + '/ct-' + process.pid).replace(/\\/g, '/');
+const tmp = (require('./scratch.js').root() + '/ct-' + process.pid).replace(/\\/g, '/');
 fs.mkdirSync(tmp, { recursive: true });
 
 const PROBE = `(function(){

@@ -14,7 +14,7 @@ const WIDTHS = process.env.WIDTHS ? process.env.WIDTHS.split(',').map(Number)
                                   : [320, 375, 390, 430, 768, 1024, 1280, 1440, 1920];
 const STATES = ['philosophy', 'curiosity', 'b-kind', 'c-curiosity', 'p-statelab', 'music'];
 
-const tmp = os.tmpdir() + '/mobilecheck'; fs.mkdirSync(tmp, { recursive: true });
+const tmp = require('./scratch.js').root() + '/mobilecheck'; fs.mkdirSync(tmp, { recursive: true });
 fs.writeFileSync(tmp + '/probe.js', `(function(){
   var out={}, ST=${JSON.stringify(STATES)};
   var stage=D.getElementById('stage'), nav=D.getElementById('graphnav');

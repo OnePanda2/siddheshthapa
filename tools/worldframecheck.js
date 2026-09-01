@@ -13,7 +13,7 @@ const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application
 const FILE = process.argv[2] || 'v02.html';
 
 function run(W, H) {
-  const tmp = (os.tmpdir() + '/wf-' + process.pid + '-' + W).split('\\').join('/');
+  const tmp = (require('./scratch.js').root() + '/wf-' + process.pid + '-' + W).split('\\').join('/');
   fs.mkdirSync(tmp, { recursive: true });
   fs.writeFileSync(tmp + '/p.html', fs.readFileSync(FILE, 'utf8') + `
 <script>setTimeout(function(){

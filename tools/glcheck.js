@@ -19,7 +19,7 @@ const FILE = process.argv[2] || 'v02.html';
 const W = +(process.argv[3] || 1440), H = +(process.argv[4] || 900);
 const ONLY = process.argv[5];
 
-const tmp = (os.tmpdir() + '/glcheck-' + process.pid).replace(/\\/g, '/');
+const tmp = (require('./scratch.js').root() + '/glcheck-' + process.pid).replace(/\\/g, '/');
 fs.mkdirSync(tmp, { recursive: true });
 
 /* Each state is a hash the app boots straight into, plus the probe to run.

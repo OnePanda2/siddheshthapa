@@ -4,7 +4,7 @@
 const fs = require('fs'), os = require('os'), { execSync } = require('child_process');
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const [W, H, driver] = process.argv.slice(2);
-const tmp = (os.tmpdir() + '/tp-' + process.pid).split(String.fromCharCode(92)).join('/');
+const tmp = (require('../tools/scratch.js').root() + '/tp-' + process.pid).split(String.fromCharCode(92)).join('/');
 fs.mkdirSync(tmp, { recursive: true });
 fs.writeFileSync(tmp + '/p.html', fs.readFileSync('v02.html', 'utf8') + `
 <script>

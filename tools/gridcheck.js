@@ -20,7 +20,7 @@ const file = process.argv[2] || 'preview.html';
 const W = +(process.argv[3] || 1440), H = +(process.argv[4] || 900);
 const STATES = ['philosophy', 'curiosity', 'b-kind'];
 
-const tmp = (os.tmpdir() + '/gridcheck').replace(/\\/g, '/');
+const tmp = (require('./scratch.js').root() + '/gridcheck').replace(/\\/g, '/');
 fs.mkdirSync(tmp, { recursive: true });
 
 const probe = `(function(){

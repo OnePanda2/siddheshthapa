@@ -19,7 +19,7 @@ const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application
 const [mode, srcFile, W, H, hash, out] = process.argv.slice(2);
 if (!mode) { console.error('usage: viewport.js shot|probe <src> <w> <h> <hash> <out>'); process.exit(2); }
 
-const tmp = os.tmpdir() + '/viewport-' + process.pid; fs.mkdirSync(tmp, { recursive: true });
+const tmp = require('./scratch.js').root() + '/viewport-' + process.pid; fs.mkdirSync(tmp, { recursive: true });
 execSync('node tools/capture.js "' + srcFile + '" "' + tmp + '/cap.html"', { stdio: 'pipe' });
 
 const frameSrc = 'cap.html' + (hash && hash !== '-' ? '#' + hash : '');

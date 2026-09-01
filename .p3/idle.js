@@ -3,7 +3,7 @@
    with nobody touching anything. */
 const fs = require('fs'), os = require('os'), { execSync } = require('child_process');
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
-const tmp = (os.tmpdir() + '/idle-' + process.pid).split('\\').join('/');
+const tmp = (require('../tools/scratch.js').root() + '/idle-' + process.pid).split('\\').join('/');
 fs.mkdirSync(tmp, { recursive: true });
 fs.writeFileSync(tmp + '/p.html', fs.readFileSync('v02.html', 'utf8') + `
 <script>setTimeout(function(){

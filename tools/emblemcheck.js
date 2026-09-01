@@ -29,7 +29,7 @@ const fs = require('fs'), os = require('os'), { execSync } = require('child_proc
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const FILE = process.argv[2] || 'v02.html';
 const fwd = s => s.split(String.fromCharCode(92)).join('/');
-const tmp = fwd(os.tmpdir() + '/emb-' + process.pid);
+const tmp = fwd(require('./scratch.js').root() + '/emb-' + process.pid);
 fs.mkdirSync(tmp, { recursive: true });
 
 /* A TIGHT BOX. The default 150px window around a region overlaps its
