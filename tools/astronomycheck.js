@@ -50,6 +50,10 @@
    A35 and K2-138's 3:2 chain is where the spacing convention comes from — the
        step LOVE and BUSINESS declare for orbits they cannot measure is one a
        real system in this dataset actually displays
+   A36 HUMAN BEHAVIOUR uses TOI-178, and its outer five keep the 2:4:6:9:12
+       resonance it is known for
+   A37 one system, one region — no two regions share a source, and every one
+       carries a recorded confidence
 
    usage: node tools/astronomycheck.js [v02.html]
 */
@@ -584,6 +588,51 @@ if (leAssigned && leAssigned.periods && leAsc.length >= 3) {
 }
 ck('A35', chainOK, 'the spacing used where data runs out is one a real system ' +
    'in this set displays — ' + chainDetail);
+
+/* ── THE ELEVENTH WORLD ───────────────────────────────────────────────
+   HUMAN BEHAVIOUR is TOI-178: STATUS, PSYCHOLOGY, MOTIVATION and
+   JUSTIFICATION on the inner four of its six measured orbits. */
+const hbAssigned = A.assigned.behaviour, hbAsc = (A.orbits.behaviour || [])
+  .slice().sort((a, b) => a.slot - b.slot);
+
+// A36 — the system, and the chain it is known for, read from its own periods
+let hbChain = false, hbDetail = 'no data';
+if (hbAssigned && hbAssigned.periods && hbAssigned.periods.length === 6) {
+  /* the DECLARED chain is 2:4:6:9:12 across the outer five, so each period
+     divided by the second planet's should land near 1, 2, 3, 4.5, 6 */
+  const P = hbAssigned.periods.slice(1);
+  const want = [1, 2, 3, 4.5, 6];
+  const got = P.map(v => v / P[0]);
+  hbChain = got.every((v, i) => Math.abs(v - want[i]) / want[i] < 0.08);
+  hbDetail = got.map(v => v.toFixed(2)).join(':') + ' against the declared 2:4:6:9:12';
+}
+ck('A36', hbAssigned && hbAssigned.system === 'TOI-178' &&
+          hbAssigned.axes.length === 6 && hbAsc.length === 4 &&
+          new Set(hbAsc.map(o => +o.r.toFixed(3))).size === 4 && hbChain,
+   'HUMAN BEHAVIOUR uses ' + (hbAssigned ? hbAssigned.system : 'nothing') + ' — ' +
+   hbAsc.length + ' concepts on ' + hbAsc.length + ' of its ' +
+   (hbAssigned ? hbAssigned.axes.length : 0) +
+   ' measured orbits, and its outer five keep the resonance it is known for: ' +
+   hbDetail);
+
+/* A37 — ONE SYSTEM, ONE REGION.
+
+   Worth asserting only now that there are eleven. Reusing a system would give
+   two regions the same geometry and the same source label while the menu
+   claimed they were different places, and nothing else would notice: every
+   per-world assertion would still pass, because each would be looking at a
+   correct copy of the same thing. The check is cheap and the failure it
+   prevents is invisible. */
+const used = Object.keys(A.assigned)
+  .filter(id => A.assigned[id]).map(id => A.assigned[id].system);
+const dupes = used.filter((v, i) => used.indexOf(v) !== i);
+const noConfidence = Object.keys(A.assigned)
+  .filter(id => A.assigned[id] && !A.assigned[id].confidence);
+ck('A37', dupes.length === 0 && noConfidence.length === 0 && used.length >= 10,
+   'each of the ' + used.length + ' charted regions has a system of its own, ' +
+   'and every one carries a recorded confidence' +
+   (dupes.length ? ' — REUSED: ' + dupes.join(', ') : '') +
+   (noConfidence.length ? ' — NO CONFIDENCE: ' + noConfidence.join(', ') : ''));
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' astronomy invariants hold');
 console.log('  draw calls ' + r.perf.calls + ' · geometries ' + r.perf.geometries +

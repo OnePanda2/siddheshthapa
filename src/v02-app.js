@@ -137,7 +137,7 @@ var ASTRO={}; (ASTRO_DATA.systems||[]).forEach(function(sy){ ASTRO[sy.system]=sy
 var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799',
                  'life':'Kepler-33', 'technology':'GJ 876', 'business':'55 Cnc',
                  'society':'Kepler-11', 'building':'HD 10180',
-                 'learning':'K2-138' };
+                 'learning':'K2-138', 'behaviour':'TOI-178' };
 function templateFor(migId){ return ASTRO[MIG_SYSTEM[migId]]||null; }
 
 var ORBIT_R0=13;                     // the innermost orbit, in scene units
@@ -166,7 +166,7 @@ var SYS_TILT=0.42;                   // one shared viewing tilt, ~24 degrees
    radius, because that span multiplies it. */
 var WORLD_SCALE={ 'philosophy':13, 'love':52, 'movies':18, 'life':15,
                   'technology':9, 'business':1.1, 'society':16,
-                  'building':11, 'learning':20 };
+                  'building':11, 'learning':20, 'behaviour':17 };
 function scaleFor(migId){ return WORLD_SCALE[migId]||ORBIT_R0; }
 
 /* TRAPPIST-1 is famously coplanar — mutual inclinations under ~0.1 degrees —
@@ -1027,6 +1027,33 @@ var LEARN_VARIANTS={
   c:{ name:'brighter violet + slate',
       fog:0xd0c8e2, star:0x7638dc, body:0x60548e, orbit:0x6640bc, accent:0x8749ec }
 };
+/* HUMAN BEHAVIOUR is TOI-178, whose outer five planets are locked in a
+   2:4:6:9:12 Laplace chain — bodies keeping a rhythm none of them chose, while
+   their densities refuse the order the chain implies. The region's own note is
+   that people are consistent in ways they would deny, which is the same
+   observation about a different kind of body.
+
+   Its colour is chosen for distinguishability and says nothing about the star,
+   which is a K7 dwarf and orange. That is not a liberty taken here for the
+   first time — OBSERVATION's verdigris is the colour of oxidised instruments
+   rather than of Ursa Major — because an emblem NAMES a region in the menu, it
+   does not photometrically render a sun. The liberty is worth stating because
+   at eleven worlds the palette is nearly full: cool white, rose, mint and
+   cream were all tried and each either fell under the chroma an identity needs
+   or landed inside 18 deltaE of a neighbour. This green sits in the one gap
+   left, between SOCIETY's leaf and OBSERVATION's blue-green. */
+var BEHAV_VARIANTS={
+  a:{ name:'spring green + steel',
+      fog:0xc4d0dc, star:0x7ff0a6, body:0x54627a, orbit:0x6a7c94, accent:0xa8c0dc },
+  b:{ name:'cooler spring green',
+      fog:0xc0d4d8, star:0x74ecb0, body:0x4e6076, orbit:0x647890, accent:0x9cbcd6 },
+  c:{ name:'warmer spring green',
+      fog:0xc8d4d0, star:0x8cf49c, body:0x5a6878, orbit:0x708098, accent:0xb0c4dc }
+};
+var BEHAV_PICK=(function(){
+  var m=/(^|[#&])behavpal:([abc])/.exec(location.hash||'');
+  return m?m[2]:'a';
+})();
 var LEARN_PICK=(function(){
   var m=/(^|[#&])learnpal:([abc])/.exec(location.hash||'');
   return m?m[2]:'a';
@@ -1101,6 +1128,9 @@ var MIG_PALETTE={};
   var ln=LEARN_VARIANTS[LEARN_PICK]||LEARN_VARIANTS.a;
   MIG_PALETTE['learning']={fog:ln.fog, star:ln.star, body:ln.body,
                            orbit:ln.orbit, accent:ln.accent};
+  var bh=BEHAV_VARIANTS[BEHAV_PICK]||BEHAV_VARIANTS.a;
+  MIG_PALETTE['behaviour']={fog:bh.fog, star:bh.star, body:bh.body,
+                            orbit:bh.orbit, accent:bh.accent};
 })();
 /* every other MIG keeps the neutral atmosphere until its own world is built —
    inventing thirteen palettes before their geometry exists would be decoration */
