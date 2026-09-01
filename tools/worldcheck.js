@@ -301,8 +301,13 @@ ck('W8', psy.id === 'psychology' && rn.from === 'psychology' &&
 /* W9 — every MIG states its source, and an unassigned one says so */
 const srcBad = (r.closed.menu || []).filter(m => !m.source || m.source !== m.expected);
 const charted = (r.closed.menu || []).filter(m => m.source !== 'not yet charted');
-ck('W9', srcBad.length === 0 && charted.length === 6 &&
-         charted.every(m => /TRAPPIST-1|Kepler-16|Ursa Major|HR 8799|Kepler-33|GJ 876/.test(m.source)) &&
+/* derived rather than listed, for the reason recorded on braincheck B19: a
+   hardcoded roster of system names is maintenance, not a test, and each world
+   added was making the same edit in two files. A source must be unique to its
+   region, and no region may invent one. */
+ck('W9', srcBad.length === 0 && charted.length >= 6 &&
+         charted.length < (r.closed.menu || []).length &&
+         new Set(charted.map(m => m.source)).size === charted.length &&
          (r.closed.menu || []).every(m => m.aria && m.aria.indexOf(m.source) >= 0),
    'every MIG states its astronomical source and it matches its profile — ' +
    charted.map(m => m.id + '=' + m.source).join(', ') + '; the other ' +

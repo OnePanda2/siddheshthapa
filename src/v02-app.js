@@ -3283,7 +3283,7 @@ function labelFor(n,cls){
 function layLabels(){
   if(!glOK||!labelLayer) return;   // boot renders before the layer exists
   var w=renderer.domElement.clientWidth, h=renderer.domElement.clientHeight;
-  var shown={};
+  var shown={}, want_=[];
   NODES.forEach(function(n){
     if(!n.pos) return;
     var d=camPos.distanceTo(n.pos);
@@ -3300,6 +3300,20 @@ function layLabels(){
     /* on the threshold the organ is atmosphere. A region name over the
        welcome copy is two things asking to be read at once. */
     if(!entered && n.t==='mig') return;
+    /* BEFORE THE MIND OPENS, ONLY THE REGIONS EXIST.
+
+       Everything a region owns is folded into it while the brain is closed, so
+       a concept's label would be drawn on top of its region's name — and the
+       renderer already refuses to draw the bodies for exactly this reason.
+       The labels were never given the same rule; they were kept out only by
+       being further away than a flat 160-unit range.
+
+       That stopped being true when label ranges started following each world's
+       own size: FOOD's range is 3262 and BUILDING's 1330, so their concepts
+       were suddenly inside it while folded, and TASTE, RITUAL, TOOLS and
+       ITERATION appeared over the organ in the menu. The distance was never
+       the reason — the fold state is. */
+    if(mindOpen<0.5 && n.t!=='mig') return;
     var want = n.t==='mig' ? (d<migRange && !elsewhere)
              : ((n.t==='minor' ? d<lp.minor : d<lp.writing) && !elsewhere);
     if(!want) return;
@@ -3309,13 +3323,60 @@ function layLabels(){
     var lr=(n.t==='minor'?lp.minor:lp.writing);
     var near = n.t==='mig' ? Math.max(0,Math.min(1,(migRange-d)/(migRange*0.55)))
              : Math.max(0,Math.min(1,(lr-d)/(lr*0.5)));
-    e.style.transform='translate(-50%,-50%) translate('+((v.x*0.5+0.5)*w).toFixed(1)+'px,'+
-      ((-v.y*0.5+0.5)*h+(n.t==='mig'?26:16)).toFixed(1)+'px)';
     e.style.opacity=(0.18+0.82*near).toFixed(3);
     e.style.display='block';
     shown[n.id]=1;
+    want_.push({ e:e, n:n,
+                 x:(v.x*0.5+0.5)*w,
+                 y:(-v.y*0.5+0.5)*h+(n.t==='mig'?26:16),
+                 /* the region's own name is the anchor and never moves; then
+                    concepts, nearest first, then writings */
+                 rank:(n.t==='mig'?0:(n.t==='minor'?1:2)), d:d });
   });
+  place_(want_);
   Object.keys(labelEls).forEach(function(id){ if(!shown[id]) labelEls[id].style.display='none'; });
+}
+
+/* TWO NAMES MUST NOT BE DRAWN ON TOP OF EACH OTHER.
+
+   Every label was placed at its object's projected point with a fixed vertical
+   offset and nothing checked whether two landed in the same place. Usually
+   nothing does, and then a world has a body that genuinely sits almost on its
+   star — 55 Cnc e at 0.015 AU, GJ 876 d at 0.021, HD 219134 b at 0.039 — and
+   the concept's name is drawn over the region's. FOOD, TECHNOLOGY and BUSINESS
+   all showed it, and it is not a fault in any of them: it is what those systems
+   ARE, and the drawing has to cope rather than the astronomy being flattened
+   to avoid it.
+
+   So labels are laid out in priority order and each one that would collide is
+   nudged along Y until it clears. The region's name never moves, because it is
+   what the viewer is orienting by; concepts move before writings, and nearer
+   before further, so the thing most worth reading keeps the place it earned.
+
+   Sizes are measured once per element and cached: reading offsetWidth every
+   frame would force a layout on every frame, and this runs inside the render
+   loop. */
+function place_(list){
+  list.sort(function(a,b){ return (a.rank-b.rank) || (a.d-b.d); });
+  var done=[];
+  var STEP=13, TRIES=[0,1,-1,2,-2,3,-3,4,-4,5,-5];
+  for(var i=0;i<list.length;i++){
+    var it=list[i], e=it.e;
+    if(e.__w===undefined || e.__txt!==e.textContent){
+      e.__w=e.offsetWidth||60; e.__h=e.offsetHeight||14; e.__txt=e.textContent;
+    }
+    var hw=e.__w/2, hh=e.__h/2, y=it.y;
+    for(var t=0;t<TRIES.length;t++){
+      var cand=it.y+TRIES[t]*STEP, ok=true;
+      for(var j=0;j<done.length;j++){
+        var o=done[j];
+        if(Math.abs(it.x-o.x) < hw+o.hw+4 && Math.abs(cand-o.y) < hh+o.hh+2){ ok=false; break; }
+      }
+      if(ok){ y=cand; break; }
+    }
+    done.push({x:it.x, y:y, hw:hw, hh:hh});
+    e.style.transform='translate(-50%,-50%) translate('+it.x.toFixed(1)+'px,'+y.toFixed(1)+'px)';
+  }
 }
 
 /* ── 8. THE HARNESS SURFACE ───────────────────────────────────────────

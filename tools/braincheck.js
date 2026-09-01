@@ -39,6 +39,9 @@ fs.writeFileSync(tmp + '/p.html', fs.readFileSync(FILE, 'utf8') + `
     M.enter(); M.settle(260);
     out.mmm={ organ:M.organ(), mind:M.mind(), brain:M.brain(), arch:M.arch(),
               menu:M.menuRows() };
+    /* how many labels are actually drawn over the closed organ */
+    out.mmm.labelsDrawn=[].filter.call(document.querySelectorAll('.lb'),
+      function(e){ return e.style.display!=='none'; }).length;
     /* where each region NAME lands, in pixels, in the view a visitor opens on */
     out.mmm.proj=M.arch().migIds.map(function(id){
       var p=M.project(id);
@@ -71,7 +74,7 @@ const r = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&amp;/g, '&')
 if (r.ERROR) { console.error('  ' + r.ERROR); process.exit(1); }
 
 let bad = 0;
-const TOTAL = 21;
+const TOTAL = 22;
 function ck(id, ok, msg) {
   if (!ok) bad++;
   console.log('  ' + (ok ? 'PASS' : 'FAIL') + '  ' + id.padEnd(4) + '  ' + msg);
@@ -232,9 +235,19 @@ ck('B18', r.mmm.arch.reparented.length === 0 &&
    does not get one invented for it */
 const menu = r.mmm.menu || [];
 const charted = menu.filter(x => x.source && x.source !== 'not yet charted');
+/* The charted set is DERIVED, not listed. This assertion was edited four
+   times in one session purely to bump a hardcoded count and paste another
+   system name into a regular expression, which is maintenance rather than
+   testing — and a list that has to be updated by hand is a list that will one
+   day be updated wrongly. What actually matters is that every label matches
+   the profile it came from, that a region without a world says so, and that
+   the charted ones are a real subset. All three survive a thirteenth world. */
+const expectedCharted = menu.filter(x => x.expected && x.expected !== 'not yet charted');
 ck('B19', menu.length === r.mmm.arch.migCount &&
-          menu.every(x => x.source === x.expected) && charted.length === 6 &&
-          charted.every(x => /TRAPPIST-1|Kepler-16|Ursa Major|HR 8799|Kepler-33|GJ 876/.test(x.source)),
+          menu.every(x => x.source === x.expected) &&
+          charted.length === expectedCharted.length && charted.length >= 6 &&
+          charted.length < menu.length &&
+          new Set(charted.map(x => x.source)).size === charted.length,
    'source labels derive from the world assignments — ' +
    charted.map(x => x.id + '=' + x.source).join(', ') + '; the other ' +
    (menu.length - charted.length) + ' say "not yet charted" rather than inventing one');
@@ -282,6 +295,24 @@ ck('B21', proj.length === r.mmm.arch.migCount && nearest >= 30,
    'no two region names land on the same place — all ' + proj.length +
    ' are on screen and the closest pair, ' + nearestPair + ', is ' +
    Math.round(nearest) + 'px apart against a floor of 30');
+
+/* B22 — WHILE THE MIND IS CLOSED, ONLY THE REGIONS ARE NAMED.
+
+   The renderer already refuses to DRAW what a region owns while the brain is
+   folded: everything is collapsed into its region and must not compete with
+   it. The labels were never given the same rule — they were kept out only by
+   being further from the camera than a flat 160-unit range.
+
+   That stopped being true once label ranges started following each world's own
+   size. FOOD's range is 3262 and BUILDING's 1330, so their concepts were
+   suddenly inside it while folded, and TASTE, RITUAL, TOOLS and ITERATION were
+   drawn over the organ in the menu — on a phone, on top of the region names
+   themselves. Distance was never the reason the rule held; the fold state is,
+   and now it says so. */
+ck('B22', r.mmm.labelsDrawn === r.mmm.arch.migCount,
+   'the closed mind names its ' + r.mmm.arch.migCount + ' regions and nothing ' +
+   'else — ' + r.mmm.labelsDrawn + ' labels drawn, so nothing a region owns is ' +
+   'named while it is still folded inside it');
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' brain invariants hold');
 console.log(bad ? '  ' + bad + ' PROBLEM(S)'
