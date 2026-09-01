@@ -27,6 +27,11 @@ const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application
 const args = process.argv.slice(2);
 const SHOT = args.includes('--shot');
 const WANT = args.filter(a => a[0] !== '-');
+/* --w / --h so the same five questions can be asked at every width the
+   responsive matrix cares about, rather than only at 1440x900 */
+const dim = f => { const m = args.find(a => a.indexOf('--' + f + '=') === 0);
+                   return m ? parseInt(m.split('=')[1], 10) : null; };
+const VW = dim('w') || 1440, VH = dim('h') || 900;
 const tmp = require('./scratch.js').root() + '/smoke-' + process.pid;
 fs.mkdirSync(tmp, { recursive: true });
 
@@ -67,7 +72,9 @@ const PROBE = `(function(){
         readable:f.principal.inSafe, total:f.principal.total,
         missed:f.principal.missed, cam:Math.round(f.camDist),
         onScreen:!!(p&&p.onScreen),
-        labelRange:w.labelStyle?w.labelStyle.minor:null,
+        /* the EFFECTIVE range at this viewport, not the stored one — a phone
+           stands further back and scales it, and reading the profile hid that */
+        labelRange:Math.round((M.labelRange?M.labelRange(id).minor:(w.labelStyle||{}).minor)||0)||null,
         orbits:(M.astro().orbits[id]||[]).length
       };
     }catch(e){ worlds[id]={threw:(e&&e.message)||String(e)}; }
@@ -89,7 +96,7 @@ try {
   const dom = execSync('"' + CHROME + '" --headless=new --hide-scrollbars' +
     ' --user-data-dir="' + tmp + '/cr" --no-first-run --no-default-browser-check' +
     ' --disable-extensions --disable-background-networking --disable-sync' +
-    ' --window-size=1440,900 --virtual-time-budget=6000' +
+    ' --window-size=' + VW + ',' + VH + ' --virtual-time-budget=6000' +
     ' --force-prefers-reduced-motion' +
     (SHOT ? ' --screenshot="' + process.cwd().split(String.fromCharCode(92)).join('/') + '/.p3/smoke.png"' : '') +
     ' --dump-dom "file:///' + page + '"',
@@ -108,7 +115,8 @@ const say = (ok, msg) => { if (!ok) bad++; console.log('  ' + (ok ? 'ok  ' : 'FA
 
 if (out.fatal) { console.log('  FAIL  ' + out.fatal); process.exit(1); }
 
-say(true, 'builds and boots, WebGL up, ' + out.perf.calls + ' draw calls');
+say(true, VW + 'x' + VH + ' — builds and boots, WebGL up, ' +
+          out.perf.calls + ' draw calls');
 say((out.errs || []).length === 0,
     (out.errs || []).length ? 'runtime errors: ' + out.errs.join(' | ') : 'no runtime errors');
 

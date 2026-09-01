@@ -25,8 +25,8 @@ const MUTATIONS = [
      driven by constants somebody typed. */
   { n: 'A7', name: 'relative spacing IS the measured spacing',
     file: APP,
-    find: "  return a.map(function(v){ return R0*(v/inner); });",
-    repl: "  return a.map(function(v,i){ return R0*(1+i*0.5); });",
+    find: "  var out=a.map(function(v){ return R0*(v/inner); });",
+    repl: "  var out=a.map(function(v,i){ return R0*(1+i*0.5); });",
     expect: 'relative spacing is the measured spacing' },
 
   { n: 'A2', name: 'the template carries provenance',
@@ -145,8 +145,8 @@ const MUTATIONS = [
      latent placeholder it was. */
   { n: 'A25', name: 'TECHNOLOGY uses GJ 876',
     file: APP,
-    find: " 'technology':'GJ 876' };",
-    repl: " };",
+    find: "'technology':'GJ 876',",
+    repl: "",
     expect: 'TECHNOLOGY uses' },
 
   /* A26 needs no mutation, for the third time and the same reason: TECHNOLOGY
@@ -169,8 +169,28 @@ const MUTATIONS = [
     expect: 'Philosophy concepts' }
 ];
 
-const ONLY = (process.argv[2] || '').split(',').filter(Boolean);
+const DRY = process.argv.indexOf('--dry') >= 0;
+const ONLY = (process.argv[2] || '').split(',').filter(Boolean).filter(x => x !== '--dry');
 const SEL = ONLY.length ? MUTATIONS.filter(m => ONLY.indexOf(m.n) >= 0) : MUTATIONS;
+
+/* THE ANCHOR CHECK, SEPARATED FROM THE RUN.
+
+   Every other mutation harness here has --dry, and this one did not — so a
+   broken anchor was only discovered after the suite had been running for ten
+   minutes, in the middle of a verification pass. A7's anchor broke the moment
+   orbitalSlots learned to extend a system beyond its measured axes, and
+   nothing said so until it stopped. */
+if (DRY) {
+  let bad = 0;
+  MUTATIONS.forEach(m => {
+    const orig = m.file === DATA ? ORIG_DATA : ORIG_APP;
+    const hits = orig.split(m.find).length - 1;
+    if (hits !== 1) { bad++; console.log('  x' + hits + '  ' + m.n + '  "' + m.find.slice(0, 58) + '"'); }
+  });
+  console.log(bad ? bad + ' BAD ANCHOR(S) of ' + MUTATIONS.length
+                  : 'all ' + MUTATIONS.length + ' anchors match exactly once');
+  process.exit(bad ? 1 : 0);
+}
 
 function build(){ execSync('node tools/build-v02.js', { stdio: 'pipe' }); }
 function run(){

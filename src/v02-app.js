@@ -1919,13 +1919,25 @@ if(glOK){
     uniforms:{ atlas:{value:atlas}, fogColor:{value:FAR_TONE},
                fogDensity:{value:0.0008}, cells:{value:ATLAS}, minPx:{value:9.0}, maxPx:{value:170.0},
                focusRegion:{value:-1.0}, hoverRegion:{value:-1.0},
-               hoverNode:{value:-1.0}, mindOpen:{value:0.0}, brainMid:{value:600.0} },
+               hoverNode:{value:-1.0}, mindOpen:{value:0.0}, brainMid:{value:600.0},
+               /* A PHONE FRAMES THE ORGAN SMALLER, SO ITS EMBLEMS ARE SMALLER.
+                  The brain is fitted at 5.60x its radius on a phone against
+                  2.50x on a desktop, which is correct — the copy owns the lower
+                  three fifths there — but it shrinks the fifteen navigation
+                  targets with everything else, and six of them measured under
+                  the findability floor of 100. The emblems are the only way
+                  into a region, so they are lifted back to roughly the size
+                  they hold on a desktop. Set from the viewport on every
+                  resize, not baked into the buffer, because the viewport
+                  changes and the buffer does not. */
+               emblemLift:{value:1.0} },
     transparent:true, depthWrite:false,
     vertexShader:[
       'uniform float minPx; uniform float maxPx;',
       'uniform float focusRegion; uniform float hoverRegion; uniform float mindOpen;',
       'uniform float hoverNode; attribute float nodeIdx;',
       'attribute float isMig; attribute float noCentre;',
+      'uniform float emblemLift;',
       'attribute vec2 cell; attribute vec2 cellB; attribute float size; attribute vec3 tint; attribute float emph;',
       'attribute float region; attribute float capPx;',
       'varying vec2 vCell; varying vec3 vTint; varying float vFog; varying float vEmph;',
@@ -2000,6 +2012,8 @@ if(glOK){
       '  float lift = (hoverRegion>=0.0 && abs(region-hoverRegion)<0.5) ? 1.95 : 1.0;',
       '  if(hoverNode >= 0.0 && abs(nodeIdx-hoverNode)<0.5) lift *= 1.34;',
       '  if(isMig < 0.5) lift *= (0.46 + 0.54*mindOpen);',
+      /* and a region keeps its apparent size when the organ is framed small */
+      '  else lift *= mix(emblemLift, 1.0, mindOpen);',
       /* the cap is per-body, not global: a binary primary must stop growing
          before it swallows its own companion */
       '  gl_PointSize=clamp(persp*lift,minPx,min(capPx,maxPx*1.25));',
@@ -3023,6 +3037,11 @@ function resize(){
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, window.innerWidth<768?1:1.5));  // P1
   renderer.setSize(w,h,false);
   camera.aspect=w/Math.max(1,h); camera.updateProjectionMatrix();
+  /* the organ is framed at 5.60x its radius on a phone and 2.50x on a desktop,
+     so a region's emblem arrives 2.24 times smaller there. The ratio is taken
+     from the two framing constants rather than typed, so changing either one
+     carries the emblems with it. */
+  if(pts) pts.material.uniforms.emblemLift.value = (w<768) ? (5.60/2.50) : 1.0;
 }
 window.addEventListener('resize',function(){ resize(); invalidate(40); });
 document.addEventListener('visibilitychange',function(){ if(!document.hidden) invalidate(40); });
@@ -3280,6 +3299,28 @@ function labelFor(n,cls){
           labelLayer.appendChild(e); labelEls[n.id]=e; }
   return e;
 }
+/* THE RANGE AT WHICH A WORLD'S NAMES RESOLVE, AT THIS VIEWPORT.
+
+   A PHONE STANDS MUCH FURTHER BACK, AND THE RANGES HAVE TO KNOW. Its readable
+   strip is a third of the height rather than most of it, so the same world is
+   fitted from two to three times the distance — correct and deliberate. But
+   labelStyle is computed from each world's own size with no idea of the
+   viewport, so every world on a phone arrived outside its own naming range:
+   TRAPPIST-1 at 327 against a range of 160, Ursa Major at 746 against 470.
+   Twelve worlds of unnamed lights.
+
+   Scaled by the same ratio the fit itself uses — the desktop's readable height
+   against the phone's — so the two cannot drift apart. Read through one
+   function so a checker measures the range that is actually applied rather
+   than the one stored in the profile. */
+function labelRangeOf(migId){
+  var lp=(profileOf(migId)||{}).labelStyle||{minor:160,writing:80};
+  if(window.innerWidth<768){
+    var k=0.86/0.34;
+    return {minor:lp.minor*k, writing:lp.writing*k};
+  }
+  return lp;
+}
 function layLabels(){
   if(!glOK||!labelLayer) return;   // boot renders before the layer exists
   var w=renderer.domElement.clientWidth, h=renderer.domElement.clientHeight;
@@ -3292,7 +3333,7 @@ function layLabels(){
        wise never be named. Minor IGs carry much further than writings, which
        is the hierarchy rather than a tweak: the concepts are what the region
        IS, the writings are what it produced. */
-    var lp=(profileOf(n.mig)||{}).labelStyle||{minor:160,writing:80};
+    var lp=labelRangeOf(n.mig);
     var isStar=(n.star!==undefined);
     /* the whole organ must be named. Measured from where the camera actually
        is, so re-framing the brain can never silently delete part of the menu. */
@@ -3645,6 +3686,9 @@ window.__v02={
     out.wantDist=+wantPos.distanceTo(b.centre).toFixed(1);
     return out;
   },
+  /* the range at which this world's names actually resolve AT THIS VIEWPORT,
+     so a checker measures what is applied rather than what is stored */
+  labelRange:function(mid){ return labelRangeOf(mid); },
   renders:function(){ return RENDERS; },
   /* the unfolding, from the inside. Exposed because the two bugs that made
      choosing a region show nothing were both invisible to every existing

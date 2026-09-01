@@ -26,10 +26,19 @@ function run(W, H) {
       M.go('region',id); M.settle(220);
       out.worlds[id]=M.framing(id);
     });
-    /* BUSINESS is the densest LATENT world — the class that had no astronomy
-       and therefore no branch of its own, and was framed by a constant. */
-    M.go('region','business'); M.settle(220);
-    out.business=M.framing('business');
+    /* A world that is still LATENT — the class with no astronomy and therefore
+       no branch of its own, which used to be framed by a constant. BUSINESS
+       held this role until it was charted to 55 Cnc; ART carries it now, and
+       the assertion below picks whichever world is latent rather than naming
+       one, so charting the next region cannot quietly empty it. */
+    var latentId=null, prof=M.worlds().profiles;
+    M.arch().migIds.forEach(function(id){
+      if(!latentId && prof[id] && prof[id].worldType==='latent' &&
+         (M.framing(id)||{}).radius) latentId=id;
+    });
+    M.go('region',latentId); M.settle(220);
+    out.latentId=latentId;
+    out.business=M.framing(latentId);
     /* and back — the world camera must not still be driving */
     M.go('universe'); M.settle(260);
     out.after={ mind:M.mind(), organ:{ frame:M.organ().frame, lateralDeg:M.organ().lateralDeg } };
@@ -236,13 +245,31 @@ ck('WF11', N.worlds.philosophy.principal.inSafe >= D.worlds.philosophy.principal
    constant — which is why it held 8 of 8 concepts readable at 1440 and 5 of 8
    at 900. 62 remains the PREFERRED distance, so a world that already framed
    well from there has not moved at all. */
-ck('WF12', N.business.principal.inSafe === N.business.principal.total &&
-           N.business.camDist > D.business.camDist &&
-           D.business.principal.inSafe === D.business.principal.total,
-   'a latent world is framed by its own size, not a constant — BUSINESS ' +
-   N.business.principal.inSafe + '/' + N.business.principal.total + ' at ' + N.w +
-   ', standing at ' + N.business.camDist + ' against ' + D.business.camDist +
-   ' on a wide desktop, where the same fit asks for less');
+/* MEASURED ON THE PHONE, BECAUSE THAT IS WHERE THE RULE DECIDES.
+
+   A latent world takes the LARGER of a preferred 62 units and its own computed
+   fit. BUSINESS used to hold this assertion and was big enough that its fit
+   won on a desktop; it has since been charted to 55 Cnc, and the only latent
+   world left with any content is ART, which is small — its fit is 53.8 on a
+   wide desktop and 62.0 on a narrow one, so the constant wins both times and
+   whether the fit is consulted at all becomes invisible. Re-pointing the
+   assertion at ART without moving the viewport left it passing against a
+   0.8-unit difference that comes from the composition shift rather than from
+   any measurement, and its mutation stopped biting.
+
+   A phone reads a strip a third of the height, so the same world must be
+   fitted from 136 rather than 62 — the fit wins by a factor of two and the
+   camera stands exactly on it. That is the one place the claim is observable,
+   so that is where it is now made. */
+const lat = P.business;
+ck('WF12', !!P.latentId && lat && lat.camDist > 100 &&
+           Math.abs(lat.camDist - lat.fit) < 2 &&
+           lat.principal.inSafe === lat.principal.total,
+   'a latent world is framed by its own size, not a constant — ' +
+   String(P.latentId).toUpperCase() + ' stands at ' + lat.camDist +
+   ' on a phone, which is its computed fit of ' + lat.fit +
+   ' rather than the 62 a constant would give, with ' +
+   lat.principal.inSafe + '/' + lat.principal.total + ' readable');
 
 console.log('\n  1440: ' + all.map(f => f.id + ' ' + f.principal.inSafe + '/' + f.principal.total + ' @' + f.camDist).join(' · '));
 console.log('  900 : ' + nw.map(f => f.id + ' ' + f.principal.inSafe + '/' + f.principal.total + ' @' + f.camDist).join(' · '));
