@@ -44,6 +44,8 @@
        measured orbits
    A32 and it uses the measured five, leaving the sixth empty rather than
        stretching five across six
+   A33 and the same rule over EVERY planetary world at once, so a world added
+       later cannot skip the property every earlier one had to satisfy
 
    usage: node tools/astronomycheck.js [v02.html]
 */
@@ -491,6 +493,41 @@ if (soAssigned && soAssigned.axes && soAsc.length === 5) {
 }
 ck('A32', soOK, 'the inner five are the measured five and the sixth is left ' +
    'empty rather than filled — ' + soDetail);
+
+/* A33 — THE RULE, FOR EVERY PLANETARY WORLD AT ONCE.
+
+   A7, A20, A23, A26, A29 each pin one world by name, and named assertions are
+   what make a failure legible — they say WHICH world broke. But they only
+   cover the worlds somebody remembered to add, and BUILDING is the ninth. This
+   asserts the shared claim over whatever set exists: every planetary world
+   places its concepts on the system's own orbits, in order, at the measured
+   ratios, with no two ideas sharing a radius.
+
+   It costs nothing to keep and it covers the worlds not yet built, so the
+   remaining regions cannot be added by editing a table and quietly skipping
+   the property every earlier world had to satisfy. */
+const planetary = Object.keys(A.assigned).filter(id => {
+  const a = A.assigned[id];
+  return a && a.sourceType === 'exoplanet-system' && (A.orbits[id] || []).length;
+});
+const offenders = [];
+for (const id of planetary) {
+  const a = A.assigned[id];
+  const asc2 = (A.orbits[id] || []).slice().sort((x, y) => x.slot - y.slot);
+  const n = Math.min(asc2.length, a.axes.length);
+  const want = a.axes.slice(0, n).map(v => v / a.axes[0]);
+  const got = asc2.slice(0, n).map(o => o.r / asc2[0].r);
+  const spacingOk = want.every((v, i) => Math.abs(v - got[i]) < 0.005);
+  const distinct = new Set(asc2.map(o => +o.r.toFixed(3))).size === asc2.length;
+  let ascending = true;
+  for (let i = 1; i < asc2.length; i++) if (asc2[i].r <= asc2[i - 1].r) ascending = false;
+  if (!spacingOk || !distinct || !ascending) offenders.push(id);
+}
+ck('A33', planetary.length >= 6 && offenders.length === 0,
+   'every one of the ' + planetary.length + ' planetary worlds places its ideas on ' +
+   'its own system\'s orbits, ascending, at the measured ratios, no two sharing ' +
+   'a radius — ' + planetary.map(id => id + '(' + (A.orbits[id] || []).length + ')').join(' ') +
+   (offenders.length ? '  BROKEN: ' + offenders.join(', ') : ''));
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' astronomy invariants hold');
 console.log('  draw calls ' + r.perf.calls + ' · geometries ' + r.perf.geometries +

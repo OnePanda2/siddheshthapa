@@ -136,7 +136,7 @@ var ASTRO={}; (ASTRO_DATA.systems||[]).forEach(function(sy){ ASTRO[sy.system]=sy
    seven packed orbits, against two stars with a hollow centre. */
 var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799',
                  'life':'Kepler-33', 'technology':'GJ 876', 'business':'55 Cnc',
-                 'society':'Kepler-11' };
+                 'society':'Kepler-11', 'building':'HD 10180' };
 function templateFor(migId){ return ASTRO[MIG_SYSTEM[migId]]||null; }
 
 var ORBIT_R0=13;                     // the innermost orbit, in scene units
@@ -164,7 +164,8 @@ var SYS_TILT=0.42;                   // one shared viewing tilt, ~24 degrees
    ultra-short-period body at 0.015 AU to a giant at 5.6 AU. A small base
    radius, because that span multiplies it. */
 var WORLD_SCALE={ 'philosophy':13, 'love':52, 'movies':18, 'life':15,
-                  'technology':9, 'business':1.1, 'society':16 };
+                  'technology':9, 'business':1.1, 'society':16,
+                  'building':11 };
 function scaleFor(migId){ return WORLD_SCALE[migId]||ORBIT_R0; }
 
 /* TRAPPIST-1 is famously coplanar — mutual inclinations under ~0.1 degrees —
@@ -989,6 +990,30 @@ var SOC_VARIANTS={
   c:{ name:'sage + bright leaf',
       fog:0xccd6c6, star:0x5a8834, body:0x667352, orbit:0x517537, accent:0x6da33e }
 };
+/* BUILDING is HD 10180, filed as "orderly, systematic, evenly graded outward —
+   the most 'architectural' spacing available", which is the description doing
+   the choosing for a region about ITERATION, PROTOTYPING, SHIPPING and TOOLS.
+
+   Its colour is the star's own: HD 10180 is a G1V solar twin, and this is what
+   a Sun-like star looks like — a pale warm white. Blue was tried first, for the
+   Neptune-like planets, and could not be had: PHILOSOPHY already occupies that
+   part of the space, and every blue bright enough to find in the menu sat under
+   9 deltaE from it while every blue far enough away was too dark to see. With
+   eight worlds already placed the palette is dense, and the axis still open is
+   not hue but LIGHTNESS — this is much paler than LIFE's deeper gold, which is
+   the same reason it reads as a different star rather than the same one. */
+var BUILD_VARIANTS={
+  a:{ name:'solar twin, pale warm white',
+      fog:0xc0c8da, star:0xdcbc94, body:0x4a5a80, orbit:0x8a7a5c, accent:0xc8a878 },
+  b:{ name:'warmer white + slate',
+      fog:0xbac3d6, star:0xe0c09a, body:0x445274, orbit:0x907f60, accent:0xd0ae7c },
+  c:{ name:'cooler white + pewter',
+      fog:0xc6cddd, star:0xd8bc9c, body:0x51618a, orbit:0x847660, accent:0xc0a880 }
+};
+var BUILD_PICK=(function(){
+  var m=/(^|[#&])buildpal:([abc])/.exec(location.hash||'');
+  return m?m[2]:'a';
+})();
 var SOC_PICK=(function(){
   var m=/(^|[#&])socpal:([abc])/.exec(location.hash||'');
   return m?m[2]:'a';
@@ -1049,6 +1074,9 @@ var MIG_PALETTE={};
   var sc=SOC_VARIANTS[SOC_PICK]||SOC_VARIANTS.a;
   MIG_PALETTE['society']={fog:sc.fog, star:sc.star, body:sc.body,
                           orbit:sc.orbit, accent:sc.accent};
+  var bd=BUILD_VARIANTS[BUILD_PICK]||BUILD_VARIANTS.a;
+  MIG_PALETTE['building']={fog:bd.fog, star:bd.star, body:bd.body,
+                           orbit:bd.orbit, accent:bd.accent};
 })();
 /* every other MIG keeps the neutral atmosphere until its own world is built —
    inventing thirteen palettes before their geometry exists would be decoration */
@@ -1070,7 +1098,15 @@ function outerOrbit(mid,tpl){
   if(!tpl) return 0;
   var n=(owned[mid]||[]).filter(function(id){ return byId[id] && byId[id].t==='minor'; }).length;
   var slots=orbitalSlots(tpl, scaleFor(mid), n);
-  return slots.length ? slots[slots.length-1] : 0;
+  if(!slots.length) return 0;
+  /* The SYSTEM's outermost orbit, deliberately, not the outermost one a
+     concept happens to occupy. Narrowing it to the occupied orbit looks more
+     honest and is wrong: a world's writings sit outside its orbits, the fit
+     accounts for them, and the camera therefore stops further out than the
+     last concept — SOCIETY arrived at 116 with a label range of 101 and
+     resolved no names at all. Ranges have to cover where the camera actually
+     stops, and the system's span is the number that does. */
+  return slots[slots.length-1];
 }
 var WORLD_BIAS={ 'movies':0.90, 'life':1.20, 'technology':0.80, 'business':0.10 };
 var MIG_WORLD_PROFILE={};
