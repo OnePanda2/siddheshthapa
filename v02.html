@@ -1060,7 +1060,13 @@ var ASTRO_DATA={
    "geometryBasis": "Extreme dynamic range: an ultra-short-period planet at 0.015 AU and a distant giant at 5.6 AU — a 363x span.",
    "visualCharacter": "one body almost touching the star, then a huge leap outward",
    "confidence": "medium",
-   "notes": "Archive reports sy_pnum 7 but returned geometry for only 5. Two planets lack values in pscomppars."
+   "notes": "Archive reports sy_pnum 7 but returned geometry for only 5. Two planets lack values in pscomppars.",
+   "illustrative": {
+    "_warning": "NOT ASTRONOMY. Orbits beyond the fifth are spaced by a declared rule and must never be presented as measured.",
+    "orbitSpacingRule": "successive 3:2 period ratio, a proportional to P^(2/3), step 1.31037 — the same rule Kepler-16 uses, so two worlds do not invent two different conventions",
+    "orbitSpacingStep": 1.31037,
+    "_whySpacing": "The archive reports sy_pnum 7 for 55 Cnc but returns semi-major axes for only 5; the other two lack values in pscomppars. BUSINESS has 7 concepts. Orbits 0-4 are the five real measurements. Orbits 5-6 are spaced by this rule and are NOT measurements — the same treatment Kepler-16's orbits 1-3 receive."
+   }
   },
   {
    "system": "HD 10180",
@@ -1418,13 +1424,14 @@ var ASTRO_DATA={
   }
  ],
  "_retrieved_kepler16": "2026-08-20"
-};
+}
+;
 var ASTRO={}; (ASTRO_DATA.systems||[]).forEach(function(sy){ ASTRO[sy.system]=sy; });
 
 /* Two worlds are assigned, chosen to be structurally opposite: one star with
    seven packed orbits, against two stars with a hollow centre. */
 var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799',
-                 'life':'Kepler-33', 'technology':'GJ 876' };
+                 'life':'Kepler-33', 'technology':'GJ 876', 'business':'55 Cnc' };
 function templateFor(migId){ return ASTRO[MIG_SYSTEM[migId]]||null; }
 
 var ORBIT_R0=13;                     // the innermost orbit, in scene units
@@ -1448,8 +1455,11 @@ var SYS_TILT=0.42;                   // one shared viewing tilt, ~24 degrees
    very close inner body, then three locked together far outside it. A smaller
    base radius than the others because that span multiplies it — 9 puts the
    outer orbit at 145 rather than 209. */
+/* BUSINESS is 55 Cnc, and its span is by far the widest here: 363x from an
+   ultra-short-period body at 0.015 AU to a giant at 5.6 AU. A small base
+   radius, because that span multiplies it. */
 var WORLD_SCALE={ 'philosophy':13, 'love':52, 'movies':18, 'life':15,
-                  'technology':9 };
+                  'technology':9, 'business':1.1 };
 function scaleFor(migId){ return WORLD_SCALE[migId]||ORBIT_R0; }
 
 /* TRAPPIST-1 is famously coplanar — mutual inclinations under ~0.1 degrees —
@@ -1468,7 +1478,26 @@ function orbitalSlots(tpl,R0,want){
     return out;
   }
   var a=tpl.semiMajorAxisAU, inner=a[0];
-  return a.map(function(v){ return R0*(v/inner); });
+  var out=a.map(function(v){ return R0*(v/inner); });
+  /* MORE CONCEPTS THAN MEASURED ORBITS.
+
+     55 Cnc is reported as a seven-planet system and the archive returns
+     semi-major axes for only five of them — the other two have no value in
+     pscomppars. BUSINESS has seven concepts. Rather than stack two of them on
+     the fifth orbit, which would put two ideas at the same radius and quietly
+     break the one-concept-one-position rule, the extra orbits are spaced by
+     the rule DECLARED IN THE DATA FILE and marked there as not measured.
+
+     This is the treatment Kepler-16 already receives: it has exactly one
+     measured planet and four concepts, and orbits 1-3 are spaced by the same
+     3:2 period rule. Reading the step from the data means changing the data
+     changes the geometry, and a world with no declared rule simply does not
+     get extended. */
+  if(want && want>out.length){
+    var step=(tpl.illustrative&&tpl.illustrative.orbitSpacingStep)||0;
+    if(step>1) while(out.length<want) out.push(out[out.length-1]*step);
+  }
+  return out;
 }
 function localOrbit(r,theta,incl){
   var x=Math.cos(theta)*r, z=Math.sin(theta)*r, y=Math.sin(theta)*r*incl;
@@ -2659,6 +2688,25 @@ var TECH_VARIANTS={
   c:{ name:'rose-red + blue-grey',
       fog:0xd8c4bc, star:0xa8455a, body:0x5a6880, orbit:0x84443a, accent:0xa64832 }
 };
+/* BUSINESS is 55 Cnc, whose signature is 55 Cnc e: a super-Earth on a 17-hour
+   orbit, close enough to its star to be molten, and the reason the data calls
+   this system "one body almost touching the star, then a huge leap outward".
+   So the world takes its colour from that body rather than from the G8V star —
+   a hot violet-magenta, which is also the one part of the palette space the
+   other six worlds leave open. Money-green was the obvious choice and is a
+   cliche about the region rather than a fact about the system. */
+var BIZ_VARIANTS={
+  a:{ name:'molten violet + ash',
+      fog:0xcfc0d2, star:0x8a2f7a, body:0x5b4f6a, orbit:0x6a3a68, accent:0x9c3b86 },
+  b:{ name:'deeper magenta + ash',
+      fog:0xcbb8d0, star:0x7d2a70, body:0x53475f, orbit:0x613362, accent:0x8f3479 },
+  c:{ name:'orchid + slate',
+      fog:0xd4c8d8, star:0x97388a, body:0x645874, orbit:0x744276, accent:0xa84a94 }
+};
+var BIZ_PICK=(function(){
+  var m=/(^|[#&])bizpal:([abc])/.exec(location.hash||'');
+  return m?m[2]:'a';
+})();
 var TECH_PICK=(function(){
   var m=/(^|[#&])techpal:([abc])/.exec(location.hash||'');
   return m?m[2]:'a';
@@ -2705,6 +2753,9 @@ var MIG_PALETTE={};
   var tc=TECH_VARIANTS[TECH_PICK]||TECH_VARIANTS.a;
   MIG_PALETTE['technology']={fog:tc.fog, star:tc.star, body:tc.body,
                              orbit:tc.orbit, accent:tc.accent};
+  var bz=BIZ_VARIANTS[BIZ_PICK]||BIZ_VARIANTS.a;
+  MIG_PALETTE['business']={fog:bz.fog, star:bz.star, body:bz.body,
+                           orbit:bz.orbit, accent:bz.accent};
 })();
 /* every other MIG keeps the neutral atmosphere until its own world is built —
    inventing thirteen palettes before their geometry exists would be decoration */
@@ -2715,13 +2766,20 @@ function paletteOf(migId){ return MIG_PALETTE[migId]||NEUTRAL_PALETTE; }
    visual interpretation of it. Every field the renderer actually consults
    lives here, so a new world is a profile rather than a new branch. */
 var WORLD_TYPES=['planetary','circumbinary','constellation','latent'];
-/* the radius of a world's outermost measured orbit, in scene units */
+/* The radius of a world's outermost orbit, in scene units — the one it
+   ACTUALLY renders, not the last measured one. 55 Cnc has five measured axes
+   and seven concepts, so its outermost orbit is a declared extension beyond
+   the measurements; reading only the measured axes under-stated the world by
+   40% and every range keyed to it fell short, which arrives as a world of
+   unnamed lights. Asking orbitalSlots is asking the same function the geometry
+   came from. */
 function outerOrbit(mid,tpl){
-  if(!tpl||!tpl.semiMajorAxisAU||!tpl.semiMajorAxisAU.length) return 0;
-  var a=tpl.semiMajorAxisAU;
-  return scaleFor(mid)*(a[a.length-1]/a[0]);
+  if(!tpl) return 0;
+  var n=(owned[mid]||[]).filter(function(id){ return byId[id] && byId[id].t==='minor'; }).length;
+  var slots=orbitalSlots(tpl, scaleFor(mid), n);
+  return slots.length ? slots[slots.length-1] : 0;
 }
-var WORLD_BIAS={ 'movies':0.90, 'life':1.20, 'technology':0.80 };
+var WORLD_BIAS={ 'movies':0.90, 'life':1.20, 'technology':0.80, 'business':0.10 };
 var MIG_WORLD_PROFILE={};
 (function(){
   MIGS.forEach(function(m){
@@ -5567,6 +5625,10 @@ window.__v02={
          from. */
       out.assigned[mid]=tpl?{system:tpl.system, planets:tpl.planetCount,
         axes:tpl.semiMajorAxisAU, periods:tpl.orbitalPeriodDays||null,
+        planetCountDeclared:tpl.planetCount||null,
+        /* exposed so a check can prove that geometry beyond the measurements
+           is DECLARED as such and never presented as a measurement */
+        illustrative:tpl.illustrative||null,
         confidence:tpl.confidence, sourceType:tpl.sourceType}:null;
     });
     Object.keys(ORBITS).forEach(function(mid){

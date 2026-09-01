@@ -95,7 +95,13 @@
    "geometryBasis": "Extreme dynamic range: an ultra-short-period planet at 0.015 AU and a distant giant at 5.6 AU — a 363x span.",
    "visualCharacter": "one body almost touching the star, then a huge leap outward",
    "confidence": "medium",
-   "notes": "Archive reports sy_pnum 7 but returned geometry for only 5. Two planets lack values in pscomppars."
+   "notes": "Archive reports sy_pnum 7 but returned geometry for only 5. Two planets lack values in pscomppars.",
+   "illustrative": {
+    "_warning": "NOT ASTRONOMY. Orbits beyond the fifth are spaced by a declared rule and must never be presented as measured.",
+    "orbitSpacingRule": "successive 3:2 period ratio, a proportional to P^(2/3), step 1.31037 — the same rule Kepler-16 uses, so two worlds do not invent two different conventions",
+    "orbitSpacingStep": 1.31037,
+    "_whySpacing": "The archive reports sy_pnum 7 for 55 Cnc but returns semi-major axes for only 5; the other two lack values in pscomppars. BUSINESS has 7 concepts. Orbits 0-4 are the five real measurements. Orbits 5-6 are spaced by this rule and are NOT measurements — the same treatment Kepler-16's orbits 1-3 receive."
+   }
   },
   {
    "system": "HD 10180",

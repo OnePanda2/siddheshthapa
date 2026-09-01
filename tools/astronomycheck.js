@@ -35,6 +35,11 @@
    A26 GJ 876's rendered spacing IS its measured spacing
    A27 GJ 876's 1:2:4 Laplace resonance is verifiable from the DRAWN radii
        through Kepler's third law — the first world whose signature is motion
+   A28 BUSINESS uses 55 Cnc, declared 7 planets but only 5 with geometry
+   A29 those five ARE rendered at their measured spacing
+   A30 and the two orbits beyond them are DECLARED illustrative, never
+       presented as measured — the assertion that keeps the project honest
+       when the data runs out
 
    usage: node tools/astronomycheck.js [v02.html]
 */
@@ -382,6 +387,66 @@ if (tcAssigned && tcAssigned.periods && tcAsc.length === 4) {
               ' — worst ' + (worst * 100).toFixed(2) + '%';
 }
 ck('A27', resOK, 'the Laplace resonance is visible in the drawn geometry — ' + resDetail);
+
+/* ── THE SEVENTH WORLD ────────────────────────────────────────────────
+   BUSINESS is 55 Cnc, and it is the first world where the data does not
+   stretch to the region. */
+const bzAssigned = A.assigned.business, bzOrbits = (A.orbits.business || []);
+const bzAsc = bzOrbits.slice().sort((a, b) => a.slot - b.slot);
+const bzConcepts = bzOrbits.filter(o => o.t === 'minor');
+
+// A28 — the system, and an honest count of what is actually measured
+ck('A28', bzAssigned && bzAssigned.system === '55 Cnc' &&
+          bzAssigned.planetCountDeclared === 7 && bzAssigned.axes.length === 5 &&
+          bzConcepts.length === 7 && new Set(bzAsc.map(o => o.slot)).size === 7,
+   'BUSINESS uses ' + (bzAssigned ? bzAssigned.system : 'nothing') +
+   ' — declared as ' + (bzAssigned ? bzAssigned.planetCountDeclared : '?') +
+   ' planets but only ' + (bzAssigned ? bzAssigned.axes.length : 0) +
+   ' with published geometry, carrying ' + bzConcepts.length +
+   ' concepts on ' + new Set(bzAsc.map(o => o.slot)).size + ' distinct orbits');
+
+// A29 — the five that ARE measured are rendered at their measured spacing
+let bzOK = false, bzDetail = 'no data';
+if (bzAssigned && bzAssigned.axes && bzAsc.length >= bzAssigned.axes.length) {
+  const want = bzAssigned.axes.map(v => +(v / bzAssigned.axes[0]).toFixed(3));
+  const got = bzAsc.slice(0, want.length).map(o => +(o.r / bzAsc[0].r).toFixed(3));
+  bzOK = want.every((v, i) => Math.abs(v - got[i]) < 0.005);
+  bzDetail = 'measured ' + want.join(' ') + '  ·  rendered ' + got.join(' ');
+}
+ck('A29', bzOK, 'the five measured orbits are rendered at their measured spacing — ' + bzDetail);
+
+/* A30 — AND THE TWO THAT ARE NOT MEASURED SAY SO.
+
+   This is the assertion that keeps the project honest when the data runs out.
+   55 Cnc is reported as seven planets and the archive returns axes for five;
+   BUSINESS has seven concepts. Stacking two of them on the fifth orbit would
+   break one-concept-one-position, and inventing two axes silently would be
+   presenting a guess as a measurement. So the extra orbits are spaced by a
+   rule DECLARED IN THE DATA FILE, marked there as not astronomy, and this
+   checks all three things: that the rule exists, that it is flagged, and that
+   the rendered radii actually follow it rather than following something else
+   that happens to look plausible.
+
+   Kepler-16 is the precedent — one measured planet, four concepts, orbits 1-3
+   spaced by the same 3:2 rule — so the two worlds do not invent two different
+   conventions for the same problem. */
+const ill = bzAssigned && bzAssigned.illustrative;
+let stepOK = false, stepDetail = 'no rule declared';
+if (ill && ill.orbitSpacingStep && bzAsc.length > bzAssigned.axes.length) {
+  const n = bzAssigned.axes.length;
+  const ratios = [];
+  for (let i = n; i < bzAsc.length; i++) ratios.push(bzAsc[i].r / bzAsc[i - 1].r);
+  stepOK = ratios.every(v => Math.abs(v - ill.orbitSpacingStep) < 0.002);
+  stepDetail = 'orbits ' + (n + 1) + '-' + bzAsc.length + ' step ' +
+               ratios.map(v => v.toFixed(4)).join(', ') + ' against the declared ' +
+               ill.orbitSpacingStep;
+}
+ck('A30', stepOK && !!ill && /NOT ASTRONOMY/.test(ill._warning || '') &&
+          bzAssigned.confidence === 'medium',
+   'geometry beyond the measurements is declared, not invented — ' + stepDetail +
+   ', flagged NOT ASTRONOMY in the data, and the system itself carries ' +
+   'confidence "' + (bzAssigned ? bzAssigned.confidence : '?') +
+   '" rather than being presented as firm');
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' astronomy invariants hold');
 console.log('  draw calls ' + r.perf.calls + ' · geometries ' + r.perf.geometries +
