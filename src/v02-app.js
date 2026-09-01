@@ -136,7 +136,8 @@ var ASTRO={}; (ASTRO_DATA.systems||[]).forEach(function(sy){ ASTRO[sy.system]=sy
    seven packed orbits, against two stars with a hollow centre. */
 var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799',
                  'life':'Kepler-33', 'technology':'GJ 876', 'business':'55 Cnc',
-                 'society':'Kepler-11', 'building':'HD 10180' };
+                 'society':'Kepler-11', 'building':'HD 10180',
+                 'learning':'K2-138' };
 function templateFor(migId){ return ASTRO[MIG_SYSTEM[migId]]||null; }
 
 var ORBIT_R0=13;                     // the innermost orbit, in scene units
@@ -165,7 +166,7 @@ var SYS_TILT=0.42;                   // one shared viewing tilt, ~24 degrees
    radius, because that span multiplies it. */
 var WORLD_SCALE={ 'philosophy':13, 'love':52, 'movies':18, 'life':15,
                   'technology':9, 'business':1.1, 'society':16,
-                  'building':11 };
+                  'building':11, 'learning':20 };
 function scaleFor(migId){ return WORLD_SCALE[migId]||ORBIT_R0; }
 
 /* TRAPPIST-1 is famously coplanar — mutual inclinations under ~0.1 degrees —
@@ -1010,6 +1011,26 @@ var BUILD_VARIANTS={
   c:{ name:'cooler white + pewter',
       fog:0xc6cddd, star:0xd8bc9c, body:0x51618a, orbit:0x847660, accent:0xc0a880 }
 };
+/* LEARNING is K2-138, whose inner five planets are locked in a near-perfect
+   3:2 chain — measured period ratios 1.513, 1.518, 1.529, 1.544 — so each step
+   stands in the same fixed relation to the one before it. TEACHING,
+   UNDERSTANDING, METHOD and MASTERY are a progression of exactly that kind.
+
+   Violet, because after nine worlds hue is nearly spent: this one keeps its
+   green channel low where PHILOSOPHY's blue-violet keeps it high, and its red
+   low where BUSINESS's magenta keeps it high. */
+var LEARN_VARIANTS={
+  a:{ name:'violet chain + indigo',
+      fog:0xcac0dc, star:0x9a62f0, body:0x584a86, orbit:0x5a36b0, accent:0x7b3ce4 },
+  b:{ name:'deeper violet + indigo',
+      fog:0xc4b8d8, star:0x5e28c0, body:0x50427c, orbit:0x522fa2, accent:0x6d34d2 },
+  c:{ name:'brighter violet + slate',
+      fog:0xd0c8e2, star:0x7638dc, body:0x60548e, orbit:0x6640bc, accent:0x8749ec }
+};
+var LEARN_PICK=(function(){
+  var m=/(^|[#&])learnpal:([abc])/.exec(location.hash||'');
+  return m?m[2]:'a';
+})();
 var BUILD_PICK=(function(){
   var m=/(^|[#&])buildpal:([abc])/.exec(location.hash||'');
   return m?m[2]:'a';
@@ -1077,6 +1098,9 @@ var MIG_PALETTE={};
   var bd=BUILD_VARIANTS[BUILD_PICK]||BUILD_VARIANTS.a;
   MIG_PALETTE['building']={fog:bd.fog, star:bd.star, body:bd.body,
                            orbit:bd.orbit, accent:bd.accent};
+  var ln=LEARN_VARIANTS[LEARN_PICK]||LEARN_VARIANTS.a;
+  MIG_PALETTE['learning']={fog:ln.fog, star:ln.star, body:ln.body,
+                           orbit:ln.orbit, accent:ln.accent};
 })();
 /* every other MIG keeps the neutral atmosphere until its own world is built —
    inventing thirteen palettes before their geometry exists would be decoration */
@@ -1108,7 +1132,8 @@ function outerOrbit(mid,tpl){
      stops, and the system's span is the number that does. */
   return slots[slots.length-1];
 }
-var WORLD_BIAS={ 'movies':0.90, 'life':1.20, 'technology':0.80, 'business':0.10 };
+var WORLD_BIAS={ 'movies':0.90, 'life':1.20, 'technology':0.80,
+                 'business':0.10, 'learning':0.90 };
 var MIG_WORLD_PROFILE={};
 (function(){
   MIGS.forEach(function(m){

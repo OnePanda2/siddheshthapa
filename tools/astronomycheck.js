@@ -46,6 +46,10 @@
        stretching five across six
    A33 and the same rule over EVERY planetary world at once, so a world added
        later cannot skip the property every earlier one had to satisfy
+   A34 LEARNING uses K2-138, four ideas on four of six measured orbits
+   A35 and K2-138's 3:2 chain is where the spacing convention comes from — the
+       step LOVE and BUSINESS declare for orbits they cannot measure is one a
+       real system in this dataset actually displays
 
    usage: node tools/astronomycheck.js [v02.html]
 */
@@ -528,6 +532,58 @@ ck('A33', planetary.length >= 6 && offenders.length === 0,
    'its own system\'s orbits, ascending, at the measured ratios, no two sharing ' +
    'a radius — ' + planetary.map(id => id + '(' + (A.orbits[id] || []).length + ')').join(' ') +
    (offenders.length ? '  BROKEN: ' + offenders.join(', ') : ''));
+
+/* ── THE TENTH WORLD, AND WHERE THE CONVENTION CAME FROM ────────────
+   LEARNING is K2-138: TEACHING, UNDERSTANDING, METHOD, MASTERY on the inner
+   four of its six measured orbits. */
+const leAssigned = A.assigned.learning, leAsc = (A.orbits.learning || [])
+  .slice().sort((a, b) => a.slot - b.slot);
+
+// A34 — the system, and four ideas on four of its six measured orbits
+ck('A34', leAssigned && leAssigned.system === 'K2-138' &&
+          leAssigned.axes.length === 6 && leAsc.length === 4 &&
+          new Set(leAsc.map(o => +o.r.toFixed(3))).size === 4,
+   'LEARNING uses ' + (leAssigned ? leAssigned.system : 'nothing') + ' — ' +
+   leAsc.length + ' concepts on ' + leAsc.length + ' of its ' +
+   (leAssigned ? leAssigned.axes.length : 0) + ' measured orbits');
+
+/* A35 — THE RULE TWO OTHER WORLDS BORROW IS ONE A REAL SYSTEM DISPLAYS.
+
+   Kepler-16 and 55 Cnc both need orbits the archive cannot give them, and both
+   space those orbits by a declared step of 1.31037, flagged in the data as not
+   astronomy. That number is 1.5 to the two-thirds — the axis ratio Kepler's
+   third law gives for a 3:2 period resonance — and until now it was a
+   convention chosen because it had to be something.
+
+   K2-138 is the system that shows it is not arbitrary. Its inner five planets
+   are locked in a near-perfect 3:2 chain: measured period ratios 1.513, 1.518,
+   1.529, 1.544, and measured axis gaps within 2% of 1.31037. The spacing used
+   where the data runs out is a relationship this dataset actually contains.
+
+   Checked from the PERIODS and from the DRAWN radii, so it is a claim about
+   the geometry on screen and not a note about the file. */
+let chainOK = false, chainDetail = 'no data';
+if (leAssigned && leAssigned.periods && leAsc.length >= 3) {
+  const STEP = Math.pow(1.5, 2 / 3);
+  const P = leAssigned.periods.slice(0, 5);
+  const pr = P.slice(1).map((v, i) => v / P[i]);
+  const resonant = pr.every(v => Math.abs(v - 1.5) / 1.5 < 0.04);
+  const drawn = leAsc.slice(1).map((o, i) => o.r / leAsc[i].r);
+  const drawnOK = drawn.every(v => Math.abs(v - STEP) / STEP < 0.03);
+  /* and the number really is the one the other two worlds declare */
+  const borrowed = [A.assigned.love, A.assigned.business]
+    .filter(a => a && a.illustrative && a.illustrative.orbitSpacingStep)
+    .map(a => a.illustrative.orbitSpacingStep);
+  const sameRule = borrowed.length === 2 &&
+                   borrowed.every(v => Math.abs(v - STEP) < 0.001);
+  chainOK = resonant && drawnOK && sameRule;
+  chainDetail = 'periods ' + pr.map(v => v.toFixed(3)).join(', ') +
+    ' against 3:2, drawn gaps ' + drawn.map(v => v.toFixed(3)).join(', ') +
+    ' against ' + STEP.toFixed(5) + ', which is the step LOVE and BUSINESS ' +
+    'declare for orbits they cannot measure (' + borrowed.join(', ') + ')';
+}
+ck('A35', chainOK, 'the spacing used where data runs out is one a real system ' +
+   'in this set displays — ' + chainDetail);
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' astronomy invariants hold');
 console.log('  draw calls ' + r.perf.calls + ' · geometries ' + r.perf.geometries +
