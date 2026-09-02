@@ -174,6 +174,25 @@ body.th-hover-mind  .th-world--mind .th-stage{left:-20vw}
   margin:0;white-space:nowrap}
 .th-world--mind .th-name{text-shadow:0 0 26px rgba(5,7,15,.92),0 0 60px rgba(5,7,15,.7)}
 
+/* THE MARK. A typewriter, drawn as pixels rather than as a smoothed glyph:
+   plain rects on a 16x13 grid with crispEdges, so the steps stay hard at any
+   size. It sits in the paper's own spot red — the colour the manual numbers
+   its parts and steps in — and is centred on the COLUMN, so it holds the
+   middle of that blank field as the column takes the screen.
+
+   Vertically it sits above the name rather than dead centre, because the name
+   crosses the middle of the viewport and the two would collide the moment the
+   column grew past half. */
+.th-mark{position:absolute;left:50%;top:27%;transform:translate(-50%,-50%);
+  width:clamp(64px,7vw,108px);color:var(--paper-spot);pointer-events:none}
+.th-mark svg{display:block;width:100%;height:auto;fill:currentColor;
+  shape-rendering:crispEdges}
+/* the keys are punched OUT of the body rather than drawn on it, which is how
+   the row reads as keys and not as a fringe of dots. Cut in the paper's own
+   colour, because this mark only ever sits on paper. */
+.th-keys rect{fill:var(--paper)}
+.th-world--works:hover .th-keys rect{fill:#eceae4}
+
 /* each column's destination, in the lower third of its own space */
 .th-world-in{position:absolute;left:0;right:0;bottom:11vh;
   padding:0 clamp(22px,3.4vw,58px);transition:opacity 420ms ease}
@@ -223,6 +242,10 @@ body.th-hover-mind  .th-world--mind  .th-meta{opacity:.55}
      44px is wider than a phone, and nowrap simply hid the end of his name */
   .th-name{white-space:normal;text-align:center;font-size:clamp(34px,11vw,50px);
     letter-spacing:-.03em;line-height:1.04}
+  /* the mark is a desktop grace note. Stacked, the paper half has the name at
+     the top and its block at the middle, and there is no field left for it to
+     sit in the centre of without landing on one of them. */
+  .th-mark{display:none}
   .th-world-in{bottom:auto;top:42%}
   .th-world--mind .th-world-in{top:auto;bottom:5vh}
   .th-desc{max-width:32ch}
@@ -426,6 +449,26 @@ body.works-open .ctl{display:none}
   <h1 class="sr-only">Siddhesh Thapa</h1>
   <div class="th-worlds">
     <button class="th-world th-world--works" id="worksBtn" type="button">
+      <span class="th-mark" aria-hidden="true">
+        <svg viewBox="0 0 14 10" role="presentation">
+          <rect x="5" y="0" width="4" height="3"></rect>
+          <rect x="2" y="3" width="10" height="1"></rect>
+          <rect x="2" y="4" width="1" height="1"></rect>
+          <rect x="11" y="4" width="1" height="1"></rect>
+          <rect x="1" y="5" width="12" height="1"></rect>
+          <rect x="0" y="6" width="14" height="3"></rect>
+          <rect x="1" y="9" width="2" height="1"></rect>
+          <rect x="11" y="9" width="2" height="1"></rect>
+          <g class="th-keys">
+            <rect x="1" y="7" width="1" height="1"></rect>
+            <rect x="3" y="7" width="1" height="1"></rect>
+            <rect x="5" y="7" width="1" height="1"></rect>
+            <rect x="7" y="7" width="1" height="1"></rect>
+            <rect x="9" y="7" width="1" height="1"></rect>
+            <rect x="11" y="7" width="1" height="1"></rect>
+          </g>
+        </svg>
+      </span>
       <span class="th-stage" aria-hidden="true">
         <span class="th-name">Siddhesh Thapa</span>
       </span>
@@ -433,7 +476,7 @@ body.works-open .ctl{display:none}
         <span class="th-kicker">One &middot; the evidence</span>
         <span class="th-rule"></span>
         <span class="th-door">My works</span>
-        <span class="th-desc">Works of Siddhesh Thapa &mdash; everything he has built so far, and the manual for each.</span>
+        <span class="th-desc">Everything I have built so far, and the manual for each.</span>
         <span class="th-meta" id="thWorksFacts"></span>
       </span>
     </button>
