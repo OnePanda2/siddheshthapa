@@ -126,16 +126,69 @@ body:not(.entered) #semantic{opacity:0;pointer-events:none}
   letter-spacing:-.035em;margin:0 0 18px}
 .th-facts{font-family:var(--serif);font-size:clamp(17px,1.6vw,21px);line-height:1.5;
   color:var(--ink-muted);margin:0 0 30px;max-width:30ch}
-#enterBtn{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;
-  background:none;border:1px solid var(--ink-subtle);color:var(--ink);padding:15px 22px;
-  min-height:48px;cursor:pointer;border-radius:2px;transition:background 200ms ease,border-color 200ms ease}
+/* ── TWO DOORS, EQUAL ─────────────────────────────────────────────────────
+   They were not. ENTER THE MIND had a brighter border, more padding and a
+   taller box; MY WORKS had a fainter border and a smaller one. One read as
+   the button and the other as the thing beside it, which is the wrong story:
+   the manual is the other half of the site, not a footnote to the mind.
+   Identical rules now, and the only difference between them is the word. */
+.th-doors{display:flex;gap:12px;flex-wrap:wrap;align-items:stretch}
+#enterBtn,#worksBtn{font-family:var(--mono);font-size:12px;letter-spacing:.12em;
+  text-transform:uppercase;background:none;border:1px solid var(--ink-subtle);
+  color:var(--ink);padding:15px 22px;min-height:48px;cursor:pointer;border-radius:2px;
+  transition:background 200ms ease,border-color 200ms ease,color 200ms ease}
 #enterBtn:hover,#worksBtn:hover{background:var(--ground-2);border-color:var(--ink)}
-.th-doors{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-#worksBtn{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;
-  padding:13px 20px;background:transparent;border:1px solid var(--rule);color:var(--ink);
-  cursor:pointer;border-radius:2px}
-#worksBtn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-#enterBtn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+#worksBtn:focus-visible,#enterBtn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* ── THE SPLIT ────────────────────────────────────────────────────────────
+   Hovering a door grows that side of the screen and shows what is behind it:
+   paper on the left for the manual, the drifting mind on the right. It is the
+   inversion the whole site is built on, felt before either word is read.
+
+   The panes sit BEHIND the copy and are inert — they never take a pointer,
+   so they cannot steal the hover that drives them. At rest each holds half
+   and neither is visible; the sky shows through as it always did. */
+.th-panes{position:fixed;inset:0;z-index:-2;display:flex;pointer-events:none}
+.th-pane{flex:1 1 50%;position:relative;overflow:hidden;
+  transition:flex-grow 620ms cubic-bezier(.22,.61,.36,1),opacity 520ms ease;
+  opacity:0}
+/* the manual's side: paper, a hairline, a part number */
+.th-pane-works{background:var(--paper);
+  box-shadow:inset -1px 0 0 rgba(185,188,182,.5)}
+.th-pane-works .th-pane-mark{color:var(--paper-spot)}
+.th-pane-works .th-pane-body{color:var(--paper-dim)}
+/* kept to the OUTER edge of the pane, clear of the copy and the darkness the
+   copy carries: set at the centre it sat under the scrim and read as a stain
+   rather than as a sheet of paper */
+.th-pane-rule{position:absolute;left:6%;width:34%;top:26%;height:1px;background:var(--paper-rule)}
+.th-pane-mark{position:absolute;left:6%;top:calc(26% - 26px);font-family:var(--mono);
+  font-size:11px;letter-spacing:.16em}
+.th-pane-body{position:absolute;left:6%;top:calc(26% + 16px);font-family:var(--mono);
+  font-size:10px;letter-spacing:.14em;text-transform:uppercase;max-width:34%;line-height:1.9}
+/* the mind's side stays the sky itself — nothing is painted over it, the pane
+   only widens so more of the real starfield is on show */
+.th-pane-mind{background:none}
+body.th-hover-works .th-pane-works{flex-grow:1.9;opacity:1}
+body.th-hover-works .th-pane-mind{flex-grow:0.55}
+body.th-hover-mind  .th-pane-mind{flex-grow:1.9}
+body.th-hover-mind  .th-pane-works{flex-grow:0.55;opacity:0}
+/* the copy has to stay readable while the paper is up, so its own darkness
+   deepens on that side rather than the text changing colour */
+/* WHITE TYPE ON PAPER NEEDS ITS DARKNESS, and the darkness must not look like
+   a smudge. While a pane is open the scrim spreads wider and fades further out,
+   so it reads as the copy sitting in its own pool of night rather than as a
+   grey blob dropped on a sheet. */
+.th-in::before{transition:inset 620ms cubic-bezier(.22,.61,.36,1),background 520ms ease}
+body.th-hover-works .th-in::before{inset:-16vh -26vw -18vh -30vw;
+  background:radial-gradient(56% 60% at 42% 50%,rgba(5,7,15,.97) 0%,
+             rgba(5,7,15,.88) 38%,rgba(5,7,15,.55) 66%,rgba(5,7,15,0) 88%)}
+@media (max-width:767px){
+  /* a phone has no room for two panes side by side, and no hover either */
+  .th-panes{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .th-pane{transition:none}
+}
 .th-hint{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--ink-subtle);
   margin:22px 0 0;max-width:44ch;line-height:1.6}
 @media (max-width:767px){ .th-in{text-align:left} }
@@ -326,6 +379,14 @@ body.works-open .ctl{display:none}
 <a id="skip" href="#semantic">Skip to the structure</a>
 
 <div id="threshold">
+  <div class="th-panes" aria-hidden="true">
+    <div class="th-pane th-pane-works">
+      <span class="th-pane-mark">SHEET 01 OF 06</span>
+      <span class="th-pane-rule"></span>
+      <span class="th-pane-body">six things built<br>what each is for<br>and what is known to break</span>
+    </div>
+    <div class="th-pane th-pane-mind"></div>
+  </div>
   <div class="th-in">
     <p class="th-eyebrow">An externalised mind</p>
     <h1 class="th-name">Siddhesh Thapa</h1>
@@ -6657,13 +6718,43 @@ var worksBtn=document.getElementById('worksBtn');
    itself as onWorksDoor. There is no fallback into the mind any more: the
    works are not a region there, so flying to one would be flying nowhere. */
 if(exitBtn) exitBtn.addEventListener('click', leaveMind);
+
+/* THE SPLIT. Hovering a door grows its side of the screen and shows what is
+   behind it. Driven by a class on the body rather than by styling the panes
+   directly, so keyboard focus gets the same behaviour as the pointer for free
+   — a door reached by Tab should preview its half exactly as a door reached by
+   mouse does. */
+(function twoDoors(){
+  if(!worksBtn || !enterBtn) return;
+  function show(which){
+    document.body.classList.toggle('th-hover-works', which==='works');
+    document.body.classList.toggle('th-hover-mind',  which==='mind');
+  }
+  function clear(){ show(null); }
+  [[worksBtn,'works'],[enterBtn,'mind']].forEach(function(pair){
+    var el=pair[0], side=pair[1];
+    el.addEventListener('mouseenter', function(){ show(side); });
+    el.addEventListener('mouseleave', clear);
+    el.addEventListener('focus',      function(){ show(side); });
+    el.addEventListener('blur',       clear);
+  });
+  /* and never leave a pane open behind the mind once a door has been used */
+  threshold.addEventListener('mouseleave', clear);
+})();
 if(worksBtn) worksBtn.addEventListener('click',function(){
   if(onWorksDoor) onWorksDoor();
 });
 var crossCount=LINKS.filter(function(l){return byId[l.a].mig!==byId[l.b].mig;}).length;
+/* BOTH HALVES, IN THEIR OWN REGISTER. This described only the mind, which was
+   the real reason the second door read as a footnote: nothing on the page
+   said what was behind it. The works count themselves from the graph, the
+   same way everything else here does. */
+var workCount=NODES.filter(function(n){
+  return n.mig==='my-works' && n.t!=='mig' && n.t!=='minor'; }).length;
 document.getElementById('thFacts').textContent=
-  MIGS.length+' regions of thinking. '+NODES.length+' objects, '+LINKS.length+
-  ' relationships between them — '+crossCount+' of which cross from one region into another.';
+  MIGS.length+' regions of thinking, '+NODES.length+' objects and '+LINKS.length+
+  ' relationships — '+crossCount+' of them crossing from one region into another. '+
+  'And '+workCount+' things built, with the manual for each.';
 var entered=false;
 function enterMind(){
   if(entered) return; entered=true;

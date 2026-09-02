@@ -4747,13 +4747,43 @@ var worksBtn=document.getElementById('worksBtn');
    itself as onWorksDoor. There is no fallback into the mind any more: the
    works are not a region there, so flying to one would be flying nowhere. */
 if(exitBtn) exitBtn.addEventListener('click', leaveMind);
+
+/* THE SPLIT. Hovering a door grows its side of the screen and shows what is
+   behind it. Driven by a class on the body rather than by styling the panes
+   directly, so keyboard focus gets the same behaviour as the pointer for free
+   — a door reached by Tab should preview its half exactly as a door reached by
+   mouse does. */
+(function twoDoors(){
+  if(!worksBtn || !enterBtn) return;
+  function show(which){
+    document.body.classList.toggle('th-hover-works', which==='works');
+    document.body.classList.toggle('th-hover-mind',  which==='mind');
+  }
+  function clear(){ show(null); }
+  [[worksBtn,'works'],[enterBtn,'mind']].forEach(function(pair){
+    var el=pair[0], side=pair[1];
+    el.addEventListener('mouseenter', function(){ show(side); });
+    el.addEventListener('mouseleave', clear);
+    el.addEventListener('focus',      function(){ show(side); });
+    el.addEventListener('blur',       clear);
+  });
+  /* and never leave a pane open behind the mind once a door has been used */
+  threshold.addEventListener('mouseleave', clear);
+})();
 if(worksBtn) worksBtn.addEventListener('click',function(){
   if(onWorksDoor) onWorksDoor();
 });
 var crossCount=LINKS.filter(function(l){return byId[l.a].mig!==byId[l.b].mig;}).length;
+/* BOTH HALVES, IN THEIR OWN REGISTER. This described only the mind, which was
+   the real reason the second door read as a footnote: nothing on the page
+   said what was behind it. The works count themselves from the graph, the
+   same way everything else here does. */
+var workCount=NODES.filter(function(n){
+  return n.mig==='my-works' && n.t!=='mig' && n.t!=='minor'; }).length;
 document.getElementById('thFacts').textContent=
-  MIGS.length+' regions of thinking. '+NODES.length+' objects, '+LINKS.length+
-  ' relationships between them — '+crossCount+' of which cross from one region into another.';
+  MIGS.length+' regions of thinking, '+NODES.length+' objects and '+LINKS.length+
+  ' relationships — '+crossCount+' of them crossing from one region into another. '+
+  'And '+workCount+' things built, with the manual for each.';
 var entered=false;
 function enterMind(){
   if(entered) return; entered=true;
