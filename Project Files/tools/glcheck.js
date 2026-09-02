@@ -13,6 +13,7 @@
    usage: node tools/glcheck.js [v02.html] [w] [h] [state]
 */
 const NODE_TOTAL = require('../.p3/expect.js').expectedNodes().total;
+const LINK_TOTAL = require('../.p3/expect.js').expectedLinks().total;
 const fs = require('fs'), os = require('os'), { execSync } = require('child_process');
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const FILE = process.argv[2] || 'v02.html';
@@ -107,7 +108,10 @@ list.forEach(st => {
 
   // 1 — the model is intact and is the same mind
   if (r.graph.nodes !== NODE_TOTAL) p.push('expected ' + NODE_TOTAL + ' nodes, model has ' + r.graph.nodes);
-  if (r.graph.links !== 126) p.push('expected 126 relationships, model has ' + r.graph.links);
+  /* counted from the sources, not typed: 126 was right until the overlay
+     started declaring relationships of its own */
+  if (r.graph.links !== LINK_TOTAL)
+    p.push('expected ' + LINK_TOTAL + ' relationships, model has ' + r.graph.links);
 
   // 2 — the layout is genuinely three-dimensional
   if (!r.volumetric)

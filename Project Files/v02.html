@@ -1018,10 +1018,11 @@ var NODES=[],byId={},owned={};
    Everything V02 changes about the extracted P4.7 graph, declared in one
    place. Nothing else may diverge. */
 var V02_OVERLAY={
-  relabel:[
-    { id:'my-works', from:'MY WORKS', to:'ART',
-      why:'the MMM entry becomes ART; the welcome page will later own a separate My Works door. Identity, ownership, concepts, writings and relationships are untouched.' }
-  ],
+  /* THE BORROWED LABEL IS RETURNED. MY WORKS was renamed to ART because the
+     welcome page had no second door and ART had no contents — one placeholder
+     covering for the other. The door exists now and ART has its own contents
+     below, so the region goes back to its own name. */
+  relabel:[],
   /* ONE SENTENCE IS REWRITTEN FOR V02.
      The graph's line for COTSI describes the mechanism, which is the right
      register inside the mind and the wrong one on a card a stranger reads in
@@ -1067,7 +1068,53 @@ var V02_OVERLAY={
       empty:true,
       why:'required as a first-class MIG. Created EMPTY on purpose — no concepts were invented.',
       idNote:'takes the id psychology because the Minor IG that held it has been re-keyed to psychology-behaviour by the declared rename above.',
-      conflict:null }
+      conflict:null },
+    /* ART, with contents. It was a borrowed label until now: the MY WORKS
+       entry was renamed to it while the works waited for a door of their own.
+       They have one, so the borrowing ends and the region becomes itself.
+
+       Everything below is extracted from Master Context §14, AESTHETIC
+       SENSIBILITY, which the P4.7 corpus never indexed. Nothing is invented —
+       the concepts are the list of what he says he cares about, and the
+       beliefs are his sentences. */
+    { id:'art', label:'ART',
+      gloss:'Most of the thinking here is analytical. This is the other half — how a thing feels, not merely whether it functions.',
+      empty:false,
+      why:'promoted from a borrowed label to a region with its own contents, now that MY WORKS has its own door and no longer needs to hide behind this name.',
+      src:'Master Context §14' }
+  ],
+
+  /* ART's contents. Concepts are the list §14 gives verbatim; beliefs are its
+     sentences, quoted rather than paraphrased. Each carries its source. */
+  addMinors:[
+    { id:'visual-identity', label:'VISUAL IDENTITY', mig:'art', crosses:['business'], state:'formed' },
+    { id:'interfaces',      label:'INTERFACES',      mig:'art', crosses:['technology'], state:'formed' },
+    { id:'photography',     label:'PHOTOGRAPHY',     mig:'art', crosses:['observation'], state:'seed' },
+    { id:'atmosphere',      label:'ATMOSPHERE',      mig:'art', crosses:['movies','music'], state:'formed' },
+    { id:'presentation',    label:'PRESENTATION',    mig:'art', crosses:['business'], state:'formed' }
+  ],
+  addWritings:[
+    { id:'b-feels', t:'belief', label:'HOW SOMETHING FEELS, NOT MERELY WHETHER IT FUNCTIONS',
+      mig:'art', crosses:['building','technology'], state:'formed', register:'belief',
+      src:'Master Context §14',
+      line:'Analytical for most of the working day, and aesthetically sensitive underneath it. The test a thing has to pass is not only that it works.' },
+    { id:'b-both-sides', t:'belief', label:'DO NOT ERASE EITHER SIDE',
+      mig:'art', crosses:['philosophy','my-works'], state:'formed', register:'belief',
+      src:'Master Context §14',
+      line:'Two modes, and he operates between them: systems, logic, automation and strategy on one side; philosophy, aesthetics, meaning, nostalgia and contradiction on the other. A good representation of him should not erase either.' },
+    { id:'t-substance', t:'thought', label:'SUBSTANCE AND EXPRESSION',
+      mig:'art', crosses:['business'], state:'formed', register:'observation',
+      src:'Master Context §14',
+      line:'He values both. Something can be right and still fail because of how it was presented, and the reverse is worse.' }
+  ],
+  addEdges:[
+    ['visual-identity','presentation','sits beside','Both are about what a thing says before anyone reads it.'],
+    ['b-feels','interfaces','tested against','An interface is where the claim that feel matters stops being an opinion.'],
+    ['b-feels','m-design','runs inside','The design loop is where the feel of a thing gets decided, iteration by iteration.'],
+    ['b-both-sides','p-website','shapes','The site is the representation, and it is built so that neither half is left out.'],
+    ['t-substance','b-package','agrees with','Take the parts you did not choose, and take the way they look as well as the way they work.'],
+    ['atmosphere','photography','collected as','Both are attention paid to how a moment sits rather than to what it contains.'],
+    ['presentation','entrepreneurship','sells through','Three years of positioning: the work is not the whole of what gets bought.']
   ]
 };
 (function(){
@@ -1110,6 +1157,21 @@ var V02_OVERLAY={
   V02_OVERLAY.addMIGs.forEach(function(a){
     for(var i=0;i<MIGS.length;i++) if(MIGS[i].id===a.id) return;   // never twice
     MIGS.push({ id:a.id, label:a.label, gloss:a.gloss, v02Added:true, v02Empty:!!a.empty });
+  });
+  /* CONTENTS FOR AN ADDED REGION. Same guard as the MIGs: never twice, and
+     never over the top of something the locked corpus already declares. */
+  function addOnce(list, rows){
+    (rows||[]).forEach(function(r){
+      for(var i=0;i<list.length;i++) if(list[i].id===r.id) return;
+      list.push(r);
+    });
+  }
+  addOnce(MINORS, V02_OVERLAY.addMinors);
+  addOnce(THOUGHTS, V02_OVERLAY.addWritings);
+  (V02_OVERLAY.addEdges||[]).forEach(function(e){
+    for(var i=0;i<EDGES.length;i++)
+      if(EDGES[i][0]===e[0] && EDGES[i][1]===e[1]) return;
+    EDGES.push(e);
   });
 })();
 MIGS.forEach(function(m){ m.t='mig'; m.mig=m.id; NODES.push(m); owned[m.id]=[]; });
@@ -2826,7 +2888,12 @@ var MIG_VISUAL={
   'society'     :{family:'assembly', branches:0, len:0.00, spread:0.00, rings:1, core:0.44},
   /* a region that exists and has not been written yet. Diffuse, uncondensed —
      not an empty box, but matter that has not yet become a body. */
-  'psychology'  :{family:'nascent',  branches:0, len:0.00, spread:0.00, rings:0, core:0.30}
+  'psychology'  :{family:'nascent',  branches:0, len:0.00, spread:0.00, rings:0, core:0.30},
+  /* how a thing feels rather than whether it works. A wide diffuse halo around
+     a modest core: the region is about the light around an object rather than
+     the object, which is also the honest shape of five concepts and three
+     beliefs with no system charted under them. */
+  'art'         :{family:'halo',     branches:0, len:0.00, spread:0.00, rings:3, core:0.38}
 };
 
 /* The star values are LIGHTER than the bodies orbiting them, which is the
@@ -3113,7 +3180,137 @@ var MIG_PALETTE={};
 /* every other MIG keeps the neutral atmosphere until its own world is built —
    inventing thirteen palettes before their geometry exists would be decoration */
 var NEUTRAL_PALETTE={fog:0xc9d3dc, star:0x1a3350, body:0x46525f, orbit:0x2b4f86, accent:0x2b6cb0};
-function paletteOf(migId){ return MIG_PALETTE[migId]||NEUTRAL_PALETTE; }
+
+/* A REGION WITHOUT ITS OWN PALETTE STILL NEEDS ITS OWN COLOUR.
+
+   Every uncharted region fell back to the single neutral above, so MY WORKS,
+   PSYCHOLOGY and MUSIC were emitting the same blue — measured at an RGB
+   distance of 3, which is not a difference anyone can see. The emblems are the
+   only things to aim at in the menu, and three of them being one colour is a
+   navigation defect rather than a cosmetic one. Adding ART would have made it
+   four.
+
+   So the neutral is a BASE, rotated per region. The rotation is derived from
+   the region's own index among the uncharted ones, which means it cannot
+   collide by construction and a seventeenth region separates itself. */
+var NEUTRAL_TINTS={};
+(function(){
+  /* A REGION WITHOUT ITS OWN PALETTE STILL NEEDS ITS OWN COLOUR.
+
+     Every uncharted region fell back to one neutral blue, so MY WORKS,
+     PSYCHOLOGY and MUSIC rendered the same emblem — measured 3 apart in RGB,
+     which is not a difference anyone can see. The emblems are the only things
+     to aim at in the menu, so three of them being one colour is a navigation
+     defect. ART would have made it four.
+
+     Three attempts got this wrong before it worked, and each failure is worth
+     keeping: dividing the wheel among the uncharted regions alone ignored
+     where the twelve charted palettes sat; spacing by hue landed 13 RGB from
+     TECHNOLOGY, because the shader's normalisation makes equal angles unequal
+     distances; and rotating the neutral base handed out colours as DARK as
+     the base, one of them under the findability floor.
+
+     So: candidates sit on one ring of fixed saturation and lightness, which
+     makes every option equally bright, and each region takes the emptiest
+     place left on it. Deterministic, no hand placement, and a seventeenth
+     region separates itself. */
+  function hsl2hex(h, s, l){
+    h=((h%360)+360)%360;
+    var c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h/60)%2-1)), m=l-c/2, q;
+    if(h<60) q=[c,x,0]; else if(h<120) q=[x,c,0]; else if(h<180) q=[0,c,x];
+    else if(h<240) q=[0,x,c]; else if(h<300) q=[x,0,c]; else q=[c,0,x];
+    return ((Math.round((q[0]+m)*255)<<16) | (Math.round((q[1]+m)*255)<<8) |
+             Math.round((q[2]+m)*255));
+  }
+  /* MEASURED IN THE SPACE THE MENU ACTUALLY SHOWS.
+     The points shader divides a tint by its own largest channel before drawing
+     an emblem, so what reaches the eye is the RATIO between the channels and
+     the brightness is thrown away. Two colours of the same hue and different
+     lightness arrive identical. Comparing raw palette values therefore left
+     PHILOSOPHY and MUSIC 14.9 apart on screen while looking well separated in
+     the source. Normalise first, then measure. */
+  function norm(hex){
+    var r=(hex>>16&255), g=(hex>>8&255), b=(hex&255), mx=Math.max(r,g,b,1);
+    return [r/mx*255, g/mx*255, b/mx*255];
+  }
+  function lumOf(hex){
+    var p=norm(hex);
+    return (0.2126*p[0] + 0.7152*p[1] + 0.0722*p[2]) / 255;
+  }
+  /* MEASURED THE WAY THE CHECK MEASURES IT — deltaE in Lab, not RGB.
+     Plain RGB distance rates greens far apart that the eye reads as one
+     colour: spacing four regions that way put three of them inside 15 deltaE
+     of each other while looking well separated in the numbers I was watching.
+     Optimising a different metric from the one asserted is how a palette
+     passes its own tuning and fails the check. */
+  function toLab(c){
+    function f(v){ v/=255; return v<=0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); }
+    var R=f(c[0]), G=f(c[1]), B=f(c[2]);
+    var X=(R*0.4124+G*0.3576+B*0.1805)/0.95047;
+    var Y=(R*0.2126+G*0.7152+B*0.0722);
+    var Z=(R*0.0193+G*0.1192+B*0.9505)/1.08883;
+    function g(t){ return t>0.008856 ? Math.pow(t,1/3) : 7.787*t+16/116; }
+    var fx=g(X), fy=g(Y), fz=g(Z);
+    return [116*fy-16, 500*(fx-fy), 200*(fy-fz)];
+  }
+  function dist(a, b){
+    var p=toLab(norm(a)), q=toLab(norm(b));
+    return Math.sqrt((p[0]-q[0])*(p[0]-q[0]) + (p[1]-q[1])*(p[1]-q[1]) +
+                     (p[2]-q[2])*(p[2]-q[2]));
+  }
+  /* Saturation widens the ring in the normalised space the emblems are judged
+     in: at 0.56 the sixteen ratios crowded and MUSIC still landed 14.9 from
+     PHILOSOPHY, which is under the separation the charted palettes already
+     manage between themselves. */
+  var RING_S=0.82, RING_L=0.50;
+  /* SATURATION IS CHOSEN PER HUE, so the ring is one of constant perceived
+     brightness rather than constant saturation.
+
+     Normalisation keeps the ratio between channels and discards the rest, and
+     a blue's ratio is simply dark — no amount of lightness rescues it. The
+     only way to brighten a blue emblem is to desaturate it. Rejecting the dark
+     hues instead left four regions crammed into the warm quarter of the wheel,
+     7 apart. Each hue now takes the strongest saturation that still clears the
+     brightness target, so the whole wheel stays usable. */
+  var LUM_TARGET=0.50;
+  function satFor(h, L){
+    var best=0.10;
+    for(var sat=0.90; sat>=0.10; sat-=0.04){
+      if(lumOf(hsl2hex(h, sat, L)) >= LUM_TARGET){ best=sat; break; }
+    }
+    return best;
+  }
+  /* scored against `star`, which is the field a MIG node actually draws —
+     everything else draws `body`, and spacing those moved nothing in the menu */
+  var taken=[];
+  MIGS.forEach(function(m){ if(MIG_PALETTE[m.id]) taken.push(MIG_PALETTE[m.id].star); });
+  MIGS.filter(function(m){ return !MIG_PALETTE[m.id]; }).forEach(function(m){
+    /* SEARCHED IN TWO DIMENSIONS, not one. On a single ring the sixteen
+       emblems could not all be pulled 18 deltaE apart — the twelve charted
+       colours are fixed, and one ring left the best arrangement at 16.7.
+       Lightness is the second axis: it costs nothing to vary and it is what
+       lets a hue already close to a charted one separate by tone instead. */
+    var best=-1, bestGap=-1, bestSat=RING_S, bestL=RING_L;
+    for(var L=0.40; L<=0.63; L+=0.035){
+      for(var h=0; h<360; h+=3){
+        var sat=satFor(h, L), cand=hsl2hex(h, sat, L), gap=1e9;
+        for(var k=0;k<taken.length;k++) gap=Math.min(gap, dist(cand, taken[k]));
+        if(gap>bestGap){ bestGap=gap; best=h; bestSat=sat; bestL=L; }
+      }
+    }
+    if(best < 0){ best=0; bestSat=RING_S; bestL=RING_L; }
+    var star=hsl2hex(best, bestSat, bestL);
+    taken.push(star);
+    NEUTRAL_TINTS[m.id]={
+      fog:   hsl2hex(best, bestSat*0.24, 0.83),
+      star:  star,
+      body:  hsl2hex(best, bestSat*0.49, 0.35),
+      orbit: hsl2hex(best, bestSat*0.56, 0.37),
+      accent:hsl2hex(best, bestSat*0.66, 0.45)
+    };
+  });
+})();
+function paletteOf(migId){ return MIG_PALETTE[migId] || NEUTRAL_TINTS[migId] || NEUTRAL_PALETTE; }
 /* ── THE WORLD PROFILE ────────────────────────────────────────────────
    One entry per MIG. The graph stays the source of truth; this is only the
    visual interpretation of it. Every field the renderer actually consults
@@ -3391,6 +3588,19 @@ function buildAtlas(){
          as an object, which is the honest thing to draw for a region whose
          thinking has not been filed here. */
       core2(R*0.96,0.13); core2(R*0.66,0.10); core2(R*0.34,0.09);
+    } else if(f==='halo'){                  // ART: the light around the object
+      /* A small hard core inside three wide soft rings. Every other species
+         draws the thing; this one draws what surrounds it, because the region
+         is about how something feels rather than what it is made of. Distinct
+         from `nascent` — that has no centre at all, this has a definite one
+         and gives most of its area to the atmosphere. */
+      core2(R*0.30, 0.30);
+      g.lineWidth=R*0.012;
+      for(var hr=0; hr<3; hr++){
+        var rr=R*(0.48+hr*0.22);
+        g.strokeStyle='rgba(255,255,255,'+(0.15-hr*0.04).toFixed(3)+')';
+        g.beginPath(); g.arc(0,0,rr,0,Math.PI*2); g.stroke();
+      }
     } else if(f==='constellation'){         // OBSERVATION: a figure, not an icon
       /* Never rendered in the scene — OBSERVATION's MIG body is deliberately
          empty, because the constellation itself is the emblem. Drawn here only
@@ -5467,6 +5677,11 @@ window.__v02={
   state:function(){ return {mode:state.mode, focus:state.focus, region:state.region,
     reading:readingId, cam:camPos.toArray().map(Math.round), aim:camAim.toArray().map(Math.round)}; },
   graph:function(){ return {nodes:NODES.length, links:LINKS.length,
+    /* the count the brain is supposed to draw: relationships whose two ends
+       live in different regions. Exposed so a check can compare the DRAWING
+       against the DATA rather than against a number typed in a year ago. */
+    cross:LINKS.filter(function(l){
+      return byId[l.a] && byId[l.b] && byId[l.a].mig!==byId[l.b].mig; }).length,
     cross:LINKS.filter(function(l){return l.cross;}).length}; },
   nodeAt:function(id){ var n=byId[id]; return n&&n.pos? n.pos.toArray().map(function(v){return +v.toFixed(2);}):null; },
   /* screen-space truth: where a real node actually lands for a real viewer */

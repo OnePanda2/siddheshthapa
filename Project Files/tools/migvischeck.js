@@ -73,7 +73,7 @@ ck('MV-3', generic.length === 0,
                   : 'no MIG falls through to the generic star');
 
 const VALID = ['neural','organic','binary','orbital','lattice','modular','growth',
-               'constellation','nascent',
+               'constellation','nascent','halo',
                'focus','harmonic','sequence','cluster','artifact','assembly'];
 const badFam = ids.filter(k => VALID.indexOf(P[k].family) < 0);
 const badCell = ids.filter(k => !(P[k].cell >= 0 && P[k].cell < r.sp.atlasCells));
