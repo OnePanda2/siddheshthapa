@@ -4759,16 +4759,23 @@ if(exitBtn) exitBtn.addEventListener('click', leaveMind);
     document.body.classList.toggle('th-hover-works', which==='works');
     document.body.classList.toggle('th-hover-mind',  which==='mind');
   }
-  function clear(){ show(null); }
+  /* LEAVING ONLY CLEARS YOUR OWN SIDE. A blanket reset on mouseleave is wrong
+     the moment the two events arrive out of order — the pointer crossing from
+     one column to the other can deliver the enter before the leave, and the
+     leave then wiped the state its neighbour had just set, dropping the
+     layout back to 50/50 while the pointer sat over a column. */
+  var active=null;
+  function enter(side){ active=side; show(side); }
+  function leave(side){ if(active===side){ active=null; show(null); } }
   [[worksBtn,'works'],[enterBtn,'mind']].forEach(function(pair){
     var el=pair[0], side=pair[1];
-    el.addEventListener('mouseenter', function(){ show(side); });
-    el.addEventListener('mouseleave', clear);
-    el.addEventListener('focus',      function(){ show(side); });
-    el.addEventListener('blur',       clear);
+    el.addEventListener('mouseenter', function(){ enter(side); });
+    el.addEventListener('mouseleave', function(){ leave(side); });
+    el.addEventListener('focus',      function(){ enter(side); });
+    el.addEventListener('blur',       function(){ leave(side); });
   });
   /* and never leave a pane open behind the mind once a door has been used */
-  threshold.addEventListener('mouseleave', clear);
+  threshold.addEventListener('mouseleave', function(){ active=null; show(null); });
 })();
 if(worksBtn) worksBtn.addEventListener('click',function(){
   if(onWorksDoor) onWorksDoor();
@@ -4780,10 +4787,17 @@ var crossCount=LINKS.filter(function(l){return byId[l.a].mig!==byId[l.b].mig;}).
    same way everything else here does. */
 var workCount=NODES.filter(function(n){
   return n.mig==='my-works' && n.t!=='mig' && n.t!=='minor'; }).length;
-document.getElementById('thFacts').textContent=
-  MIGS.length+' regions of thinking, '+NODES.length+' objects and '+LINKS.length+
-  ' relationships — '+crossCount+' of them crossing from one region into another. '+
-  'And '+workCount+' things built, with the manual for each.';
+/* EACH WORLD COUNTS ITSELF. One sentence used to describe the mind and stop,
+   which was the real reason the second door read as a footnote: nothing on
+   the page said what was behind it. Both lines are derived, so neither can
+   drift from what it points at. */
+var thFacts=document.getElementById('thFacts');
+if(thFacts) thFacts.textContent=
+  MIGS.length+' regions · '+NODES.length+' objects · '+LINKS.length+
+  ' relationships · '+crossCount+' of them crossing';
+var thWorks=document.getElementById('thWorksFacts');
+if(thWorks) thWorks.textContent=
+  workCount+' sheets · purpose · parts · procedure · known failures';
 var entered=false;
 function enterMind(){
   if(entered) return; entered=true;
