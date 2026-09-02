@@ -141,8 +141,8 @@ padded. This is exactly how MUSIC and PSYCHOLOGY are handled in the mind, and
 the honesty reads as confidence rather than absence — a manual with a sheet
 reserved for a part not yet documented is a real manual.
 
-Sheets 1–3 are buildable today. Sheet 4 is buildable thin. Sheets 5 and 6 are
-latent until Siddhesh writes them.
+No sheet is reserved today. The path is still guarded, because a seventh work
+added to the graph arrives in exactly that state — see §11, W5.
 
 ---
 
