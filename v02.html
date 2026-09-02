@@ -27,6 +27,8 @@ html,body{margin:0;padding:0;height:100%;background:#05070f;color:var(--ink);
   font-family:var(--sans);overscroll-behavior:none}
 #gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
 
+
+
 /* the DOM semantic layer — the SOURCE OF STRUCTURE. Delete the canvas and this
    must still carry the whole mind (DESIGN-V02 §22). */
 #skip{position:absolute;left:-9999px;top:0;z-index:50;background:var(--ground-0);
@@ -454,6 +456,46 @@ body.works-open .ctl{display:none}
 @media (prefers-reduced-motion:reduce){
   *{transition-duration:1ms!important}
 }
+
+/* ── THE HAND ─────────────────────────────────────────────────────────────
+   Siddhesh's pointing hand, recovered from his artwork onto its own 42x40
+   grid and shipped at native resolution — one image pixel per screen pixel,
+   which is the only size 8-bit art is ever actually sharp at.
+
+   Three gestures, and they are made the way a pixel artist would make them:
+   by adding or removing rows from the FINGER SHAFT. Rows 4 and 5 of the grid
+   are two near-identical slices of the straight part of the finger, above
+   where it merges into the fist, so duplicating them reaches and deleting
+   them presses — while the tip and the hand stay exactly as drawn.
+
+   All three share one canvas and one hotspot, so the pointer itself never
+   moves between states: only the finger does.
+
+     rest      pointing, as drawn
+     reach     over anything that can be chosen — the finger extends
+     press     while the button is down — it retracts into the fist
+
+   The fallbacks after each url() are not decoration: a browser that refuses
+   the image still gets the right KIND of cursor. */
+/* declared once and referenced, rather than three copies of the same kilobyte */
+:root{
+  --hand-rest:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACoAAAAsCAYAAAATmipGAAAC20lEQVR4nO2YMXLbMBBFQYzHpS0XrnwEH0FFytwgOoFchDdwxSo3oIv4BM4NUrrwEXSEVCmkuFSjzOdwOcv1AliApMeF/wxHIwkEHhf7FwCd+9SnPraquTu8urw4hf7b/3utPgTo1eXFqVmt3Pbn9zf/3Xz7MQm2mhuyfnkKtmnXG9ccDkWw1XtBkq5vv3afubBnbiHIdr0Zfbc8xKKgGkS73gTB8FCY/lz5OaJphXzXiMbKT7sQJFQtZRpNlLc09TmG8nNBkpvnmp0iUGskW+H0WDT//Lp3i+SottpINYAQecrhCZIbEEGwpMAs5Qn6u/vdTT/BSmkliUqVBXY2UD5wE6mTPJqIfG3Mb2/Nz/PbL8nO6penEUgIUqYRfk8ZSwXFTXTllqM6ABt7AOo/BhuMKDpG3pXUzLqH1eBCpqS2FKAk6NSiTqL7CSC1vqM9AoNLSwVfWoosBqhhFpYKgH28exhtpEP3SdiiTQlBxgo8l4TtPlerrh9cWj9yRn2JwzE9NGgOLImiCsXSjEfVl+Ymh7XouHsemaurtxnj+SkGooGtUd32uU+QEE0/HkSK85xNcXl3T39gwwpTsnrRzETbO3fyKZen3E1GCZkC4tEaotrXad5Gi6rJ9VZ3DwX+8NZccnCUJT6DEjAE66ULS90tYY9KhOQ4ISjtd4/tVcy5pbCPAgrfaRy0i02zBtvtAS2GojSw7vQb5mxZjlKQ9GB0H4I57Efxw3b3HCz2cmOcgm0C5/cU5GgxYK9/hl21tUylInvsQeSAoZdnFkhoiGiXq86dUtHika0NkBZJQEgeTUZHkVxYXKnTZJNYYnkuaoDBOkpVwLosau7WFKsENM2xA576B+1YYjmLaeYlh9pbTp7IVX6v5bhcWd8gy2rA3RvbBO8ZhHbEsL7WSTbSYDmknM6GRXHKO/vsc/1gsA7owXRM2c8ISDJ3yPNW01KRdL2yOwydvZeA4/oP6YA1HP2gS8QAAAAASUVORK5CYII=") 23 5;
+  --hand-reach:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACoAAAAsCAYAAAATmipGAAAC5UlEQVR4nOWZMVLrMBCGZQ1D+V4oqDgCR0jxyncDcoJQ4BtQueIGpoAT8G7wSgqOkCNQUSRQpgmzGq9nvexKK9lmJsM/k8kkkaXPq/1XklO5iXX2+9dB+237/lGV9lt8oQbZLBZu/XDz5beLq7tRsNXUkPXLk9qmXa5cs9sVwVbfBYk6v/wb3nNhT9xMkO1yNfhsuYlZQSWIdrlSweCmYPpz5d2RyLsjkXdHIu9+AuhZ53irkb7V9bElsp0JElTNVdglYW3F8pRT9P1UkLjiTDU7RaDWSLZsNYpF8/XfrZslR6UdEVcDECxPKTxCUgNCECwpMMkSCnrb/A/Tj7Bc0rKJy6kFdjJQOnATWctpNCHytTG/vTU/Ty//JDurX54GIBokTyP4PmUsERQuwlduOaoV2NgNYP8xWDWi0DHkXUnNrDtYCU4zJbbFACVBxxZ1FF6PAKk9KLSHwMBLSgVfWoosBqjBLCQVAPbx+n5w2NOu47BFmxKEjBV4Kg4b3heL0A+8pH74jPoSh8P04KA5sCiMKiiWZjSqvjQ3KaxF+83zwFyh3maM58cYCAe2RnXd5T5CgnD64Ua4KM/JGJeHa7qHCrDClKxeODPR9s4dfMrlKXejUTRTgGi0+qh2dZq2kaJqcr3V3X2B3301Fx8cyhKdQQ6owXruwlJ3c9i9ECE+jgYlfe9hexVzbinsI4OCzzgOtItNswQb9oAWQ2EaWHf6DXE2L0cpSLwxvA6C2e9H4Yv15lkt9nxjnIJtlGdMKcjBYkAeUfa7amuZSkV234HwAbUHvBZIUB/RkKvOHVLRopGtDZAWcUAQP5oMjiK5sPBKnSabxBJLc1ECVOsoVgHrsii5W1KsEuA0xw544g+4Y4nlLEwzLTnY3nLyhFyl11qOy5X1Xw5eDah7Y5vgLYGQjhjWxzrJRhIsheTT2ZAojvlfKftc3xssAN2bjinbCQFR5g5p3kqaK5KuU3aH2tl7DjiqTwf+NSSdsSrWAAAAAElFTkSuQmCC") 23 5;
+  --hand-press:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACoAAAAsCAYAAAATmipGAAACt0lEQVR4nO2YMVLDMBBFZQ1DGUxBxRE4QgpKbkBOEAp8AypX3IAU5AThBpQUOUKOQEWRQJkmzGq8nvVmJa1kh6Hwn/FkYsvS89fuWrIxo0aNGjWqjwozsC4vJgffte33T/EvQC8vJoe6LM389fHo2vX9cy/YYmjIar3ytnmZzky922XBFn8Fibq6uXO/qbDFqYB8joLA1VRYOxQkOjVU4mWBap18aRzTuPn59mRSdKZtKGUyVw0Q01nngSg8QsJDUxM0IaAGjelr8+6mH2G5ELJzrizdeQ3sYKB04FqAom1Q4HyljG+rjc/zm9toZ9V61QHxQfIwgvOxxBJB4SY8UstR5YENPQD2H4L1OgodQ9zl1MyqgZXgfEmJbdGgKGjfoo7C+xEgFLfYHoyBQwoFm1uKNAlQQbKQUADY5cOis0jx3cdh1W8mCTJU4Kk4rPstS9cPHFI/fEZtTobD9OCgKbAodBUUCjPqqs2NTQqr0X7z0UkuV28TxrN9EggH1ro6b2IfIUE4/fAgXJTnrE+Wu3uaxTC8YXLeXjgzwfbGHGwsy2PZjYniSwoQdat1tanTtI3kqirrtdndFvjdcXLxwaEs0RnkgD5Yy7MwN7s57F5wiI/jg5LOW1hehTI3F3bJoOA/jgPtQtMswbo1oCahMAy0K/2aZDYvRzFIfDC8D8xs16NwYr758BZ7vjCOwdaNs1wxyM7LgGyt21W1tkzFnN03IHxA34cJDSSoddTFqjGHmFvU2UoBqREHBPGtSWcrkgoLR2w3WUdesTQWJUBvHcUqoH0tStktKVQJcJpDGzzxAq5YQjEL00xLDrbX7DwhVum9mu1yof06x6sBzd7QInhLIKQthvazTrSRBEsh+XTWxMU+30OT9/VtgjmghWqbsh0QEKXukMatpFM5aRold+jbe58CjuoXN4IdlbF6uCcAAAAASUVORK5CYII=") 23 5;
+}
+html,body{cursor:var(--hand-rest),auto}
+.nav button,.wk-toc button,.wk-see button,#readClose,
+a,button,summary,[role="button"],[data-nav],[data-sheet],[data-see],
+.th-world,.tray,.wk-btn,.ctl{cursor:var(--hand-reach),pointer}
+.nav button:active,.wk-toc button:active,.wk-see button:active,#readClose:active,
+a:active,button:active,summary:active,[role="button"]:active,[data-nav]:active,
+[data-sheet]:active,[data-see]:active,.th-world:active,.tray:active,
+.wk-btn:active,.ctl:active,#gl:active{cursor:var(--hand-press),pointer}
+/* the sky is dragged rather than clicked, so the hand closes while it turns */
+#gl{cursor:var(--hand-rest),grab}
+/* text meant to be read keeps a text cursor: a hand over a paragraph says
+   "click me", and these do not */
+.docbody,.th-desc,#gloss,.wk-line,#works p{cursor:text}
 </style>
 
 <a id="skip" href="#semantic">Skip to the structure</a>
