@@ -38,12 +38,18 @@ const PROBE = `(function(){
      neighbourhood is monotone in the sprite's own contribution. */
   function bright(id){ var b=M.spriteBlobs(id,110); return b? b.sumSignal : null; }
   function snap(){ return {state:M.hoverState(), st:M.state(), arch:M.arch(),
-                           phil:bright('philosophy'), works:bright('my-works'),
+                           phil:bright('philosophy'), works:bright('psychology'),
                            life:bright('life'), menu:M.dom().navRows}; }
   M.highlight(null); M.settle(40);
   var base=snap();
   M.highlight('philosophy'); M.settle(40); var hPhil=snap();
-  M.highlight('my-works');   M.settle(40); var hWork=snap();
+  M.highlight('psychology');   M.settle(40); var hWork=snap();
+  /* a SECOND populated region, for the contrast test. An uncharted one cannot
+     serve: its emblem has no world of bodies behind it, so hovering it lifts
+     the reading by about 17 against a charted region's 370, and the check was
+     measuring the difference between a full world and an empty one rather
+     than whether the highlight works. */
+  M.highlight('life');       M.settle(40); var hLife=snap();
   M.highlight(null);         M.settle(40); var rel=snap();
 
   /* H7 — the keyboard must reach the same behaviour as the mouse */
@@ -56,7 +62,7 @@ const PROBE = `(function(){
     row.focus(); M.settle(30); kb=M.hoverState(); row.blur(); M.settle(20);
   }
 
-  return {base:base, hPhil:hPhil, hWork:hWork, rel:rel, kb:kb,
+  return {base:base, hPhil:hPhil, hWork:hWork, hLife:hLife, rel:rel, kb:kb,
           migCount:M.arch().migCount};
 })()`;
 
@@ -93,19 +99,34 @@ ck('H1', r.hPhil.state.hoverRegion >= 0 && r.hWork.state.hoverRegion >= 0 &&
          r.hPhil.state.hoverRegion !== r.hWork.state.hoverRegion &&
          r.base.state.hoverRegion === -1,
    'MIG -> world mapping is a region index: philosophy=' + r.hPhil.state.hoverRegion +
-   ', my-works=' + r.hWork.state.hoverRegion + ', none=' + r.base.state.hoverRegion);
+   ', psychology=' + r.hWork.state.hoverRegion + ', none=' + r.base.state.hoverRegion);
 
 // H2 — the hovered world brightens
 ck('H2', r.hPhil.phil > r.base.phil && r.hWork.works >= r.base.works * 0.98,
    'the hovered world brightens — philosophy ' + r.base.phil + ' -> ' + r.hPhil.phil +
-   ', my-works ' + r.base.works + ' -> ' + r.hWork.works);
+   ', psychology ' + r.base.works + ' -> ' + r.hWork.works);
 
-// H3 — the others recede, so the answer is unambiguous
-const philGap = r.hPhil.phil - r.hPhil.works;
-const workGap = r.hWork.works - r.hWork.phil;
-ck('H3', philGap > 40 && workGap > 40,
-   'the answer is unambiguous — hovering philosophy leaves it ' + philGap +
-   ' brighter than my-works; hovering my-works leaves it ' + workGap + ' brighter than philosophy');
+/* H3 — the others recede, so the answer is unambiguous.
+
+   This compared the two regions' ABSOLUTE brightness: hovering A had to leave
+   A outshining B. That only holds between regions of similar population, and
+   it held only because the region it used to test against was one of the
+   busiest in the mind. Against an uncharted region it fails while the
+   behaviour is perfectly correct — PHILOSOPHY has a charted world of bodies
+   behind its emblem and simply carries more light, hovered or not.
+
+   What "the others recede" actually means is a direction of change: each hover
+   lifts its own region and does not lift the other. That is what is measured
+   now, and it is true of any pair. */
+const philRise = r.hPhil.phil - r.base.phil;
+const philOtherMove = r.hPhil.life - r.base.life;
+const lifeRise = r.hLife.life - r.base.life;
+const lifeOtherMove = r.hLife.phil - r.base.phil;
+ck('H3', philRise > 40 && philOtherMove <= 0 && lifeRise > 40 && lifeOtherMove <= 0,
+   'each hover lifts its own region and recedes the other — philosophy ' +
+   (philRise > 0 ? '+' : '') + philRise + ' while life moves ' +
+   philOtherMove + '; life ' + (lifeRise > 0 ? '+' : '') + lifeRise +
+   ' while philosophy moves ' + lifeOtherMove);
 
 // H4 — exactly reversible
 ck('H4', r.rel.state.hoverRegion === -1 &&

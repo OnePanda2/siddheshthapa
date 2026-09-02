@@ -138,8 +138,8 @@ const EXP = require('../.p3/expect.js');
 const MIG_TOTAL = EXP.expectedMigs().total, NODE_TOTAL = EXP.expectedNodes().total;
 ck('L7', W.starBIsGraphNode === false && r.arch.migCount === MIG_TOTAL &&
          r.arch.reparented.length === 0 &&
-         r.bin.renderedPoints === r.bin.graphNodes + r.bin.renderOnly,
-   'star B is render-only — ' + r.bin.graphNodes + ' graph nodes + ' + r.bin.renderOnly +
+         r.bin.renderedPoints === r.bin.placedNodes + r.bin.renderOnly,
+   'star B is render-only — ' + r.bin.placedNodes + ' placed nodes + ' + r.bin.renderOnly +
    ' render-only bodies (' + r.bin.totalCompanions + ' companion + ' +
    (r.bin.renderOnly - r.bin.totalCompanions) + ' constellation sky) = ' +
    r.bin.renderedPoints + ' points, 14 MIGs, nothing reparented');

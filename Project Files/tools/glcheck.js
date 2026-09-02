@@ -130,8 +130,13 @@ list.forEach(st => {
 
   // 5 — perception ranges are real, not decorative
   const rg = r.ranges;
-  if ((rg.far + rg.mid + rg.near) !== r.graph.nodes)
-    p.push('ranges do not account for every node: ' + JSON.stringify(rg));
+  /* against PLACED nodes, not declared ones. The works keep their nodes and
+     their relationships and are drawn nowhere, because the mind no longer has
+     a region for them - so the graph legitimately holds more than the scene
+     shows, and this counted the difference as a defect. */
+  if ((rg.far + rg.mid + rg.near) !== r.graph.placed)
+    p.push('ranges do not account for every placed node (' + r.graph.placed +
+           '): ' + JSON.stringify(rg));
   if (st.id === 'universe' && rg.far < 20)
     p.push('from the universe almost nothing is distant (far=' + rg.far + ') — there is no depth to travel through');
   if (st.id === 'concept' && rg.near < 1)

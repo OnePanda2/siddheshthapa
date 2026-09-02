@@ -29,12 +29,16 @@ const PROBE = `(function(){
   M.enter();
   var atEntry=M.arch();
 
-  /* walk the real journey: MY WORKS -> a project -> the idea it reaches ->
-     that idea's MIG -> back to the Main Mind. Ownership is sampled at every
-     step, because a hierarchy that only survives when nobody moves is not a
-     hierarchy. */
-  M.go('region','my-works');           var inWorks=M.arch();
-  M.go('concept','p-website');         var inProject=M.arch();
+  /* walk the real journey: a region -> one of its writings -> the idea it
+     reaches -> that idea's MIG -> back to the Main Mind. Ownership is sampled
+     at every step, because a hierarchy that only survives when nobody moves is
+     not a hierarchy.
+
+     This used to start at MY WORKS, which is no longer a region of the mind —
+     the works have their own door. ART replaces it: the newest region, and the
+     one most likely to have been wired up carelessly. */
+  M.go('region','art');                var inWorks=M.arch();
+  M.go('concept','b-both-sides');      var inProject=M.arch();
   var reach=M.crossFrom? M.crossFrom('p-website') : null;
   M.go('concept','curiosity');         var inIdea=M.arch();
   M.go('region','philosophy');         var inPhil=M.arch();
@@ -95,8 +99,8 @@ ck('C21', menuBad.length === 0 && modelBad.length === 0,
 
 // C22 — MY WORKS is a peer, and owns no MIG
 ck('C22', r.atEntry.myWorksOwnsMigs.length === 0 && r.atEntry.migCount === EXPECT,
-   r.atEntry.myWorksOwnsMigs.length ? 'MY WORKS owns MIGs: ' + r.atEntry.myWorksOwnsMigs.join(', ')
-   : 'MY WORKS is a first-class MIG owning ' + r.atEntry.myWorksMembers + ' of its own members, no MIGs');
+   r.atEntry.myWorksOwnsMigs.length ? 'a region owns MIGs: ' + r.atEntry.myWorksOwnsMigs.join(', ')
+   : 'no region nests another — ' + r.atEntry.migCount + ' regions, all top-level');
 
 // C23 — nothing is reparented, at any step
 const rep = steps.filter(k => r[k].reparented.length);
@@ -121,10 +125,21 @@ ck('C25/C28', ownershipStable,
 ck('C26', r.back.migCount === EXPECT && r.back.migsInMenu === EXPECT && r.state.mode === 'universe',
    'returning to the Main Mind restores all ' + r.back.migCount + ' constellations');
 
-// C27 — prominence without nesting
-ck('C27', r.atEntry.menuFirst === 'my-works' && r.atEntry.myWorksOwnsMigs.length === 0,
-   'MY WORKS leads the menu (' + r.atEntry.menuFirst + ') while nesting nothing');
+/* C27 — THE WORKS ARE NOT A REGION, AND THEIR OBJECTS STILL EXIST.
+
+   This asserted the opposite: that MY WORKS led the menu. It did, because the
+   works had nowhere else to live. They have their own door now, and being a
+   region as well put the same six objects in two places and made the second
+   door read as an appendix to the first. What has to stay true is both halves
+   of the removal — the region is gone from the mind, and nothing was deleted
+   with it: the objects keep their ids, their owner key and every relationship,
+   because the manual reads them and because a belief in LEARNING still
+   genuinely points at COTSI. */
+const works = r.atEntry.migIds.indexOf('my-works');
+ck('C27', works < 0 && r.atEntry.myWorksMembers > 0,
+   'the works are not a region of the mind, and their ' +
+   r.atEntry.myWorksMembers + ' objects survive the removal intact');
 
 console.log('\n' + (7 - bad) + '/7 architectural invariants hold');
-console.log(bad ? bad + ' PROBLEM(S)' : 'MY WORKS is the front door, not the house');
+console.log(bad ? bad + ' PROBLEM(S)' : 'no region nests another, and the works are a door rather than a room');
 process.exit(bad ? 1 : 0);

@@ -18,7 +18,17 @@ function expectedMigs() {
     const end = app.indexOf('\n  ]', at);
     declared = (app.slice(at, end > 0 ? end : at + 4000).match(/\{\s*id:'/g) || []).length;
   }
-  return { inSource, declared, total: inSource + declared };
+  /* and the overlay may REMOVE a region as openly as it adds one: MY WORKS
+     stopped being a region of the mind when the works got their own door, and
+     every check that counts regions has to learn that in one place. */
+  const hideAt = app.indexOf('hideMIGs:[');
+  let hidden = 0;
+  if (hideAt >= 0) {
+    const hideEnd = app.indexOf('\n  ]', hideAt);
+    hidden = (app.slice(hideAt, hideEnd > 0 ? hideEnd : hideAt + 4000)
+      .match(/\{\s*id:'/g) || []).length;
+  }
+  return { inSource, declared, hidden, total: inSource + declared - hidden };
 }
 
 module.exports = { expectedMigs };
@@ -52,9 +62,12 @@ function expectedNodes() {
   const declaredMinors = declaredIn('addMinors:[');
   const declaredWritings = declaredIn('addWritings:[');
   const declared = declaredMigs + declaredMinors + declaredWritings;
+  /* a hidden region loses its own node — only the region, never its contents,
+     which stay in the graph and are what the manual reads */
+  const hidden = expectedMigs().hidden || 0;
   return { migs, minors, thoughts, inSource: migs + minors + thoughts,
-           declaredMigs, declaredMinors, declaredWritings,
-           declared, total: migs + minors + thoughts + declared };
+           declaredMigs, declaredMinors, declaredWritings, hidden,
+           declared, total: migs + minors + thoughts + declared - hidden };
 }
 module.exports.expectedNodes = expectedNodes;
 
