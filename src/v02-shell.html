@@ -232,9 +232,13 @@ body.works-open .ctl{display:none}
 .wk-parts{list-style:none;margin:0 0 14px;padding:0}
 .wk-parts li{font-size:13px;line-height:1.6;padding:0 0 0 26px;position:relative;margin:0 0 9px}
 .wk-parts li b{position:absolute;left:0;top:0;color:var(--paper-spot);font-size:11px;font-weight:400}
-.wk-fail{list-style:none;margin:0;padding:0}
+.wk-failwrap{border-top:1px solid var(--paper-rule);margin-top:6px;padding-top:16px}
+/* Two up where there is room. Four failures in a single column is a wall, and
+   the entries are independent of one another — they are not steps, so they do
+   not have to be read in order. */
+.wk-fail{list-style:none;margin:0;padding:0;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:0 34px}
 .wk-fail li{font-size:12.5px;line-height:1.55;padding:9px 0;border-bottom:1px dotted var(--paper-rule)}
-.wk-fail li:last-child{border-bottom:0}
 .wk-fail b{display:block;font-size:10px;letter-spacing:.13em;text-transform:uppercase;
   color:var(--paper-spot);font-weight:400;margin-bottom:3px}
 .wk-none{font-size:12px;line-height:1.7;color:var(--paper-dim);border-left:2px solid var(--paper-rule);
@@ -253,6 +257,16 @@ body.works-open .ctl{display:none}
 .wk-svg.exploded .p2{transform:translate(0,-4px)}
 .wk-svg.exploded .p3{transform:translate(0,10px)}
 .wk-svg.exploded .p4{transform:translate(0,26px)}
+/* An ASSEMBLY explodes differently from a ROW. The five inputs are already
+   stacked, so staggering them downward would only compress the stack; they
+   step apart and away from the thing they compose into instead. Offsets are
+   kept inside the viewBox — an exploded part that leaves it is simply
+   clipped, which reads as a missing part. */
+.wk-svg--stack.exploded .p1{transform:translate(-16px,-12px)}
+.wk-svg--stack.exploded .p2{transform:translate(-16px,-6px)}
+.wk-svg--stack.exploded .p3{transform:translate(-16px,0)}
+.wk-svg--stack.exploded .p4{transform:translate(-16px,6px)}
+.wk-svg--stack.exploded .p5{transform:translate(-16px,12px)}
 .wk-svg.exploded .lead{opacity:1}
 
 /* the operable diagnostic — COTSI only, and it earns it */

@@ -232,9 +232,13 @@ body.works-open .ctl{display:none}
 .wk-parts{list-style:none;margin:0 0 14px;padding:0}
 .wk-parts li{font-size:13px;line-height:1.6;padding:0 0 0 26px;position:relative;margin:0 0 9px}
 .wk-parts li b{position:absolute;left:0;top:0;color:var(--paper-spot);font-size:11px;font-weight:400}
-.wk-fail{list-style:none;margin:0;padding:0}
+.wk-failwrap{border-top:1px solid var(--paper-rule);margin-top:6px;padding-top:16px}
+/* Two up where there is room. Four failures in a single column is a wall, and
+   the entries are independent of one another — they are not steps, so they do
+   not have to be read in order. */
+.wk-fail{list-style:none;margin:0;padding:0;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:0 34px}
 .wk-fail li{font-size:12.5px;line-height:1.55;padding:9px 0;border-bottom:1px dotted var(--paper-rule)}
-.wk-fail li:last-child{border-bottom:0}
 .wk-fail b{display:block;font-size:10px;letter-spacing:.13em;text-transform:uppercase;
   color:var(--paper-spot);font-weight:400;margin-bottom:3px}
 .wk-none{font-size:12px;line-height:1.7;color:var(--paper-dim);border-left:2px solid var(--paper-rule);
@@ -253,6 +257,16 @@ body.works-open .ctl{display:none}
 .wk-svg.exploded .p2{transform:translate(0,-4px)}
 .wk-svg.exploded .p3{transform:translate(0,10px)}
 .wk-svg.exploded .p4{transform:translate(0,26px)}
+/* An ASSEMBLY explodes differently from a ROW. The five inputs are already
+   stacked, so staggering them downward would only compress the stack; they
+   step apart and away from the thing they compose into instead. Offsets are
+   kept inside the viewBox — an exploded part that leaves it is simply
+   clipped, which reads as a missing part. */
+.wk-svg--stack.exploded .p1{transform:translate(-16px,-12px)}
+.wk-svg--stack.exploded .p2{transform:translate(-16px,-6px)}
+.wk-svg--stack.exploded .p3{transform:translate(-16px,0)}
+.wk-svg--stack.exploded .p4{transform:translate(-16px,6px)}
+.wk-svg--stack.exploded .p5{transform:translate(-16px,12px)}
 .wk-svg.exploded .lead{opacity:1}
 
 /* the operable diagnostic — COTSI only, and it earns it */
@@ -6389,6 +6403,46 @@ var WORKS_DATA = {
       ],
       "figure": "diagnostic-before-generation",
       "operable": true
+    },
+    {
+      "node": "p-website",
+      "authority": [
+        "tools/build-v02.js — the five inputs and the order they compose in",
+        "CHECKPOINT.md — known imperfections 4, 6 and 7, each recorded when it was found",
+        "BRAIN-VISUAL-SPEC.md §0 — why the two previous attempts failed",
+        "WORKS-MANUAL-SPEC.md §1 — the derived / declared / forbidden rule"
+      ],
+      "purpose": "To put a way of thinking somewhere it can be walked through rather than described. The constraint that shapes everything else is that it must not be able to lie: a claim on the page has to come from a source the project holds, or it does not go on the page.",
+      "parts": [
+        { "n": 1, "name": "the graph",
+          "note": "143 declared objects and 126 relationships, extracted verbatim from the locked source at build time. It is never retyped, so the experience layer cannot disagree with the content it renders." },
+        { "n": 2, "name": "the shell",
+          "note": "Markup, style, and the DOM structure. Delete the canvas and this still carries the whole mind — the 3D is an experience over the structure, not the structure itself." },
+        { "n": 3, "name": "the renderer",
+          "note": "three.js r149, 594KB, inlined rather than linked. The artifact's content policy blocks every CDN, and a blocked script fails silently — so the library ships inside the file or the page dies without saying why." },
+        { "n": 4, "name": "the scene",
+          "note": "The constellation, the fold from brain to universe, and the twelve charted planetary systems. Renders on demand: idle costs zero frames." },
+        { "n": 5, "name": "the manual",
+          "note": "This. A second door off the same threshold, and the only part of the site that is deliberately not the mind." }
+      ],
+      "procedure": [
+        "Declare each thing once, in the locked source, with where it came from. Nothing is written twice.",
+        "Compose the artifact from the five parts above — one file, no external requests, nothing to fetch at run time.",
+        "Assert every claim against the live scene rather than against a copy of it, so a check cannot quietly agree with the thing it is checking.",
+        "Break each assertion on purpose. One that survives its own mutation is repaired; the mutation is never weakened to suit it.",
+        "Leave what is not yet documented visibly undocumented, and ship it in that state."
+      ],
+      "knownFailures": [
+        { "name": "Every check passed while it was broken",
+          "note": "Choosing a region from the closed mind flew the camera to where the region had been before the mind unfolded. Thirteen of fifteen landed completely off screen — one at y=2710, another at -6070,-38218 — and the entire suite passed throughout, because the checks run under reduced motion, where the fold completes before the framing is computed and the ordering that caused it cannot occur. A suite that only exercises one path proves things about one path." },
+        { "name": "The navigation was invisible",
+          "note": "The fifteen region emblems are the only things to aim at in the menu, and they were being drawn dimmer than the constellation's own decorative stars — Philosophy at 45, Observation at 72, against background stars near 250. Choosing a region flew you into what looked like empty space. Nothing was broken; it was simply unlit." },
+        { "name": "An assertion went quiet",
+          "note": "A check claimed to prove that hovering a region brightens it, but measured any rise at all across a wide window — and a hover also enlarges the point. With the brightening removed entirely, growth alone moved the reading from 62 to 64 and the check still passed. It now measures the core in a tight window, where growth spreads light outward and only emphasis raises it: +36% healthy against +0% mutated. A test that cannot fail is not a test." },
+        { "name": "The organ was built twice before it read as one",
+          "note": "The first attempt drew evenly spaced curves across a closed shell and read as a helmet. The second was a lit mesh of 26,624 triangles, and was recognisable and wrong — a translucent clay organ, the object rather than the mind. Both were rejected outright rather than tuned." }
+      ],
+      "figure": "five-parts-one-file"
     }
   ]
 }
@@ -6449,6 +6503,64 @@ var FIGURES = {
       '<text x="582" y="116" text-anchor="middle" font-size="8.5" fill="#5e6367">not at zero</text>',
       '<text x="518" y="58" font-size="9" fill="#9a2a1f">04</text></g>',
       '<line x1="14" y1="168" x2="646" y2="168" stroke="#b9bcb6" stroke-width="1"></line>',
+      '</svg>'
+    ].join('')
+  },
+
+  /* Five inputs, one file. Drawn as an assembly rather than a flow, because
+     that is what it is: nothing is fetched at run time, so every part has to
+     be inside the artifact before it leaves the bench. */
+  'five-parts-one-file': {
+    caption: 'Fig. 2.1 — assembly: five parts, one file, nothing fetched',
+    parts: [1, 2, 3, 4, 5],
+    svg: [
+      /* Pitch 46 against a box height of 32, so the nine-pixel gap under each
+         box is clear for the next part's number. At a pitch of 42 the number
+         sat on the box above it. */
+      '<svg class="wk-svg wk-svg--stack" viewBox="0 -12 660 276" role="img" aria-label="Assembly drawing: the graph, the shell, the renderer, the scene and the manual compose into one self-contained file that makes no external requests.">',
+      '<g class="part p1">',
+      '<rect x="14" y="12" width="150" height="32" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="89" y="27" text-anchor="middle" font-size="9.5" fill="#1a1d1f">THE GRAPH</text>',
+      '<text x="89" y="39" text-anchor="middle" font-size="8" fill="#5e6367">143 objects · 126 links</text>',
+      '<text x="14" y="7" font-size="9" fill="#9a2a1f">01</text></g>',
+      '<g class="part p2">',
+      '<rect x="14" y="58" width="150" height="32" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="89" y="73" text-anchor="middle" font-size="9.5" fill="#1a1d1f">THE SHELL</text>',
+      '<text x="89" y="85" text-anchor="middle" font-size="8" fill="#5e6367">21KB · structure</text>',
+      '<text x="14" y="53" font-size="9" fill="#9a2a1f">02</text></g>',
+      '<g class="part p3">',
+      '<rect x="14" y="104" width="150" height="32" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="89" y="119" text-anchor="middle" font-size="9.5" fill="#1a1d1f">THE RENDERER</text>',
+      '<text x="89" y="131" text-anchor="middle" font-size="8" fill="#5e6367">three r149 · 594KB</text>',
+      '<text x="14" y="99" font-size="9" fill="#9a2a1f">03</text></g>',
+      '<g class="part p4">',
+      '<rect x="14" y="150" width="150" height="32" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="89" y="165" text-anchor="middle" font-size="9.5" fill="#1a1d1f">THE SCENE</text>',
+      '<text x="89" y="177" text-anchor="middle" font-size="8" fill="#5e6367">228KB · 6 draw calls</text>',
+      '<text x="14" y="145" font-size="9" fill="#9a2a1f">04</text></g>',
+      '<g class="part p5">',
+      '<rect x="14" y="196" width="150" height="32" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="89" y="211" text-anchor="middle" font-size="9.5" fill="#1a1d1f">THE MANUAL</text>',
+      '<text x="89" y="223" text-anchor="middle" font-size="8" fill="#5e6367">21KB · this</text>',
+      '<text x="14" y="191" font-size="9" fill="#9a2a1f">05</text></g>',
+      /* the leaders gather on one bus, then run to the artifact once */
+      '<path class="lead" d="M164 28 L232 28 L232 120" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<path class="lead" d="M164 74 L232 74 L232 120" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<path class="lead" d="M164 120 L292 120" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<path class="lead" d="M164 166 L232 166 L232 120" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<path class="lead" d="M164 212 L232 212 L232 120" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      /* the artifact */
+      '<rect x="292" y="76" width="176" height="88" fill="none" stroke="#1a1d1f" stroke-width="1.6"></rect>',
+      '<text x="380" y="108" text-anchor="middle" font-size="11" fill="#1a1d1f">v02.html</text>',
+      '<text x="380" y="126" text-anchor="middle" font-size="8.5" fill="#5e6367">953KB · one file</text>',
+      '<text x="380" y="140" text-anchor="middle" font-size="8.5" fill="#5e6367">idle: 0 frames</text>',
+      /* and the thing that never happens */
+      '<path d="M468 120 L556 120" stroke="#9a2a1f" stroke-width="1" stroke-dasharray="4 3"></path>',
+      '<line x1="502" y1="106" x2="522" y2="134" stroke="#9a2a1f" stroke-width="1.4"></line>',
+      '<line x1="522" y1="106" x2="502" y2="134" stroke="#9a2a1f" stroke-width="1.4"></line>',
+      '<text x="562" y="117" font-size="8.5" fill="#9a2a1f">NO NETWORK</text>',
+      '<text x="562" y="129" font-size="8" fill="#5e6367">nothing is fetched</text>',
+      '<line x1="14" y1="252" x2="646" y2="252" stroke="#b9bcb6" stroke-width="1"></line>',
       '</svg>'
     ].join('')
   }
@@ -6607,7 +6719,17 @@ function renderWritten(sh, n){
   });
   c2.appendChild(ul);
 
-  c2.appendChild(el('p', 'wk-h', 'Known failures'));
+  grid.appendChild(c2);
+  wkBody.appendChild(grid);
+
+  /* KNOWN FAILURES GETS THE FULL WIDTH. It sat in the right rail under the
+     parts list, which balanced while a sheet had two of them and stopped
+     balancing the moment a sheet had four — one column ran three times the
+     length of the other. It is also the section that makes this format worth
+     choosing over a gallery, and a column it has to share is the wrong place
+     to put it. */
+  var fw = el('div', 'wk-failwrap');
+  fw.appendChild(el('p', 'wk-h', 'Known failures'));
   var fails = sh.knownFailures || [];
   if(fails.length){
     var fl = el('ul', 'wk-fail');
@@ -6617,14 +6739,13 @@ function renderWritten(sh, n){
       li.appendChild(document.createTextNode(f.note));
       fl.appendChild(li);
     });
-    c2.appendChild(fl);
+    fw.appendChild(fl);
   } else {
-    c2.appendChild(el('p', 'wk-none',
+    fw.appendChild(el('p', 'wk-none',
       'Not yet written. This section stays empty until something has actually ' +
       'broken and been understood.'));
   }
-  grid.appendChild(c2);
-  wkBody.appendChild(grid);
+  wkBody.appendChild(fw);
 
   if(sh.figure && FIGURES[sh.figure]) renderFigure(FIGURES[sh.figure]);
   if(sh.operable) renderDiagnostic();

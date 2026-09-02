@@ -113,18 +113,29 @@ setTimeout(function(){
       return { id: e.a === 'p-cotsi' ? e.b : e.a, verb: e.verb };
     });
 
-    /* W10 — measured HERE, on the sheet that actually has a drawing. Read
-       after navigating to the reserved sheet it found no figure at all and
-       reported null. */
-    out.overflowX=document.documentElement.scrollWidth > window.innerWidth;
-    /* AND THE LAYER ITSELF. #works sets overflow-y:auto, and CSS computes the
-       other axis to auto when one is not visible — so the layer quietly
-       absorbs any sideways overflow and the DOCUMENT never grows. Measuring
-       only the document said "clean" while the manual scrolled sideways. */
+    /* W10 — EVERY SHEET, not whichever one happened to be open. Measured on a
+       single sheet this said "clean" while another one scrolled sideways: a
+       drawing is authored per sheet, so the risk is per sheet too.
+
+       The layer is measured as well as the document. #works sets
+       overflow-y:auto, and CSS computes the other axis to auto alongside it,
+       so the layer quietly absorbs sideways overflow and the DOCUMENT never
+       grows to show it. */
     var wkEl=document.getElementById('works');
-    out.layerOverflow=wkEl.scrollWidth - wkEl.clientWidth;
-    var fsc=document.querySelector('.wk-figscroll');
-    out.figScrolls=fsc ? (fsc.scrollWidth > fsc.clientWidth) : null;
+    out.perSheet={};
+    W.sheets().forEach(function(id){
+      W.show(id);
+      var fsc=document.querySelector('.wk-figscroll');
+      out.perSheet[id]={
+        doc:document.documentElement.scrollWidth > window.innerWidth,
+        layer:wkEl.scrollWidth - wkEl.clientWidth,
+        figScrolls:fsc ? (fsc.scrollWidth > fsc.clientWidth) : null
+      };
+    });
+    W.show('p-cotsi');
+    out.overflowX=out.perSheet['p-cotsi'].doc;
+    out.layerOverflow=out.perSheet['p-cotsi'].layer;
+    out.figScrolls=out.perSheet['p-cotsi'].figScrolls;
 
     /* W5 — a reserved sheet is stamped, not empty */
     W.show('p-statelab');
@@ -259,15 +270,22 @@ ck('W9', r.escOnce === 'contents' && r.escTwice === false,
    (r.focusAfter ? ' (focus lands on #' + r.focusAfter + ')' : ''));
 
 /* W10 — and none of it scrolls sideways, at either composition */
-ck('W10', r.overflowX === false && rp.overflowX === false &&
+const wide = [];
+[[r,'desktop'],[rp,'phone']].forEach(([res,tag]) => {
+  Object.keys(res.perSheet).forEach(id => {
+    const p = res.perSheet[id];
+    if(p.doc || p.layer !== 0) wide.push(tag + ':' + id + ' by ' + p.layer + 'px');
+  });
+});
+ck('W10', wide.length === 0 &&
           r.overflowContents === false && rp.overflowContents === false &&
           r.rowOverflow === 0 && rp.rowOverflow === 0 &&
-          r.layerOverflow === 0 && rp.layerOverflow === 0 &&
           rp.figScrolls === true,
    'nothing is wider than the box it was given — page and rows clean at ' +
    r.vw + 'x' + r.vh + ' and ' + rp.vw + 'x' + rp.vh +
-   ' (row over by ' + rp.rowOverflow + 'px, layer by ' + rp.layerOverflow +
-   'px) — and only the drawing scrolls, inside itself');
+   ' — all ' + Object.keys(r.perSheet).length + ' sheets, contents included' +
+   (wide.length ? ' — WIDE: ' + wide.join(', ') : '') +
+   ' — and only the drawing scrolls, inside itself');
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' manual invariants hold');
 console.log(bad ? '  ' + bad + ' PROBLEM(S)'

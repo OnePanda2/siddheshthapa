@@ -34,6 +34,46 @@
       ],
       "figure": "diagnostic-before-generation",
       "operable": true
+    },
+    {
+      "node": "p-website",
+      "authority": [
+        "tools/build-v02.js — the five inputs and the order they compose in",
+        "CHECKPOINT.md — known imperfections 4, 6 and 7, each recorded when it was found",
+        "BRAIN-VISUAL-SPEC.md §0 — why the two previous attempts failed",
+        "WORKS-MANUAL-SPEC.md §1 — the derived / declared / forbidden rule"
+      ],
+      "purpose": "To put a way of thinking somewhere it can be walked through rather than described. The constraint that shapes everything else is that it must not be able to lie: a claim on the page has to come from a source the project holds, or it does not go on the page.",
+      "parts": [
+        { "n": 1, "name": "the graph",
+          "note": "143 declared objects and 126 relationships, extracted verbatim from the locked source at build time. It is never retyped, so the experience layer cannot disagree with the content it renders." },
+        { "n": 2, "name": "the shell",
+          "note": "Markup, style, and the DOM structure. Delete the canvas and this still carries the whole mind — the 3D is an experience over the structure, not the structure itself." },
+        { "n": 3, "name": "the renderer",
+          "note": "three.js r149, 594KB, inlined rather than linked. The artifact's content policy blocks every CDN, and a blocked script fails silently — so the library ships inside the file or the page dies without saying why." },
+        { "n": 4, "name": "the scene",
+          "note": "The constellation, the fold from brain to universe, and the twelve charted planetary systems. Renders on demand: idle costs zero frames." },
+        { "n": 5, "name": "the manual",
+          "note": "This. A second door off the same threshold, and the only part of the site that is deliberately not the mind." }
+      ],
+      "procedure": [
+        "Declare each thing once, in the locked source, with where it came from. Nothing is written twice.",
+        "Compose the artifact from the five parts above — one file, no external requests, nothing to fetch at run time.",
+        "Assert every claim against the live scene rather than against a copy of it, so a check cannot quietly agree with the thing it is checking.",
+        "Break each assertion on purpose. One that survives its own mutation is repaired; the mutation is never weakened to suit it.",
+        "Leave what is not yet documented visibly undocumented, and ship it in that state."
+      ],
+      "knownFailures": [
+        { "name": "Every check passed while it was broken",
+          "note": "Choosing a region from the closed mind flew the camera to where the region had been before the mind unfolded. Thirteen of fifteen landed completely off screen — one at y=2710, another at -6070,-38218 — and the entire suite passed throughout, because the checks run under reduced motion, where the fold completes before the framing is computed and the ordering that caused it cannot occur. A suite that only exercises one path proves things about one path." },
+        { "name": "The navigation was invisible",
+          "note": "The fifteen region emblems are the only things to aim at in the menu, and they were being drawn dimmer than the constellation's own decorative stars — Philosophy at 45, Observation at 72, against background stars near 250. Choosing a region flew you into what looked like empty space. Nothing was broken; it was simply unlit." },
+        { "name": "An assertion went quiet",
+          "note": "A check claimed to prove that hovering a region brightens it, but measured any rise at all across a wide window — and a hover also enlarges the point. With the brightening removed entirely, growth alone moved the reading from 62 to 64 and the check still passed. It now measures the core in a tight window, where growth spreads light outward and only emphasis raises it: +36% healthy against +0% mutated. A test that cannot fail is not a test." },
+        { "name": "The organ was built twice before it read as one",
+          "note": "The first attempt drew evenly spaced curves across a closed shell and read as a helmet. The second was a lit mesh of 26,624 triangles, and was recognisable and wrong — a translucent clay organ, the object rather than the mind. Both were rejected outright rather than tuned." }
+      ],
+      "figure": "five-parts-one-file"
     }
   ]
 }

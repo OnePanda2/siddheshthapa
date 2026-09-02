@@ -77,6 +77,64 @@ var FIGURES = {
       '<line x1="14" y1="168" x2="646" y2="168" stroke="#b9bcb6" stroke-width="1"></line>',
       '</svg>'
     ].join('')
+  },
+
+  /* Five inputs, one file. Drawn as an assembly rather than a flow, because
+     that is what it is: nothing is fetched at run time, so every part has to
+     be inside the artifact before it leaves the bench. */
+  'five-parts-one-file': {
+    caption: 'Fig. 2.1 — assembly: five parts, one file, nothing fetched',
+    parts: [1, 2, 3, 4, 5],
+    svg: [
+      /* Pitch 46 against a box height of 32, so the nine-pixel gap under each
+         box is clear for the next part's number. At a pitch of 42 the number
+         sat on the box above it. */
+      '<svg class="wk-svg wk-svg--stack" viewBox="0 -12 660 276" role="img" aria-label="Assembly drawing: the graph, the shell, the renderer, the scene and the manual compose into one self-contained file that makes no external requests.">',
+      '<g class="part p1">',
+      '<rect x="14" y="12" width="150" height="32" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="89" y="27" text-anchor="middle" font-size="9.5" fill="#1a1d1f">THE GRAPH</text>',
+      '<text x="89" y="39" text-anchor="middle" font-size="8" fill="#5e6367">143 objects · 126 links</text>',
+      '<text x="14" y="7" font-size="9" fill="#9a2a1f">01</text></g>',
+      '<g class="part p2">',
+      '<rect x="14" y="58" width="150" height="32" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="89" y="73" text-anchor="middle" font-size="9.5" fill="#1a1d1f">THE SHELL</text>',
+      '<text x="89" y="85" text-anchor="middle" font-size="8" fill="#5e6367">21KB · structure</text>',
+      '<text x="14" y="53" font-size="9" fill="#9a2a1f">02</text></g>',
+      '<g class="part p3">',
+      '<rect x="14" y="104" width="150" height="32" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="89" y="119" text-anchor="middle" font-size="9.5" fill="#1a1d1f">THE RENDERER</text>',
+      '<text x="89" y="131" text-anchor="middle" font-size="8" fill="#5e6367">three r149 · 594KB</text>',
+      '<text x="14" y="99" font-size="9" fill="#9a2a1f">03</text></g>',
+      '<g class="part p4">',
+      '<rect x="14" y="150" width="150" height="32" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="89" y="165" text-anchor="middle" font-size="9.5" fill="#1a1d1f">THE SCENE</text>',
+      '<text x="89" y="177" text-anchor="middle" font-size="8" fill="#5e6367">228KB · 6 draw calls</text>',
+      '<text x="14" y="145" font-size="9" fill="#9a2a1f">04</text></g>',
+      '<g class="part p5">',
+      '<rect x="14" y="196" width="150" height="32" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="89" y="211" text-anchor="middle" font-size="9.5" fill="#1a1d1f">THE MANUAL</text>',
+      '<text x="89" y="223" text-anchor="middle" font-size="8" fill="#5e6367">21KB · this</text>',
+      '<text x="14" y="191" font-size="9" fill="#9a2a1f">05</text></g>',
+      /* the leaders gather on one bus, then run to the artifact once */
+      '<path class="lead" d="M164 28 L232 28 L232 120" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<path class="lead" d="M164 74 L232 74 L232 120" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<path class="lead" d="M164 120 L292 120" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<path class="lead" d="M164 166 L232 166 L232 120" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<path class="lead" d="M164 212 L232 212 L232 120" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      /* the artifact */
+      '<rect x="292" y="76" width="176" height="88" fill="none" stroke="#1a1d1f" stroke-width="1.6"></rect>',
+      '<text x="380" y="108" text-anchor="middle" font-size="11" fill="#1a1d1f">v02.html</text>',
+      '<text x="380" y="126" text-anchor="middle" font-size="8.5" fill="#5e6367">953KB · one file</text>',
+      '<text x="380" y="140" text-anchor="middle" font-size="8.5" fill="#5e6367">idle: 0 frames</text>',
+      /* and the thing that never happens */
+      '<path d="M468 120 L556 120" stroke="#9a2a1f" stroke-width="1" stroke-dasharray="4 3"></path>',
+      '<line x1="502" y1="106" x2="522" y2="134" stroke="#9a2a1f" stroke-width="1.4"></line>',
+      '<line x1="522" y1="106" x2="502" y2="134" stroke="#9a2a1f" stroke-width="1.4"></line>',
+      '<text x="562" y="117" font-size="8.5" fill="#9a2a1f">NO NETWORK</text>',
+      '<text x="562" y="129" font-size="8" fill="#5e6367">nothing is fetched</text>',
+      '<line x1="14" y1="252" x2="646" y2="252" stroke="#b9bcb6" stroke-width="1"></line>',
+      '</svg>'
+    ].join('')
   }
 };
 
@@ -233,7 +291,17 @@ function renderWritten(sh, n){
   });
   c2.appendChild(ul);
 
-  c2.appendChild(el('p', 'wk-h', 'Known failures'));
+  grid.appendChild(c2);
+  wkBody.appendChild(grid);
+
+  /* KNOWN FAILURES GETS THE FULL WIDTH. It sat in the right rail under the
+     parts list, which balanced while a sheet had two of them and stopped
+     balancing the moment a sheet had four — one column ran three times the
+     length of the other. It is also the section that makes this format worth
+     choosing over a gallery, and a column it has to share is the wrong place
+     to put it. */
+  var fw = el('div', 'wk-failwrap');
+  fw.appendChild(el('p', 'wk-h', 'Known failures'));
   var fails = sh.knownFailures || [];
   if(fails.length){
     var fl = el('ul', 'wk-fail');
@@ -243,14 +311,13 @@ function renderWritten(sh, n){
       li.appendChild(document.createTextNode(f.note));
       fl.appendChild(li);
     });
-    c2.appendChild(fl);
+    fw.appendChild(fl);
   } else {
-    c2.appendChild(el('p', 'wk-none',
+    fw.appendChild(el('p', 'wk-none',
       'Not yet written. This section stays empty until something has actually ' +
       'broken and been understood.'));
   }
-  grid.appendChild(c2);
-  wkBody.appendChild(grid);
+  wkBody.appendChild(fw);
 
   if(sh.figure && FIGURES[sh.figure]) renderFigure(FIGURES[sh.figure]);
   if(sh.operable) renderDiagnostic();
