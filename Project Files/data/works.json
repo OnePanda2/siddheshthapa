@@ -141,6 +141,26 @@
           "note": "Not owning land is not a problem that can be engineered around, and it is recorded as a constraint rather than solved. Some limits are conditions of the work, and the honest thing is to name them instead of implying they were overcome." }
       ],
       "figure": "two-halves-one-habit"
+    },
+    {
+      "node": "p-statelab",
+      "authority": [
+        "Siddhesh, 2026-09-02 — the description of the project, supplied in full and quoted rather than summarised"
+      ],
+      "purpose": "To find a random-number generator faster than the one securing most of the internet, that needs no special chip to run. Speed alone is not the test: a candidate has to be enough better to be worth changing something almost everything depends on.",
+      "parts": [
+        { "n": 1, "name": "the incumbent",
+          "note": "The generator securing most of the internet — the thing any candidate has to beat. Which one it is is not stated here." },
+        { "n": 2, "name": "the constraint",
+          "note": "No special chip. A candidate that needs particular hardware to be fast does not count, however fast it is on that hardware." },
+        { "n": 3, "name": "the candidate",
+          "note": "After months of testing, one is 3% faster — and carries the first real evidence that it might be genuinely stronger per unit of work, not merely quicker." }
+      ],
+      "knownFailures": [
+        { "name": "3% is not enough",
+          "note": "Nobody replaces the thing securing most of the internet for 3%. A margin has to be worth the cost and risk of changing it, and this one is not, so the result is a real finding and not yet a reason to switch. The hunt continues." }
+      ],
+      "figure": "three-percent-is-not-enough"
     }
   ]
 }

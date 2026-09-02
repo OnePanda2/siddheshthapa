@@ -141,27 +141,22 @@ setTimeout(function(){
                  .map(function(s){ return parseInt(s,10); }),
         hasFigure:!!document.querySelector('.wk-svg'),
         plate:(document.querySelector('.wk-plate span')||{}).textContent||'',
-        cap:(document.querySelector('.wk-cap')||{}).textContent||''
+        cap:(document.querySelector('.wk-cap')||{}).textContent||'',
+        /* W5, per sheet. Pointed at one named work, it broke the moment that
+           work was written - and it would have broken silently as a PASS if
+           the named one had happened to stay reserved while another did not. */
+        stamp:(document.querySelector('.wk-stamp')||{}).textContent||'',
+        hasNone:!!document.querySelector('.wk-none'),
+        steps:document.querySelectorAll('.wk-steps li').length,
+        hasLine:!!document.querySelector('.wk-line'),
+        plateCount:document.querySelectorAll('.wk-plate span').length,
+        seeCount:document.querySelectorAll('[data-see]').length
       };
     });
     W.show('p-cotsi');
     out.overflowX=out.perSheet['p-cotsi'].doc;
     out.layerOverflow=out.perSheet['p-cotsi'].layer;
     out.figScrolls=out.perSheet['p-cotsi'].figScrolls;
-
-    /* W5 — a reserved sheet is stamped, not empty */
-    W.show('p-statelab');
-    out.reserved={
-      name:(document.querySelector('.wk-name')||{}).textContent,
-      stamp:(document.querySelector('.wk-stamp')||{}).textContent,
-      hasNone:!!document.querySelector('.wk-none'),
-      steps:document.querySelectorAll('.wk-steps li').length,
-      /* the derived tier is still on the page */
-      hasLine:!!document.querySelector('.wk-line'),
-      plate:[].map.call(document.querySelectorAll('.wk-plate span'),
-                        function(s){ return s.textContent; }),
-      see:document.querySelectorAll('[data-see]').length
-    };
 
     /* W9 — Escape steps back one level, then closes */
     function esc(){ document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true})); }
@@ -256,13 +251,22 @@ ck('W4', r.see.length > 0 && invented.length === 0 && wrongVerb.length === 0,
    (invented.length ? ' — INVENTED: ' + invented.map(s => s.id).join(', ') : '') +
    (wrongVerb.length ? ' — WRONG VERB: ' + wrongVerb.map(s => s.id).join(', ') : ''));
 
-/* W5 — an undocumented work is reserved, not hidden and not padded */
-const rv = r.reserved;
-ck('W5', rv.stamp === 'not yet written' && rv.hasNone && rv.steps === 0 &&
-         rv.hasLine && rv.plate.length === 2 && rv.see > 0,
-   'an undocumented work is a reserved sheet, not an empty one — ' + rv.name +
-   ' stamped "' + rv.stamp + '", 0 steps, and its derived tier still printed (' +
-   rv.see + ' relationships)');
+/* W5 — EVERY undocumented work is reserved: stamped, not hidden, not padded,
+   and still carrying the tier the graph declares. */
+const reservedIds = r.sheets.filter(id => r.written.indexOf(id) < 0);
+const wrong = reservedIds.filter(id => {
+  const p = r.perSheet[id];
+  return !p || p.stamp !== 'not yet written' || !p.hasNone || p.steps !== 0 ||
+         !p.hasLine || p.plateCount !== 2 || p.seeCount === 0;
+});
+ck('W5', reservedIds.length > 0 && wrong.length === 0,
+   reservedIds.length
+     ? 'every undocumented work is a reserved sheet, not an empty one — ' +
+       reservedIds.length + ' of ' + r.sheets.length + ' reserved, each stamped ' +
+       'and still printing its derived tier' +
+       (wrong.length ? ' — WRONG: ' + wrong.join(', ') : '')
+     : 'NOTHING TO CHECK — every work is written, so this assertion is vacuous ' +
+       'and the reserved-sheet guarantee is currently untested');
 
 /* W6 — no drawing has drifted from its own parts list, on any sheet */
 const num = a => a.slice().sort((x, y) => x - y).join('/');
