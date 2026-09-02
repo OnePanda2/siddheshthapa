@@ -1,0 +1,6 @@
+CONSTELLATION-V1 - plain-copy checkpoint
+files: 49
+sha256 of the whole set: 26fc48ff61bf870eba0b3e9e8ea0c70bd357115d5ad2b26d748c3a2b32745dd4
+
+Restore without git: copy src/, tools/, data/ and v02.html back over
+the project root, then run:  node tools/build-v02.js

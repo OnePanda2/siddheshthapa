@@ -1,0 +1,57 @@
+Siddhesh Thapa
+SUMMARY
+Personal website project for siddheshthapa.com as a public-facing “copy of my brain”: a living archive of thoughts, 
+beliefs, observations, philosophical ideas, business thinking, personal principles, writing, experiments, projects, and 
+intellectual evolution.
+EXPERIENCE
+since the last 3 years
+Multiple businesses and startups
+I've been a part of many businesses and startups and helped them with Marketing, content writing, positioning and 
+building their online presence. Website designing and proofreading has been a part of my job since the last 3 years.
+• Helped with marketing, content writing, positioning, and building online presence.
+• Website designing and proofreading has been a part of the job since the last 3 years.
+Research and technology startup (defence context)
+Our startup is a research and technology business at its core, prioritised towards building breakthrough and 
+independent tech that does not depend on tech from any other country.
+• Primary products include kamikaze drones for the Indian army to target enemies from a safer distance, reduce 
+risk of losing lives, and increase targeting accuracy.
+• Work for the Indian army as target customer.
+• Design process includes idea generation, market research, consulting veteran and experienced soldiers, working 
+with soldiers during training, continuous feedback, iteration, and participation in government procurement/
+bidding.
+• Soldiers train with the team almost every day, approximately 6 days a week excluding government holidays.
+• Challenges mentioned: financial constraints as a bootstrapped young startup and testing environment 
+constraints due to not owning dedicated land.
+PROJECTS
+siddheshthapa.com  | Personal website / “copy of my brain”
+• Intended as a living archive of beliefs, ideas, essays, projects, experiments, learning, questions, contradictions, 
+and intellectual evolution.
+• Major section: “My Beliefs.”
+COTSI course-personalisation idea  | Feature concept for a Claude skill called COTSI
+• Trigger: /cotsi I want a course on [topic name].
+• Should ask diagnostic questions first (Yes/No and multiple-choice only) instead of generating a generic 
+beginner course.
+• Determine current level (beginner to highly advanced) and then build a course from actual knowledge level.
+• Philosophy: “A good tutor diagnoses before teaching.”
+TECHNICAL SKILLS
+Marketing
+Content writing
+Positioning
+Building online presence
+Website designing
+Proofreading
+Design thinking
+User feedback and iteration
+Market research
+WRITING / THINKING STYLE
+Philosophical observation, existential thinking, business/founder thinking, skepticism, curiosity, social commentary, 
+dark/dry humor, Gen-Z internet language, concise aphorisms, and reflective monologues.
+CORE PHILOSOPHICAL THEMES
+Unrealised potential; Curiosity over utility; Action over potential; Value over money; Intellectual independence; 
+Human complexity.
+IMPORTANT PHRASES / CONCEPTUAL ANCHORS
+“To be kind is rebellion enough.”; “But the lotus blooms anyway.”; “The man you had the potential to be.”; “Life 
+comes in a package.”; “We divided knowledge for the sake of understanding it, but we shouldn't let those divisions 
+limit our curiosity.”; “You need value more than money in order to make money.”; “Consistent execution > untapped 
+intelligence.”; “People worship wealth, not its source.”; “First comes desire, then comes justification.”; “Disciplinary 
+boundaries are tools, not walls.”; “Access → insight → better decisions → better product.”

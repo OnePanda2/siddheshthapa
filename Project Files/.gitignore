@@ -1,0 +1,21 @@
+# Screenshots and render sheets. Thousands of PNGs from the visual review —
+# they are evidence for a decision already made, not part of the project, and
+# they are what makes the scratch directory 60MB.
+.p3/**/*.png
+.p3/*.png
+.p3/**/*.html
+.p3/*.html
+.p3/*.json
+.p3/appcheck.tmp.js
+.p3/v02*.bak.js
+.p3/v02.*.js
+.p3/tmp.*
+
+# node, editor, OS noise
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+
+# headless-Chrome working files; created and swept by tools/scratch.js
+.scratch/
