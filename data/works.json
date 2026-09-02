@@ -105,6 +105,42 @@
           "note": "Two of the names carry a version and one carries a browser's duplicate-download suffix. Where the version lives in the filename there is no record of what changed between one and the next, and the earlier one is usually gone." }
       ],
       "figure": "one-documented-six-named"
+    },
+    {
+      "node": "w-startups",
+      "authority": [
+        "source-text/Siddhesh Thapa (pdf).txt — EXPERIENCE: multiple businesses and startups; research and technology startup, defence context, and its stated design process and constraints",
+        "source-text/Siddhesh Thapa (rtf).txt §13 — the freelance pitch, the refined positioning, and the sales principle",
+        "source-text/Siddhesh Thapa (rtf).txt §14 — the founder conversation and what it concluded"
+      ],
+      "purpose": "Three years of being paid by people who were watching the result. The through-line across both halves is the same habit: get next to whoever will actually use the thing before deciding what it should be, and keep asking them while it is being built.",
+      "parts": [
+        { "n": 1, "name": "the freelance work",
+          "note": "Marketing, content, positioning, online presence, website design and proofreading, across multiple businesses and startups. Paid work for people measuring whether it worked." },
+        { "n": 2, "name": "the defence startup",
+          "note": "A bootstrapped research and technology business building independent tech that does not depend on another country's. Its primary product is kamikaze drones for the Indian army — hitting a target from further away, so fewer people have to be near it." },
+        { "n": 3, "name": "the people who use it",
+          "note": "Veteran and experienced soldiers, consulted before the design and present during it: they train with the team roughly six days a week. The customer is not researched at a distance; they are in the room." },
+        { "n": 4, "name": "the constraints",
+          "note": "No budget, as a bootstrapped young startup, and nowhere to test — the team does not own dedicated land. Both shaped the work rather than merely slowing it." }
+      ],
+      "procedure": [
+        "Generate the idea, then go and check it rather than defending it.",
+        "Research the market, and treat that as the beginning of the question rather than the answer.",
+        "Consult veterans and experienced soldiers — people who have used something like it under the conditions it is actually for.",
+        "Work alongside them while it is being built, not once at the end. They are there roughly six days a week.",
+        "Take the feedback and iterate. Repeat until the people who will carry it stop finding fault with it.",
+        "Enter government procurement and bid."
+      ],
+      "knownFailures": [
+        { "name": "Moved too fast to the pitch",
+          "note": "An outreach to a startup founder went straight for the meeting, the pitch, the brainstorm, and the consultant framing. The founder answered: I am a spontaneous person, you just be by yourself, we will figure this out together if we are a great fit for each other. The lesson recorded at the time was two words — stop performing — and it is the exact opposite of the instinct that produced the message." },
+        { "name": "The first pitch explained instead of positioning",
+          "note": "The original freelance pitch ran 54 words and spent its last sentence explaining why the reader should believe it. The refined version is 8 claims in 24 words and explains nothing. The principle it was rewritten against: show relevance, demonstrate understanding, then ask for the opportunity — and avoid generic consultant language, which is what the first version was made of." },
+        { "name": "Nowhere to test",
+          "note": "Not owning land is not a problem that can be engineered around, and it is recorded as a constraint rather than solved. Some limits are conditions of the work, and the honest thing is to name them instead of implying they were overcome." }
+      ],
+      "figure": "two-halves-one-habit"
     }
   ]
 }

@@ -6496,6 +6496,42 @@ var WORKS_DATA = {
           "note": "Two of the names carry a version and one carries a browser's duplicate-download suffix. Where the version lives in the filename there is no record of what changed between one and the next, and the earlier one is usually gone." }
       ],
       "figure": "one-documented-six-named"
+    },
+    {
+      "node": "w-startups",
+      "authority": [
+        "source-text/Siddhesh Thapa (pdf).txt — EXPERIENCE: multiple businesses and startups; research and technology startup, defence context, and its stated design process and constraints",
+        "source-text/Siddhesh Thapa (rtf).txt §13 — the freelance pitch, the refined positioning, and the sales principle",
+        "source-text/Siddhesh Thapa (rtf).txt §14 — the founder conversation and what it concluded"
+      ],
+      "purpose": "Three years of being paid by people who were watching the result. The through-line across both halves is the same habit: get next to whoever will actually use the thing before deciding what it should be, and keep asking them while it is being built.",
+      "parts": [
+        { "n": 1, "name": "the freelance work",
+          "note": "Marketing, content, positioning, online presence, website design and proofreading, across multiple businesses and startups. Paid work for people measuring whether it worked." },
+        { "n": 2, "name": "the defence startup",
+          "note": "A bootstrapped research and technology business building independent tech that does not depend on another country's. Its primary product is kamikaze drones for the Indian army — hitting a target from further away, so fewer people have to be near it." },
+        { "n": 3, "name": "the people who use it",
+          "note": "Veteran and experienced soldiers, consulted before the design and present during it: they train with the team roughly six days a week. The customer is not researched at a distance; they are in the room." },
+        { "n": 4, "name": "the constraints",
+          "note": "No budget, as a bootstrapped young startup, and nowhere to test — the team does not own dedicated land. Both shaped the work rather than merely slowing it." }
+      ],
+      "procedure": [
+        "Generate the idea, then go and check it rather than defending it.",
+        "Research the market, and treat that as the beginning of the question rather than the answer.",
+        "Consult veterans and experienced soldiers — people who have used something like it under the conditions it is actually for.",
+        "Work alongside them while it is being built, not once at the end. They are there roughly six days a week.",
+        "Take the feedback and iterate. Repeat until the people who will carry it stop finding fault with it.",
+        "Enter government procurement and bid."
+      ],
+      "knownFailures": [
+        { "name": "Moved too fast to the pitch",
+          "note": "An outreach to a startup founder went straight for the meeting, the pitch, the brainstorm, and the consultant framing. The founder answered: I am a spontaneous person, you just be by yourself, we will figure this out together if we are a great fit for each other. The lesson recorded at the time was two words — stop performing — and it is the exact opposite of the instinct that produced the message." },
+        { "name": "The first pitch explained instead of positioning",
+          "note": "The original freelance pitch ran 54 words and spent its last sentence explaining why the reader should believe it. The refined version is 8 claims in 24 words and explains nothing. The principle it was rewritten against: show relevance, demonstrate understanding, then ask for the opportunity — and avoid generic consultant language, which is what the first version was made of." },
+        { "name": "Nowhere to test",
+          "note": "Not owning land is not a problem that can be engineered around, and it is recorded as a constraint rather than solved. Some limits are conditions of the work, and the honest thing is to name them instead of implying they were overcome." }
+      ],
+      "figure": "two-halves-one-habit"
     }
   ]
 }
@@ -6656,6 +6692,63 @@ var FIGURES = {
       out.push('</svg>');
       return out.join('');
     })()
+  },
+
+  /* NOTE ON THE CONNECTORS. These are drawn as plain paths, not as .lead —
+     a leader line is an annotation that appears when an exploded view pulls
+     its parts apart, and hiding these until then left three unconnected boxes
+     and a floating word. Here the connections ARE the subject.
+
+     Two bodies of work that look unrelated on a CV, drawn as what they
+     actually share: the same loop, with the people who will use the thing
+     inside it rather than surveyed from outside. The constraints are drawn as
+     a bracket around the whole loop because that is where they sat. */
+  'two-halves-one-habit': {
+    caption: 'the same loop, run twice, under a bracket',
+    parts: [1, 2, 3, 4],
+    svg: [
+      '<svg class="wk-svg" viewBox="0 -14 660 250" role="img" aria-label="Two bodies of work — freelance across businesses, and a defence startup — both feeding one loop in which the people who will use the thing are consulted before and during the build. Constraints bracket the whole loop.">',
+      /* 01 · 02 — the two halves */
+      '<g class="part p1">',
+      '<rect x="14" y="20" width="158" height="52" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="93" y="42" text-anchor="middle" font-size="9.5" fill="#1a1d1f">FREELANCE</text>',
+      '<text x="93" y="56" text-anchor="middle" font-size="8" fill="#5e6367">copy · positioning</text>',
+      '<text x="93" y="67" text-anchor="middle" font-size="8" fill="#5e6367">sites · proofreading</text>',
+      '<text x="14" y="14" font-size="9" fill="#9a2a1f">01</text></g>',
+      '<g class="part p2">',
+      '<rect x="14" y="106" width="158" height="52" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="93" y="128" text-anchor="middle" font-size="9.5" fill="#1a1d1f">DEFENCE STARTUP</text>',
+      '<text x="93" y="142" text-anchor="middle" font-size="8" fill="#5e6367">research &amp; technology,</text>',
+      '<text x="93" y="153" text-anchor="middle" font-size="8" fill="#5e6367">bootstrapped</text>',
+      '<text x="14" y="100" font-size="9" fill="#9a2a1f">02</text></g>',
+      '<path d="M172 46 L226 46 L226 89 L246 89" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<path d="M172 132 L226 132 L226 89" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      /* 03 — the loop, with the user inside it */
+      '<g class="part p3">',
+      '<rect x="246" y="34" width="196" height="110" fill="none" stroke="#1a1d1f" stroke-width="1.6"></rect>',
+      '<text x="344" y="56" text-anchor="middle" font-size="9.5" fill="#1a1d1f">THE PEOPLE WHO USE IT</text>',
+      '<text x="344" y="72" text-anchor="middle" font-size="8" fill="#5e6367">consulted before the design</text>',
+      '<text x="344" y="83" text-anchor="middle" font-size="8" fill="#5e6367">and present during it</text>',
+      /* the loop itself */
+      '<path d="M286 96 L402 96" stroke="#1a1d1f" stroke-width="1"></path>',
+      '<path d="M402 96 L396 92 M402 96 L396 100" stroke="#1a1d1f" stroke-width="1"></path>',
+      '<path d="M402 96 C 418 104, 418 120, 402 126 L286 126 C 270 120, 270 104, 286 96" ' +
+        'fill="none" stroke="#1a1d1f" stroke-width="1"></path>',
+      '<text x="344" y="119" text-anchor="middle" font-size="8" fill="#5e6367">build · show · iterate</text>',
+      '<text x="246" y="28" font-size="9" fill="#9a2a1f">03</text></g>',
+      /* 04 — the bracket */
+      '<g class="part p4">',
+      '<path d="M232 168 L232 182 L456 182 L456 168" fill="none" stroke="#9a2a1f" stroke-width="1.2"></path>',
+      '<text x="344" y="198" text-anchor="middle" font-size="8.5" fill="#9a2a1f">NO BUDGET · NOWHERE TO TEST</text>',
+      '<text x="232" y="162" font-size="9" fill="#9a2a1f">04</text></g>',
+      '<path d="M442 89 L512 89" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3"></path>',
+      '<path d="M512 89 L506 85 M512 89 L506 93" stroke="#1a1d1f" stroke-width="1"></path>',
+      '<text x="520" y="86" font-size="8.5" fill="#1a1d1f">SHIPPED</text>',
+      '<text x="520" y="98" font-size="8" fill="#5e6367">for people watching</text>',
+      '<text x="520" y="109" font-size="8" fill="#5e6367">the result</text>',
+      '<line x1="14" y1="220" x2="646" y2="220" stroke="#b9bcb6" stroke-width="1"></line>',
+      '</svg>'
+    ].join('')
   }
 };
 
