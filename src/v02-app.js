@@ -3123,7 +3123,11 @@ function travelTo(mode,id,push){
 var elWhere=document.getElementById('where'), elGloss=document.getElementById('gloss'),
     elTier=document.getElementById('tier'), elGroups=document.getElementById('groups'),
     elStatus=document.getElementById('status'),
-    backBtn=document.getElementById('backBtn'), mindBtn=document.getElementById('mindBtn');
+    backBtn=document.getElementById('backBtn'), mindBtn=document.getElementById('mindBtn'),
+    /* obtained HERE with the other two, not beside the threshold code far
+       below: paintDOM paints all three during boot, and an exitBtn still
+       undefined at that moment took the whole app down with it */
+    exitBtn=document.getElementById('exitBtn');
 
 function row(n, meta, onClick, current){
   var li=document.createElement('li'), b=document.createElement('button');
@@ -3181,6 +3185,10 @@ function paintDOM(){
   elGroups.innerHTML='';
   backBtn.hidden=(state.mode==='universe');
   mindBtn.hidden=(state.mode==='universe');
+  /* the way out stays available at every depth, including the menu itself —
+     that is the whole point of it, and the other two controls are hidden there
+     precisely because there is nowhere further up to go inside the mind */
+  exitBtn.hidden=!entered;
 
   if(state.mode==='universe'){
     elTier.textContent='The mind of';
@@ -4663,6 +4671,7 @@ var worksBtn=document.getElementById('worksBtn');
 /* THE SECOND DOOR. It now opens the manual (src/v02-works.js), which installs
    itself as onWorksDoor. The old behaviour — enter the mind and fly to ART —
    remains as the fallback, so the door is never dead if the manual is absent. */
+if(exitBtn) exitBtn.addEventListener('click', leaveMind);
 if(worksBtn) worksBtn.addEventListener('click',function(){
   if(onWorksDoor) return onWorksDoor();
   enterMind();
@@ -4689,6 +4698,43 @@ function enterMind(){
   setTimeout(function(){ var f=document.querySelector('#groups [data-nav]'); if(f) f.focus(); },
              (reduced?0:540));
   say('You are in the mind. '+MIGS.length+' regions.');
+  paintControls();
+}
+
+/* THE WAY BACK OUT, and the exact reverse of entering.
+
+   The manual could always be closed and the mind could not: once you were in
+   it the only route back to the two doors was the browser's own back button,
+   which is not a route a visitor should have to think of. Everything entering
+   sets is unset here — including `entered`, without which the door would not
+   open a second time. */
+function leaveMind(){
+  if(!entered) return;
+  if(readingId) closeReader();
+  entered=false;
+  document.body.classList.remove('entered');
+  threshold.classList.remove('gone');
+  threshold.setAttribute('aria-hidden','false');
+  /* fold the mind shut behind you, so the door opens onto the organ again
+     rather than onto whichever world was last unfolded */
+  state.mode='universe'; state.region=null; state.focus=null;
+  history.length=0;
+  MORPH_ON=false; morphStart=0; setMindOpen(0);
+  var uf=frameFor('universe');
+  wantPos.copy(uf.p); wantAim.copy(uf.a);
+  invalidate(200);
+  paintDOM();
+  paintControls();
+  if(enterBtn) enterBtn.focus();
+  say('Back at the main menu.');
+}
+
+/* the three controls are painted together because their visibility is one
+   decision: where you are, and how far up you can still go */
+function paintControls(){
+  backBtn.hidden=(state.mode==='universe');
+  mindBtn.hidden=(state.mode==='universe');
+  exitBtn.hidden=!entered;
 }
 enterBtn.addEventListener('click',enterMind);
 window.__v02.enter=enterMind;
