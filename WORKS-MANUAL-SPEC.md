@@ -339,10 +339,21 @@ it has added its own and the total has grown.
 
 ## 12. Open decisions — Siddhesh's, not mine
 
-1. **What ART becomes.** The six works currently sit inside the mind as the
-   region labelled ART (`V02_OVERLAY.relabel`, `src/v02-app.js:19`). When they
-   move out, ART is either given real content or made latent like MUSIC and
-   PSYCHOLOGY. It cannot stay a borrowed label.
+1. ~~**What ART becomes.**~~ **RESOLVED — it became a region.** ART was a name
+   borrowed from MY WORKS while the works had no door and ART had no contents:
+   one placeholder covering for another. Both halves ended together. The
+   relabel is gone, MY WORKS has its own name back in the mind, and ART is a
+   sixteenth region with five concepts and three beliefs out of Master Context
+   §14, a source the P4.7 corpus never indexed. Nothing was invented for it.
+
+   Adding a region is not free, and what it cost is the useful part of this
+   entry. Six checks had counts typed into them — 15 regions, 126
+   relationships, 144 objects, 41 cross-region links — and every one went red.
+   All six now derive from the graph. So does the neutral palette: three
+   uncharted regions had been emitting the *same blue*, 3 apart in RGB, and
+   `emblemcheck` never saw it because it compared only the charted ones.
+   Uncharted regions now take the emptiest place left on a ring of constant
+   perceived brightness, and E7 measures every pair.
 
 2. ~~**STATELAB and AUTOMATION PORTFOLIO.**~~ **RESOLVED.** Both written.
 

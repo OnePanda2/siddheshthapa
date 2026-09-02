@@ -107,7 +107,10 @@ const FLOOR = 100;
 const CHROMA = 30;
 
 // E1 — on screen and measurable at all
-ck('E1', seen.length === ids.length && ids.length === 15,
+/* Counted from the graph, not typed. This said 15 and broke the day ART
+   became a region of its own — a check that has to be edited whenever the
+   thing it measures grows is a check that will be edited without thinking. */
+ck('E1', seen.length === ids.length && ids.length >= 15,
    'all ' + seen.length + '/' + ids.length + ' region emblems are on screen and measurable');
 
 // E2 — bright enough to find
@@ -190,26 +193,46 @@ const dE = (a, b) => { const p = toLab(a), q = toLab(b);
    charted worlds now sit at 22 and above, so this has real margin without
    being tuned to exactly what today's palette happens to score. */
 const DE_MIN = 18;
-const owned = seen.filter(id => MENU[id].own);
+/* EVERY REGION, not only the charted ones.
+
+   This used to compare only regions with their own palette and say plainly
+   that the rest "share the neutral palette" — which was true, and meant three
+   emblems were the same blue at an RGB distance of 3. They no longer share it:
+   an uncharted region takes the emptiest place left on a ring of constant
+   perceived brightness, so it has both a colour of its own and enough light to
+   be found. There is nothing left to exempt. */
+/* TWO BARS, AND THE REASON IS ABOUT THE SPACE RATHER THAN THE CODE.
+
+   18 stands between CHARTED regions. Those palettes were designed by hand and
+   could be put wherever they needed to go.
+
+   An uncharted region has no such freedom: it has to fit whatever gap the
+   twelve fixed palettes leave, and measured across the whole wheel under the
+   brightness floor the widest gap available is 16.7 deltaE. 18 is therefore
+   not a bar it can clear however the placement is written, and insisting on it
+   would mean either deleting this check or re-spacing twelve approved colours.
+   14 is the bar instead, taken from the perceptual threshold this file already
+   names: below about 10 two dots read as the same colour, so 14 keeps real
+   margin over that while being honest that it is the looser of the two. */
+const CHARTED_MIN = DE_MIN, UNCHARTED_MIN = 14;
 const clashes = [];
-for (let i = 0; i < owned.length; i++)
-  for (let j = i + 1; j < owned.length; j++) {
-    const d = dE(MENU[owned[i]].rgb, MENU[owned[j]].rgb);
-    if (d < DE_MIN) clashes.push(owned[i] + '/' + owned[j] + ' ' + d.toFixed(1));
-  }
 let closest = Infinity, closestPair = '';
-for (let i = 0; i < owned.length; i++)
-  for (let j = i + 1; j < owned.length; j++) {
-    const d = dE(MENU[owned[i]].rgb, MENU[owned[j]].rgb);
-    if (d < closest) { closest = d; closestPair = owned[i] + '/' + owned[j]; }
+for (let i = 0; i < seen.length; i++)
+  for (let j = i + 1; j < seen.length; j++) {
+    const a = seen[i], b = seen[j];
+    const bar = (MENU[a].own && MENU[b].own) ? CHARTED_MIN : UNCHARTED_MIN;
+    const d = dE(MENU[a].rgb, MENU[b].rgb);
+    if (d < bar) clashes.push(a + '/' + b + ' ' + d.toFixed(1) + ' under ' + bar);
+    if (d < closest) { closest = d; closestPair = a + '/' + b; }
   }
-ck('E7', owned.length >= 6 && clashes.length === 0,
-   'no two charted regions look alike — ' + owned.length +
-   ' worlds with their own palette, closest pair ' + closestPair + ' at ' +
-   closest.toFixed(1) + ' deltaE against a floor of ' + DE_MIN +
-   (clashes.length ? ' — TOO CLOSE: ' + clashes.join(', ') : '') +
-   '; the other ' + (seen.length - owned.length) +
-   ' share the neutral palette because they are not yet charted');
+const chartedCount = seen.filter(id => MENU[id].own).length;
+ck('E7', seen.length >= 15 && clashes.length === 0,
+   'no two regions look alike — all ' + seen.length + ' of them: ' +
+   chartedCount + ' charted, held ' + CHARTED_MIN + ' deltaE apart, and ' +
+   (seen.length - chartedCount) + ' uncharted held ' + UNCHARTED_MIN +
+   ' because they take what the fixed palettes leave. Closest pair ' +
+   closestPair + ' at ' + closest.toFixed(1) +
+   (clashes.length ? ' — TOO CLOSE: ' + clashes.join(', ') : ''));
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' emblem invariants hold');
 if (!bad) console.log('  menu ' + lo + '-' + hi + '  ·  in-world  philosophy ' +

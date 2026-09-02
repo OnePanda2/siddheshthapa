@@ -28,6 +28,7 @@
 const fs = require('fs'), os = require('os'), { execSync } = require('child_process');
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const FILE = process.argv[2] || 'v02.html';
+const MIG_TOTAL = require('../.p3/expect.js').expectedMigs().total;
 const W = 1440, H = 900;
 
 const tmp = (require('./scratch.js').root() + '/tv-' + process.pid).split('\\').join('/');
@@ -311,9 +312,11 @@ function feMiss(res) {
 const feD = feMiss(r), feP = feMiss(rp);
 const show = (res, o) => o.bad.map(id => id + ' at ' + res.firstEntry[id].x + ',' +
                                     res.firstEntry[id].y).join(', ');
-ck('T9', feD.ids.length === 15 && feD.bad.length === 0,
+/* counted from the graph, not typed: this said 15 and went red the day ART
+   became a region of its own */
+ck('T9', feD.ids.length === MIG_TOTAL && feD.bad.length === 0,
    'the first selection from the CLOSED mind arrives clear of the sheet for ' +
-   'all 15 regions at ' + r.vw + 'x' + r.vh +
+   'all ' + MIG_TOTAL + ' regions at ' + r.vw + 'x' + r.vh +
    (feD.bad.length ? ' — MISSED: ' + show(r, feD)
     : ' (x' + r.firstEntry.learning.x + ', past a sheet ending at ' +
       r.firstEntry.learning.shRight + ')'));
@@ -345,8 +348,8 @@ ck('T10', threw.length === 0,
    number means a different screen shift per region, and BUILDING — the most
    steeply inclined — still landed 6px inside the sheet while the other
    fourteen cleared it. */
-ck('T11', feP.ids.length === 15 && feP.bad.length === 0,
-   'and on a phone, where the sheet is below rather than beside — all 15 ' +
+ck('T11', feP.ids.length === MIG_TOTAL && feP.bad.length === 0,
+   'and on a phone, where the sheet is below rather than beside — all ' + MIG_TOTAL + ' ' +
    'arrive above it at ' + rp.vw + 'x' + rp.vh +
    (feP.bad.length ? ' — MISSED: ' + show(rp, feP)
     : ' (y' + rp.firstEntry.learning.y + ', above a sheet starting at ' +

@@ -92,7 +92,7 @@ const PROBE = `(function(){
   var atUniverse=M.relVis();
 
   return { closed:closed, open:open, worlds:worlds, atUniverse:atUniverse, minor:minor,
-           arch:M.arch(), perf:M.perf() };
+           arch:M.arch(), graph:M.graph(), perf:M.perf() };
 })()`;
 
 const page = tmp + '/w.html';
@@ -154,11 +154,23 @@ ck('W5', r.closed.menu.length === OV.migCount &&
          r.closed.menu.some(x => x.id === 'my-works'),
    'the Main Mind Menu exposes all ' + r.closed.menu.length + ' MIGs, Psychology included');
 
-// W6 — ART is a relabel, not a new region
-const art = (OV.relabel || []).find(x => x.id === 'my-works') || {};
-ck('W6', art.nowLabel === 'ART' && art.observedFrom === 'MY WORKS' && art.owns === 10,
-   'ART is a relabel of my-works, not a new region — it still owns ' + art.owns +
-   ' objects and keeps its id');
+/* W6 — ART IS A REGION NOW, AND MY WORKS HAS ITS NAME BACK.
+
+   This used to assert the opposite, and was right to: ART was a label borrowed
+   from MY WORKS while the works waited for a door of their own and ART had no
+   contents — one placeholder covering for another. Both halves of that are
+   over. The works have their own section, and ART arrived with five concepts
+   and three beliefs out of Master Context §14. The assertion is inverted
+   rather than deleted, because the thing worth guarding is the same: no region
+   may quietly be a costume for another. */
+const art = (OV.added || []).find(x => x.id === 'art') || {};
+const works = (OV.migs || []).find(x => x.id === 'my-works') || {};
+const stillRelabelled = (OV.relabel || []).some(x => x.id === 'my-works');
+ck('W6', art.label === 'ART' && art.empty === false && art.owns >= 8 &&
+         works.label === 'MY WORKS' && !stillRelabelled,
+   'ART is its own region and MY WORKS has its name back — ART owns ' +
+   (art.owns === undefined ? '?' : art.owns) +
+   ' objects under its own id, and nothing is relabelled any more');
 
 // W7 — Psychology exists and took nothing
 const psy = (OV.added || []).find(x => x.id === 'psychology') || {};
@@ -182,9 +194,13 @@ ck('M1', hw > 0.45 && hw < 0.90 && dw > 0.95 && dw < 1.55 &&
    ', midline clear by ' + B.midlineGap);
 
 // M2
-ck('M2', B.nodes.length === OV.migCount && B.links === 41,
-   'all ' + B.nodes.length + ' MIGs are in the brain, drawn by ' + B.links +
-   ' real cross-region relationships');
+/* The 41 that used to sit here was measured once and typed in, and ART's own
+   relationships made it wrong. The brain is supposed to draw exactly the
+   relationships that cross a region boundary, so that is what is asserted:
+   the DRAWING against the DATA, not against a remembered number. */
+ck('M2', B.nodes.length === OV.migCount && B.links === r.graph.cross && B.links > 0,
+   'all ' + B.nodes.length + ' MIGs are in the brain, drawn by its ' + B.links +
+   ' cross-region relationships and no others');
 
 // M3 — hover identifies a region while the mind is CLOSED
 ck('M3', r.closed.mind.open === 0 && r.closed.hPhil.st.hoverRegion >= 0 &&
