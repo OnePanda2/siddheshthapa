@@ -458,44 +458,52 @@ body.works-open .ctl{display:none}
 }
 
 /* ── THE HAND ─────────────────────────────────────────────────────────────
-   Siddhesh's pointing hand, recovered from his artwork onto its own 42x40
-   grid and shipped at native resolution — one image pixel per screen pixel,
-   which is the only size 8-bit art is ever actually sharp at.
+   Siddhesh's cursor sheet, six of its twenty poses — the six this site
+   actually has affordances for. Each was recovered from the sheet rather than
+   cropped out of it: the pose's content box measured, divided by the ~5px cell
+   the art was drawn at, and every cell read by MAJORITY VOTE so the render's
+   soft edges could not vote. They ship at native resolution, one art pixel per
+   screen pixel, which is the only size this art is sharp at.
 
-   Three gestures, and they are made the way a pixel artist would make them:
-   by adding or removing rows from the FINGER SHAFT. Rows 4 and 5 of the grid
-   are two near-identical slices of the straight part of the finger, above
-   where it merges into the fist, so duplicating them reaches and deleting
-   them presses — while the tip and the hand stay exactly as drawn.
+     rest       pointing at you — the page at large
+     hover      index finger up — over anything that can be chosen
+     click      the same finger with its motion lines — while the button is down
+     grab       an open claw — over the sky, which is turned rather than clicked
+     grabbing   a closed fist — while it is being turned
+     text       over prose, which is read rather than pressed
 
-   All three share one canvas and one hotspot, so the pointer itself never
-   moves between states: only the finger does.
+   An earlier attempt built three states by lengthening and shortening the
+   finger of one drawing. They were four pixels apart and read as the same
+   hand: a gesture set has to be different POSES, not one pose nudged.
 
-     rest      pointing, as drawn
-     reach     over anything that can be chosen — the finger extends
-     press     while the button is down — it retracts into the fist
+   Each pose carries its own hotspot, because they do not share a shape — the
+   pointing ones sit on the fingertip, the grabbing ones in the palm.
 
-   The fallbacks after each url() are not decoration: a browser that refuses
-   the image still gets the right KIND of cursor. */
-/* declared once and referenced, rather than three copies of the same kilobyte */
+   Fallbacks after each url() are real: a browser that refuses the image still
+   gets the right KIND of cursor. */
 :root{
-  --hand-rest:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACoAAAAsCAYAAAATmipGAAAC20lEQVR4nO2YMXLbMBBFQYzHpS0XrnwEH0FFytwgOoFchDdwxSo3oIv4BM4NUrrwEXSEVCmkuFSjzOdwOcv1AliApMeF/wxHIwkEHhf7FwCd+9SnPraquTu8urw4hf7b/3utPgTo1eXFqVmt3Pbn9zf/3Xz7MQm2mhuyfnkKtmnXG9ccDkWw1XtBkq5vv3afubBnbiHIdr0Zfbc8xKKgGkS73gTB8FCY/lz5OaJphXzXiMbKT7sQJFQtZRpNlLc09TmG8nNBkpvnmp0iUGskW+H0WDT//Lp3i+SottpINYAQecrhCZIbEEGwpMAs5Qn6u/vdTT/BSmkliUqVBXY2UD5wE6mTPJqIfG3Mb2/Nz/PbL8nO6penEUgIUqYRfk8ZSwXFTXTllqM6ABt7AOo/BhuMKDpG3pXUzLqH1eBCpqS2FKAk6NSiTqL7CSC1vqM9AoNLSwVfWoosBqhhFpYKgH28exhtpEP3SdiiTQlBxgo8l4TtPlerrh9cWj9yRn2JwzE9NGgOLImiCsXSjEfVl+Ymh7XouHsemaurtxnj+SkGooGtUd32uU+QEE0/HkSK85xNcXl3T39gwwpTsnrRzETbO3fyKZen3E1GCZkC4tEaotrXad5Gi6rJ9VZ3DwX+8NZccnCUJT6DEjAE66ULS90tYY9KhOQ4ISjtd4/tVcy5pbCPAgrfaRy0i02zBtvtAS2GojSw7vQb5mxZjlKQ9GB0H4I57Efxw3b3HCz2cmOcgm0C5/cU5GgxYK9/hl21tUylInvsQeSAoZdnFkhoiGiXq86dUtHika0NkBZJQEgeTUZHkVxYXKnTZJNYYnkuaoDBOkpVwLosau7WFKsENM2xA576B+1YYjmLaeYlh9pbTp7IVX6v5bhcWd8gy2rA3RvbBO8ZhHbEsL7WSTbSYDmknM6GRXHKO/vsc/1gsA7owXRM2c8ISDJ3yPNW01KRdL2yOwydvZeA4/oP6YA1HP2gS8QAAAAASUVORK5CYII=") 23 5;
-  --hand-reach:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACoAAAAsCAYAAAATmipGAAAC5UlEQVR4nOWZMVLrMBCGZQ1D+V4oqDgCR0jxyncDcoJQ4BtQueIGpoAT8G7wSgqOkCNQUSRQpgmzGq9nvexKK9lmJsM/k8kkkaXPq/1XklO5iXX2+9dB+237/lGV9lt8oQbZLBZu/XDz5beLq7tRsNXUkPXLk9qmXa5cs9sVwVbfBYk6v/wb3nNhT9xMkO1yNfhsuYlZQSWIdrlSweCmYPpz5d2RyLsjkXdHIu9+AuhZ53irkb7V9bElsp0JElTNVdglYW3F8pRT9P1UkLjiTDU7RaDWSLZsNYpF8/XfrZslR6UdEVcDECxPKTxCUgNCECwpMMkSCnrb/A/Tj7Bc0rKJy6kFdjJQOnATWctpNCHytTG/vTU/Ty//JDurX54GIBokTyP4PmUsERQuwlduOaoV2NgNYP8xWDWi0DHkXUnNrDtYCU4zJbbFACVBxxZ1FF6PAKk9KLSHwMBLSgVfWoosBqjBLCQVAPbx+n5w2NOu47BFmxKEjBV4Kg4b3heL0A+8pH74jPoSh8P04KA5sCiMKiiWZjSqvjQ3KaxF+83zwFyh3maM58cYCAe2RnXd5T5CgnD64Ua4KM/JGJeHa7qHCrDClKxeODPR9s4dfMrlKXejUTRTgGi0+qh2dZq2kaJqcr3V3X2B3301Fx8cyhKdQQ6owXruwlJ3c9i9ECE+jgYlfe9hexVzbinsI4OCzzgOtItNswQb9oAWQ2EaWHf6DXE2L0cpSLwxvA6C2e9H4Yv15lkt9nxjnIJtlGdMKcjBYkAeUfa7amuZSkV234HwAbUHvBZIUB/RkKvOHVLRopGtDZAWcUAQP5oMjiK5sPBKnSabxBJLc1ECVOsoVgHrsii5W1KsEuA0xw544g+4Y4nlLEwzLTnY3nLyhFyl11qOy5X1Xw5eDah7Y5vgLYGQjhjWxzrJRhIsheTT2ZAojvlfKftc3xssAN2bjinbCQFR5g5p3kqaK5KuU3aH2tl7DjiqTwf+NSSdsSrWAAAAAElFTkSuQmCC") 23 5;
-  --hand-press:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACoAAAAsCAYAAAATmipGAAACt0lEQVR4nO2YMVLDMBBFZQ1DGUxBxRE4QgpKbkBOEAp8AypX3IAU5AThBpQUOUKOQEWRQJkmzGq8nvVmJa1kh6Hwn/FkYsvS89fuWrIxo0aNGjWqjwozsC4vJgffte33T/EvQC8vJoe6LM389fHo2vX9cy/YYmjIar3ytnmZzky922XBFn8Fibq6uXO/qbDFqYB8joLA1VRYOxQkOjVU4mWBap18aRzTuPn59mRSdKZtKGUyVw0Q01nngSg8QsJDUxM0IaAGjelr8+6mH2G5ELJzrizdeQ3sYKB04FqAom1Q4HyljG+rjc/zm9toZ9V61QHxQfIwgvOxxBJB4SY8UstR5YENPQD2H4L1OgodQ9zl1MyqgZXgfEmJbdGgKGjfoo7C+xEgFLfYHoyBQwoFm1uKNAlQQbKQUADY5cOis0jx3cdh1W8mCTJU4Kk4rPstS9cPHFI/fEZtTobD9OCgKbAodBUUCjPqqs2NTQqr0X7z0UkuV28TxrN9EggH1ro6b2IfIUE4/fAgXJTnrE+Wu3uaxTC8YXLeXjgzwfbGHGwsy2PZjYniSwoQdat1tanTtI3kqirrtdndFvjdcXLxwaEs0RnkgD5Yy7MwN7s57F5wiI/jg5LOW1hehTI3F3bJoOA/jgPtQtMswbo1oCahMAy0K/2aZDYvRzFIfDC8D8xs16NwYr758BZ7vjCOwdaNs1wxyM7LgGyt21W1tkzFnN03IHxA34cJDSSoddTFqjGHmFvU2UoBqREHBPGtSWcrkgoLR2w3WUdesTQWJUBvHcUqoH0tStktKVQJcJpDGzzxAq5YQjEL00xLDrbX7DwhVum9mu1yof06x6sBzd7QInhLIKQthvazTrSRBEsh+XTWxMU+30OT9/VtgjmghWqbsh0QEKXukMatpFM5aRold+jbe58CjuoXN4IdlbF6uCcAAAAASUVORK5CYII=") 23 5;
+  --hand-rest:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAABu0lEQVR4nLVXu00DQRS8XV3oCJFwgUUDREQUQAF0glyGgxOdUAAFEBHRAQEkiMihJaOxbk7Py3v7eZxHOiH2M/P+K4fuH9h/vR3k//3Vbai9G7yiw+XFiSjx+f3j5qwS3V6vD/A4/bCXRkJDs3Ugflytus3rs3lmfXNf9Dx2DuREaxGXyKsHfavYx/vL+YWHSVQTQx619fHuYb6by3MsWdbiIUSfdruqe703n6hseI2/BEW5Bg4YoA2W0BpiCQhrBsmqt1orekW1M9J7jdMU5nBoySvOSsG0x8k1JBPtJATMiQcsLN7Xqn6cziD0s8el+arlUwKeglCeS+9sRDQiPU0r1BJHhVrPH4wHB3s5F71IT0uDHyT4al4fhJPtxo/AOjiCVcWw2jLEmlpyX+OU++bk4jDQAMJSzktFGr3kDKXnLQZCro1KIeMZFmXNnB6nlpqFcxdyOa19GMap0tnrcYk3ttSGUhRAOx6F2ZdWTplvErQA9yDIicX8/xmZFLJIuJ8aoYVbjsguQfC8TqVql8ZYFR60xZy49FT2OgXkE5hrq2BtkECOUi283l8OIbcpxSmU4izCqQFLCBK/3M5H1isq1/QAAAAASUVORK5CYII=") 16 1;
+  --hand-hover:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAcCAYAAABlL09dAAABNklEQVR4nNVVsQ2DMBC0LZdUURpcZAMqqgzAANkEZRDEJhkgA6RKlQ0okiZKRYlE9JZfcozf2LjKSQgsyP39/dnhjIDa72Z8fr4/nCVCrJG2RfGzzoIyRNPrPsO1hdirGACELAMkcS7+j1gGX5a1jhkMLzV+IkQ6mVRg7IbHVd9j4K2s9rsZVCHpoWo0KQLWNnwdyNS4ybLmUNgptLBpdXiyrLndPlXQtUkrDg3GR0T5fL5dWF81upuFYmWKYCIoghBgBtL1qzueWD+OwR/GdCAoNVPCWeHrwDu8NjKrIQhsP8XDGAhIAXjqhj6b2F50jvJsYsxuahpWiW3yHEvsjjm1QQYr27EAUeRZ8TQvUv12vye3rTLKIdMxW9gW5VXMDGIHikrdwyv41wQ+g5otMQwSI7bE8Atyvp+Kria+kgAAAABJRU5ErkJggg==") 7 1;
+  --hand-click:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAfCAYAAAAMeVbNAAABaklEQVR4nLVVMW7DMAyUBI2egi7OEPQDnTz1AX1Af2JkyCMyGPlJH5AHZPKUDxQe7KXolFFAChomIDEyTSnuARpsi8cjeZKVYnB83d3Vf2H7snmK3OQk3AqTWtzY//zqJVIl2McGz71zQytWHCV/tscs1ibXKQn7nH5zxG5oxwWeT60ssCIXfPjuklUbf5jd9Ty70Q1t8jwCn9uyUmvOwEqHZMtK0+p2bx9souTjTwHJ6qIY24YLv1klUOymoOb9M7pnf/mCKh5jl8idpwRIfIDi2PNJqTu0SS9ZsWMc5AOUAyGKgWfjE0NmIMM+jqWVlWjgtAqApqqJG8TKY5UEbqFEdURNCgJy6oY9GWAqHtoCyG0FPXAmdsKaGT9LgY4J2gIJYJ1uN7UGDDftJqMCiMHTGiXvpxZhBVKv+zHAMau8nxKAEuldTisV/0PromCtCcS+atGV2wlsicRoCLFyXz1WQEEVZ5NzoOR/tkbYqz6XGbAAAAAASUVORK5CYII=") 7 1;
+  --hand-grab:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAXCAYAAAD+4+QTAAABZklEQVR4nKVVu23DMBQUDZWuDDd2YWSBVK4yQAbIJkHGcCFoEw+QAVKlygYukiZI5dKAghN0wvGRFEXrAIL/d++d3qNcVYj9dtNx/P3753TONXtnVWJ8v910r+t1dfl6r9DrHE3PFZHcfj47NLveXq99//ZxHtdIRge47nLec4yLNHh4fPbmMeAM5YuSwHMegjF4TTmap5cgghyRm4rAEvAivItJOEUUEPA7YHx6OPRj9Dq3jfu8r3MvEmYLpLCy1Lujw8WUTIwwltIBSYkUBByCrLEa8VKYUdxLMIVaJ3MyJgUkR707emkPILo+ErtRgnbIPnwzqgHD6FmUvYYYaJoukeoy2AEpbc9+u3LgGxZ7jhZFMrcQV6XZNFdGfbtGuVh8S9FIzbBuxuJZKlkjSWCL0iPJPd8WGr2msj0XkBBTZM1gXNM3RRCQ6IYSKlpjmA9j0qPY/8T+DVMEQM54kiRGdo9hxT+LdSAMjcL4CQAAAABJRU5ErkJggg==") 12 11;
+  --hand-grabbing:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAYCAYAAAD+vg1LAAABRUlEQVR4nK1VMQ6CQBAEQklFaLzC+AErKx/gA/yJofARFsaf+AAeYGXFB8wV2hgrShPMEJfsHXuCHJOA3Oacnd2buwuDHhwW85qP9zcdBgPQmaSytCW6P18hH0sxjHuzqCytofD9uDa/GOObP4hRnOb8VHz4lpxfzsaE43rbic2Xm0CXRfstqY/wQvZTVXUIhoASUMUGcTxbOfuEZFwVsEsSMQHvf0PMgdKlP/G4XZmUyFCqvtkwcUxbUDk4oFxsgcrSeiw5gNbFttqpEJE3dVkYKwyXeBHbAc3IJyV2rfIkxPnl7E0eufybj3RESwzvwXe+i9W7QbTH4qFqEmj0eJckjbmlbT0ERIoORPbtoMuimTCW3OmKeLYKodyX3HlcKrbF6XRzOYUEOFsRMPDbwD6PJXDSn4ol9dKm4TblYv4idkG6qT+QG77rJ52/8QAAAABJRU5ErkJggg==") 11 12;
+  --hand-text:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAWCAYAAAArdgcFAAABKUlEQVR4nK1UsQ3CMBB0IpdUiCYUbECVigEYgE0iCsaI2IQBGICKigVQCmgQVcpIoIv46GW//Q7KSYgE3nf397aNEbBczD/d8zp88G4SwetzrdgWZUaLtFqQrtbb4Vkl736kWIQFsS4er3dvBGhuZ2M1cl7MRSRC/m6LMj0WV4S+Y0iKpZrNxP8gQFFJcankwP5yMhyuGERIiP/etyypNglt0wyQMx885Z6DmJRTCd0uiNidjxfLWAEemXsWxMyrwAA1iM7rzS7oZgxE58e29QQmcU6TnUrAc84FpkQu3R31Hx1gjXiIOKhg7JaEqf4mZLl7W5EiGuM+VOs5B7Cl4IT2e2xrgphm5V6/4iGyRZmhRW3AMeKgcwLlHzuxIJeIk8k1QPxwbzyuL4F2t81FEvXEAAAAAElFTkSuQmCC") 13 1;
 }
 html,body{cursor:var(--hand-rest),auto}
 .nav button,.wk-toc button,.wk-see button,#readClose,
 a,button,summary,[role="button"],[data-nav],[data-sheet],[data-see],
-.th-world,.tray,.wk-btn,.ctl{cursor:var(--hand-reach),pointer}
+.th-world,.tray,.wk-btn,.ctl{cursor:var(--hand-hover),pointer}
 .nav button:active,.wk-toc button:active,.wk-see button:active,#readClose:active,
 a:active,button:active,summary:active,[role="button"]:active,[data-nav]:active,
 [data-sheet]:active,[data-see]:active,.th-world:active,.tray:active,
-.wk-btn:active,.ctl:active,#gl:active{cursor:var(--hand-press),pointer}
-/* the sky is dragged rather than clicked, so the hand closes while it turns */
-#gl{cursor:var(--hand-rest),grab}
-/* text meant to be read keeps a text cursor: a hand over a paragraph says
-   "click me", and these do not */
-.docbody,.th-desc,#gloss,.wk-line,#works p{cursor:text}
+.wk-btn:active,.ctl:active{cursor:var(--hand-click),pointer}
+/* THE SKY IS TURNED, NOT PRESSED. Dragging it rotates the constellation, so it
+   takes the grab pair rather than the pointing pair — the only place on the
+   site where the hand closes. */
+#gl{cursor:var(--hand-grab),grab}
+#gl:active,body.mind-dragging #gl{cursor:var(--hand-grabbing),grabbing}
+/* prose is read rather than pressed */
+.docbody,.th-desc,#gloss,.wk-line,#works p,.wk-desc{cursor:var(--hand-text),text}
 </style>
 
 <a id="skip" href="#semantic">Skip to the structure</a>
@@ -5825,6 +5833,10 @@ function loop(){
   el.addEventListener('pointerdown',function(e){
     if(mindOpen>0.5 || state.region) return;
     pid=e.pointerId; px=e.clientX; py=e.clientY; MIND_DRAG=true;
+    /* the hand closes while the sky is being turned. A class rather than
+       :active, because the pointer is captured for the whole drag and may
+       leave the canvas without letting go of it. */
+    document.body.classList.add('mind-dragging');
     try{ el.setPointerCapture(pid); }catch(_){}
   });
   el.addEventListener('pointermove',function(e){
@@ -5841,7 +5853,8 @@ function loop(){
   });
   function release(e){
     if(!MIND_DRAG || (e && e.pointerId!==pid)) return;
-    MIND_DRAG=false; MIND_HELD=performance.now(); MIND_LAST=MIND_HELD;
+    MIND_DRAG=false; document.body.classList.remove('mind-dragging');
+    MIND_HELD=performance.now(); MIND_LAST=MIND_HELD;
     try{ el.releasePointerCapture(pid); }catch(_){}
     pid=null;
   }
