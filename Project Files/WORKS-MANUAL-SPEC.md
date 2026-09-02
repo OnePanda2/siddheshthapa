@@ -108,22 +108,31 @@ manual with no edit to any sheet.
 Measured from `preview.html`, not assumed. Edge counts are real relationships
 already declared.
 
-| # | Work | State | Edges | Procedure can be written from | Gap |
-|---|---|---|--:|---|---|
-| 1 | COTSI | formed | 3 | `source-text` §12 — steps, question constraints, the critical rule | known failures |
-| 2 | SIDDHESHTHAPA.COM | growing | 4 | This repo: the specs, the checkpoint, the suites | none — it documents itself |
-| 3 | THREE YEARS ACROSS STARTUPS | proven | 2 | CV · handover §13 | what a "part" is for a career |
-| 4 | CLAUDE-SKILLS | growing | 2 | The repo's own quoted line only | purpose, parts, procedure |
-| 5 | STATELAB | seed | 2 | **nothing** | everything |
-| 6 | AUTOMATION PORTFOLIO | growing | 2 | **nothing** | everything |
+**All six are now written.** The table below is what was true when this spec
+was drafted, kept because two of its predictions were wrong in a way worth
+recording.
 
-**Two of six have no documented content, and the graph says so in their own
-words** — STATELAB: *"Listed because it exists; what it does is not yet written
-down anywhere I can quote."* AUTOMATION PORTFOLIO: *"Contents not yet
-documented in any source I can quote from."*
+| # | Work | Predicted | What happened |
+|---|---|---|---|
+| 1 | COTSI | buildable from `source-text` §12 | built; known failures came from the same source |
+| 2 | SIDDHESHTHAPA.COM | it documents itself | built; four known failures, all from `CHECKPOINT.md` |
+| 3 | THREE YEARS ACROSS STARTUPS | buildable, no failures available | **wrong** — §13 and §14 held two, both costly |
+| 4 | CLAUDE-SKILLS | thin: only its own quoted line | **wrong** — reading the repository gave seven parts |
+| 5 | STATELAB | nothing to write | Siddhesh wrote it; one part-written sheet |
+| 6 | AUTOMATION PORTFOLIO | nothing to write | reading the repository gave five parts and a README |
 
-This is the single most important fact in this spec. It is not a blocker, and
-it is not to be solved by writing plausible text.
+The two wrong predictions have the same cause: **the spec assumed the corpus
+was the only source.** Three of the six works are public repositories, and
+reading them turned two "thin" sheets into two of the fullest. A work that
+looks undocumented may only be undocumented *here*.
+
+Both of those lines have since been replaced, because both were made false —
+STATELAB by Siddhesh writing the description, AUTOMATION PORTFOLIO by its
+repository gaining a README. The replacements are declared in `V02_OVERLAY`
+next to the sentences they replace.
+
+The rule that produced this outcome stands unchanged: **a work with nothing
+true to say stays reserved, and is never solved by writing plausible text.**
 
 **Latent sheets.** A work with no authored procedure renders as a **numbered,
 titled sheet stamped NOT YET WRITTEN**, carrying only its derived tier: the
@@ -132,8 +141,8 @@ padded. This is exactly how MUSIC and PSYCHOLOGY are handled in the mind, and
 the honesty reads as confidence rather than absence — a manual with a sheet
 reserved for a part not yet documented is a real manual.
 
-Sheets 1–3 are buildable today. Sheet 4 is buildable thin. Sheets 5 and 6 are
-latent until Siddhesh writes them.
+No sheet is reserved today. The path is still guarded, because a seventh work
+added to the graph arrives in exactly that state — see §11, W5.
 
 ---
 
@@ -335,11 +344,19 @@ it has added its own and the total has grown.
    move out, ART is either given real content or made latent like MUSIC and
    PSYCHOLOGY. It cannot stay a borrowed label.
 
-2. **STATELAB and AUTOMATION PORTFOLIO.** Latent sheets until documented. Two
-   or three sentences each is enough to promote them; nothing less will be
-   written for them.
+2. ~~**STATELAB and AUTOMATION PORTFOLIO.**~~ **RESOLVED.** Both written.
 
-3. **Whether `KNOWN FAILURES` can be filled honestly.** This is the section's
-   whole differentiator. If it can be filled for three works, the manual is
-   strong. If it can only be filled for one, the section still works and that
-   one sheet carries it.
+3. ~~**Whether `KNOWN FAILURES` can be filled honestly.**~~ **RESOLVED, and it
+   was the question that mattered.** Every one of the six carries at least one,
+   twelve in total, and none is invented. The costly ones are real: a suite
+   that stayed green while thirteen of fifteen regions arrived off screen; an
+   assertion that passed with the behaviour it tested removed; an outreach that
+   went straight for the pitch and was told to stop performing; and the same
+   failure — work done, description not written — recorded twice across two
+   repositories, which makes it a habit rather than an oversight.
+
+4. **Keeping the reserved path tested.** With every work written, nothing a
+   visitor can reach renders a reserved sheet, so W5 had nothing to measure and
+   said so rather than passing vacuously. It now proves the path on demand
+   through `works.asReserved()`, which renders a real sheet with its record
+   suppressed — the state a seventh work would arrive in.

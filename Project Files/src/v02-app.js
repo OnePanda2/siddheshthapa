@@ -41,6 +41,18 @@ var V02_OVERLAY={
       to:"Portfolio of Automations that I've built on Activepieces and N8n",
       why:'replaces "Contents not yet documented in any source I can quote from." The tools it is built on are now stated.' }
   ],
+  /* A RELATIONSHIP'S SENTENCE CAN GO STALE THE SAME WAY A LINE CAN.
+     The gloss below said the automation repository's contents were not
+     written down anywhere quotable. They are now — the repository has a
+     README — and leaving the sentence would put a flat contradiction in the
+     band of night at the foot of the sheet that documents them. Declared here
+     for the same reason the lines are: preview.html is locked, and one
+     declared place beats two copies. */
+  reedge:[
+    { a:'automation', b:'p-automation', verb:'collected in',
+      to:'A public repository of production-style automation projects, five of them, three described in its README.',
+      why:'replaces "What is in it is not yet written down anywhere I can quote." It is written down now.' }
+  ],
   /* an internal key moves; nothing else does */
   renameIds:[
     { from:'psychology', to:'psychology-behaviour',
@@ -80,6 +92,16 @@ var V02_OVERLAY={
   (V02_OVERLAY.reline||[]).forEach(function(r){
     for(var i=0;i<THOUGHTS.length;i++) if(THOUGHTS[i].id===r.id){
       r.observedFrom=THOUGHTS[i].line; THOUGHTS[i].line=r.to; r.applied=true;
+    }
+  });
+  /* and the same for a relationship's sentence. Applied to EDGES before LINKS
+     is derived from it, so there is only ever one version in the scene. */
+  (V02_OVERLAY.reedge||[]).forEach(function(r){
+    for(var i=0;i<EDGES.length;i++){
+      var e=EDGES[i];
+      if(e[0]===r.a && e[1]===r.b && e[2]===r.verb){
+        r.observedFrom=e[3]; e[3]=r.to; r.applied=true;
+      }
     }
   });
   V02_OVERLAY.addMIGs.forEach(function(a){
