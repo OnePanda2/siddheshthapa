@@ -149,10 +149,14 @@ ck('W4', r.arch.migCount === OV.migCount && r.arch.reparented.length === 0,
    'all ' + r.arch.migCount + ' MIGs are top-level, nothing reparented');
 
 // W5
+/* the menu shows every region and ONLY regions. It used to require my-works
+   among them; the works are a door now rather than a room, so their presence
+   here would be the defect. */
 ck('W5', r.closed.menu.length === OV.migCount &&
          r.closed.menu.some(x => x.id === 'psychology') &&
-         r.closed.menu.some(x => x.id === 'my-works'),
-   'the Main Mind Menu exposes all ' + r.closed.menu.length + ' MIGs, Psychology included');
+         !r.closed.menu.some(x => x.id === 'my-works'),
+   'the Main Mind Menu exposes all ' + r.closed.menu.length +
+   ' regions and nothing else — Psychology included, the works not among them');
 
 /* W6 — ART IS A REGION NOW, AND MY WORKS HAS ITS NAME BACK.
 
@@ -164,13 +168,14 @@ ck('W5', r.closed.menu.length === OV.migCount &&
    rather than deleted, because the thing worth guarding is the same: no region
    may quietly be a costume for another. */
 const art = (OV.added || []).find(x => x.id === 'art') || {};
-const works = (OV.migs || []).find(x => x.id === 'my-works') || {};
 const stillRelabelled = (OV.relabel || []).some(x => x.id === 'my-works');
+const worksIsRegion = (OV.migs || []).some(x => x.id === 'my-works');
 ck('W6', art.label === 'ART' && art.empty === false && art.owns >= 8 &&
-         works.label === 'MY WORKS' && !stillRelabelled,
-   'ART is its own region and MY WORKS has its name back — ART owns ' +
+         !worksIsRegion && !stillRelabelled,
+   'ART is its own region and the works are not one — ART owns ' +
    (art.owns === undefined ? '?' : art.owns) +
-   ' objects under its own id, and nothing is relabelled any more');
+   ' objects under its own id, nothing is relabelled, and my-works is absent ' +
+   'from the mind');
 
 // W7 — Psychology exists and took nothing
 const psy = (OV.added || []).find(x => x.id === 'psychology') || {};
@@ -198,9 +203,13 @@ ck('M1', hw > 0.45 && hw < 0.90 && dw > 0.95 && dw < 1.55 &&
    relationships made it wrong. The brain is supposed to draw exactly the
    relationships that cross a region boundary, so that is what is asserted:
    the DRAWING against the DATA, not against a remembered number. */
-ck('M2', B.nodes.length === OV.migCount && B.links === r.graph.cross && B.links > 0,
-   'all ' + B.nodes.length + ' MIGs are in the brain, drawn by its ' + B.links +
-   ' cross-region relationships and no others');
+/* against the relationships between regions the mind actually SHOWS. The graph
+   holds more than that — an object in a hidden region keeps every link it had —
+   and the brain can only draw the ones with two ends to draw. */
+ck('M2', B.nodes.length === OV.migCount && B.links === r.graph.crossPlaced &&
+         B.links > 0,
+   'all ' + B.nodes.length + ' regions are in the brain, drawn by its ' +
+   B.links + ' cross-region relationships and no others');
 
 // M3 — hover identifies a region while the mind is CLOSED
 ck('M3', r.closed.mind.open === 0 && r.closed.hPhil.st.hoverRegion >= 0 &&

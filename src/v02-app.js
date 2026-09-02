@@ -14,6 +14,11 @@ var NODES=[],byId={},owned={};
 /* ── THE V02 OVERLAY ──────────────────────────────────────────────────
    Everything V02 changes about the extracted P4.7 graph, declared in one
    place. Nothing else may diverge. */
+/* Regions the mind no longer shows, by id, with the label they had. The NAME
+   survives the region: objects still belong to it and the mind still has to be
+   able to say where they are — it simply cannot travel there, because there is
+   no such room any more. */
+var HIDDEN_MIG_LABEL={};
 var V02_OVERLAY={
   /* THE BORROWED LABEL IS RETURNED. MY WORKS was renamed to ART because the
      welcome page had no second door and ART had no contents — one placeholder
@@ -53,6 +58,24 @@ var V02_OVERLAY={
     { a:'automation', b:'p-automation', verb:'collected in',
       to:'A public repository of production-style automation projects, five of them, three described in its README.',
       why:'replaces "What is in it is not yet written down anywhere I can quote." It is written down now.' }
+  ],
+  /* MY WORKS IS NOT A REGION OF THE MIND.
+
+     It was one in the P4.7 corpus, because there was nowhere else for the
+     works to live. There is now: they have their own door, their own manual
+     and six sheets. Leaving them ALSO as a region put the same six objects in
+     two places and made the second door look like a duplicate of a region
+     rather than the other half of the site.
+
+     The region is removed from the mind's regions. Its objects are NOT
+     deleted — they stay in the graph, keep their ids and keep every
+     relationship, because the manual reads them and because a belief in
+     LEARNING still genuinely points at COTSI. They simply never get a
+     position, so nothing places them in the organ and nothing draws them.
+     The mind keeps fifteen regions; the works are objects of the site. */
+  hideMIGs:[
+    { id:'my-works',
+      why:'the works have their own section; a region for them as well would be the same six objects twice, and would make the second door read as an appendix to the first.' }
   ],
   /* an internal key moves; nothing else does */
   renameIds:[
@@ -163,6 +186,15 @@ var V02_OVERLAY={
       list.push(r);
     });
   }
+  /* removed AFTER the additions, so an id can be added and hidden in one pass
+     if it ever needs to be, and BEFORE nodes are derived, so nothing that
+     depends on the region list ever sees it */
+  (V02_OVERLAY.hideMIGs||[]).forEach(function(h){
+    for(var i=MIGS.length-1;i>=0;i--) if(MIGS[i].id===h.id){
+      h.observedLabel=MIGS[i].label; MIGS.splice(i,1); h.applied=true;
+    }
+    HIDDEN_MIG_LABEL[h.id]=h.observedLabel||h.id;
+  });
   addOnce(MINORS, V02_OVERLAY.addMinors);
   addOnce(THOUGHTS, V02_OVERLAY.addWritings);
   (V02_OVERLAY.addEdges||[]).forEach(function(e){
@@ -172,6 +204,10 @@ var V02_OVERLAY={
   });
 })();
 MIGS.forEach(function(m){ m.t='mig'; m.mig=m.id; NODES.push(m); owned[m.id]=[]; });
+/* a hidden region keeps its ownership books. Its objects still belong to it —
+   the manual reads them by that key — and only the ROOM is gone, so dropping
+   the bookkeeping would have made the works look deleted rather than moved. */
+Object.keys(HIDDEN_MIG_LABEL).forEach(function(id){ if(!owned[id]) owned[id]=[]; });
 MINORS.forEach(function(n){ n.t='minor'; NODES.push(n); });
 THOUGHTS.forEach(function(n){ NODES.push(n); });
 NODES.forEach(function(n,i){ n.i=i; byId[n.id]=n; });
@@ -208,14 +244,21 @@ MIGS.forEach(function(m){ migAffinity[m.id]={}; });
 LINKS.forEach(function(l){
   var A=byId[l.a].mig, B=byId[l.b].mig;
   if(A===B) return;
+  /* an object may belong to a region the mind does not show — the works do,
+     and they keep every relationship they had. Those relationships are real
+     and are used by the manual; they simply pull nothing in an organ that has
+     no such region to place. */
+  if(!migAffinity[A] || !migAffinity[B]) return;
   migAffinity[A][B]=(migAffinity[A][B]||0)+1;
   migAffinity[B][A]=(migAffinity[B][A]||0)+1;
 });
 MIGS.forEach(function(m,i){ m.pos=seedSphere(i,MIGS.length,R_UNIVERSE); });
-var MW=byId['my-works']; if(MW) MW.pos.set(-40,-18,R_UNIVERSE*0.86);   // nearest the arriving camera
+/* MY WORKS used to be pinned here, nearest the arriving camera, because it was
+   the region a visitor was meant to find first. It is not a region any more —
+   it is the other door — so the pin and the relaxation's exemption for it are
+   both gone rather than left as dead special cases. */
 for(var pass=0; pass<60; pass++){
   MIGS.forEach(function(m){
-    if(m.id==='my-works') return;            // the hook stays put
     var force=new THREE.Vector3();
     MIGS.forEach(function(o){
       if(o===m) return;
@@ -984,7 +1027,6 @@ var MIG_VISUAL={
   /* abundance and material life: a dense nourishing micro-cluster */
   'food'        :{family:'cluster',  branches:0, len:0.00, spread:0.00, rings:0, core:0.40},
   /* constructed, intentional, engineered — the most geometric, still celestial */
-  'my-works'    :{family:'artifact', branches:2, len:0.30, spread:0.00, rings:2, core:0.56},
   /* many minds forming one system: stable bodies sharing a gravity well */
   'society'     :{family:'assembly', branches:0, len:0.00, spread:0.00, rings:1, core:0.44},
   /* a region that exists and has not been written yet. Diffuse, uncondensed —
@@ -3195,8 +3237,10 @@ function paintDOM(){
     elWhere.textContent='Siddhesh Thapa';
     elGloss.textContent=MIGS.length+' regions of thinking, '+NODES.length+' objects, '+LINKS.length+
       ' relationships. Nothing here is arranged — regions that share thinking sit closer together.';
-    var ordered=MIGS.slice().sort(function(a,b){
-      return (a.id==='my-works'?-1:0)-(b.id==='my-works'?-1:0); });   // the work comes first
+    /* the menu used to lift MY WORKS to the top, because the works were the
+       thing a visitor was meant to find first and they were a region. They are
+       a door of their own now, so the list is simply the mind's own order. */
+    var ordered=MIGS.slice();
     var rows=ordered.map(function(m){
       var mem=owned[m.id]||[];
       /* concepts are the Minor IGs, not every member — mem.length counts the
@@ -3232,8 +3276,18 @@ function paintDOM(){
     var o=byId[k.o];
     var meta=(k.dir>0? '<span class="verb">'+esc(k.v)+'</span> '+esc(o.label)
                      : esc(o.label)+' <span class="verb">'+esc(k.v)+'</span> this')
-             +(o.mig!==n.mig? ' · crosses into '+esc(byId[o.mig].label.toLowerCase()) : '');
-    return row(o, meta, function(){ o.src? openReader(o.id) : travelTo('concept',o.id); });
+             +(o.mig!==n.mig? ' · '+(HIDDEN_MIG_LABEL[o.mig]
+                  ? 'in '+esc(HIDDEN_MIG_LABEL[o.mig].toLowerCase())
+                  : 'crosses into '+esc((byId[o.mig]||{label:o.mig}).label.toLowerCase())) : '');
+    /* AN OBJECT IN A REGION THE MIND NO LONGER HAS still has somewhere to go:
+       the works live behind the second door, so the mind opens the manual at
+       that sheet. The band of night at the foot of each sheet is the same
+       crossing in reverse. Without this the row crashed outright, because it
+       was naming a region that had been removed. */
+    return row(o, meta, function(){
+      if(HIDDEN_MIG_LABEL[o.mig] && onWorksSheet) return onWorksSheet(o.id);
+      o.src? openReader(o.id) : travelTo('concept',o.id);
+    });
   })));
   if(n.src) put(group('This writing',[ row(n,'Open the source — '+esc(n.src),
     function(){ openReader(n.id); }) ]));
@@ -3249,7 +3303,7 @@ var readingId=null, camMemory=null;
 /* THE MANUAL'S HOOKS. MY WORKS is a layer over this scene, not a second scene,
    so the app needs to know only two things about it: that it is open, and who
    to call when its door is used. Everything else lives in src/v02-works.js. */
-var WORKS_OPEN=false, onWorksDoor=null;
+var WORKS_OPEN=false, onWorksDoor=null, onWorksSheet=null;
 
 function openReader(id){
   var n=byId[id]; if(!n) return;
@@ -3791,6 +3845,14 @@ window.__v02={
        against the DATA rather than against a number typed in a year ago. */
     cross:LINKS.filter(function(l){
       return byId[l.a] && byId[l.b] && byId[l.a].mig!==byId[l.b].mig; }).length,
+    /* PLACED, not declared. An object in a region the mind no longer shows
+       keeps its node and its relationships and gets no position, so it is
+       never drawn — and a check that counts what is on screen has to count
+       these rather than the graph's own totals. */
+    placed:nodeOrder.length,
+    crossPlaced:LINKS.filter(function(l){
+      var A=byId[l.a], B=byId[l.b];
+      return A && B && A.mig!==B.mig && A.pos && B.pos; }).length,
     cross:LINKS.filter(function(l){return l.cross;}).length}; },
   nodeAt:function(id){ var n=byId[id]; return n&&n.pos? n.pos.toArray().map(function(v){return +v.toFixed(2);}):null; },
   /* screen-space truth: where a real node actually lands for a real viewer */
@@ -4194,7 +4256,15 @@ window.__v02={
                        b:m.bPos.toArray().map(function(v){return +v.toFixed(2);}),
                        u:m.uPos?m.uPos.toArray().map(function(v){return +v.toFixed(2);}):null });
     });
-    out.links=LINKS.filter(function(l){ return byId[l.a].mig!==byId[l.b].mig; }).length;
+    /* only the ones it can actually draw. This counted every cross-region
+       relationship in the graph, including those reaching an object in a
+       region the mind no longer shows — so the brain reported 45 lines while
+       drawing 35, and the number was describing the data rather than the
+       drawing it belongs to. */
+    out.links=LINKS.filter(function(l){
+      var A=byId[l.a], B=byId[l.b];
+      return A && B && A.mig!==B.mig && A.pos && B.pos;
+    }).length;
     var xs=out.nodes.map(function(o){ return Math.abs(o.b[0]); });
     out.midlineGap=+Math.min.apply(null,xs).toFixed(2);
     var bx=out.nodes.map(function(o){return o.b[0];}),
@@ -4353,6 +4423,10 @@ window.__v02={
                    maxSize:Math.max.apply(null,bg.map(function(b){ return b.vMag; })) },
       renderedPoints:pts?pts.geometry.attributes.position.count:0,
       graphNodes:NODES.length,
+      /* how many of them the scene actually holds a vertex for. An object in a
+         region the mind no longer shows keeps its node and gets no position,
+         so the graph is legitimately larger than the drawing. */
+      placedNodes:nodeOrder.length,
       companions:COMPANIONS.length,
       migBodyDrawn:(function(){
         if(!pts) return null;
@@ -4456,6 +4530,7 @@ window.__v02={
     out.totalCompanions=COMPANIONS.length;
     out.renderOnly=COMPANIONS.length+CONST_BG.length;   // every body that is not an idea
     out.graphNodes=NODES.length;
+    out.placedNodes=nodeOrder.length;
     out.renderedPoints=pts?pts.geometry.attributes.position.count:0;
     return out;
   },
@@ -4668,14 +4743,12 @@ window.__v02={
    with the universe after. */
 var threshold=document.getElementById('threshold'), enterBtn=document.getElementById('enterBtn');
 var worksBtn=document.getElementById('worksBtn');
-/* THE SECOND DOOR. It now opens the manual (src/v02-works.js), which installs
-   itself as onWorksDoor. The old behaviour — enter the mind and fly to ART —
-   remains as the fallback, so the door is never dead if the manual is absent. */
+/* THE SECOND DOOR. It opens the manual (src/v02-works.js), which installs
+   itself as onWorksDoor. There is no fallback into the mind any more: the
+   works are not a region there, so flying to one would be flying nowhere. */
 if(exitBtn) exitBtn.addEventListener('click', leaveMind);
 if(worksBtn) worksBtn.addEventListener('click',function(){
-  if(onWorksDoor) return onWorksDoor();
-  enterMind();
-  travelTo('region','my-works');
+  if(onWorksDoor) onWorksDoor();
 });
 var crossCount=LINKS.filter(function(l){return byId[l.a].mig!==byId[l.b].mig;}).length;
 document.getElementById('thFacts').textContent=

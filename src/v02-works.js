@@ -729,6 +729,14 @@ function closeWorks(silent){
 
 /* the door on the threshold */
 onWorksDoor = function(){ openWorks(null); };
+/* and the route the other way: a row in the mind that points at one of the
+   works opens its sheet, rather than trying to travel to a region that no
+   longer exists. The band of night at the foot of each sheet is the same
+   crossing in reverse. */
+onWorksSheet = function(id){
+  var sheetIds = SHEETS.map(function(x){ return x.id; });
+  openWorks(sheetIds.indexOf(id) >= 0 ? id : null);
+};
 
 wkClose.addEventListener('click', function(){ closeWorks(); });
 wkIndex.addEventListener('click', function(){ renderContents(); wkIndex.focus(); });

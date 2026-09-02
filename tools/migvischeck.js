@@ -9,7 +9,7 @@
    MV-2  none is missing a primary visual family
    MV-3  none silently uses the generic fallback
    MV-4  every profile references a valid renderer family and atlas cell
-   MV-5  MY WORKS remains a first-class MIG
+   MV-5  the works are NOT a region, and their objects survive that
    MV-6  PHILOSOPHY remains a first-class MIG
    MV-7  every MIG is reachable through the Main Mind Menu
    MV-8  visual profiles do not touch ownership or hierarchy
@@ -90,8 +90,17 @@ ck('MV-4b', distinct >= 10,
    distinct + ' distinct visual families across ' + ids.length + ' MIGs' +
    (distinct < 10 ? ' — too few to read as different kinds of thought' : ''));
 
-ck('MV-5', P['my-works'] && P['my-works'].hasProfile && r.arch.myWorksOwnsMigs.length === 0,
-   'MY WORKS has its own species (' + (P['my-works']||{}).family + ') and owns no MIG');
+/* MV-5 — the works have no species, because they are not a region.
+
+   This asserted the opposite, and it was right to while the works were a
+   region of the mind. They are a door of their own now, so a visual species
+   for them would be a profile with nothing to draw — and the check that would
+   have caught a stale one is this. Both halves matter: no profile, and the
+   objects still there. */
+ck('MV-5', !P['my-works'] && r.arch.myWorksMembers > 0 &&
+           r.arch.myWorksOwnsMigs.length === 0,
+   'the works carry no visual species, because they are not a region — and ' +
+   'their ' + r.arch.myWorksMembers + ' objects are still in the graph');
 ck('MV-6', P['philosophy'] && P['philosophy'].hasProfile && r.arch.philosophyTopLevel,
    'PHILOSOPHY has its own species (' + (P['philosophy']||{}).family + ') and is top-level');
 ck('MV-7', r.arch.migsInMenu === ids.length,

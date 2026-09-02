@@ -226,12 +226,18 @@ ck('CST-10', !bowlDrawn && !inGraph,
 
 // CST-11 — the sky is render-only
 const skyCount = (K.background || {}).count;
+/* The identity is against PLACED nodes. The graph holds more than the scene
+   draws - an object in a region the mind no longer shows keeps its node and
+   its relationships and gets no vertex - so comparing the drawing to the
+   graph's own total counted a deliberate absence as a missing point. Both
+   numbers are still asserted: the graph is unchanged, and every vertex is
+   accounted for. */
 ck('CST-11', skyCount === D.background.atmosphericCount &&
-            K.renderedPoints === K.graphNodes + K.companions + skyCount &&
+            K.renderedPoints === K.placedNodes + K.companions + skyCount &&
             K.graphNodes === NODE_TOTAL,
-   'the sky is render-only — ' + K.graphNodes + ' graph nodes + ' + K.companions +
+   'the sky is render-only — ' + K.placedNodes + ' placed nodes + ' + K.companions +
    ' companion + ' + skyCount + ' background = ' + K.renderedPoints +
-   ' rendered points; the graph is unchanged');
+   ' rendered points; the graph itself is unchanged at ' + K.graphNodes);
 
 // CST-12 — and it stays tertiary
 ck('CST-12', D.background.namedOrComponentRows > 0 &&
