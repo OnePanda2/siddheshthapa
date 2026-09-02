@@ -74,6 +74,37 @@
           "note": "The first attempt drew evenly spaced curves across a closed shell and read as a helmet. The second was a lit mesh of 26,624 triangles, and was recognisable and wrong — a translucent clay organ, the object rather than the mind. Both were rejected outright rather than tuned." }
       ],
       "figure": "five-parts-one-file"
+    },
+    {
+      "node": "p-skills",
+      "authority": [
+        "github.com/OnePanda2/Claude-skills — repository listing, read 2026-09-02: one folder and six .skill files",
+        "The MY WORKS region's own line: ideas that stopped being arguments and became objects other people can use"
+      ],
+      "purpose": "To keep the procedures worth repeating where they can be run again — by the person who wrote them and by the friends they were written for. A skill here is a piece of thinking that stopped being advice and became something a machine performs the same way twice.",
+      "parts": [
+        { "n": 1, "name": "cotsi",
+          "note": "The only one with a folder of its own, and the only one whose argument is written down anywhere. It has its own sheet in this manual." },
+        { "n": 2, "name": "job-hunter",
+          "note": "Named, not described. What it does is not stated in the repository." },
+        { "n": 3, "name": "out-of-the-box3.5",
+          "note": "Named, not described. The version sits in the filename, which means the history of it is not anywhere else." },
+        { "n": 4, "name": "primis",
+          "note": "Named, not described. The name gives a reader nothing to go on." },
+        { "n": 5, "name": "prospect-intel1.0",
+          "note": "Named, not described. Versioned in the filename, like 03." },
+        { "n": 6, "name": "unfair-advantage",
+          "note": "Named, not described." },
+        { "n": 7, "name": "wave-predict (1)",
+          "note": "Named, not described. The name still carries the suffix a browser adds to a second copy of a download, so the file was moved into the repository rather than written into it." }
+      ],
+      "knownFailures": [
+        { "name": "Six of seven cannot be chosen",
+          "note": "A skill is reached for by its description — the model decides whether to use one by reading what it says it is for. Six of these say nothing beyond a filename, so nothing can reach for them on purpose and a stranger cannot tell what any of them does. The collection is a folder, not yet a set of tools." },
+        { "name": "The filename is the version",
+          "note": "Two of the names carry a version and one carries a browser's duplicate-download suffix. Where the version lives in the filename there is no record of what changed between one and the next, and the earlier one is usually gone." }
+      ],
+      "figure": "one-documented-six-named"
     }
   ]
 }

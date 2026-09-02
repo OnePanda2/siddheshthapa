@@ -19,6 +19,18 @@ var V02_OVERLAY={
     { id:'my-works', from:'MY WORKS', to:'ART',
       why:'the MMM entry becomes ART; the welcome page will later own a separate My Works door. Identity, ownership, concepts, writings and relationships are untouched.' }
   ],
+  /* ONE SENTENCE IS REWRITTEN FOR V02.
+     The graph's line for COTSI describes the mechanism, which is the right
+     register inside the mind and the wrong one on a card a stranger reads in
+     one breath. preview.html is locked, and the manual is forbidden from
+     keeping its own copy of anything the graph declares — so the change is
+     declared HERE, in the one place divergence is allowed, and both the mind
+     and the manual read the same rewritten line. */
+  reline:[
+    { id:'p-cotsi',
+      to:'A tool/Claude-skill that helps you learn anything faster',
+      why:'the mechanism is what the sheet is for; the line should say what it is for a reader who has not opened it yet.' }
+  ],
   /* an internal key moves; nothing else does */
   renameIds:[
     { from:'psychology', to:'psychology-behaviour',
@@ -51,6 +63,13 @@ var V02_OVERLAY={
   V02_OVERLAY.relabel.forEach(function(r){
     for(var i=0;i<MIGS.length;i++) if(MIGS[i].id===r.id){
       r.observedFrom=MIGS[i].label; MIGS[i].label=r.to;
+    }
+  });
+  /* the rewritten line, recorded with what it replaced so the divergence is
+     legible rather than silent */
+  (V02_OVERLAY.reline||[]).forEach(function(r){
+    for(var i=0;i<THOUGHTS.length;i++) if(THOUGHTS[i].id===r.id){
+      r.observedFrom=THOUGHTS[i].line; THOUGHTS[i].line=r.to; r.applied=true;
     }
   });
   V02_OVERLAY.addMIGs.forEach(function(a){
@@ -3979,6 +3998,9 @@ window.__v02={
       var m=byId[a.id];
       out.added.push({ id:a.id, label:m?m.label:null, empty:!!a.empty,
                        owns:(owned[a.id]||[]).length, conflict:a.conflict||null });
+    });
+    out.relined=(V02_OVERLAY.reline||[]).map(function(r){
+      return { id:r.id, from:r.observedFrom||null, to:r.to, applied:!!r.applied };
     });
     out.renamed=(V02_OVERLAY.renameIds||[]).map(function(rn){
       var o=byId[rn.to];

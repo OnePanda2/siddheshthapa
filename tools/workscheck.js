@@ -129,7 +129,19 @@ setTimeout(function(){
       out.perSheet[id]={
         doc:document.documentElement.scrollWidth > window.innerWidth,
         layer:wkEl.scrollWidth - wkEl.clientWidth,
-        figScrolls:fsc ? (fsc.scrollWidth > fsc.clientWidth) : null
+        figScrolls:fsc ? (fsc.scrollWidth > fsc.clientWidth) : null,
+        /* W6, per sheet: the numbers in the parts list, and the numbers drawn
+           in the figure. Checked on p-cotsi alone this said the manual was
+           consistent while another sheet's drawing could have drifted. */
+        partNos:[].map.call(document.querySelectorAll('.wk-parts li b'),
+                  function(b){ return parseInt(b.textContent,10); }),
+        figNos:[].map.call(document.querySelectorAll('.wk-svg text'),
+                  function(x){ return x.textContent; })
+                 .filter(function(s){ return /^0[0-9]$/.test(s); })
+                 .map(function(s){ return parseInt(s,10); }),
+        hasFigure:!!document.querySelector('.wk-svg'),
+        plate:(document.querySelector('.wk-plate span')||{}).textContent||'',
+        cap:(document.querySelector('.wk-cap')||{}).textContent||''
       };
     });
     W.show('p-cotsi');
@@ -215,9 +227,21 @@ ck('W2', restated.length === 0,
 const m = r.sheets.length;
 const plateOk = r.plate.length === 2 &&
                 r.plate[0] === 'Sheet 01 of ' + (m < 10 ? '0' + m : m);
-ck('W3', plateOk,
-   'sheet numbering is derived — "' + (r.plate[0] || '(none)') +
-   '" against ' + m + ' works in the graph');
+/* and the figure number tracks the sheet number, on every sheet that has a
+   drawing. Typed by hand into each caption, they disagreed the moment a third
+   sheet reordered the set: "Fig. 3.1" appeared on sheet 02. */
+const capMismatch = [];
+Object.keys(r.perSheet).forEach(id => {
+  const p = r.perSheet[id];
+  if(!p.cap) return;
+  const sheetNo = (p.plate.match(/Sheet (\d+)/) || [])[1];
+  const figNo = (p.cap.match(/Fig\. (\d+)/) || [])[1];
+  if(sheetNo !== figNo) capMismatch.push(id + ' sheet ' + sheetNo + ' fig ' + figNo);
+});
+ck('W3', plateOk && capMismatch.length === 0,
+   'sheet numbering is derived, and the figures follow it — "' +
+   (r.plate[0] || '(none)') + '" against ' + m + ' works in the graph' +
+   (capMismatch.length ? ' — MISMATCH: ' + capMismatch.join(', ') : ''));
 
 /* W4 — every entry in the band of night is a relationship the graph holds.
    Checked against the graph's own edge list, not against the rendered text,
@@ -240,15 +264,27 @@ ck('W5', rv.stamp === 'not yet written' && rv.hasNone && rv.steps === 0 &&
    ' stamped "' + rv.stamp + '", 0 steps, and its derived tier still printed (' +
    rv.see + ' relationships)');
 
-/* W6 — the drawing has not drifted from the parts list */
-const declared = ((r.data.sheets || []).find(s => s.node === 'p-cotsi') || {}).parts || [];
-const declaredNos = declared.map(p => p.n).sort();
-const drawnNos = (r.figPartNos || []).slice().sort();
-ck('W6', declaredNos.length > 0 &&
-         declaredNos.join(',') === drawnNos.join(',') &&
-         r.partNos.slice().sort().join(',') === declaredNos.join(','),
-   'the figure is numbered to match its parts list — ' + declaredNos.join('/') +
-   ' declared, ' + (drawnNos.join('/') || 'none') + ' drawn');
+/* W6 — no drawing has drifted from its own parts list, on any sheet */
+const num = a => a.slice().sort((x, y) => x - y).join('/');
+const drifted = [];
+let figuresChecked = 0;
+(r.data.sheets || []).forEach(sh => {
+  const p = r.perSheet[sh.node];
+  if(!p) return;
+  const declaredNos = (sh.parts || []).map(q => q.n);
+  if(num(p.partNos) !== num(declaredNos))
+    drifted.push(sh.node + ' list ' + num(p.partNos) + ' vs declared ' + num(declaredNos));
+  if(sh.figure){
+    figuresChecked++;
+    if(!p.hasFigure) drifted.push(sh.node + ' declares a figure and drew none');
+    else if(num(p.figNos) !== num(declaredNos))
+      drifted.push(sh.node + ' drew ' + num(p.figNos) + ' vs parts ' + num(declaredNos));
+  }
+});
+ck('W6', figuresChecked > 0 && drifted.length === 0,
+   'every drawing is numbered to match its own parts list — ' + figuresChecked +
+   ' figure(s) across ' + (r.data.sheets || []).length + ' written sheet(s)' +
+   (drifted.length ? ' — DRIFTED: ' + drifted.join('; ') : ''));
 
 /* W7 — the scene stops while the manual is up. Measured over real time,
    because settle() drives the renderer directly and would walk past the

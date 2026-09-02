@@ -45,7 +45,7 @@ var SHEETS = WORK_NODES.slice().sort(function(a, b){
    parts list is a defect and not a variation. */
 var FIGURES = {
   'diagnostic-before-generation': {
-    caption: 'Fig. 1.1 — the diagnostic stands before the generator',
+    caption: 'the diagnostic stands before the generator',
     parts: [1, 2, 3, 4],
     svg: [
       '<svg class="wk-svg" viewBox="0 0 660 200" role="img" aria-label="Exploded view: trigger, diagnostic, level estimate, course. The diagnostic sits between the request and anything being generated.">',
@@ -83,7 +83,7 @@ var FIGURES = {
      that is what it is: nothing is fetched at run time, so every part has to
      be inside the artifact before it leaves the bench. */
   'five-parts-one-file': {
-    caption: 'Fig. 2.1 — assembly: five parts, one file, nothing fetched',
+    caption: 'assembly: five parts, one file, nothing fetched',
     parts: [1, 2, 3, 4, 5],
     svg: [
       /* Pitch 46 against a box height of 32, so the nine-pixel gap under each
@@ -135,6 +135,46 @@ var FIGURES = {
       '<line x1="14" y1="252" x2="646" y2="252" stroke="#b9bcb6" stroke-width="1"></line>',
       '</svg>'
     ].join('')
+  },
+
+  /* The asymmetry IS the drawing. One part is drawn solid because something is
+     written down about it; six are drawn open because nothing is, and an
+     honest parts list of a collection like this looks exactly like that. */
+  'one-documented-six-named': {
+    caption: 'one part documented, six named',
+    parts: [1, 2, 3, 4, 5, 6, 7],
+    svg: (function(){
+      var out = ['<svg class="wk-svg" viewBox="0 -10 660 210" role="img" ' +
+        'aria-label="Seven parts in the repository. One, cotsi, is drawn solid because its behaviour is written down. The other six are drawn open because only their names are.">'];
+      /* 01 — the one with something written about it */
+      out.push('<g class="part p1">');
+      out.push('<rect x="14" y="26" width="150" height="70" fill="none" stroke="#1a1d1f" stroke-width="1.6"></rect>');
+      out.push('<text x="89" y="52" text-anchor="middle" font-size="10" fill="#1a1d1f">COTSI</text>');
+      out.push('<text x="89" y="68" text-anchor="middle" font-size="8" fill="#5e6367">a folder, and</text>');
+      out.push('<text x="89" y="80" text-anchor="middle" font-size="8" fill="#5e6367">an argument</text>');
+      out.push('<text x="14" y="20" font-size="9" fill="#9a2a1f">01</text></g>');
+      out.push('<path class="lead" d="M89 96 L89 126" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3"></path>');
+      out.push('<text x="89" y="140" text-anchor="middle" font-size="8" fill="#5e6367">sheet 01</text>');
+      /* 02-07 — named only, drawn open on three sides */
+      var names = ['job-hunter', 'out-of-the-box3.5', 'primis',
+                   'prospect-intel1.0', 'unfair-advantage', 'wave-predict (1)'];
+      names.forEach(function(nm, i){
+        var col = i % 3, row = (i / 3) | 0;
+        var x = 214 + col * 148, y = 26 + row * 76;
+        out.push('<g class="part p' + (i + 2) + '">');
+        /* open on the right: nothing states where it ends or what it is for */
+        out.push('<path d="M' + (x + 118) + ' ' + y + ' L' + x + ' ' + y +
+                 ' L' + x + ' ' + (y + 52) + ' L' + (x + 118) + ' ' + (y + 52) + '" ' +
+                 'fill="none" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="2 3"></path>');
+        out.push('<text x="' + (x + 8) + '" y="' + (y + 22) + '" font-size="8.5" fill="#1a1d1f">' + nm + '</text>');
+        out.push('<text x="' + (x + 8) + '" y="' + (y + 38) + '" font-size="7.5" fill="#9a2a1f">no description</text>');
+        out.push('<text x="' + x + '" y="' + (y - 6) + '" font-size="9" fill="#9a2a1f">0' + (i + 2) + '</text>');
+        out.push('</g>');
+      });
+      out.push('<line x1="14" y1="190" x2="646" y2="190" stroke="#b9bcb6" stroke-width="1"></line>');
+      out.push('</svg>');
+      return out.join('');
+    })()
   }
 };
 
@@ -254,7 +294,7 @@ function renderSheet(id){
   /* the graph's own sentence about this work — derived, never retyped */
   if(n.line) wkBody.appendChild(el('p', 'wk-line', n.line));
 
-  if(sh) renderWritten(sh, n);
+  if(sh) renderWritten(sh, n, idx);
   else   renderReserved(n);
 
   /* the title block, bottom, where a drawing puts it */
@@ -268,16 +308,27 @@ function renderSheet(id){
   say(n.label + ', sheet ' + (idx + 1) + ' of ' + SHEETS.length + '.');
 }
 
-function renderWritten(sh, n){
+function renderWritten(sh, n, idx){
   var grid = el('div', 'wk-grid');
 
   var c1 = el('div', 'wk-col');
   c1.appendChild(el('p', 'wk-h', 'Purpose'));
   c1.appendChild(el('p', null, sh.purpose));
   c1.appendChild(el('p', 'wk-h', 'Procedure'));
-  var ol = el('ol', 'wk-steps');
-  (sh.procedure || []).forEach(function(step){ ol.appendChild(el('li', null, step)); });
-  c1.appendChild(ol);
+  /* A SHEET CAN BE PART-WRITTEN. Purpose and parts can be known while the
+     steps are not — a collection whose contents state only their names has no
+     procedure anyone can honestly write down. An empty <ol> rendered as a
+     silent gap, which reads as an oversight rather than as a fact. */
+  var steps = sh.procedure || [];
+  if(steps.length){
+    var ol = el('ol', 'wk-steps');
+    steps.forEach(function(step){ ol.appendChild(el('li', null, step)); });
+    c1.appendChild(ol);
+  } else {
+    c1.appendChild(el('p', 'wk-none',
+      'Not yet written. The parts are known and what they do, step by step, ' +
+      'is not stated anywhere that can be quoted.'));
+  }
   grid.appendChild(c1);
 
   var c2 = el('div', 'wk-col');
@@ -319,7 +370,7 @@ function renderWritten(sh, n){
   }
   wkBody.appendChild(fw);
 
-  if(sh.figure && FIGURES[sh.figure]) renderFigure(FIGURES[sh.figure]);
+  if(sh.figure && FIGURES[sh.figure]) renderFigure(FIGURES[sh.figure], idx);
   if(sh.operable) renderDiagnostic();
 }
 
@@ -337,10 +388,15 @@ function renderReserved(n){
   wkBody.appendChild(box);
 }
 
-function renderFigure(fig){
+/* THE FIGURE NUMBER IS DERIVED, like the sheet number. It was typed into each
+   caption, and the moment a third sheet was written the ordering changed and
+   "Fig. 3.1" appeared on sheet 02. A number a person maintains by hand next to
+   a number the code derives will disagree eventually. */
+function renderFigure(fig, idx){
   var wrap = el('div', 'wk-fig');
   var bar = el('div', 'wk-figbar');
-  bar.appendChild(el('span', 'wk-cap', fig.caption));
+  bar.appendChild(el('span', 'wk-cap',
+    'Fig. ' + pad(idx + 1) + '.1 — ' + fig.caption));
   var btn = el('button', 'wk-btn', 'Explode');
   btn.type = 'button';
   bar.appendChild(btn);

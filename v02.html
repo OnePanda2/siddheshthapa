@@ -1022,6 +1022,18 @@ var V02_OVERLAY={
     { id:'my-works', from:'MY WORKS', to:'ART',
       why:'the MMM entry becomes ART; the welcome page will later own a separate My Works door. Identity, ownership, concepts, writings and relationships are untouched.' }
   ],
+  /* ONE SENTENCE IS REWRITTEN FOR V02.
+     The graph's line for COTSI describes the mechanism, which is the right
+     register inside the mind and the wrong one on a card a stranger reads in
+     one breath. preview.html is locked, and the manual is forbidden from
+     keeping its own copy of anything the graph declares — so the change is
+     declared HERE, in the one place divergence is allowed, and both the mind
+     and the manual read the same rewritten line. */
+  reline:[
+    { id:'p-cotsi',
+      to:'A tool/Claude-skill that helps you learn anything faster',
+      why:'the mechanism is what the sheet is for; the line should say what it is for a reader who has not opened it yet.' }
+  ],
   /* an internal key moves; nothing else does */
   renameIds:[
     { from:'psychology', to:'psychology-behaviour',
@@ -1054,6 +1066,13 @@ var V02_OVERLAY={
   V02_OVERLAY.relabel.forEach(function(r){
     for(var i=0;i<MIGS.length;i++) if(MIGS[i].id===r.id){
       r.observedFrom=MIGS[i].label; MIGS[i].label=r.to;
+    }
+  });
+  /* the rewritten line, recorded with what it replaced so the divergence is
+     legible rather than silent */
+  (V02_OVERLAY.reline||[]).forEach(function(r){
+    for(var i=0;i<THOUGHTS.length;i++) if(THOUGHTS[i].id===r.id){
+      r.observedFrom=THOUGHTS[i].line; THOUGHTS[i].line=r.to; r.applied=true;
     }
   });
   V02_OVERLAY.addMIGs.forEach(function(a){
@@ -5879,6 +5898,9 @@ window.__v02={
       out.added.push({ id:a.id, label:m?m.label:null, empty:!!a.empty,
                        owns:(owned[a.id]||[]).length, conflict:a.conflict||null });
     });
+    out.relined=(V02_OVERLAY.reline||[]).map(function(r){
+      return { id:r.id, from:r.observedFrom||null, to:r.to, applied:!!r.applied };
+    });
     out.renamed=(V02_OVERLAY.renameIds||[]).map(function(rn){
       var o=byId[rn.to];
       return { from:rn.from, to:rn.to, moved:rn.movedObjects||0,
@@ -6443,6 +6465,37 @@ var WORKS_DATA = {
           "note": "The first attempt drew evenly spaced curves across a closed shell and read as a helmet. The second was a lit mesh of 26,624 triangles, and was recognisable and wrong — a translucent clay organ, the object rather than the mind. Both were rejected outright rather than tuned." }
       ],
       "figure": "five-parts-one-file"
+    },
+    {
+      "node": "p-skills",
+      "authority": [
+        "github.com/OnePanda2/Claude-skills — repository listing, read 2026-09-02: one folder and six .skill files",
+        "The MY WORKS region's own line: ideas that stopped being arguments and became objects other people can use"
+      ],
+      "purpose": "To keep the procedures worth repeating where they can be run again — by the person who wrote them and by the friends they were written for. A skill here is a piece of thinking that stopped being advice and became something a machine performs the same way twice.",
+      "parts": [
+        { "n": 1, "name": "cotsi",
+          "note": "The only one with a folder of its own, and the only one whose argument is written down anywhere. It has its own sheet in this manual." },
+        { "n": 2, "name": "job-hunter",
+          "note": "Named, not described. What it does is not stated in the repository." },
+        { "n": 3, "name": "out-of-the-box3.5",
+          "note": "Named, not described. The version sits in the filename, which means the history of it is not anywhere else." },
+        { "n": 4, "name": "primis",
+          "note": "Named, not described. The name gives a reader nothing to go on." },
+        { "n": 5, "name": "prospect-intel1.0",
+          "note": "Named, not described. Versioned in the filename, like 03." },
+        { "n": 6, "name": "unfair-advantage",
+          "note": "Named, not described." },
+        { "n": 7, "name": "wave-predict (1)",
+          "note": "Named, not described. The name still carries the suffix a browser adds to a second copy of a download, so the file was moved into the repository rather than written into it." }
+      ],
+      "knownFailures": [
+        { "name": "Six of seven cannot be chosen",
+          "note": "A skill is reached for by its description — the model decides whether to use one by reading what it says it is for. Six of these say nothing beyond a filename, so nothing can reach for them on purpose and a stranger cannot tell what any of them does. The collection is a folder, not yet a set of tools." },
+        { "name": "The filename is the version",
+          "note": "Two of the names carry a version and one carries a browser's duplicate-download suffix. Where the version lives in the filename there is no record of what changed between one and the next, and the earlier one is usually gone." }
+      ],
+      "figure": "one-documented-six-named"
     }
   ]
 }
@@ -6473,7 +6526,7 @@ var SHEETS = WORK_NODES.slice().sort(function(a, b){
    parts list is a defect and not a variation. */
 var FIGURES = {
   'diagnostic-before-generation': {
-    caption: 'Fig. 1.1 — the diagnostic stands before the generator',
+    caption: 'the diagnostic stands before the generator',
     parts: [1, 2, 3, 4],
     svg: [
       '<svg class="wk-svg" viewBox="0 0 660 200" role="img" aria-label="Exploded view: trigger, diagnostic, level estimate, course. The diagnostic sits between the request and anything being generated.">',
@@ -6511,7 +6564,7 @@ var FIGURES = {
      that is what it is: nothing is fetched at run time, so every part has to
      be inside the artifact before it leaves the bench. */
   'five-parts-one-file': {
-    caption: 'Fig. 2.1 — assembly: five parts, one file, nothing fetched',
+    caption: 'assembly: five parts, one file, nothing fetched',
     parts: [1, 2, 3, 4, 5],
     svg: [
       /* Pitch 46 against a box height of 32, so the nine-pixel gap under each
@@ -6563,6 +6616,46 @@ var FIGURES = {
       '<line x1="14" y1="252" x2="646" y2="252" stroke="#b9bcb6" stroke-width="1"></line>',
       '</svg>'
     ].join('')
+  },
+
+  /* The asymmetry IS the drawing. One part is drawn solid because something is
+     written down about it; six are drawn open because nothing is, and an
+     honest parts list of a collection like this looks exactly like that. */
+  'one-documented-six-named': {
+    caption: 'one part documented, six named',
+    parts: [1, 2, 3, 4, 5, 6, 7],
+    svg: (function(){
+      var out = ['<svg class="wk-svg" viewBox="0 -10 660 210" role="img" ' +
+        'aria-label="Seven parts in the repository. One, cotsi, is drawn solid because its behaviour is written down. The other six are drawn open because only their names are.">'];
+      /* 01 — the one with something written about it */
+      out.push('<g class="part p1">');
+      out.push('<rect x="14" y="26" width="150" height="70" fill="none" stroke="#1a1d1f" stroke-width="1.6"></rect>');
+      out.push('<text x="89" y="52" text-anchor="middle" font-size="10" fill="#1a1d1f">COTSI</text>');
+      out.push('<text x="89" y="68" text-anchor="middle" font-size="8" fill="#5e6367">a folder, and</text>');
+      out.push('<text x="89" y="80" text-anchor="middle" font-size="8" fill="#5e6367">an argument</text>');
+      out.push('<text x="14" y="20" font-size="9" fill="#9a2a1f">01</text></g>');
+      out.push('<path class="lead" d="M89 96 L89 126" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3"></path>');
+      out.push('<text x="89" y="140" text-anchor="middle" font-size="8" fill="#5e6367">sheet 01</text>');
+      /* 02-07 — named only, drawn open on three sides */
+      var names = ['job-hunter', 'out-of-the-box3.5', 'primis',
+                   'prospect-intel1.0', 'unfair-advantage', 'wave-predict (1)'];
+      names.forEach(function(nm, i){
+        var col = i % 3, row = (i / 3) | 0;
+        var x = 214 + col * 148, y = 26 + row * 76;
+        out.push('<g class="part p' + (i + 2) + '">');
+        /* open on the right: nothing states where it ends or what it is for */
+        out.push('<path d="M' + (x + 118) + ' ' + y + ' L' + x + ' ' + y +
+                 ' L' + x + ' ' + (y + 52) + ' L' + (x + 118) + ' ' + (y + 52) + '" ' +
+                 'fill="none" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="2 3"></path>');
+        out.push('<text x="' + (x + 8) + '" y="' + (y + 22) + '" font-size="8.5" fill="#1a1d1f">' + nm + '</text>');
+        out.push('<text x="' + (x + 8) + '" y="' + (y + 38) + '" font-size="7.5" fill="#9a2a1f">no description</text>');
+        out.push('<text x="' + x + '" y="' + (y - 6) + '" font-size="9" fill="#9a2a1f">0' + (i + 2) + '</text>');
+        out.push('</g>');
+      });
+      out.push('<line x1="14" y1="190" x2="646" y2="190" stroke="#b9bcb6" stroke-width="1"></line>');
+      out.push('</svg>');
+      return out.join('');
+    })()
   }
 };
 
@@ -6682,7 +6775,7 @@ function renderSheet(id){
   /* the graph's own sentence about this work — derived, never retyped */
   if(n.line) wkBody.appendChild(el('p', 'wk-line', n.line));
 
-  if(sh) renderWritten(sh, n);
+  if(sh) renderWritten(sh, n, idx);
   else   renderReserved(n);
 
   /* the title block, bottom, where a drawing puts it */
@@ -6696,16 +6789,27 @@ function renderSheet(id){
   say(n.label + ', sheet ' + (idx + 1) + ' of ' + SHEETS.length + '.');
 }
 
-function renderWritten(sh, n){
+function renderWritten(sh, n, idx){
   var grid = el('div', 'wk-grid');
 
   var c1 = el('div', 'wk-col');
   c1.appendChild(el('p', 'wk-h', 'Purpose'));
   c1.appendChild(el('p', null, sh.purpose));
   c1.appendChild(el('p', 'wk-h', 'Procedure'));
-  var ol = el('ol', 'wk-steps');
-  (sh.procedure || []).forEach(function(step){ ol.appendChild(el('li', null, step)); });
-  c1.appendChild(ol);
+  /* A SHEET CAN BE PART-WRITTEN. Purpose and parts can be known while the
+     steps are not — a collection whose contents state only their names has no
+     procedure anyone can honestly write down. An empty <ol> rendered as a
+     silent gap, which reads as an oversight rather than as a fact. */
+  var steps = sh.procedure || [];
+  if(steps.length){
+    var ol = el('ol', 'wk-steps');
+    steps.forEach(function(step){ ol.appendChild(el('li', null, step)); });
+    c1.appendChild(ol);
+  } else {
+    c1.appendChild(el('p', 'wk-none',
+      'Not yet written. The parts are known and what they do, step by step, ' +
+      'is not stated anywhere that can be quoted.'));
+  }
   grid.appendChild(c1);
 
   var c2 = el('div', 'wk-col');
@@ -6747,7 +6851,7 @@ function renderWritten(sh, n){
   }
   wkBody.appendChild(fw);
 
-  if(sh.figure && FIGURES[sh.figure]) renderFigure(FIGURES[sh.figure]);
+  if(sh.figure && FIGURES[sh.figure]) renderFigure(FIGURES[sh.figure], idx);
   if(sh.operable) renderDiagnostic();
 }
 
@@ -6765,10 +6869,15 @@ function renderReserved(n){
   wkBody.appendChild(box);
 }
 
-function renderFigure(fig){
+/* THE FIGURE NUMBER IS DERIVED, like the sheet number. It was typed into each
+   caption, and the moment a third sheet was written the ordering changed and
+   "Fig. 3.1" appeared on sheet 02. A number a person maintains by hand next to
+   a number the code derives will disagree eventually. */
+function renderFigure(fig, idx){
   var wrap = el('div', 'wk-fig');
   var bar = el('div', 'wk-figbar');
-  bar.appendChild(el('span', 'wk-cap', fig.caption));
+  bar.appendChild(el('span', 'wk-cap',
+    'Fig. ' + pad(idx + 1) + '.1 — ' + fig.caption));
   var btn = el('button', 'wk-btn', 'Explode');
   btn.type = 'button';
   bar.appendChild(btn);
