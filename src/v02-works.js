@@ -274,6 +274,59 @@ var FIGURES = {
       '<line x1="14" y1="176" x2="646" y2="176" stroke="#b9bcb6" stroke-width="1"></line>',
       '</svg>'
     ].join('')
+  },
+
+  /* ONE PIPELINE, BUILT THREE TIMES AT THREE DEPTHS. Drawn as bars of ten, six
+     and three segments against a shared scale, because that comparison is the
+     finding: the collection is not five unrelated automations, it is one idea
+     at decreasing depth — and then two that cannot be measured at all, drawn
+     as the empty bars they are. */
+  'one-pipeline-three-depths': {
+    caption: 'one pipeline, built three times, and two that are not described',
+    parts: [1, 2, 3, 4, 5],
+    svg: (function(){
+      var rows = [
+        { n:1, name:'RevenuePilot OS',        segs:10, note:'lead to cash' },
+        { n:2, name:'RevFlow AI',             segs:6,  note:'capture to opportunity' },
+        { n:3, name:'CRM Lead Capture',       segs:3,  note:'validate · store · alert' },
+        { n:4, name:'Pipeline-Leak-Engine',   segs:0,  note:'not described' },
+        { n:5, name:'02-crm-slack-onboarding',segs:0,  note:'not described' }
+      ];
+      /* X and W leave room for the note that follows the longest bar: at
+         X=196/W=400 the ten-segment row put its label past the right edge of
+         the viewBox, where it was simply clipped. */
+      var X = 180, W = 340, SEG = W / 10, out = [];
+      out.push('<svg class="wk-svg" viewBox="0 -10 660 226" role="img" ' +
+        'aria-label="Five automation projects. Three are the same lead-to-cash pipeline at ten, six and three workflows; two are present in the repository with no description, drawn as empty bars.">');
+      /* the shared scale */
+      out.push('<text x="' + X + '" y="4" font-size="8" fill="#5e6367">1</text>');
+      out.push('<text x="' + (X + W) + '" y="4" text-anchor="end" font-size="8" fill="#5e6367">10 workflows</text>');
+      rows.forEach(function(r, i){
+        var y = 20 + i * 38;
+        out.push('<g class="part p' + r.n + '">');
+        out.push('<text x="14" y="' + (y + 14) + '" font-size="9" fill="#9a2a1f">0' + r.n + '</text>');
+        out.push('<text x="38" y="' + (y + 14) + '" font-size="9" fill="#1a1d1f">' + r.name + '</text>');
+        if(r.segs){
+          for(var k = 0; k < r.segs; k++){
+            out.push('<rect x="' + (X + k * SEG) + '" y="' + y + '" width="' + (SEG - 3) +
+                     '" height="18" fill="none" stroke="#1a1d1f" stroke-width="1"></rect>');
+          }
+          out.push('<text x="' + (X + r.segs * SEG + 6) + '" y="' + (y + 13) +
+                   '" font-size="8" fill="#5e6367">' + r.segs + ' · ' + r.note + '</text>');
+        } else {
+          /* an empty bar is the honest drawing of a project with no description */
+          out.push('<rect x="' + X + '" y="' + y + '" width="' + W +
+                   '" height="18" fill="none" stroke="#9a2a1f" stroke-width="1" ' +
+                   'stroke-dasharray="2 4"></rect>');
+          out.push('<text x="' + (X + 8) + '" y="' + (y + 13) +
+                   '" font-size="8" fill="#9a2a1f">' + r.note + '</text>');
+        }
+        out.push('</g>');
+      });
+      out.push('<line x1="14" y1="204" x2="646" y2="204" stroke="#b9bcb6" stroke-width="1"></line>');
+      out.push('</svg>');
+      return out.join('');
+    })()
   }
 };
 
@@ -308,6 +361,15 @@ var wkRunning = document.getElementById('wkRunning');
 
 var wkView = null;          /* null = shut · 'contents' · a node id */
 var wkReturnFocus = null;
+
+/* A TEST SEAM, AND THE REASON FOR IT.
+   Every one of the six works is now written, so nothing a visitor can reach
+   renders the reserved path — and the check that guards it had nothing left to
+   measure. The guarantee still matters: the day a seventh work is added to the
+   graph it must render as a numbered, stamped, reserved sheet rather than as a
+   broken one. This makes that state reachable by asking for it, through the
+   same renderSheet the real path uses, rather than by faking a record. */
+var RESERVED_PREVIEW = null;
 
 function el(tag, cls, txt){
   var e = document.createElement(tag);
@@ -371,7 +433,7 @@ function pad(n){ return (n < 10 ? '0' : '') + n; }
 function renderSheet(id){
   var n = byId[id];
   if(!n) return renderContents();
-  var sh = WORKS_BY_NODE[id];
+  var sh = (RESERVED_PREVIEW === id) ? null : WORKS_BY_NODE[id];
   var idx = SHEETS.map(function(x){ return x.id; }).indexOf(id);
 
   wkView = id;
@@ -706,6 +768,11 @@ window.__v02.works = {
               return wkView; },
   seeAlso:  function(id){ return seeAlso(id).map(function(r){
               return { id:r.id, verb:r.verb }; }); },
+  /* render a written sheet the way an undocumented one is rendered, so the
+     reserved-sheet guarantee stays measurable once every work is written */
+  asReserved:function(id){ RESERVED_PREVIEW = id;
+    if(WORKS_OPEN) renderSheet(id); else openWorks(id);
+    RESERVED_PREVIEW = null; return wkView; },
   /* ask the scene for frames, so a suite can prove the manual stops them */
   nudge:    function(n){ invalidate(n || 400); return true; },
   /* graph truth, so a suite can check the manual against the mind rather

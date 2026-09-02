@@ -161,6 +161,40 @@
           "note": "Nobody replaces the thing securing most of the internet for 3%. A margin has to be worth the cost and risk of changing it, and this one is not, so the result is a real finding and not yet a reason to switch. The hunt continues." }
       ],
       "figure": "three-percent-is-not-enough"
+    },
+    {
+      "node": "p-automation",
+      "authority": [
+        "github.com/OnePanda2/automation-portfolio — repository listing and README.md, read 2026-09-02: five project folders, three of them described"
+      ],
+      "purpose": "To hold automation work as systems that run rather than as claims that they would. Each project is a pipeline someone else could pick up: a lead arrives, and it is validated, enriched, judged, routed and reported on without anyone touching it.",
+      "parts": [
+        { "n": 1, "name": "RevenuePilot OS",
+          "note": "The flagship, and the fullest version of the idea: ten workflows from lead capture to cash. Built on Activepieces with Airtable, Slack, Gmail and OpenAI." },
+        { "n": 2, "name": "RevFlow AI",
+          "note": "The same shape at six workflows — capture through to opportunity, with AI qualification and routing. An MVP of the flagship rather than a different idea." },
+        { "n": 3, "name": "CRM Lead Capture",
+          "note": "The floor of the same pipeline: validate a website lead, store it in Airtable, alert Slack. The smallest version that is still useful." },
+        { "n": 4, "name": "Pipeline-Leak-Engine",
+          "note": "In the repository. Not in the README, so what it does is not stated anywhere a reader can reach." },
+        { "n": 5, "name": "02-crm-slack-onboarding",
+          "note": "In the repository, not in the README, and still carrying the ordinal prefix of a numbering scheme the other four do not use." }
+      ],
+      "procedure": [
+        "Capture the lead where it arrives, rather than waiting for someone to copy it across.",
+        "Deduplicate against what is already held, before anything downstream acts on it twice.",
+        "Enrich it, so the decision is made on more than what the form collected.",
+        "Score it with AI, and route it by territory to whoever should actually see it.",
+        "Notify that person in Slack, and start onboarding if it converts.",
+        "Report on the whole thing, catch the errors, and leave an assistant that can be asked about it in plain language."
+      ],
+      "knownFailures": [
+        { "name": "Two of five cannot be read",
+          "note": "Pipeline-Leak-Engine and 02-crm-slack-onboarding are in the repository and not in the README. This is the same failure recorded on the skills sheet, in a different repository and a different year: the work gets done and the description does not, so a stranger cannot tell what is there. Repeating a failure across two collections makes it a habit rather than an oversight." },
+        { "name": "Production-style",
+          "note": "The README calls these production-style, which is an honest word and a careful one. None of them is stated to be running for anyone. Built to production shape is a real claim and it is not the same claim as in production, and the distinction is worth keeping rather than blurring." }
+      ],
+      "figure": "one-pipeline-three-depths"
     }
   ]
 }

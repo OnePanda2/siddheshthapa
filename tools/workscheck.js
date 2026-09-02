@@ -140,6 +140,21 @@ setTimeout(function(){
                  .filter(function(s){ return /^0[0-9]$/.test(s); })
                  .map(function(s){ return parseInt(s,10); }),
         hasFigure:!!document.querySelector('.wk-svg'),
+        /* CONTENT OUTSIDE THE VIEWBOX IS SILENTLY CLIPPED, and a clipped part
+           number reads as a missing part. This has happened twice: an exploded
+           label lifted out of the top, and a row label ran past the right
+           edge. getBBox against the declared viewBox catches both. */
+        figClip:(function(){
+          var s=document.querySelector('.wk-svg');
+          if(!s) return null;
+          var vb=(s.getAttribute('viewBox')||'').split(/\s+/).map(Number);
+          if(vb.length!==4) return null;
+          var b=s.getBBox();
+          return Math.max(0, Math.round(b.x+b.width-(vb[0]+vb[2])),
+                             Math.round(vb[0]-b.x),
+                             Math.round(b.y+b.height-(vb[1]+vb[3])),
+                             Math.round(vb[1]-b.y));
+        })(),
         plate:(document.querySelector('.wk-plate span')||{}).textContent||'',
         cap:(document.querySelector('.wk-cap')||{}).textContent||'',
         /* W5, per sheet. Pointed at one named work, it broke the moment that
@@ -153,6 +168,25 @@ setTimeout(function(){
         seeCount:document.querySelectorAll('[data-see]').length
       };
     });
+    /* W5 — the reserved path, made reachable. Every work is written now, so
+       nothing a visitor can click renders it; asReserved() renders a real
+       sheet through the real renderSheet with its record suppressed, which is
+       exactly the state a seventh work would arrive in. */
+    out.reservedProbe={};
+    W.sheets().slice(0, 2).forEach(function(id){
+      W.asReserved(id);
+      out.reservedProbe[id]={
+        stamp:(document.querySelector('.wk-stamp')||{}).textContent||'',
+        hasNone:!!document.querySelector('.wk-none'),
+        steps:document.querySelectorAll('.wk-steps li').length,
+        parts:document.querySelectorAll('.wk-parts li').length,
+        hasLine:!!document.querySelector('.wk-line'),
+        plateCount:document.querySelectorAll('.wk-plate span').length,
+        seeCount:document.querySelectorAll('[data-see]').length,
+        hasFigure:!!document.querySelector('.wk-svg')
+      };
+    });
+
     W.show('p-cotsi');
     out.overflowX=out.perSheet['p-cotsi'].doc;
     out.layerOverflow=out.perSheet['p-cotsi'].layer;
@@ -259,14 +293,22 @@ const wrong = reservedIds.filter(id => {
   return !p || p.stamp !== 'not yet written' || !p.hasNone || p.steps !== 0 ||
          !p.hasLine || p.plateCount !== 2 || p.seeCount === 0;
 });
-ck('W5', reservedIds.length > 0 && wrong.length === 0,
-   reservedIds.length
-     ? 'every undocumented work is a reserved sheet, not an empty one — ' +
-       reservedIds.length + ' of ' + r.sheets.length + ' reserved, each stamped ' +
-       'and still printing its derived tier' +
-       (wrong.length ? ' — WRONG: ' + wrong.join(', ') : '')
-     : 'NOTHING TO CHECK — every work is written, so this assertion is vacuous ' +
-       'and the reserved-sheet guarantee is currently untested');
+/* and the same guarantee proved on demand, because every work being written
+   left nothing in the UI that renders it */
+const probeIds = Object.keys(r.reservedProbe || {});
+const probeWrong = probeIds.filter(id => {
+  const p = r.reservedProbe[id];
+  return p.stamp !== 'not yet written' || !p.hasNone || p.steps !== 0 ||
+         p.parts !== 0 || !p.hasLine || p.plateCount !== 2 ||
+         p.seeCount === 0 || p.hasFigure;
+});
+ck('W5', probeIds.length > 0 && probeWrong.length === 0 && wrong.length === 0,
+   'a work with no record renders reserved, not empty — ' +
+   (reservedIds.length ? reservedIds.length + ' live, ' : 'none live, ') +
+   probeIds.length + ' proved on demand: stamped, no steps, no parts, no ' +
+   'figure, and still printing the line, the plate and its relationships' +
+   (wrong.length ? ' — LIVE WRONG: ' + wrong.join(', ') : '') +
+   (probeWrong.length ? ' — WRONG: ' + probeWrong.join(', ') : ''));
 
 /* W6 — no drawing has drifted from its own parts list, on any sheet */
 const num = a => a.slice().sort((x, y) => x - y).join('/');
@@ -283,10 +325,12 @@ let figuresChecked = 0;
     if(!p.hasFigure) drifted.push(sh.node + ' declares a figure and drew none');
     else if(num(p.figNos) !== num(declaredNos))
       drifted.push(sh.node + ' drew ' + num(p.figNos) + ' vs parts ' + num(declaredNos));
+    if(p.figClip > 0) drifted.push(sh.node + ' draws ' + p.figClip + 'px outside its viewBox');
   }
 });
 ck('W6', figuresChecked > 0 && drifted.length === 0,
-   'every drawing is numbered to match its own parts list — ' + figuresChecked +
+   'every drawing is numbered to match its own parts list, and none is drawn ' +
+   'outside its own frame — ' + figuresChecked +
    ' figure(s) across ' + (r.data.sheets || []).length + ' written sheet(s)' +
    (drifted.length ? ' — DRIFTED: ' + drifted.join('; ') : ''));
 
