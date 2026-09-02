@@ -2977,6 +2977,10 @@ var reader=document.getElementById('reader'), readTitle=document.getElementById(
     readPlate=document.getElementById('readPlate'), readRunning=document.getElementById('readRunning'),
     readFolio=document.getElementById('readFolio'), readClose=document.getElementById('readClose');
 var readingId=null, camMemory=null;
+/* THE MANUAL'S HOOKS. MY WORKS is a layer over this scene, not a second scene,
+   so the app needs to know only two things about it: that it is open, and who
+   to call when its door is used. Everything else lives in src/v02-works.js. */
+var WORKS_OPEN=false, onWorksDoor=null;
 
 function openReader(id){
   var n=byId[id]; if(!n) return;
@@ -3013,6 +3017,7 @@ backBtn.addEventListener('click',function(){
 });
 mindBtn.addEventListener('click',function(){ if(readingId) closeReader(); travelTo('universe'); });
 document.addEventListener('keydown',function(e){
+  if(WORKS_OPEN) return;               /* the manual answers its own Escape */
   if(e.key==='Escape'){ if(readingId) closeReader(); else if(state.mode!=='universe') backBtn.click(); }
 });
 
@@ -3063,7 +3068,9 @@ var FLIGHT_ON=false, FLIGHT_T0=0, FLIGHT_MS=1400;
 var FLIGHT_FROM_P=new THREE.Vector3(), FLIGHT_FROM_A=new THREE.Vector3();
 var FLIGHT_MIN=48;      /* below this a move is an adjustment, not a journey */
 var lastMs=0, frameMs=16;
+var FRAMES_DRAWN=0;
 function step(){
+  FRAMES_DRAWN++;
   var t0=(performance&&performance.now)?performance.now():Date.now();
   var k=reduced?1:0.055;
   var aim=wantPos.clone();
@@ -3203,13 +3210,16 @@ function step(){
 }
 var needFrames=0;
 function invalidate(n){ needFrames=Math.max(needFrames, n||46); }
+/* THE ONE PLACE THAT DECIDES WHETHER THE WORLD IS RUNNING. Named so a suite
+   can ask the same question the loop asks, rather than a copy of it. */
+function scenePaused(){ return !!readingId || WORKS_OPEN; }
 /* RENDER ON DEMAND — idle is free, a hidden tab is free, reading nearly stops
    the world. Frames are requested by events, never by mere existence. */
 function loop(){
   requestAnimationFrame(loop);
   if(!glOK||LITE) return;
   if(document.hidden) return;                     // P2 hidden tab
-  if(readingId){ needFrames=0; return; }          // P3 reading pauses the world
+  if(scenePaused()){ needFrames=0; return; }      // P3 reading, and the manual
   /* THE DRIFT. Only while the mind is the subject, never inside a world,
      never under reduced motion, never while it is being held, and never
      faster than it needs to be. Metered to about 20 frames a second rather
@@ -3556,11 +3566,17 @@ window.__v02={
     return {calls:i.render.calls, points:i.render.points, lines:i.render.lines,
             triangles:i.render.triangles, geometries:i.memory.geometries,
             textures:i.memory.textures, frameMs:+frameMs.toFixed(2),
-            dpr:renderer.getPixelRatio(),
+            frames:FRAMES_DRAWN, dpr:renderer.getPixelRatio(),
             renderer:(function(){ try{ var g=renderer.getContext(),
               d=g.getExtension('WEBGL_debug_renderer_info');
               return d?g.getParameter(d.UNMASKED_RENDERER_WEBGL):'unknown'; }catch(e){ return 'unknown'; } })()};
   },
+  paused:function(){ return scenePaused(); },
+  /* the graph's own edges for a node. Lives on the APP harness deliberately:
+     a suite checking the manual's "see also" against the manual's own helper
+     is checking a copy against itself, and passes when both are wrong. */
+  edgesOf:function(id){ return LINKS.filter(function(l){ return l.a===id||l.b===id; })
+    .map(function(l){ return {a:l.a, b:l.b, verb:l.verb}; }); },
   go:function(mode,id){ travelTo(mode,id); return this.state(); },
   /* drive the same viewpoint the pointer drives, so a checker and a screenshot
      can stand where a visitor would stand */
@@ -4375,9 +4391,11 @@ window.__v02={
    with the universe after. */
 var threshold=document.getElementById('threshold'), enterBtn=document.getElementById('enterBtn');
 var worksBtn=document.getElementById('worksBtn');
-/* the second door. NOT the future My Works experience — it opens the mind and
-   travels to ART, so both paths exist without a second project corpus. */
+/* THE SECOND DOOR. It now opens the manual (src/v02-works.js), which installs
+   itself as onWorksDoor. The old behaviour — enter the mind and fly to ART —
+   remains as the fallback, so the door is never dead if the manual is absent. */
 if(worksBtn) worksBtn.addEventListener('click',function(){
+  if(onWorksDoor) return onWorksDoor();
   enterMind();
   travelTo('region','my-works');
 });
@@ -4411,7 +4429,9 @@ window.__v02.atThreshold=function(){ return !entered; };
 (function boot(){
   var h=decodeURIComponent(location.hash.slice(1));
   if(!h) return;
-  if(!/^lite$/.test(h)) enterMind();   // a deep link lands inside, not at the door
+  /* a deep link lands inside, not at the door — except a works link, which
+     opens the manual over a threshold that was never left */
+  if(!/^lite$/.test(h) && !/^works/.test(h)) enterMind();
   h.split('&').forEach(function(part){
     var m=part.split(':'), kind=m.shift();
     if(kind==='focus'&&m[0]){

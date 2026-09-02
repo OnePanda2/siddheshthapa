@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "_rule": "TIER 2 ONLY. This file carries what a manual needs and the graph does not: purpose, parts, procedure, known failures. It may NEVER restate a field the graph already declares — label, line, src, state, register, mig, or any relationship — because a second copy of those is a second truth. Sheets are addressed by node id and everything else is read from preview.html at run time. A work with no record here renders as a numbered, titled sheet stamped NOT YET WRITTEN. That is a legitimate state, and it is not to be filled with plausible text. See WORKS-MANUAL-SPEC §1 and §3.",
+  "sheets": [
+    {
+      "node": "p-cotsi",
+      "authority": [
+        "source-text/Siddhesh Thapa (rtf).txt §12 — COTSI COURSE-PERSONALISATION IDEA",
+        "source-text/Siddhesh Thapa (pdf).txt lines 30-31"
+      ],
+      "purpose": "To stop a teacher — human or machine — from explaining what the student already knows. The skill refuses to generate a course until it has established what the person in front of it can already do.",
+      "parts": [
+        { "n": 1, "name": "trigger",
+          "note": "The request and a topic. Nothing is generated at this point, which is the whole departure from a normal prompt." },
+        { "n": 2, "name": "diagnostic",
+          "note": "Closed questions only. This is the single load-bearing part; remove it and what remains is a generic course generator." },
+        { "n": 3, "name": "level estimate",
+          "note": "One of five bands: beginner, familiar, intermediate, advanced, highly advanced." },
+        { "n": 4, "name": "course",
+          "note": "Assembled upward from the estimate, so the starting point moves with the student rather than sitting at zero." }
+      ],
+      "procedure": [
+        "Receive the trigger and a topic. Do not generate a course yet.",
+        "Ask diagnostic questions relevant to the topic — yes/no and multiple choice only. Never open-ended, never a question the person answers by typing.",
+        "Establish current knowledge, prior exposure, practical experience, familiarity with foundational concepts, and where relevant the goal.",
+        "Place the answers on one of five bands: beginner, familiar, intermediate, advanced, highly advanced.",
+        "Build the course from that band upward. Do not assume the person knows nothing, and skip what they already hold."
+      ],
+      "knownFailures": [
+        { "name": "Assumed ignorance",
+          "note": "The failure this exists to prevent: teaching chapter one to someone who came for chapter nine. It is the default behaviour of every course generator that skips step 2." },
+        { "name": "The open question",
+          "note": "Asking someone to state their own level returns a guess rather than a measurement — people under-state and over-state. The questions have to be answerable without self-assessment, which is why the constraint on question type is a rule and not a preference." }
+      ],
+      "figure": "diagnostic-before-generation",
+      "operable": true
+    }
+  ]
+}

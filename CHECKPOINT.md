@@ -55,8 +55,14 @@ LOVE → Kepler-16, OBSERVATION → Ursa Major. Real astronomy, real provenance.
 | worldframecheck | 8/8 |
 | **total** | **105/105** |
 
-*(The suite has since grown to 188/188 across twelve check suites, with 117
-mutations verified: `travelcheck` was added when the MIG zoom was fixed,
+*(The suite has since grown to 184/184 across THIRTEEN check suites, with 127
+mutations verified. The figure recorded here previously was 188, which was
+wrong: summed from each suite's own headline it is 174 for the twelve, and
+`workscheck` adds 10. The count is corrected rather than carried forward.
+`workscheck` / `worksmutate` guard MY WORKS — the manual — and the rule that
+makes it possible: content is either DERIVED from the locked graph or DECLARED
+in `data/works.json`, never both, so the manual cannot drift from the mind.
+Also: `travelcheck` was added when the MIG zoom was fixed,
 `braincheck` was rewritten for the constellation, `emblemcheck` was added when
 the region emblems turned out to be invisible in the menu, and `travelcheck`
 grew T9/T10/T11 when the first selection from the CLOSED mind turned out to

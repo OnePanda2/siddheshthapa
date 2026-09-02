@@ -41,6 +41,13 @@ const app   = fs.readFileSync('src/v02-app.js', 'utf8');
    changes with it — the scene cannot drift from its sources. */
 const astro = fs.readFileSync('data/astronomy-systems.json', 'utf8');
 const konst = fs.readFileSync('data/constellation-ursa-major.json', 'utf8');
+/* MY WORKS carries only what the graph does not: purpose, parts, procedure,
+   known failures. Same rule as the astronomy — injected, never retyped, so
+   the manual cannot drift from the mind it came out of. */
+const worksData = fs.readFileSync('data/works.json', 'utf8');
+const worksApp  = fs.readFileSync('src/v02-works.js', 'utf8');
+const works = worksApp.replace('/*__WORKSDATA__*/', () => worksData);
+if (works === worksApp) throw new Error('the /*__WORKSDATA__*/ marker was not found in the manual');
 
 /* the ASTRO marker lives inside the APP, so it must be filled BEFORE the app
    is inserted into the shell — replacing it on the shell first finds nothing */
@@ -53,7 +60,8 @@ appWithAstro = withConst;
 const out = shell
   .replace('/*__THREE__*/', () => three)
   .replace('/*__DATA__*/',  () => data)
-  .replace('/*__APP__*/',   () => appWithAstro);
+  .replace('/*__APP__*/',   () => appWithAstro)
+  .replace('/*__WORKS__*/', () => works);
 
 fs.writeFileSync(OUT, out, 'utf8');
 const kb = n => (n / 1024).toFixed(0) + 'KB';
@@ -61,5 +69,8 @@ console.log('wrote ' + OUT + '  ' + kb(out.length) +
             '   (three ' + kb(three.length) + ' · data ' + kb(data.length) +
             ' · app ' + kb(appWithAstro.length) + ' · shell ' + kb(shell.length) + ')');
 console.log('data block: ' + counts.migs + ' declared objects, ' + counts.edges + ' relationship rows');
+console.log('manual: ' + (JSON.parse(worksData).sheets || []).length + ' sheet(s) written, ' +
+            kb(works.length) + ' of layer');
+if (out.indexOf('/*__WORKS__*/') >= 0) throw new Error('the manual was not injected into the shell');
 if (/src="http|href="http|fetch\(|import\(/.test(out.replace(three,'')))
   console.error('WARNING: an external reference appeared outside the three.js payload');
