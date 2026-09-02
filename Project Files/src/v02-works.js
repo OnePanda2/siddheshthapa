@@ -175,6 +175,63 @@ var FIGURES = {
       out.push('</svg>');
       return out.join('');
     })()
+  },
+
+  /* NOTE ON THE CONNECTORS. These are drawn as plain paths, not as .lead —
+     a leader line is an annotation that appears when an exploded view pulls
+     its parts apart, and hiding these until then left three unconnected boxes
+     and a floating word. Here the connections ARE the subject.
+
+     Two bodies of work that look unrelated on a CV, drawn as what they
+     actually share: the same loop, with the people who will use the thing
+     inside it rather than surveyed from outside. The constraints are drawn as
+     a bracket around the whole loop because that is where they sat. */
+  'two-halves-one-habit': {
+    caption: 'the same loop, run twice, under a bracket',
+    parts: [1, 2, 3, 4],
+    svg: [
+      '<svg class="wk-svg" viewBox="0 -14 660 250" role="img" aria-label="Two bodies of work — freelance across businesses, and a defence startup — both feeding one loop in which the people who will use the thing are consulted before and during the build. Constraints bracket the whole loop.">',
+      /* 01 · 02 — the two halves */
+      '<g class="part p1">',
+      '<rect x="14" y="20" width="158" height="52" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="93" y="42" text-anchor="middle" font-size="9.5" fill="#1a1d1f">FREELANCE</text>',
+      '<text x="93" y="56" text-anchor="middle" font-size="8" fill="#5e6367">copy · positioning</text>',
+      '<text x="93" y="67" text-anchor="middle" font-size="8" fill="#5e6367">sites · proofreading</text>',
+      '<text x="14" y="14" font-size="9" fill="#9a2a1f">01</text></g>',
+      '<g class="part p2">',
+      '<rect x="14" y="106" width="158" height="52" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="93" y="128" text-anchor="middle" font-size="9.5" fill="#1a1d1f">DEFENCE STARTUP</text>',
+      '<text x="93" y="142" text-anchor="middle" font-size="8" fill="#5e6367">research &amp; technology,</text>',
+      '<text x="93" y="153" text-anchor="middle" font-size="8" fill="#5e6367">bootstrapped</text>',
+      '<text x="14" y="100" font-size="9" fill="#9a2a1f">02</text></g>',
+      '<path d="M172 46 L226 46 L226 89 L246 89" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<path d="M172 132 L226 132 L226 89" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      /* 03 — the loop, with the user inside it */
+      '<g class="part p3">',
+      '<rect x="246" y="34" width="196" height="110" fill="none" stroke="#1a1d1f" stroke-width="1.6"></rect>',
+      '<text x="344" y="56" text-anchor="middle" font-size="9.5" fill="#1a1d1f">THE PEOPLE WHO USE IT</text>',
+      '<text x="344" y="72" text-anchor="middle" font-size="8" fill="#5e6367">consulted before the design</text>',
+      '<text x="344" y="83" text-anchor="middle" font-size="8" fill="#5e6367">and present during it</text>',
+      /* the loop itself */
+      '<path d="M286 96 L402 96" stroke="#1a1d1f" stroke-width="1"></path>',
+      '<path d="M402 96 L396 92 M402 96 L396 100" stroke="#1a1d1f" stroke-width="1"></path>',
+      '<path d="M402 96 C 418 104, 418 120, 402 126 L286 126 C 270 120, 270 104, 286 96" ' +
+        'fill="none" stroke="#1a1d1f" stroke-width="1"></path>',
+      '<text x="344" y="119" text-anchor="middle" font-size="8" fill="#5e6367">build · show · iterate</text>',
+      '<text x="246" y="28" font-size="9" fill="#9a2a1f">03</text></g>',
+      /* 04 — the bracket */
+      '<g class="part p4">',
+      '<path d="M232 168 L232 182 L456 182 L456 168" fill="none" stroke="#9a2a1f" stroke-width="1.2"></path>',
+      '<text x="344" y="198" text-anchor="middle" font-size="8.5" fill="#9a2a1f">NO BUDGET · NOWHERE TO TEST</text>',
+      '<text x="232" y="162" font-size="9" fill="#9a2a1f">04</text></g>',
+      '<path d="M442 89 L512 89" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3"></path>',
+      '<path d="M512 89 L506 85 M512 89 L506 93" stroke="#1a1d1f" stroke-width="1"></path>',
+      '<text x="520" y="86" font-size="8.5" fill="#1a1d1f">SHIPPED</text>',
+      '<text x="520" y="98" font-size="8" fill="#5e6367">for people watching</text>',
+      '<text x="520" y="109" font-size="8" fill="#5e6367">the result</text>',
+      '<line x1="14" y1="220" x2="646" y2="220" stroke="#b9bcb6" stroke-width="1"></line>',
+      '</svg>'
+    ].join('')
   }
 };
 
