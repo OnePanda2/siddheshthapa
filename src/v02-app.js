@@ -3292,6 +3292,14 @@ function paintDOM(){
     put(group('Writings', mem.filter(function(id){return byId[id].src;})
       .map(function(id){ var n=byId[id];
         return row(n, esc(n.t)+' · '+esc(n.src), function(){ openReader(id); }); })));
+    /* THE EDITOR'S ONE DOOR INTO THE PAGE. Inert in the published artifact,
+       which never loads an editor, so this line costs the public page a single
+       property lookup and changes nothing it renders. Placed inside the region
+       branch because a region is the only place from which adding makes sense:
+       every note declares exactly one owning region, and here that region is
+       already chosen by where the reader is standing. */
+    if(window.__editor && window.__editor.paintRegion)
+      window.__editor.paintRegion(m.id, elGroups);
     say('Region '+m.label+'.');
     return;
   }
@@ -3860,6 +3868,24 @@ function highlightMIG(migId){
 }
 window.__v02={
   ok:function(){ return glOK; },
+  /* ── WHAT THE EDITOR IS ALLOWED TO ASK ────────────────────────────────
+     The editor is a separate script in a separate artifact; it cannot see
+     inside this closure. These two accessors are the whole of its access, and
+     both are read-only introspection of a graph that is already public in the
+     page source, so exposing them gives away nothing that View Source did not.
+
+     model() exists so the editor's form can DERIVE its vocabularies — regions,
+     nodes, registers already in use — instead of carrying a typed copy that
+     would drift the first time the graph changed. */
+  model:function(){
+    return {
+      migs:  MIGS.map(function(m){ return {id:m.id, label:m.label}; }),
+      nodes: NODES.map(function(n){ return {id:n.id, label:n.label, t:n.t, mig:n.mig}; }),
+      registers: NODES.map(function(n){ return n.register; }).filter(Boolean)
+                  .filter(function(v,i,a){ return a.indexOf(v)===i; }).sort()
+    };
+  },
+  repaint:function(){ paintDOM(); return true; },
   lite:function(){ return LITE; },
   reduced:function(){ return reduced; },
   frame:function(){ if(glOK) step(); return true; },

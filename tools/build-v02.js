@@ -15,7 +15,9 @@ const fs = require('fs');
 
 const SRC   = 'preview.html';
 const THREE = '.p3/t0.149.0.js';
-const OUT   = 'v02.html';
+const OUT    = 'v02.html';
+/* the editor is a second artifact, never a mode of the first */
+const EDITOR = 'editor.html';
 
 const src = fs.readFileSync(SRC, 'utf8');
 
@@ -74,6 +76,23 @@ const out = shell
   .replace('/*__WORKS__*/', () => works);
 
 fs.writeFileSync(OUT, out, 'utf8');
+
+/* ── THE SECOND ARTIFACT ────────────────────────────────────────────────────
+   editor.html is v02.html plus one script. Keeping them as two files rather
+   than one file with a hidden mode is what lets ADR-02 stay literally true of
+   the published page: every network call in this project lives in the editor,
+   so the page the world loads still makes none. It is also the honest split —
+   there is nothing to "unlock" in v02.html, because the editor is not in it. */
+const editorApp = fs.readFileSync('src/v02-editor.js', 'utf8');
+const editorCfg = fs.readFileSync('data/editor-config.json', 'utf8');
+const editorReady = editorApp.replace('/*__EDITORCFG__*/', () => editorCfg);
+if (editorReady === editorApp) throw new Error('the /*__EDITORCFG__*/ marker was not found in the editor');
+fs.writeFileSync(EDITOR, out + '\n<script>\n' + editorReady + '\n</script>\n', 'utf8');
+/* the published page must contain no editor and no way out to the network.
+   Measured against the file WITHOUT the three.js payload, which carries its own
+   fetch and would otherwise convict the page of the editor's crime. */
+if (/__EDITORCFG__|api\.github\.com|login\/oauth/.test(out.replace(three, '')))
+  throw new Error('the editor leaked into the published artifact');
 const kb = n => (n / 1024).toFixed(0) + 'KB';
 console.log('wrote ' + OUT + '  ' + kb(out.length) +
             '   (three ' + kb(three.length) + ' · data ' + kb(data.length) +
