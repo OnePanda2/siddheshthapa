@@ -44,11 +44,21 @@ const MUTATIONS = [
     find: `    var ordered=MIGS.slice();`,
     repl: `    var ordered=MIGS.slice().filter(function(x){ return x.id!=='psychology'; });` },
 
-  { n: 'W6', file: APP, name: 'ART is a relabel, not a new region',
-    /* renaming the id took the whole app down, which proves nothing. A relabel
-       that does not produce ART tests the same claim cleanly. */
-    find: `    { id:'my-works', from:'MY WORKS', to:'ART',`,
-    repl: `    { id:'my-works', from:'MY WORKS', to:'MY WORKS AND ART',` },
+  /* THE SUBJECT OF THIS MUTATION CEASED TO EXIST. It edited the relabel that
+     turned MY WORKS into ART, and there is no such relabel any more: ART was
+     promoted to a region with its own contents and MY WORKS was hidden, so
+     `relabel` is empty and the anchor matched nothing. worldcheck's W6 had
+     already been INVERTED to match — it now asserts ART is a real region and
+     that nothing is being relabelled — but the mutation was left pointing at
+     the world as it used to be, and had been unverified ever since.
+
+     Restoring the relabel is therefore the right break: it puts back exactly
+     the state W6 exists to forbid, one region wearing another's name as a
+     costume. Nothing else needs touching, because a relabel of a region that
+     is also hidden is harmless to the app and visible to the check. */
+  { n: 'W6', file: APP, name: 'ART is a region of its own, not a costume for MY WORKS',
+    find: `  relabel:[],`,
+    repl: `  relabel:[{ id:'my-works', from:'MY WORKS', to:'ART' }],` },
 
   { n: 'W7', file: APP, name: 'Psychology took no content from anyone',
     find: `    MIGS.push({ id:a.id, label:a.label, gloss:a.gloss, v02Added:true, v02Empty:!!a.empty });`,

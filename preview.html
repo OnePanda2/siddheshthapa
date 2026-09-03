@@ -2412,7 +2412,7 @@
           if(Z.G.length && byW[1].length>2)
             inField=byW[1].splice(0, Math.min(Z.G.length, Math.ceil(byW[1].length/2)));
           placed=[].concat(
-            layZone(byW[3],Z.A,3,0,TS.dom,0),
+            layZone(byW[3],Z.A,3,0,TS.dom,Math.round(TS.dom*1.14*(W<1100?2:1))),
             layZone(byW[2],Z.B,2,1,TS.mid,0),
             layZone(byW[1],Z.C,1,0,TS.small,0)
           );
@@ -2432,7 +2432,7 @@
           placed.forEach(function(q){
             var asc =(q.tier>=3?TS.dom:(q.tier<1?TS.field:(q.tier===2?TS.mid:TS.small)));
             var desc=(q.tier>=3?Math.round(TS.dom*1.14*(W<1100?2:1)):0);
-            var need=asc+12;
+            var need=lastDesc+asc+12;
             var qx1=q.zone? q.zone.x1 : q.x+260;
             var overlapsX=!(lastX1<q.x-4 || lastX0>qx1);
             if(overlapsX && q.y-lastY<need) q.y=lastY+need;
@@ -2458,7 +2458,7 @@
                     x1:(q.zone?q.zone.x1:q.x+260),
                     y1:q.y+Math.round(TS.dom*1.14*(W<1100?2:1))+8};
           });
-          if(false && tallBox.length) keep=keep.filter(function(q){
+          if(tallBox.length) keep=keep.filter(function(q){
             if(q.tier>=3) return true;
             var asc=(q.tier===2?TS.mid:TS.small);
             var b={x0:q.x-6, y0:q.y-asc-6, x1:q.x+260, y1:q.y+8};
