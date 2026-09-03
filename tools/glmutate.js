@@ -18,15 +18,32 @@ const MUTATIONS = [
      Collapsing the Z axis produces exactly that build, and the check must
      refuse it — otherwise the whole rebuild could ship as a flat diagram
      behind a perspective camera and nothing would notice. */
+  /* THIS FLATTENED A LAYOUT NOTHING IS MEASURED IN. It zeroed the Z of
+     seedSphere, which is still called - it seeds the MIGs' universe positions -
+     but glcheck probes at boot, before the mind is entered, and there the
+     objects stand at their BRAIN positions. seedSphere's plane never reached
+     the measurement, so the assertion could not fail and was not verified.
+
+     brainShell is what actually gives that layout its three dimensions, and
+     its x term is the brain's width. Zeroing it presses the whole organ into a
+     single plane, which is the exact condition "the layout is genuinely
+     three-dimensional" exists to refuse. */
   { n: 'GL-1', name: 'the universe is genuinely volumetric, not a plane in Z',
-    find: 'Math.cos(phi)*r);',
-    repl: '0.0);',
+    find: '  var p=new THREE.Vector3(x*brainWidth(y,z), y*r*0.74, z*r);',
+    repl: '  var p=new THREE.Vector3(0.0, y*r*0.74, z*r);',
     expect: 'not volumetric' },
 
   { n: 'GL-2', name: 'the model is the same mind (node count)',
     find: 'THOUGHTS.forEach(function(n){ NODES.push(n); });',
     repl: 'THOUGHTS.slice(0,-4).forEach(function(n){ NODES.push(n); });',
-    expect: 'expected 143 nodes' },
+    /* the number is NOT written here. It was 'expected 143 nodes' and had gone
+       stale twice over - once when the overlay began adding contents, again
+       when the first live note was published - so the mutation was caught by
+       the right assertion and reported as caught by the wrong one. glcheck
+       derives the count now; this matches the shape of its message instead,
+       which identifies the assertion without pinning a total that is supposed
+       to move. */
+    expect: 'nodes, model has' },
 
   { n: 'GL-3', name: 'cross-region relationships exist',
     find: 'l.cross=cross;',
