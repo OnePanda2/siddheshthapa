@@ -74,9 +74,15 @@ const MUTATIONS = [
     repl: `      node.home=m.id; node.mig='philosophy';        // mutation: reparent
       node.star=s.proper;` },
 
+  /* Broken by the same commit as W5 in worldmutate.js — f11a2b2 removed the
+     menu sort along with MY WORKS, and both harnesses were still anchored on
+     it. One source edit, two mutations silently matching nothing.
+
+     observation is confirmed to be a live region id, so the filter really does
+     remove a region rather than quietly doing nothing. */
   { n: 'CST-14', file: APP, name: 'the Main Mind Menu keeps all 14 MIGs',
-    find: `    var ordered=MIGS.slice().sort(function(a,b){`,
-    repl: `    var ordered=MIGS.slice().filter(function(x){ return x.id!=='observation'; }).sort(function(a,b){` },
+    find: `    var ordered=MIGS.slice();`,
+    repl: `    var ordered=MIGS.slice().filter(function(x){ return x.id!=='observation'; });` },
 
   { n: 'CST-15', file: APP, name: 'the highlight is reversible',
     find: `function highlightMIG(migId){

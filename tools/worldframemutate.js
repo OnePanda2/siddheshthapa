@@ -62,11 +62,39 @@ const M = [
     repl:'  var need=moves ? fitRead*bias : Math.max(fitRead*bias, fitAll);' },
 
   /* PER-WORLD BIAS. WF11 is about how far the composition is pushed clear of
-     the panel: at 0.16 the shift satisfies every bar in WF9 while still
-     costing PHILOSOPHY a concept that a wide window keeps. */
+     the panel: the shift has to satisfy every bar in WF9 while still costing
+     PHILOSOPHY a concept that a wide window keeps.
+
+     THIS WAS 0.16 AND HAD STOPPED BITING. Other framing work moved the margins
+     until a shift that once cost PHILOSOPHY a concept cost it nothing, and
+     WF11 was reported as surviving. The assertion had not gone soft; the
+     mutation had. Rather than guess a new number, the value was swept and the
+     assertions that fired at each step recorded:
+
+       0.16   survives — nothing fails
+       0.15   WF11 alone
+       0.14   WF11 alone
+       0.13   WF9 and WF11
+       0.12   WF9 and WF11
+       0.08   WF9, WF10 and WF11
+       0.00   WF9, WF10 and WF11
+
+     0.15 is the strongest mutation that still bites, and it lands inside the
+     narrow band where WF11 fails BY ITSELF — which is what this mutation was
+     always for. Below 0.14 the shift is weak enough that WF9's bar goes too,
+     and a mutation tripping three assertions cannot tell you which one is
+     doing the work.
+
+     One methodological note, because it nearly produced a wrong conclusion:
+     the first sweep of these values silently edited nothing, and every run
+     re-tested the same number while appearing to test six. The identical
+     results read as a finding — "no value isolates WF11" — when they were an
+     artefact of a regex that did not match. The setter now verifies the file
+     changed and refuses to run if it did not. A sweep that cannot prove it
+     varied its variable is not a measurement. */
   { id:'WF11', why:'push the composition only far enough to satisfy the bar, not far enough to keep the world whole',
     find:'  var shiftPx=Math.max(Wpx/2, panelR+0.20*Wpx)-Wpx/2;',
-    repl:'  var shiftPx=Math.max(Wpx/2, panelR+0.16*Wpx)-Wpx/2;' },
+    repl:'  var shiftPx=Math.max(Wpx/2, panelR+0.15*Wpx)-Wpx/2;' },
 
   { id:'WF12', why:'frame a latent world from a constant instead of from its own size',
     find:'    out.normalize().multiplyScalar(fwG.d);\n    dOut=fwG.d;',

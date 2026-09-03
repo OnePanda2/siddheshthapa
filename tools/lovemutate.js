@@ -61,9 +61,35 @@ const MUTATIONS = [
     repl: "          var pB=binaryOffset(b,0,b.phase+binPhase);   // land on star A",
     expect: 'two separated lights' },
 
+  /* THIS MUTATION USED TO BE INERT, and L9 was reported as surviving it. It
+     disabled the circumbinary branch — but disabling that branch changes
+     nothing, because the generic path below it reproduces the same radii
+     exactly. Kepler-16 has ONE measured planet, so the generic path maps that
+     single axis and then pads with orbitSpacingStep, which is the identical
+     rule the branch applies:
+
+       circumbinary branch : 10, 13.1037, 17.170695, 22.499964
+       generic + padding   : 10, 13.1037, 17.170695, 22.499964
+
+     No assertion can catch a mutation that changes no output, so L9 was not
+     weak — it was being asked an empty question. The branch became redundant
+     at 523acdc, when the 55 Cnc work generalised the padding rule it had been
+     the only user of. It is kept in the app because it states the Kepler-16
+     case explicitly, not because anything depends on it.
+
+     So the mutation now breaks the mechanism that DOES decide the geometry:
+     the code that raises the declared step to each orbit's power. Spacing
+     becomes linear, the ratios stop being constant, and a check claiming LOVE
+     is geometric at the declared rate has to notice.
+
+     It mutates the CODE and not the data on purpose. lovecheck reads the
+     expected step from the data file, so moving the data would move the
+     check's own expectation with it and the assertion would pass while the
+     geometry was wrong — a check agreeing with a copy of the thing it is
+     checking, which is the failure this whole suite exists to prevent. */
   { n: 'L9', file: APP, name: 'the two worlds are structurally different',
-    find: "  if(tpl.sourceType==='circumbinary-system'){",
-    repl: "  if(false && tpl.sourceType==='circumbinary-system'){",
+    find: "    for(var k=0;k<Math.max(1,want||1);k++) out.push(R0*Math.pow(step,k));",
+    repl: "    for(var k=0;k<Math.max(1,want||1);k++) out.push(R0*(1+k));",
     expect: 'differ structurally' },
 
   { n: 'L10', file: AST, name: 'an illustrative number is never laundered into a measurement',
@@ -86,9 +112,23 @@ const MUTATIONS = [
     repl: "      highlightMIG(n.id);                    // any focus lights up",
     expect: 'opens with NO world highlighted' },
 
+  /* THE ANCHOR DRIFTED AND THIS RAN AGAINST NOTHING FOR TWO DAYS. It read
+     "return a.map(...)", which is what the function said until 523acdc gave
+     BUSINESS the 55 Cnc system: the map became "var out=a.map(...)" so the
+     seven-concept case could be handled before returning. The mutation then
+     matched zero times.
+
+     It failed loudly rather than quietly — the harness stops on any anchor
+     that does not match exactly once, and reported L12 as UNVERIFIED rather
+     than as a pass. That is the protocol working. What did not happen is
+     anyone reading it, because the suite was not being run.
+
+     The mutation itself is unchanged in intent: replace the MEASURED spacing
+     with evenly spaced orbits, so a check claiming exact TRAPPIST-1 spacing
+     has to notice. */
   { n: 'L12', file: APP, name: 'Philosophy is not disturbed',
-    find: "  var a=tpl.semiMajorAxisAU, inner=a[0];\n  return a.map(function(v){ return R0*(v/inner); });",
-    repl: "  var a=tpl.semiMajorAxisAU, inner=a[0];\n  return a.map(function(v,i){ return R0*(1+i*0.5); });",
+    find: "  var out=a.map(function(v){ return R0*(v/inner); });",
+    repl: "  var out=a.map(function(v,i){ return R0*(1+i*0.5); });",
     expect: 'exact TRAPPIST-1 spacing' }
 ];
 

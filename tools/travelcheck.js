@@ -164,6 +164,20 @@ setTimeout(async function(){
         ? (B > shR.top && R > shR.left && L < shR.right)
         : (L < shR.right && B > shR.top && T < shR.bottom);
       if(hits) out.buried.push(e.textContent.trim().split(String.fromCharCode(10))[0]);
+      /* HOW MUCH ROOM IS ACTUALLY LEFT. "Nothing is buried" is a yes/no, and a
+         yes/no cannot tell a comfortable layout from one a pixel away from
+         failing. The closest approach is recorded so the assertion's message
+         says how much headroom it is passing WITH — which is what showed that
+         T12's guards had stopped mattering rather than that its mutation had
+         stopped applying. Measured only for labels that overlap the sheet
+         horizontally, since one to the side of it cannot be buried by it. */
+      if(window.innerWidth<768 && R > shR.left && L < shR.right){
+        var clear = Math.round(shR.top - B);
+        if(out.minClear === undefined || clear < out.minClear){
+          out.minClear = clear;
+          out.closest = e.textContent.trim().split(String.fromCharCode(10))[0];
+        }
+      }
     });
   }catch(e){ out.ERROR=(e&&e.message)||String(e); }
   document.title=JSON.stringify(out);
@@ -171,12 +185,46 @@ setTimeout(async function(){
 
 /* NO --force-prefers-reduced-motion. Under reduced motion the mind snaps and
    the camera teleports, which is exactly why neither bug was ever caught. */
-function run(w, h, tag) {
+/* THE PHONE HAS TO BE AN ACTUAL PHONE.
+
+   This asked for 390x844 and was silently given 500x749: headless Chrome
+   clamps --window-size at about 500px and then reports the clamped number as
+   though it were the one requested. Every "phone" measurement here was taken
+   at 500px.
+
+   That is why T12 could not be made to fail. At 500 there is room for every
+   region name beside the sheet, so removing BOTH of the guards it exists to
+   protect changes nothing, and the harness correctly reported the assertion as
+   proving nothing. The bug it was written for — SOCIETY's name twelve pixels
+   under the sheet — happens at widths this runner could not reach.
+
+   An iframe resolves media queries and vw/vh against its OWN box, so the page
+   inside a 390x844 frame gets a genuine phone viewport regardless of the
+   window floor. tools/viewport.js established this technique for exactly this
+   reason; this is the same trick, and the probe is unchanged — it simply runs
+   somewhere narrow enough for its own subject to exist. */
+fs.writeFileSync(tmp + '/pf.html', `<!doctype html><meta charset="utf-8">
+<style>html,body{margin:0;background:#05070f}
+iframe{width:390px;height:844px;border:0;display:block}</style>
+<iframe id="f" src="p.html"></iframe>
+<script>
+setTimeout(function(){
+  var t;
+  try{ t=document.getElementById('f').contentDocument.title; }
+  catch(e){ t=JSON.stringify({ERROR:'frame unreachable: '+((e&&e.message)||e)}); }
+  document.title = t || JSON.stringify({ERROR:'the frame never reported'});
+}, 3000);
+</script>`, 'utf8');
+
+function run(w, h, tag, framed) {
   const dom = execSync('"' + CHROME + '" --headless=new --hide-scrollbars' +
     ' --user-data-dir="' + tmp + '/cr-' + tag + '" --no-first-run --no-default-browser-check' +
     ' --disable-extensions --disable-background-networking --disable-sync' +
-    ' --window-size=' + w + ',' + h + ' --virtual-time-budget=7000' +
-    ' --dump-dom "file:///' + tmp + '/p.html"',
+    /* without this every file:// document is its own origin and the wrapper
+       cannot read the frame's title, which is how the frame reports */
+    (framed ? ' --allow-file-access-from-files' : '') +
+    ' --window-size=' + w + ',' + h + ' --virtual-time-budget=9000' +
+    ' --dump-dom "file:///' + tmp + '/' + (framed ? 'pf.html' : 'p.html') + '"',
     { encoding: 'utf8', maxBuffer: 1e8, timeout: 300000 });
   const mm = dom.match(/<title>([\s\S]*?)<\/title>/);
   if (!mm) { console.error('  the page never reported at ' + w + 'x' + h); process.exit(1); }
@@ -191,7 +239,10 @@ const r = run(W, H, 'desk');
    moves: beside the mind on a desktop, BELOW it on a phone. A first-entry
    sweep at one width therefore proves nothing about the other, and the phone
    is where the generic branch was landing worlds under the panel. */
-const rp = run(390, 844, 'phone');
+/* The outer window only has to be big enough to hold the frame; the viewport
+   the page actually sees is the frame's own 390x844, and the probe reports it
+   so the assertions below can state the width they were really measured at. */
+const rp = run(520, 900, 'phone', true);
 
 let bad = 0;
 const TOTAL = 12;
@@ -372,6 +423,8 @@ ck('T11', feP.ids.length === MIG_TOTAL && feP.bad.length === 0,
 ck('T12', rp.buried.length === 0,
    'no region name is buried by the sheet on a phone — 15 names clear of a ' +
    'sheet starting at y' + rp.sheet.top + ' at ' + rp.vw + 'x' + rp.vh +
+   (rp.minClear === undefined ? ', none of them over it'
+     : ', the closest ' + rp.closest + ' by ' + rp.minClear + 'px') +
    ' (desktop measured too, ' + r.buried.length + ' in a column ending at x' +
    r.sheet.right + ', not asserted — nothing there can reach it)' +
    (rp.buried.length ? ' — BURIED: ' + rp.buried.join(', ') : ''));

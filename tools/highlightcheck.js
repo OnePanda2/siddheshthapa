@@ -101,10 +101,40 @@ ck('H1', r.hPhil.state.hoverRegion >= 0 && r.hWork.state.hoverRegion >= 0 &&
    'MIG -> world mapping is a region index: philosophy=' + r.hPhil.state.hoverRegion +
    ', psychology=' + r.hWork.state.hoverRegion + ', none=' + r.base.state.hoverRegion);
 
-// H2 — the hovered world brightens
-ck('H2', r.hPhil.phil > r.base.phil && r.hWork.works >= r.base.works * 0.98,
-   'the hovered world brightens — philosophy ' + r.base.phil + ' -> ' + r.hPhil.phil +
-   ', psychology ' + r.base.works + ' -> ' + r.hWork.works);
+/* H2 — the hovered world brightens AND the rest step back.
+
+   THIS ASSERTION ONCE SURVIVED ITS OWN MUTATION, which means it proved
+   nothing. It read "hovering philosophy raises philosophy's brightness", and
+   that stayed true with the hover contrast deleted from the shader, because
+   TWO mechanisms answer a hover and only one of them was being measured:
+
+     here *= (abs(region-hoverRegion)<0.5) ? 3.60 : 0.30;   the contrast
+     float lift = (... hovered ...) ? 1.95 : 1.0;            the size
+
+   lift scales gl_PointSize, so a hovered region's sprites grow by 1.95 and put
+   more lit pixels inside a fixed probe box whatever the contrast line says.
+   Brightness alone cannot tell the two apart.
+
+   The dimming can. lift is exactly 1.0 for every region that is not hovered,
+   so nothing but the contrast line can push another region DOWN — which is
+   also what the source says the line is for: "the gap has to survive being
+   seen through a lit surface, so it is a gap in BOTH directions rather than a
+   brightening alone". Measuring both directions is therefore not a stricter
+   version of the same claim, it is the claim.
+
+   The floor is 10% of the region's own baseline, never an absolute figure,
+   because regions carry wildly different amounts of light — and never smaller
+   than 4, which is twice the +/-2 that H4 already treats as the noise in this
+   measurement. Real dimming is to 30%, so the margin is wide. */
+const h2Fall = r.base.life - r.hPhil.life;
+const h2Floor = Math.max(4, r.base.life * 0.10);
+ck('H2', r.hPhil.phil > r.base.phil &&
+         h2Fall > h2Floor &&
+         r.hWork.works >= r.base.works * 0.98,
+   'the hovered world brightens and the others step back — philosophy ' +
+   r.base.phil + ' -> ' + r.hPhil.phil + ', while life falls ' + h2Fall +
+   ' (needs more than ' + Math.round(h2Floor) + '); hovering psychology leaves it at ' +
+   r.base.works + ' -> ' + r.hWork.works);
 
 /* H3 — the others recede, so the answer is unambiguous.
 

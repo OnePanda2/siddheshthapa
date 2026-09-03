@@ -7,6 +7,13 @@
 */
 const fs = require('fs'), { execSync } = require('child_process');
 const APP = 'src/v02-app.js';
+/* A STEP MAY NAME ITS FILE. Everything here used to mutate the app alone,
+   which put the entire stylesheet out of reach — and the composition this
+   suite measures is half CSS. T12 is the case that forced it: no app-side edit
+   can make the sheet climb into the region names, because the sheet's height
+   on a phone is a max-height in the shell. */
+const SHELL = 'src/v02-shell.html';
+const FILES = [APP, SHELL];
 const ONLY = (process.argv[2] && process.argv[2] !== '--dry') ? process.argv[2] : null;
 const DRY = process.argv.includes('--dry');
 
@@ -67,23 +74,43 @@ const M = [
     find:"    put(group('Concepts', mem.filter(function(id){return byId[id].t==='minor';})",
     repl:"    elGroups.appendChild(group('Concepts', mem.filter(function(id){return byId[id].t==='minor';})" },
 
-  /* BOTH GUARDS AT ONCE, because either one alone is sufficient and a
-     mutation that removes only one proves nothing — both were tried
-     separately first, and T12 survived both times.
+  /* T12's TWO APP-SIDE GUARDS HAVE STOPPED BEING LOAD-BEARING, and this
+     mutation was reported as surviving for that reason rather than because the
+     assertion had gone soft. Measured at a true 390x844:
 
-     Restoring the second line grows every region name from 13px back to 22px;
-     no longer seeding the sheet leaves the layout believing the panel is
-     empty screen. Together they are the state the phone was actually in when
-     SOCIETY's name ran twelve pixels under the sheet with the line naming its
-     system cut in half. Redundant guards are worth keeping — a mutation that
-     pretends to test one of them is not. */
-  { id:'T12', why:'put the second line back AND let the layout treat the sheet as empty space',
+       both guards intact    SOCIETY clears the sheet by 33px
+       both guards removed   SOCIETY clears the sheet by 29px
+
+     Four pixels. The bug T12 was written for was SOCIETY twelve pixels UNDER
+     the sheet, so the layout has moved some forty pixels away from that state
+     and no removal of those two guards can get back to it. They are worth
+     keeping — four pixels of margin is still margin — but a mutation that only
+     removes them is asking whether four pixels can bury a name that has
+     twenty-nine to spare.
+
+     (Before this could even be measured, the runner had to be fixed: it asked
+     for 390x844 and headless Chrome silently gave it 500x749, so every "phone"
+     measurement in this suite was taken at 500px — a width where the defect
+     cannot occur at all. travelcheck now renders the phone inside an iframe,
+     which is the technique tools/viewport.js established for exactly this.)
+
+     So the mutation now attacks what actually keeps the names clear: the size
+     of the sheet itself. On a phone that is a max-height in the SHELL, which
+     is why steps became file-aware. At 80vh the panel's top rises from y354 to
+     roughly y169, well above where the names sit, and a check claiming no name
+     is buried has to notice. The two app-side guards are kept in the mutation
+     as well, so it still tests the state the phone was really in — the sheet
+     is simply now large enough for that state to matter. */
+  { id:'T12', why:'grow the sheet into the region names, and remove both guards that hold them clear',
     steps:[
       { find:'    var wantSrc = window.innerWidth >= 768;',
         repl:'    var wantSrc = true;' },
       { find:`    done.push({ x:shR.left+shR.width/2, y:shR.top+shR.height/2,
                 hw:shR.width/2, hh:shR.height/2 });`,
-        repl:'    void 0;' }
+        repl:'    void 0;' },
+      { file:SHELL,
+        find:'max-height:58vh',
+        repl:'max-height:80vh' }
     ] }
 ];
 
@@ -95,12 +122,13 @@ M.forEach(m => { if (!m.steps) m.steps = [{ find: m.find, repl: m.repl }]; });
 const list = ONLY ? M.filter(m => m.id === ONLY) : M;
 if (!list.length) { console.error('no mutation named ' + ONLY); process.exit(1); }
 
-const original = fs.readFileSync(APP, 'utf8');
+const originals = {};
+FILES.forEach(f => originals[f] = fs.readFileSync(f, 'utf8'));
 let bad = 0;
 if (DRY) {
   M.forEach(m => {
     m.steps.forEach(s => {
-      const hits = original.split(s.find).length - 1;
+      const hits = originals[s.file || APP].split(s.find).length - 1;
       if (hits !== 1) { bad++; console.log('  x' + hits + '  ' + m.id + '  "' + s.find.slice(0, 58) + '"'); }
     });
   });
@@ -112,18 +140,21 @@ if (DRY) {
 let verified = 0;
 try {
   for (const m of list) {
-    let mutated = original, miss = 0;
+    const work = {}; FILES.forEach(f => work[f] = originals[f]);
+    let miss = 0;
     for (const s of m.steps) {
-      const hits = mutated.split(s.find).length - 1;
+      const f = s.file || APP;
+      const hits = work[f].split(s.find).length - 1;
       if (hits !== 1) {
         miss++;
-        console.log('BAD  ' + m.id.padEnd(4) + ' anchor matched ' + hits + ' times — UNVERIFIED');
+        console.log('BAD  ' + m.id.padEnd(4) + ' anchor matched ' + hits +
+                    ' times in ' + f + ' — UNVERIFIED');
         break;
       }
-      mutated = mutated.replace(s.find, s.repl);
+      work[f] = work[f].replace(s.find, s.repl);
     }
     if (miss) { bad++; continue; }
-    fs.writeFileSync(APP, mutated, 'utf8');
+    FILES.forEach(f => { if (work[f] !== originals[f]) fs.writeFileSync(f, work[f], 'utf8'); });
     execSync('node tools/build-v02.js', { stdio: 'pipe' });
     let failed = false, line = '';
     try {
@@ -147,7 +178,7 @@ try {
     }
   }
 } finally {
-  fs.writeFileSync(APP, original, 'utf8');
+  FILES.forEach(f => fs.writeFileSync(f, originals[f], 'utf8'));
   execSync('node tools/build-v02.js', { stdio: 'pipe' });
 }
 console.log('\n' + verified + '/' + list.length + ' travel assertions mutation-verified');

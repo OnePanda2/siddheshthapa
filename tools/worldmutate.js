@@ -27,9 +27,22 @@ const MUTATIONS = [
     find: `MIGS.forEach(function(m){ m.t='mig'; m.mig=m.id; NODES.push(m); owned[m.id]=[]; });`,
     repl: `MIGS.forEach(function(m){ m.t='mig'; m.mig=(m.id==='love'?'philosophy':m.id); NODES.push(m); owned[m.id]=[]; });` },
 
+  /* THE ANCHOR WAS BROKEN BY f11a2b2, "MY WORKS is not a region of the mind".
+     The menu used to sort MY WORKS to the top; when MY WORKS stopped being a
+     region there was nothing to lift, the sort went, and the line became a
+     plain slice. This mutation kept anchoring on the sort and matched zero
+     times, so W5 has been UNVERIFIED since that commit — reported as such by
+     the harness rather than counted as a pass, and unread because the suite
+     was not being run.
+
+     The mutation is unchanged in intent: drop one region from the menu and
+     require the check to notice. psychology is confirmed to be a live region
+     id, because a filter naming an id that does not exist would remove
+     nothing and this would be inert again — which is how L9 spent two days
+     asking an empty question. */
   { n: 'W5', file: APP, name: 'the menu exposes every MIG',
-    find: `    var ordered=MIGS.slice().sort(function(a,b){`,
-    repl: `    var ordered=MIGS.slice().filter(function(x){ return x.id!=='psychology'; }).sort(function(a,b){` },
+    find: `    var ordered=MIGS.slice();`,
+    repl: `    var ordered=MIGS.slice().filter(function(x){ return x.id!=='psychology'; });` },
 
   { n: 'W6', file: APP, name: 'ART is a relabel, not a new region',
     /* renaming the id took the whole app down, which proves nothing. A relabel
