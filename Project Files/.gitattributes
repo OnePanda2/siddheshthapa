@@ -1,4 +1,0 @@
-# Byte-exact. A restore point that rewrites line endings is not a restore
-# point: patch anchors in tools/ and .p3/ match exact text, and a silent
-# CRLF conversion on checkout breaks them without any error.
-* -text
