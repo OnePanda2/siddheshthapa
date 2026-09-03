@@ -158,11 +158,28 @@ body.th-hover-mind  .th-world--mind{width:80%}
    which is the argument of the whole page made in a single word. */
 .th-stage{position:absolute;top:0;height:100%;width:100vw;
   display:flex;flex-direction:column;justify-content:center;align-items:center;
-  pointer-events:none;transition:left 760ms cubic-bezier(.22,.61,.36,1)}
+  pointer-events:none}
+/* EACH STAGE IS PINNED TO THE VIEWPORT EDGE ITS OWN COLUMN ALREADY TOUCHES.
+   The paper column's left edge is the viewport's left edge at every split, and
+   the mind column's right edge is the viewport's right edge at every split —
+   so left:0 on one and right:0 on the other holds the two copies in register
+   by geometry, and nothing has to be animated to keep them there. The divider
+   slides across a stationary name, which is what "cut by the divider rather
+   than moved by it" was supposed to mean.
+
+   IT WAS WRITTEN THE OTHER WAY FIRST: left:-50vw on the mind stage, retuned to
+   -80vw and -20vw on hover and eased over the same 760ms as the columns, so
+   that two animations agreeing with each other produced a name that appeared
+   to stand still. That held only while the viewport did. The offset was in vw,
+   so ANY change of viewport width invalidated it, and it was animated, so the
+   stage then took 760ms to catch up: the name pulled apart into
+   "Siddhesdhesh Thapa" and slid back together. Resizing did it, and so did
+   every load where the viewport settled a moment late — a scrollbar appearing,
+   a window animating open, a phone's URL bar collapsing. Measured across
+   1280 -> 1000: left stayed at -640px against a correct -500px, holding the
+   two halves 140px apart. */
 .th-world--works .th-stage{left:0}
-.th-world--mind  .th-stage{left:-50vw}
-body.th-hover-works .th-world--mind .th-stage{left:-80vw}
-body.th-hover-mind  .th-world--mind .th-stage{left:-20vw}
+.th-world--mind  .th-stage{right:0}
 
 /* THE EYEBROW IS GONE, and its absence is the point. Every element on this
    stage is cut in half by the divider, which a 100px name carries and a 10px
@@ -246,10 +263,11 @@ body.th-hover-mind  .th-world--mind  .th-meta{opacity:.55}
   body.th-hover-mind  .th-world--works,body.th-hover-mind  .th-world--mind{
     width:100%;height:50%}
   .th-world--works{border-right:0;border-bottom:1px solid var(--paper-rule)}
-  .th-stage,.th-world--mind .th-stage,
-  body.th-hover-works .th-world--mind .th-stage,
-  body.th-hover-mind  .th-world--mind .th-stage{left:0;width:100%;height:auto;top:6vh;
-    padding:0 22px}
+  /* stacked, each stage belongs to its own row and simply fills it. right:auto
+     is not decoration: the mind stage is anchored by its right edge above, and
+     leaving that in place here would fight the width. */
+  .th-stage,.th-world--mind .th-stage{left:0;right:auto;width:100%;height:auto;
+    top:6vh;padding:0 22px}
   .th-world--mind .th-stage{visibility:hidden}
   /* the name wraps here rather than running off the edge: one line of it at
      44px is wider than a phone, and nowrap simply hid the end of his name */
