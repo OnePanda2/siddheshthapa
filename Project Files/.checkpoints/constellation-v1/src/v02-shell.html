@@ -1,0 +1,211 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Siddhesh Thapa — cognitive constellation</title>
+<style>
+/* ── V02 tokens. Every colour has a declared semantic role (DESIGN-V02 §4.1).
+      Never pure #ffffff: a faint cool tint, the same refusal of a pure value
+      that Linear applies to black. ─────────────────────────────────────── */
+:root{
+  /* DEEP SPACE. The mind is a constellation now, so the page is the sky it
+     hangs in. Never pure black — nothing out there is empty, and pure black is
+     what makes a starfield look cheap. */
+  --ground-0:#05070f; --ground-1:#090d18; --ground-2:#111726; --ground-3:#1a2233;
+  --depth-far:#2b3446;
+  --ink:#e9eef8; --ink-muted:#a7b4ca; --ink-subtle:#6e7c94;
+  --line:#232d40;
+  --accent:#7fb0e8; --focus:#9cc4f0;
+  /* the scrim: what keeps white type legible over white stars. A gradient,
+     not a backdrop blur — a blur is a per-frame cost on a weak GPU and buys
+     nothing a gradient cannot do here. */
+  --scrim:rgba(5,7,15,.90); --scrim-soft:rgba(5,7,15,.62);
+  --serif:Georgia,'Iowan Old Style','Times New Roman',Times,serif;
+  --sans:-apple-system,'Segoe UI Variable Text','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --mono:ui-monospace,'Cascadia Mono',Consolas,'SF Mono',monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:#05070f;color:var(--ink);
+  font-family:var(--sans);overscroll-behavior:none}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+/* the DOM semantic layer — the SOURCE OF STRUCTURE. Delete the canvas and this
+   must still carry the whole mind (DESIGN-V02 §22). */
+#skip{position:absolute;left:-9999px;top:0;z-index:50;background:var(--ground-0);
+  color:var(--ink);padding:10px 14px;border:1px solid var(--line)}
+#skip:focus{left:12px;top:12px}
+#semantic{position:fixed;left:0;top:0;width:min(380px,86vw);max-height:100vh;overflow:auto;
+  padding:22px 24px 40px;z-index:10;
+  /* the type sits on its own darkness, fading into the sky rather than ending
+     at a hard edge */
+  background:linear-gradient(90deg,var(--scrim) 0%,var(--scrim) 58%,rgba(5,7,15,0) 100%)}
+@media (max-width:767px){
+  #semantic{background:linear-gradient(180deg,rgba(5,7,15,0) 0%,var(--scrim) 9%,var(--scrim) 100%)}
+}
+#semantic h1{font-family:var(--serif);font-weight:400;font-size:15px;letter-spacing:.02em;
+  margin:0 0 2px;color:var(--ink-muted)}
+#where{font-family:var(--serif);font-size:clamp(30px,3.4vw,52px);line-height:1.05;
+  letter-spacing:-.03em;font-weight:400;margin:0 0 6px}
+#gloss{font-family:var(--serif);font-size:16px;line-height:1.5;color:var(--ink-muted);
+  margin:0 0 18px;max-width:34ch}
+#status{position:absolute;left:-9999px}
+.grp{margin:0 0 16px}
+.grp h2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-subtle);font-weight:400;margin:0 0 7px}
+.nav{list-style:none;margin:0;padding:0}
+.nav li{margin:0 0 1px}
+.nav button{display:block;width:100%;text-align:left;background:none;border:0;cursor:pointer;
+  font:inherit;color:var(--ink);padding:7px 8px;min-height:44px;border-radius:3px;
+  border-left:2px solid transparent;transition:background 160ms ease,border-color 160ms ease}
+.nav button:hover{background:var(--ground-2)}
+.nav button:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+.nav button[aria-current="true"]{border-left-color:var(--accent);background:var(--ground-1)}
+.nav .lbl{font-family:var(--serif);font-size:15px;line-height:1.25;display:block}
+.nav .src{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-subtle);opacity:.62;margin:3px 0 1px}
+.nav [data-nav]:hover .src,.nav [data-nav]:focus-visible .src{opacity:1}
+.nav .meta{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-subtle);display:block;margin-top:3px}
+.nav .verb{color:var(--accent)}
+
+/* two controls, two promises — unchanged from V1 (DESIGN-V02 §10) */
+.ctl{position:fixed;z-index:20;background:none;border:0;cursor:pointer;color:var(--ink-muted);
+  width:44px;height:44px;display:grid;place-items:center;border-radius:4px}
+.ctl:hover{color:var(--ink);background:var(--ground-2)}
+.ctl:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+#backBtn{left:6px;top:6px;font-size:19px;font-family:var(--mono)}
+#mindBtn{right:6px;top:6px}
+#mindBtn svg{width:19px;height:19px}
+#backBtn[hidden],#mindBtn[hidden]{display:none}
+
+/* projected labels — spatial identity, still ordinary DOM text */
+#labels{position:fixed;inset:0;pointer-events:none;z-index:5}
+.lb{position:absolute;left:0;top:0;white-space:nowrap;color:var(--ink-muted);
+  font-family:var(--mono);letter-spacing:.16em;text-transform:uppercase;display:none;
+  /* a label sits over a field of white stars, so it carries its own darkness.
+     Three tight shadows read as a halo rather than as a drop shadow. */
+  text-shadow:0 0 4px rgba(5,7,15,.95),0 0 9px rgba(5,7,15,.85),0 0 16px rgba(5,7,15,.6)}
+/* §16 — the region is primary, the system it borrows is secondary. Two
+   levels, never one flat row of equally loud text. */
+.lb-mig{font-size:11px;color:var(--ink);letter-spacing:.2em;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:2px}
+.lb-name{display:block}
+.lb-src{display:block;font-size:7.5px;letter-spacing:.14em;color:var(--ink-subtle);
+  opacity:.8}
+.lb-min{font-size:9px}
+.lb-w{font-size:8.5px;color:var(--ink-subtle);letter-spacing:.1em;text-transform:none;
+  font-family:var(--serif);font-style:italic}
+
+/* the threshold — the first ten seconds. The universe is already behind it,
+   faintly, so entering is a change of attention rather than a page load. */
+#threshold{position:fixed;inset:0;z-index:40;display:grid;place-items:center;
+  background:none;transition:opacity 520ms ease,visibility 520ms}
+/* the copy carries its own darkness so the sky stays visible everywhere else */
+.th-in{position:relative}
+.th-in::before{content:'';position:absolute;inset:-8vh -14vw -10vh -22vw;z-index:-1;
+  background:radial-gradient(58% 62% at 34% 50%,var(--scrim) 0%,
+             var(--scrim-soft) 46%,rgba(5,7,15,0) 78%)}
+/* The region sheet belongs to the mind, not to the threshold. While the
+   threshold is up it is hidden, so the panel can stay translucent at EVERY
+   width and the brain is visible behind it — including on a phone, where the
+   sheet would otherwise print straight through the glass. */
+body:not(.entered) #semantic{opacity:0;pointer-events:none}
+#semantic{transition:opacity 460ms ease}
+#threshold.gone{opacity:0;visibility:hidden;pointer-events:none}
+.th-in{max-width:38rem;padding:0 26px;text-align:left}
+.th-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-subtle);margin:0 0 14px}
+.th-name{font-family:var(--serif);font-weight:400;font-size:clamp(44px,7vw,96px);line-height:1.0;
+  letter-spacing:-.035em;margin:0 0 18px}
+.th-facts{font-family:var(--serif);font-size:clamp(17px,1.6vw,21px);line-height:1.5;
+  color:var(--ink-muted);margin:0 0 30px;max-width:30ch}
+#enterBtn{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+  background:none;border:1px solid var(--ink-subtle);color:var(--ink);padding:15px 22px;
+  min-height:48px;cursor:pointer;border-radius:2px;transition:background 200ms ease,border-color 200ms ease}
+#enterBtn:hover,#worksBtn:hover{background:var(--ground-2);border-color:var(--ink)}
+.th-doors{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#worksBtn{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+  padding:13px 20px;background:transparent;border:1px solid var(--rule);color:var(--ink);
+  cursor:pointer;border-radius:2px}
+#worksBtn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+#enterBtn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.th-hint{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--ink-subtle);
+  margin:22px 0 0;max-width:44ch;line-height:1.6}
+@media (max-width:767px){ .th-in{text-align:left} }
+
+/* the reading environment — a document, unchanged in character from V1 */
+#reader{position:fixed;inset:0;z-index:30;background:var(--ground-0);overflow-y:auto;
+  visibility:hidden;opacity:0;transition:opacity 320ms ease}
+#reader.on{visibility:visible;opacity:1}
+.doc{max-width:34rem;margin:0 auto;padding:14vh 24px 18vh}
+.dochead{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-subtle);margin:0 0 26px;display:flex;justify-content:space-between}
+.docbody{font-family:var(--serif);font-size:clamp(24px,2.6vw,34px);line-height:1.32;
+  letter-spacing:-.02em;margin:0 0 30px}
+.docplate{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink-subtle);
+  border-top:1px solid var(--line);padding-top:14px}
+.docplate b{font-weight:400;color:var(--ink-muted)}
+#readClose{margin-top:34px;font:inherit;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  background:none;border:1px solid var(--line);color:var(--ink-muted);padding:11px 15px;
+  min-height:44px;cursor:pointer;border-radius:3px}
+#readClose:hover{border-color:var(--ink-subtle);color:var(--ink)}
+#readClose:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+
+@media (max-width:767px){
+  #semantic{top:auto;bottom:0;width:100%;max-height:58vh;background:var(--ground-0);
+    border-top:1px solid var(--line);padding:16px 18px 30px}
+  #where{font-size:27px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:1ms!important}
+}
+</style>
+
+<a id="skip" href="#semantic">Skip to the structure</a>
+
+<div id="threshold">
+  <div class="th-in">
+    <p class="th-eyebrow">An externalised mind</p>
+    <h1 class="th-name">Siddhesh Thapa</h1>
+    <p class="th-facts" id="thFacts"></p>
+    <div class="th-doors">
+      <button id="worksBtn" type="button">My works</button>
+      <button id="enterBtn" type="button">Enter the mind <span aria-hidden="true">&rarr;</span></button>
+    </div>
+    <p class="th-hint">Nothing here is a menu. Regions that share thinking sit closer together.</p>
+  </div>
+</div>
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<nav id="semantic" aria-label="Where you are and what it connects to">
+  <h1 id="tier">The mind of</h1>
+  <p id="where">Siddhesh Thapa</p>
+  <p id="gloss"></p>
+  <div id="groups"></div>
+</nav>
+<div id="status" role="status" aria-live="polite"></div>
+
+<button class="ctl" id="backBtn" title="Back" aria-label="Back one step" hidden>&lt;</button>
+<button class="ctl" id="mindBtn" title="Go back to Mind map" aria-label="Return to the whole mind" hidden>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">
+    <path d="M12 3.5c-2 0-3.2 1.2-3.4 2.6C7 6.3 5.8 7.4 5.8 9c0 .7.2 1.3.6 1.8-.7.5-1.1 1.3-1.1 2.2 0 1.2.8 2.2 1.9 2.6.1 1.5 1.4 2.7 3 2.7.7 0 1.4-.3 1.8-.7"/>
+    <path d="M12 3.5c2 0 3.2 1.2 3.4 2.6 1.6.2 2.8 1.3 2.8 2.9 0 .7-.2 1.3-.6 1.8.7.5 1.1 1.3 1.1 2.2 0 1.2-.8 2.2-1.9 2.6-.1 1.5-1.4 2.7-3 2.7-.7 0-1.4-.3-1.8-.7"/>
+    <path d="M12 3.5v16"/>
+  </svg>
+</button>
+
+<div id="reader" role="dialog" aria-modal="true" aria-labelledby="readTitle" aria-hidden="true">
+  <article class="doc">
+    <div class="dochead"><span id="readRunning"></span><span id="readFolio"></span></div>
+    <p class="docbody" id="readTitle"></p>
+    <div class="docplate" id="readPlate"></div>
+    <button id="readClose">← Return to where you were</button>
+  </article>
+</div>
+
+<script>/*__THREE__*/</script>
+<script>
+(function(){
+'use strict';
+/*__DATA__*/
+/*__APP__*/
+})();
+</script>

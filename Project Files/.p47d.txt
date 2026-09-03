@@ -1,0 +1,110 @@
+### MUTATIONS: GRID ###
+OK   P4.7-1  the graph field is actually inhabited
+OK   P4.7-2  a field fragment is held to its slot
+BAD  P4.7-3  room is reserved for a wrapped line
+OK   P4.7-4  the dominant fragment wraps to a measure
+3/4 P4.7 assertions mutation-verified
+### MUTATIONS: MARGINALIA ###
+OK   assertion 1  SOURCE authenticity — text must equal n.src
+OK   assertion 2  CROSS authenticity — named region must be really reached
+OK   assertion 2b  CROSS authenticity — the "+n" remainder must be true
+OK   assertion 3  CROSS existence — the layer may not silently render nothing
+OK   assertion 4  no fabricated footnote / "cf. N" marks
+OK   assertion 5  marks stay inside the annotation margins
+OK   assertion 6  no mark on the reading panel
+BAD  assertion 7  no mark over a drawn graph label  @2560x1080
+OK   assertion 8  marginalia responds to a change of focus
+OK   assertion 9  marginalia stays subordinate to the fragments
+OK   assertion 11  the layer renders at all where there is room for it
+OK   assertion 10  marginalia is not clickable
+11/12 assertions mutation-verified
+### MUTATIONS: ACCEPT ###
+OK   the marginalia layer is present and locatable
+OK   every mark records the writing it belongs to, by id
+OK   a source mark is the record's own src, never a written-out label
+OK   a destination is judged against the node's own region, not a hard-coded one
+OK   a destination names the region the graph actually reaches
+OK   the invented footnote and "cf. N" apparatus is gone from the margins
+OK   marginalia opacity is a named constant the acceptance suite can read
+OK   marginalia is not in the hit-test chain — fragments stay the doorways
+OK   marginalia never resolves as a node
+9/9 accept.js marginalia checks mutation-verified
+### MATRIX ###
+P4.6 GATE — preview.html
+
+STATIC
+  PASS  validate  (0s)
+  PASS  accept  (0s)
+
+RUNTIME — reference viewport
+  PASS  tokencheck  (7s)
+  PASS  overlapcheck  (14s)
+  PASS  contradictioncheck  (17s)
+
+WIDTH MATRIX — gridcheck + marginaliacheck at every width
+  PASS  gridcheck 320x812  (8s)
+  PASS  marginaliacheck 320x812  (14s)
+  PASS  gridcheck 375x812  (11s)
+  PASS  marginaliacheck 375x812  (7s)
+  PASS  gridcheck 390x812  (7s)
+  PASS  marginaliacheck 390x812  (8s)
+  PASS  gridcheck 430x812  (8s)
+  PASS  marginaliacheck 430x812  (9s)
+  PASS  gridcheck 768x1024  (9s)
+  PASS  marginaliacheck 768x1024  (9s)
+  PASS  gridcheck 1024x1024  (9s)
+  PASS  marginaliacheck 1024x1024  (9s)
+  PASS  gridcheck 1280x900  (9s)
+  PASS  marginaliacheck 1280x900  (9s)
+  PASS  gridcheck 1440x900  (14s)
+  PASS  marginaliacheck 1440x900  (12s)
+  PASS  gridcheck 1920x1080  (409s)
+  PASS  marginaliacheck 1920x1080  (59s)
+  PASS  gridcheck 2560x1080  (123s)
+  PASS  marginaliacheck 2560x1080  (181s)
+
+RESPONSIVE + ULTRAWIDE
+  PASS  mobilecheck  (62s)
+  PASS  widecheck 2560x1080  (375s)
+  PASS  contradictioncheck 2560x1080  (710s)
+
+──────── P4.6 GATE ────────
+PASS  validate
+PASS  accept
+PASS  tokencheck
+PASS  overlapcheck
+PASS  contradictioncheck
+PASS  gridcheck 320x812
+PASS  marginaliacheck 320x812
+PASS  gridcheck 375x812
+PASS  marginaliacheck 375x812
+PASS  gridcheck 390x812
+PASS  marginaliacheck 390x812
+PASS  gridcheck 430x812
+PASS  marginaliacheck 430x812
+PASS  gridcheck 768x1024
+PASS  marginaliacheck 768x1024
+PASS  gridcheck 1024x1024
+PASS  marginaliacheck 1024x1024
+PASS  gridcheck 1280x900
+PASS  marginaliacheck 1280x900
+PASS  gridcheck 1440x900
+PASS  marginaliacheck 1440x900
+PASS  gridcheck 1920x1080
+PASS  marginaliacheck 1920x1080
+PASS  gridcheck 2560x1080
+PASS  marginaliacheck 2560x1080
+PASS  mobilecheck
+PASS  widecheck 2560x1080
+PASS  contradictioncheck 2560x1080
+
+28/28 green
+### SHOTS ###
+wrote C:/Users/SIDDHE~1/AppData/Local/Temp/claude/F--Projects-Siddhesh-Thapa/6449f481-2cdb-472d-a094-ffc550770bfa/scratchpad/shots/p47-2560.png at a true 2560x1080 CSS viewport
+wrote C:/Users/SIDDHE~1/AppData/Local/Temp/claude/F--Projects-Siddhesh-Thapa/6449f481-2cdb-472d-a094-ffc550770bfa/scratchpad/shots/p47-concept.png at a true 1440x900 CSS viewport
+wrote C:/Users/SIDDHE~1/AppData/Local/Temp/claude/F--Projects-Siddhesh-Thapa/6449f481-2cdb-472d-a094-ffc550770bfa/scratchpad/shots/p47-region.png at a true 1440x900 CSS viewport
+wrote C:/Users/SIDDHE~1/AppData/Local/Temp/claude/F--Projects-Siddhesh-Thapa/6449f481-2cdb-472d-a094-ffc550770bfa/scratchpad/shots/p47-contra.png at a true 1440x900 CSS viewport
+wrote C:/Users/SIDDHE~1/AppData/Local/Temp/claude/F--Projects-Siddhesh-Thapa/6449f481-2cdb-472d-a094-ffc550770bfa/scratchpad/shots/p47-1024.png at a true 1024x768 CSS viewport
+wrote C:/Users/SIDDHE~1/AppData/Local/Temp/claude/F--Projects-Siddhesh-Thapa/6449f481-2cdb-472d-a094-ffc550770bfa/scratchpad/shots/p47-375.png at a true 375x812 CSS viewport
+wrote C:/Users/SIDDHE~1/AppData/Local/Temp/claude/F--Projects-Siddhesh-Thapa/6449f481-2cdb-472d-a094-ffc550770bfa/scratchpad/shots/p47-read.png at a true 1440x900 CSS viewport
+ALL DONE
