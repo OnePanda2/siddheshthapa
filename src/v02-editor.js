@@ -35,7 +35,6 @@ var CFG = /*__EDITORCFG__*/;
 /* the vocabularies. CONTENT-MODEL.md is the authority. */
 var TYPES  = ['belief','thought','question','contradiction','project',
               'experiment','person','reference'];
-var STATES = ['seed','growing','formed','tested','proven','changed','open'];
 var GLOSS_MIN = 25;
 
 var TYPE_HELP = {
@@ -47,15 +46,6 @@ var TYPE_HELP = {
   experiment:'something being tried',
   person:'someone who matters to the thinking',
   reference:'a source worth keeping'
-};
-var STATE_HELP = {
-  seed:'written down before it was worked out',
-  growing:'still being added to; shape not final',
-  formed:'settled enough to state plainly, not closed to argument',
-  tested:'put into practice rather than only asserted',
-  proven:'has held up in practice over time',
-  changed:'an earlier version was held and is not any more',
-  open:'unresolved on purpose'
 };
 
 var API = 'https://api.github.com';
@@ -345,7 +335,6 @@ function openForm(migId){
   var fLabel = el('input'); fLabel.type = 'text';
   fLabel.placeholder = 'The title, as it appears in the mind';
   var fId = el('input'); fId.type = 'text'; fId.className = 'mono';
-  var fState = select(STATES, 'formed', STATE_HELP);
   var fRegister = el('input'); fRegister.type = 'text'; fRegister.className = 'mono';
   fRegister.setAttribute('list','edRegisters');
   fRegister.placeholder = 'e.g. observation, or "joke — not a belief"';
@@ -369,7 +358,6 @@ function openForm(migId){
   formIn.appendChild(field('Kind', 'what sort of statement this is', fType));
   formIn.appendChild(field('Title', 'uppercase, as everything in the mind is', fLabel));
   formIn.appendChild(field('The writing', 'the material itself', fLine));
-  formIn.appendChild(field('State', 'where it is in its life', fState));
   formIn.appendChild(field('Register',
     'so a joke can never be read as a conviction. A disclaimer after an em-dash is doing safety work.',
     fRegister));
@@ -419,7 +407,7 @@ function openForm(migId){
     });
     var note2 = {
       id: fId.value.trim(), t: fType.value, label: fLabel.value.trim(),
-      mig: migId, crosses: crosses, state: fState.value,
+      mig: migId, crosses: crosses,
       register: fRegister.value.trim(), src: fSrc.value.trim(),
       line: fLine.value.trim(), added: new Date().toISOString().slice(0,10)
     };
@@ -488,7 +476,6 @@ function validate(n, rels, M){
   if(!/^[a-z0-9][a-z0-9-]*$/.test(n.id)) p.push('The reference must be a lowercase slug.');
   else if(ids[n.id]) p.push('The reference "' + n.id + '" already exists in the mind — it would be silently dropped.');
   if(TYPES.indexOf(n.t) < 0) p.push('Unknown kind.');
-  if(STATES.indexOf(n.state) < 0) p.push('Unknown state.');
   if(!n.label) p.push('A title is required.');
   else if(n.label !== n.label.toUpperCase()) p.push('The title must be uppercase.');
   if(!n.register) p.push('A register is required — it is what stops a joke being read as a conviction.');

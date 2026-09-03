@@ -5483,13 +5483,12 @@ function row(n, meta, onClick, current){
   if(current) b.setAttribute('aria-current','true');
   var l=document.createElement('span'); l.className='lbl'; l.textContent=n.label||n.id;
   b.appendChild(l);
-  if(n.t==='mig'){
-    var src=document.createElement('span');
-    src.className='src'; src.setAttribute('data-src',n.id);
-    src.textContent=sourceLabelOf(n.id);
-    b.appendChild(src);
-    b.setAttribute('aria-label',(n.label||n.id)+' — '+sourceLabelOf(n.id));
-  }
+  /* THE SYSTEM NAME IS NOT REPEATED HERE. Every MIG row used to carry the name
+     of its planetary system under the region's own name — TRAPPIST-1 beneath
+     PHILOSOPHY — while the sky already writes that name under the world itself.
+     Saying it twice made the menu look like it held two facts where it held
+     one. It is still drawn in the sky, where it belongs: beside the thing it
+     names. */
   if(meta){ var m=document.createElement('span'); m.className='meta'; m.innerHTML=meta; b.appendChild(m); }
   b.addEventListener('click',onClick);
   /* hovering a MIG row identifies its world in the sky. Pointer events only —
@@ -5570,7 +5569,7 @@ function paintDOM(){
         return row(n, adj[id].length+' connections', function(){ travelTo('concept',id); }); })));
     put(group('Writings', mem.filter(function(id){return byId[id].src;})
       .map(function(id){ var n=byId[id];
-        return row(n, esc(n.t)+' · '+esc(n.src), function(){ openReader(id); }); })));
+        return row(n, esc(n.t), function(){ openReader(id); }); })));
     /* THE EDITOR'S ONE DOOR INTO THE PAGE. Inert in the published artifact,
        which never loads an editor, so this line costs the public page a single
        property lookup and changes nothing it renders. Placed inside the region
@@ -5583,7 +5582,7 @@ function paintDOM(){
     return;
   }
   var n=byId[state.focus];
-  elTier.textContent=esc(n.t)+(n.state?' · '+esc(n.state):'');
+  elTier.textContent=esc(n.t);
   elWhere.textContent=n.label;
   elGloss.textContent=n.line||'';
   put(group('Connects to', adj[n.id].map(function(k){
@@ -5603,7 +5602,7 @@ function paintDOM(){
       o.src? openReader(o.id) : travelTo('concept',o.id);
     });
   })));
-  if(n.src) put(group('This writing',[ row(n,'Open the source — '+esc(n.src),
+  if(n.src) put(group('This writing',[ row(n,'Read it',
     function(){ openReader(n.id); }) ]));
   say(n.label+'. '+adj[n.id].length+' connections.');
 }
@@ -5626,8 +5625,7 @@ function openReader(id){
   readTitle.textContent=n.line||n.label;
   readRunning.textContent=byId[n.mig]?byId[n.mig].label:'';
   readFolio.textContent=esc(n.t).toUpperCase();
-  readPlate.innerHTML='From <b>'+esc(n.src||'—')+'</b>'+
-    (n.register?' · '+esc(n.register):'')+(n.state?' · '+esc(n.state):'');
+  readPlate.innerHTML=n.register?esc(n.register):'';
   reader.classList.add('on'); reader.setAttribute('aria-hidden','false');
   readClose.focus();
   say('Reading '+n.label+'.');
@@ -6718,6 +6716,21 @@ window.__v02={
                source:s?s.textContent:null, meta:mt?mt.textContent:null,
                aria:b.getAttribute('aria-label')||null,
                expected:sourceLabelOf(b.getAttribute('data-nav')) };
+    });
+  },
+  /* WHERE THE SOURCE CLAIM NOW LIVES. It used to be declared under every menu
+     row, including "not yet charted" beneath the regions that have no system.
+     The menu no longer repeats what the sky already says, so the audit reads
+     the sky: a charted world writes its system beside itself, and a world with
+     no system writes nothing. What is testable therefore changed shape - it is
+     no longer "every region states a source", it is "no region states one it
+     does not have, and every one that has a source states it". */
+  skyLabels:function(){
+    return Object.keys(labelEls).filter(function(id){
+      return byId[id] && byId[id].t==='mig';
+    }).map(function(id){
+      var e=labelEls[id], s=e.querySelector ? e.querySelector('.lb-src') : null;
+      return { id:id, shown:s?s.textContent:null, expected:sourceLabelOf(id) };
     });
   },
   constellation:function(mid){
@@ -7875,7 +7888,7 @@ function renderSheet(id){
   /* the title block, bottom, where a drawing puts it */
   var plate = el('div', 'wk-plate');
   plate.appendChild(el('span', null, 'Sheet ' + pad(idx + 1) + ' of ' + pad(SHEETS.length)));
-  plate.appendChild(el('span', null, 'Source — ' + String(n.src || '—')));
+  /* the source line is gone from the manual too - see src/v02-app.js */
   wkBody.appendChild(plate);
 
   renderNight(id);

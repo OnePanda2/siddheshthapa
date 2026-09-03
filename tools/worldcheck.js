@@ -58,6 +58,11 @@ const PROBE = `(function(){
 
   /* ---- open it ---- */
   M.enter(); M.settle(60);
+  /* SAMPLED HERE, NOT WHILE THE MIND IS SHUT. The sky builds its labels when
+     the sky is drawn, so asking for them at the threshold returns an empty
+     list — which reads as "no world names a source" and failed W9 for the one
+     reason that had nothing to do with the site. */
+  closed.sky = M.skyLabels();
   var afterEnter=M.mind();            // entering must leave the brain standing
   M.go('region','philosophy'); M.settle(150);
   var afterPick=M.mind();             // choosing a region unfolds it
@@ -324,19 +329,19 @@ ck('W8', psy.id === 'psychology' && rn.from === 'psychology' &&
    ' and all ' + rn.edges + ' of its relationships');
 
 /* W9 — every MIG states its source, and an unassigned one says so */
-const srcBad = (r.closed.menu || []).filter(m => !m.source || m.source !== m.expected);
-const charted = (r.closed.menu || []).filter(m => m.source !== 'not yet charted');
+const sky9 = r.closed.sky || [];
+const srcBad = sky9.filter(m => m.shown !== null && m.shown !== m.expected);
+const charted = sky9.filter(m => m.shown);
 /* derived rather than listed, for the reason recorded on braincheck B19: a
    hardcoded roster of system names is maintenance, not a test, and each world
    added was making the same edit in two files. A source must be unique to its
    region, and no region may invent one. */
 ck('W9', srcBad.length === 0 && charted.length >= 6 &&
-         charted.length < (r.closed.menu || []).length &&
-         new Set(charted.map(m => m.source)).size === charted.length &&
-         (r.closed.menu || []).every(m => m.aria && m.aria.indexOf(m.source) >= 0),
-   'every MIG states its astronomical source and it matches its profile — ' +
-   charted.map(m => m.id + '=' + m.source).join(', ') + '; the other ' +
-   ((r.closed.menu || []).length - charted.length) + ' say "not yet charted" rather than inventing one' +
+         charted.length < sky9.length &&
+         new Set(charted.map(m => m.shown)).size === charted.length,
+   'no world claims a heritage it does not have — ' +
+   charted.map(m => m.id + '=' + m.shown).join(', ') + '; the other ' +
+   (sky9.length - charted.length) + ' name none' +
    (srcBad.length ? ' — WRONG: ' + srcBad.map(m => m.id).join(', ') : ''));
 
 /* M6 — the whole brain is in frame, not cropped and not zoomed into a MIG */

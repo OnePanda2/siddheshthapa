@@ -139,7 +139,14 @@ notes.forEach((n, i) => {
   if (!n || typeof n !== 'object') return fail(where, 'not an object');
   checkId(n, where);
   if (!TYPES.includes(n.t)) fail(where, 't must be one of ' + TYPES.join('|') + ', found ' + JSON.stringify(n.t));
-  if (!STATES.includes(n.state)) fail(where, 'state must be one of ' + STATES.join('|') + ', found ' + JSON.stringify(n.state));
+  /* STATE IS NO LONGER ASKED FOR, so it is no longer required. It is still
+     CHECKED when present, because the locked corpus is full of it and a typo
+     there would be as wrong as it ever was - what changed is that the editor
+     stopped inventing a classification nobody reads. The vocabulary was the
+     file's own judgement of how settled a thought is, and with it off the
+     page there is nothing for a writer to answer. */
+  if ('state' in n && !STATES.includes(n.state))
+    fail(where, 'state, when given, must be one of ' + STATES.join('|') + ', found ' + JSON.stringify(n.state));
   if (typeof n.label !== 'string' || !n.label.trim()) fail(where, 'label is required');
   else if (n.label !== n.label.toUpperCase()) fail(where, 'label must be uppercase, found ' + JSON.stringify(n.label));
   if (typeof n.register !== 'string' || !n.register.trim()) fail(where, 'register is required');
@@ -157,7 +164,8 @@ minors.forEach((m, i) => {
   checkId(m, where);
   if (typeof m.label !== 'string' || !m.label.trim()) fail(where, 'label is required');
   else if (m.label !== m.label.toUpperCase()) fail(where, 'label must be uppercase');
-  if (!STATES.includes(m.state)) fail(where, 'state must be one of ' + STATES.join('|'));
+  if ('state' in m && !STATES.includes(m.state))
+    fail(where, 'state, when given, must be one of ' + STATES.join('|'));
   /* scaffolding is not his words, and the ABSENCE of src is how the page says
      so. Giving a concept a src would claim authorship the file cannot support. */
   if ('src' in m) fail(where, 'a concept carries no src — that absence is the honesty signal');

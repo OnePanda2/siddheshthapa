@@ -461,7 +461,7 @@ function renderSheet(id){
   /* the title block, bottom, where a drawing puts it */
   var plate = el('div', 'wk-plate');
   plate.appendChild(el('span', null, 'Sheet ' + pad(idx + 1) + ' of ' + pad(SHEETS.length)));
-  plate.appendChild(el('span', null, 'Source — ' + String(n.src || '—')));
+  /* the source line is gone from the manual too - see src/v02-app.js */
   wkBody.appendChild(plate);
 
   renderNight(id);

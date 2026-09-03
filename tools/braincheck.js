@@ -38,7 +38,7 @@ fs.writeFileSync(tmp + '/p.html', fs.readFileSync(FILE, 'utf8') + `
     out.profile=out.welcome.organ.profile; delete out.welcome.organ.profile;
     M.enter(); M.settle(260);
     out.mmm={ organ:M.organ(), mind:M.mind(), brain:M.brain(), arch:M.arch(),
-              menu:M.menuRows() };
+              menu:M.menuRows(), sky:M.skyLabels() };
     /* how many labels are actually drawn over the closed organ */
     out.mmm.labelsDrawn=[].filter.call(document.querySelectorAll('.lb'),
       function(e){ return e.style.display!=='none'; }).length;
@@ -242,15 +242,29 @@ const charted = menu.filter(x => x.source && x.source !== 'not yet charted');
    day be updated wrongly. What actually matters is that every label matches
    the profile it came from, that a region without a world says so, and that
    the charted ones are a real subset. All three survive a thirteenth world. */
-const expectedCharted = menu.filter(x => x.expected && x.expected !== 'not yet charted');
+/* THE CLAIM MOVED, SO THE AUDIT MOVED WITH IT. This read the source line under
+   every menu row, where an uncharted region declared itself "not yet charted".
+   The menu no longer repeats what the sky says, so the sky is where a source is
+   now stated — and only the charted worlds state one.
+
+   ONE PROPERTY DID NOT SURVIVE THE MOVE, and pretending otherwise would be
+   worse than losing it: an unassigned region used to SAY it had no system, and
+   now it merely says nothing. Silence is not a declaration, and no assertion
+   can make it one. What is still testable is the half that stops a world
+   inventing a heritage it does not have — every source shown is the one the
+   profile assigns, no region shows a source it lacks, and no two share one. */
+const sky = r.mmm.sky || [];
+const skyCharted = sky.filter(x => x.shown);
+const wantCharted = sky.filter(x => x.expected && x.expected !== 'not yet charted');
 ck('B19', menu.length === r.mmm.arch.migCount &&
-          menu.every(x => x.source === x.expected) &&
-          charted.length === expectedCharted.length && charted.length >= 6 &&
-          charted.length < menu.length &&
-          new Set(charted.map(x => x.source)).size === charted.length,
-   'source labels derive from the world assignments — ' +
-   charted.map(x => x.id + '=' + x.source).join(', ') + '; the other ' +
-   (menu.length - charted.length) + ' say "not yet charted" rather than inventing one');
+          sky.length === r.mmm.arch.migCount &&
+          sky.every(x => x.shown === null || x.shown === x.expected) &&
+          skyCharted.length === wantCharted.length && skyCharted.length >= 6 &&
+          skyCharted.length < sky.length &&
+          new Set(skyCharted.map(x => x.shown)).size === skyCharted.length,
+   'the sky names each charted world and no other — ' +
+   skyCharted.map(x => x.id + '=' + x.shown).join(', ') + '; the other ' +
+   (sky.length - skyCharted.length) + ' show none rather than inventing one');
 
 /* B20 — visiting a world does not rewrite the anatomy. Compared DURING the
    world as well as after it: a figure rewritten while a world is open and

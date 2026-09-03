@@ -254,7 +254,12 @@ ck('W2', restated.length === 0,
 
 /* W3 — the numbering is derived from the graph, not typed into a sheet */
 const m = r.sheets.length;
-const plateOk = r.plate.length === 2 &&
+/* THE PLATE CARRIES ONE LINE NOW, not two. It used to end "Source — <the
+   document it came from>", and provenance was removed from every page of this
+   site: a reader does not care which handover a thought was drawn out of. The
+   sheet number stays, because it is derived from the graph and is the thing
+   this assertion is actually about. */
+const plateOk = r.plate.length === 1 &&
                 r.plate[0] === 'Sheet 01 of ' + (m < 10 ? '0' + m : m);
 /* and the figure number tracks the sheet number, on every sheet that has a
    drawing. Typed by hand into each caption, they disagreed the moment a third
@@ -299,7 +304,7 @@ const probeIds = Object.keys(r.reservedProbe || {});
 const probeWrong = probeIds.filter(id => {
   const p = r.reservedProbe[id];
   return p.stamp !== 'not yet written' || !p.hasNone || p.steps !== 0 ||
-         p.parts !== 0 || !p.hasLine || p.plateCount !== 2 ||
+         p.parts !== 0 || !p.hasLine || p.plateCount !== 1 ||
          p.seeCount === 0 || p.hasFigure;
 });
 ck('W5', probeIds.length > 0 && probeWrong.length === 0 && wrong.length === 0,
