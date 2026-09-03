@@ -88,9 +88,14 @@ const MUTATIONS = [
    s => { s.notes[0].t = 'review'; return s; },
    't must be one of'],
 
+  /* the message gained 'when given' when state stopped being required: it
+     is no longer asked for in the editor, because it is no longer shown
+     anywhere. The RULE is unchanged - a state outside the vocabulary is still
+     a typo and still refused - so this is an expectation catching up with a
+     wording change, not a rule being relaxed. */
   ['state outside the vocabulary',
    s => { s.notes[0].state = 'draft'; return s; },
-   'state must be one of'],
+   'state, when given, must be one of'],
 
   ['label is not uppercase',
    s => { s.notes[0].label = 'A Quiet Title'; return s; },
