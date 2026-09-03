@@ -1,0 +1,98 @@
+# What turns a commit into a published page.
+#
+# The editor does not deploy anything. It commits one file — data/notes.json —
+# and stops. Everything after that happens here, which is the property that
+# makes the whole design safe: publishing is not an action the browser takes,
+# it is a consequence of a commit GitHub already decided to accept.
+#
+# THE CHECK RUNS BEFORE THE BUILD, AND ITS FAILURE IS THE POINT. notescheck
+# reads data/notes.json against the rules in CONTENT-MODEL.md, and a store that
+# fails it stops here rather than reaching the site. That matters most for the
+# case the editor's own validation cannot cover — a note committed by hand, or
+# by a future version of the form with a bug in it.
+#
+# The site is built from source on every run. Nothing pre-built in the
+# repository is trusted or served: v02.html is committed for convenience, and
+# this workflow ignores it and makes its own.
+
+name: Build and deploy
+
+on:
+  push:
+    branches: [main]
+  # so a deploy can be re-run without inventing a commit to hang it on
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time, and a newer commit wins. Two notes published a minute
+# apart should not race each other onto the site in the wrong order.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check the live notes before anything is built
+        run: node tools/notescheck.js
+
+      - name: Build both artifacts
+        run: node tools/build-v02.js
+
+      - name: Assemble the site
+        run: |
+          mkdir -p _site
+          # the mind is the site; index.html is what a bare domain serves
+          cp v02.html    _site/index.html
+          # and the editor sits beside it, useless to anyone who cannot push
+          cp editor.html _site/editor.html
+          # .nojekyll stops Pages running the files through Jekyll, which would
+          # otherwise mangle anything it decided looked like a template
+          touch _site/.nojekyll
+
+      - name: Prove what is about to be served
+        run: |
+          echo "index.html   $(du -h _site/index.html   | cut -f1)"
+          echo "editor.html  $(du -h _site/editor.html  | cut -f1)"
+          # ADR-02, enforced where it actually matters: the page the world
+          # loads must reach for nothing. Checked on the published file rather
+          # than trusted from the build, and the three.js payload is excluded
+          # because it carries its own fetch and is inlined, not requested.
+          node -e "
+            const fs = require('fs');
+            const page  = fs.readFileSync('_site/index.html', 'utf8');
+            const three = fs.readFileSync('.p3/t0.149.0.js', 'utf8');
+            const body  = page.replace(three, '');
+            const leaks = [/src=\"http/, /href=\"http/, /api\.github\.com/, /login\/oauth/]
+              .filter(re => re.test(body));
+            if (leaks.length) {
+              console.error('the published page reaches outside itself: ' + leaks.join(', '));
+              process.exit(1);
+            }
+            console.log('published page makes no external request');
+          "
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
