@@ -3575,10 +3575,6 @@ function loop(){
   el.addEventListener('pointerdown',function(e){
     if(mindOpen>0.5 || state.region) return;
     pid=e.pointerId; px=e.clientX; py=e.clientY; MIND_DRAG=true;
-    /* the hand closes while the sky is being turned. A class rather than
-       :active, because the pointer is captured for the whole drag and may
-       leave the canvas without letting go of it. */
-    document.body.classList.add('mind-dragging');
     try{ el.setPointerCapture(pid); }catch(_){}
   });
   el.addEventListener('pointermove',function(e){
@@ -3595,8 +3591,7 @@ function loop(){
   });
   function release(e){
     if(!MIND_DRAG || (e && e.pointerId!==pid)) return;
-    MIND_DRAG=false; document.body.classList.remove('mind-dragging');
-    MIND_HELD=performance.now(); MIND_LAST=MIND_HELD;
+    MIND_DRAG=false; MIND_HELD=performance.now(); MIND_LAST=MIND_HELD;
     try{ el.releasePointerCapture(pid); }catch(_){}
     pid=null;
   }

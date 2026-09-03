@@ -27,8 +27,6 @@ html,body{margin:0;padding:0;height:100%;background:#05070f;color:var(--ink);
   font-family:var(--sans);overscroll-behavior:none}
 #gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
 
-
-
 /* the DOM semantic layer — the SOURCE OF STRUCTURE. Delete the canvas and this
    must still carry the whole mind (DESIGN-V02 §22). */
 #skip{position:absolute;left:-9999px;top:0;z-index:50;background:var(--ground-0);
@@ -456,81 +454,6 @@ body.works-open .ctl{display:none}
 @media (prefers-reduced-motion:reduce){
   *{transition-duration:1ms!important}
 }
-
-/* ── THE HAND, IN TWO WORLDS ──────────────────────────────────────────────
-   Siddhesh's cursor sheet, six of its twenty poses — the six this site has
-   affordances for. Each was recovered from the sheet rather than cropped from
-   it: content box measured, divided by the ~5px cell the art was drawn at,
-   every cell read by MAJORITY VOTE so the render's soft edges could not vote.
-   They ship at native resolution, one art pixel per screen pixel.
-
-     rest       pointing at you        the page at large
-     hover      index finger up        anything that can be chosen
-     click      finger with its lines  while the button is down
-     grab       an open claw           the sky, which is turned not clicked
-     grabbing   a closed fist          while it is being turned
-     text                              prose, read rather than pressed
-
-   THE SET IS DRAWN TWICE, because the site is two worlds and one drawing
-   cannot serve both. The warm hand is drawn for paper: a near-black outline
-   and a red crease, which is precisely what vanishes against #05070f. For the
-   mind the same silhouettes are relit — navy outline so the edge reads as
-   depth rather than a hole, indigo crease, a periwinkle rim on the edges
-   facing the light, and a faint halo so the hand separates from the sky
-   without resorting to a blur. Nothing is redrawn: same grids, same poses,
-   same hotspots plus the halo's margin.
-
-   THE CROSSING IS FREE. The poses are held in custom properties, and custom
-   properties inherit — so re-declaring them inside the paper world is the
-   whole mechanism. Cross the divider on the threshold and the hand changes in
-   the same pointer move, with no script listening for it and nothing to fall
-   out of step with the layout. */
-:root{
-  --warm-rest:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAABu0lEQVR4nLVXu00DQRS8XV3oCJFwgUUDREQUQAF0glyGgxOdUAAFEBHRAQEkiMihJaOxbk7Py3v7eZxHOiH2M/P+K4fuH9h/vR3k//3Vbai9G7yiw+XFiSjx+f3j5qwS3V6vD/A4/bCXRkJDs3Ugflytus3rs3lmfXNf9Dx2DuREaxGXyKsHfavYx/vL+YWHSVQTQx619fHuYb6by3MsWdbiIUSfdruqe703n6hseI2/BEW5Bg4YoA2W0BpiCQhrBsmqt1orekW1M9J7jdMU5nBoySvOSsG0x8k1JBPtJATMiQcsLN7Xqn6cziD0s8el+arlUwKeglCeS+9sRDQiPU0r1BJHhVrPH4wHB3s5F71IT0uDHyT4al4fhJPtxo/AOjiCVcWw2jLEmlpyX+OU++bk4jDQAMJSzktFGr3kDKXnLQZCro1KIeMZFmXNnB6nlpqFcxdyOa19GMap0tnrcYk3ttSGUhRAOx6F2ZdWTplvErQA9yDIicX8/xmZFLJIuJ8aoYVbjsguQfC8TqVql8ZYFR60xZy49FT2OgXkE5hrq2BtkECOUi283l8OIbcpxSmU4izCqQFLCBK/3M5H1isq1/QAAAAASUVORK5CYII=") 16 1;
-  --warm-hover:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAcCAYAAABlL09dAAABNklEQVR4nNVVsQ2DMBC0LZdUURpcZAMqqgzAANkEZRDEJhkgA6RKlQ0okiZKRYlE9JZfcozf2LjKSQgsyP39/dnhjIDa72Z8fr4/nCVCrJG2RfGzzoIyRNPrPsO1hdirGACELAMkcS7+j1gGX5a1jhkMLzV+IkQ6mVRg7IbHVd9j4K2s9rsZVCHpoWo0KQLWNnwdyNS4ybLmUNgptLBpdXiyrLndPlXQtUkrDg3GR0T5fL5dWF81upuFYmWKYCIoghBgBtL1qzueWD+OwR/GdCAoNVPCWeHrwDu8NjKrIQhsP8XDGAhIAXjqhj6b2F50jvJsYsxuahpWiW3yHEvsjjm1QQYr27EAUeRZ8TQvUv12vye3rTLKIdMxW9gW5VXMDGIHikrdwyv41wQ+g5otMQwSI7bE8Atyvp+Kria+kgAAAABJRU5ErkJggg==") 7 1;
-  --warm-click:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAfCAYAAAAMeVbNAAABaklEQVR4nLVVMW7DMAyUBI2egi7OEPQDnTz1AX1Af2JkyCMyGPlJH5AHZPKUDxQe7KXolFFAChomIDEyTSnuARpsi8cjeZKVYnB83d3Vf2H7snmK3OQk3AqTWtzY//zqJVIl2McGz71zQytWHCV/tscs1ibXKQn7nH5zxG5oxwWeT60ssCIXfPjuklUbf5jd9Ty70Q1t8jwCn9uyUmvOwEqHZMtK0+p2bx9souTjTwHJ6qIY24YLv1klUOymoOb9M7pnf/mCKh5jl8idpwRIfIDi2PNJqTu0SS9ZsWMc5AOUAyGKgWfjE0NmIMM+jqWVlWjgtAqApqqJG8TKY5UEbqFEdURNCgJy6oY9GWAqHtoCyG0FPXAmdsKaGT9LgY4J2gIJYJ1uN7UGDDftJqMCiMHTGiXvpxZhBVKv+zHAMau8nxKAEuldTisV/0PromCtCcS+atGV2wlsicRoCLFyXz1WQEEVZ5NzoOR/tkbYqz6XGbAAAAAASUVORK5CYII=") 7 1;
-  --warm-grab:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAXCAYAAAD+4+QTAAABZklEQVR4nKVVu23DMBQUDZWuDDd2YWSBVK4yQAbIJkHGcCFoEw+QAVKlygYukiZI5dKAghN0wvGRFEXrAIL/d++d3qNcVYj9dtNx/P3753TONXtnVWJ8v910r+t1dfl6r9DrHE3PFZHcfj47NLveXq99//ZxHtdIRge47nLec4yLNHh4fPbmMeAM5YuSwHMegjF4TTmap5cgghyRm4rAEvAivItJOEUUEPA7YHx6OPRj9Dq3jfu8r3MvEmYLpLCy1Lujw8WUTIwwltIBSYkUBByCrLEa8VKYUdxLMIVaJ3MyJgUkR707emkPILo+ErtRgnbIPnwzqgHD6FmUvYYYaJoukeoy2AEpbc9+u3LgGxZ7jhZFMrcQV6XZNFdGfbtGuVh8S9FIzbBuxuJZKlkjSWCL0iPJPd8WGr2msj0XkBBTZM1gXNM3RRCQ6IYSKlpjmA9j0qPY/8T+DVMEQM54kiRGdo9hxT+LdSAMjcL4CQAAAABJRU5ErkJggg==") 12 11;
-  --warm-grabbing:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAYCAYAAAD+vg1LAAABRUlEQVR4nK1VMQ6CQBAEQklFaLzC+AErKx/gA/yJofARFsaf+AAeYGXFB8wV2hgrShPMEJfsHXuCHJOA3Oacnd2buwuDHhwW85qP9zcdBgPQmaSytCW6P18hH0sxjHuzqCytofD9uDa/GOObP4hRnOb8VHz4lpxfzsaE43rbic2Xm0CXRfstqY/wQvZTVXUIhoASUMUGcTxbOfuEZFwVsEsSMQHvf0PMgdKlP/G4XZmUyFCqvtkwcUxbUDk4oFxsgcrSeiw5gNbFttqpEJE3dVkYKwyXeBHbAc3IJyV2rfIkxPnl7E0eufybj3RESwzvwXe+i9W7QbTH4qFqEmj0eJckjbmlbT0ERIoORPbtoMuimTCW3OmKeLYKodyX3HlcKrbF6XRzOYUEOFsRMPDbwD6PJXDSn4ol9dKm4TblYv4idkG6qT+QG77rJ52/8QAAAABJRU5ErkJggg==") 11 12;
-  --warm-text:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABcAAAAWCAYAAAArdgcFAAABKUlEQVR4nK1UsQ3CMBB0IpdUiCYUbECVigEYgE0iCsaI2IQBGICKigVQCmgQVcpIoIv46GW//Q7KSYgE3nf397aNEbBczD/d8zp88G4SwetzrdgWZUaLtFqQrtbb4Vkl736kWIQFsS4er3dvBGhuZ2M1cl7MRSRC/m6LMj0WV4S+Y0iKpZrNxP8gQFFJcankwP5yMhyuGERIiP/etyypNglt0wyQMx885Z6DmJRTCd0uiNidjxfLWAEemXsWxMyrwAA1iM7rzS7oZgxE58e29QQmcU6TnUrAc84FpkQu3R31Hx1gjXiIOKhg7JaEqf4mZLl7W5EiGuM+VOs5B7Cl4IT2e2xrgphm5V6/4iGyRZmhRW3AMeKgcwLlHzuxIJeIk8k1QPxwbzyuL4F2t81FEvXEAAAAAElFTkSuQmCC") 13 1;
-  --cool-rest:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACIAAAAiCAYAAAA6RwvCAAACnklEQVR4nK1YsUoDQRDdO/IH9wWCEeMHHFaCWClYxN7OykIQQa6TdFrY+gPXxyKglQhWIR9gxAj5gnyD8i4352Qyu3t7l4EQc7c7+3bem9lZI9PCsqffHdf7+8vou66vaAMgUsuQSQiYaBMg7s6mOX8/GPbOOZg6gDptQRzumTzpnqyMeR7N8/dPc86iVQHaGBAJ4vb6wixmL2bVpsaYXn6wO+XRcVpsGorzsAQxfr1RxwKEjFSriGTrmVGJ0waiicUBekg5Jf3TrY2meh2NpLQ4PQCIdV14fUwaRSQTesDi4B0fDsKmg/3jx2ou92mLTFy3WC0CIgAQs5+34m8AZ77S2tRkSp1wUdHdPiqigm8yAkHP4IOnMtaQBS5qA8JFD0DwrMKYq4e5teJq1KQhIGByDI8ON6aXiibafOwqVosAXWAsByBrDN5jY/DNzqZKM7FNnOMGxQpzAIY0ImkDGGgFYubZVADRTtK+o1j5yjbAQAsfXz3rHIzhawBDRztJuxaONeHJFoCeUR2BeSguil2HT05KEC5ayOnH1zIlXQaKKL3lfDzHxst24V+sFMqxAMF3FnK6kh+AweL0sdHjbQNmTHjS4NinmbqZ5wWy8CwmQ28pYF6rNAKunkfzfNldGdWxtrslBTcrZZ6iqAnZRnmHldwic7QF6bcNDIzXDxcdBIC0Mxgun8f88DnwZIHPfGnPQcB4P7ty+g6GvYKepKufMaQXX4prxnUktDOpTt/QUzcpneK95Fqjh/oTDQAMrERtWoDEk00cnKsFaNWP7LNI8FpDC/IGW4LQbn1rV87MAobrQqOjRs1w3oXVu2/mACMjQFYCcXbqrvuv9RKeKT2Kdp+RAgz5V0QtIGb9UmTtwENu/Y2AWACp1hQA2R8rsqkcmqaTbwAAAABJRU5ErkJggg==") 18 3;
-  --cool-hover:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAgCAYAAAAMq2gFAAAB40lEQVR4nLVWwUoDMRCdXfoH/QLBFesHLHsSxFMLHuq9N714KIggvZXetoJ489Sb9/ZQ0JMInko+wIoV9gv8BmWWnTjJJttkXR+EbpNsXt7sm0kCsGB0/71nG0svgg/wRLCFJDYMizpkrYqxnOToAB6o4+UNBkW/AE+EVYNI0j/ZAWzXl2cKaaNEiOE0G3xtHmH1dJUT/hvR+HRdW4UXUVNo1X1xxOzv4sC6RDF7dnKgE9Fk3kFbw2KZ4ffS7Q56cpsUtlxIyBDtqAfR7nHuwKR7C93zmSmphSms3qFDEvp9fVfziiW0JFUUVdU1m70n884AE/hwf816O9awcnvHWistjGHjG+hrCYz/kRiriLYmhFwN7pCaSRmFjcCJOXAersGjQYqkAqptVOfIcbYFbcB30TwEaQaKN9Y1RNKV8p0RWRRWliDarU+tW1UoDOvu0BcKESah6w5rE6Hvb+5mygdsEqGpMOrKGiFKWQFEVYtlBpvP5+aJ4BeCk/0lhIkhIoHtikUJS3nlg3bUy+8arEtIRSyEijLf75Wo8wWtV7pA2pTRObRNCYKpESSglLA2ZdsMkhRKOAkfNx58SFYow8kxnTkeYRTapu0nLCOT8LF9qt0bnC8nw2nmTGKCC5H3hd6EH3gT3DogurQbAAAAAElFTkSuQmCC") 9 3;
-  --cool-click:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABsAAAAjCAYAAABl/XGVAAACWElEQVR4nK1Wu2oCQRQdl/0Dv0CIIeYDxCoQUimk0N7ONCmEIIR0YhcDki5N7LZPikCsxFb2AxSi4BfkGxLO6N3cmZ27L3NA3F3mzrnnvmZKKgEPLz+n9rfH29KXKgg/w5o6ew6LEmUlU7PXXtC8mXYltVkV+1mMn56narES1WZW7EvGghPRustzFeB/sVJacR4y27gueVuEhODRA4zxo80cajUuztaqfV2h1zBP0ZSscNUtz0OJlMjytIKHxdzAER7J8/DY0g+hxCLUylh4U/OamDOp/AkgQq7wu7/rGcR5wPvMKGup2g7NHZFxR9PyZ/QZeQwFi1XNaTDsrINytaX6453hoLJ600Vs9BlKuj/edSUiDiGHicQ+Nzh4qxcrAaO3Wvf9Y6dz+IdaIjE9+NLm8CatcAjt64r63nyqRnOilrNBwB3DP/bBfiVuJM1DKhjkCx8Om0YLytWWJqNnAlLCxURhdFUlBxEBnAionlw531lV6560mzrWwDxMEpYWOdpj7xzyWovaKBrEBBChcXkT8/inoWqpZEM7TgZstvOY1zyMSVjOBuJaJ5kdMtvbovBcH1FtSTn5V7LNdm6UcFGM9gNAJkPl0AJbYV4MO2s9AlPPM4yufQvwsXQcPMeUNu4VCGcRhY3mJJYKI4yuKwJCSq2QtdcAsmEjy10gB4ScEJ5m7bVGPBJ6L2MQc9izks479FxSKzSaE5cqfQsT7/rsiNFFY55fyUR9Fjqef1GZpdBQJ02VjakoFE/qFMQuq3x+KgH2PSRVGcDV5UDstpxVmTbOSRbDL6DsQQn/LLiqAAAAAElFTkSuQmCC") 9 3;
-  --cool-grab:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB0AAAAbCAYAAACAyoQSAAACFElEQVR4nKWWv0oDQRDGd8O9QZ5AMGJ8gOMqQawiWGh/nTYWAQmIXUhnBLGzSpc+FkJSScAq5AESMUKeIM+gfOvNOtnb3du7fJA/e9mb387uN3ORoqTuX34Oysx/uJFf5jVZERYH3ja3wWVV2MmRGNL36UKkfEzXhAEnsAwE5mB3t1diNumIpPUkHp8HegzVG2fi9W1twjVYhmbXvVwOKSDU2D9VEBpvVuNcnCRbkAmueRKNCYjsEBwvwAAgII1tmk064uJ8jx+Fiid9W4rsPj6b6kYEX32/awCyoMBFqmfbnWU8r/nO0AWEMG5dD7hZnNqsxioOyba9ekuPD5fqBgAApgxpW+mcueh3Omsac9Vs5gEQbqSbyDQQsuNjU1hgu79OsZ2AYQzhGs2RBlRnif23ZeITFkhQxxTl3siV5WzSqQQMUcS+6wYQ4kiX4IHeaLtjQZlz45x7MZG7rIzI3b1RM6Xdmi5Eik+8+CJ4pkquQveJajarR7XwvzjwhC6rf2jZR1WRkBVfeJe1z3Z/vZVp6KPKqj8PuH1Qd9UpVlT1PF1KWGPgZRTZJu7i3oKaneNN8qbA29+uMIgBt/5BRMbFuEq25F6zdASLzf+uRDQwXRzy6KI5vBMVAa1nagZJWrYZeVBWEim6kQ/obPhmd6LHGsnssTazQDagDUqywj2gIJgwoUVwhzQoBOaEOuBOhYK4fgH6Ek4ZWz/gCQAAAABJRU5ErkJggg==") 14 13;
-  --cool-grabbing:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAcCAYAAAB/E6/TAAAB8klEQVR4nLVWsUoDQRDdPfIH+QLBiPEDwlWCWJ1gof11sbEIiCB2YpcIwc7GdOm1EJJKhFThPsAET8gX5BuUd5dZ5uZ2L+clPgjk9m7n7cy8nRmt1uD26Wev6H33Un+pEtAlDbcc+6OyxNpBkjM8fm4P+XNwMQhdxDYy7SI5OlDG8MenCvF8drpjNnZ6i1B+I73khNpFcnPVVtPxtfKDvnp4HKjD/VnmhJN5U4F4GY/MN4ws5x0navEQgYQDxuRavXGSENH/17eF1TuQeXzj3flsGH+/5wyWwTIeJR7ix0Jqcp0hun9phnQqCZDj1ByN3WMrIeWUr3suqSJUNiN8fSo8txFTajypDpwGiUYIbWRFYZ3a3yXh0+KCZu4PV18VTOZNEkZUkwQ8tkisKxxlgP2dXprzGlccTkD3hRKPECpVzSOOjOr4zaf7sS14RS83CZuECZ0NaQlS/+ORLyRdVXFOj1AVoJBUddkCuk2PIqoMdGE3gR/0c+XK2o9QwSFriKFK6OorEvSs1VJkcsTLELon5O0qQ39E5JJ3RDmDR9sg68p+xLyKyDO0DZBROIpI/aDvfJ/zSJJBHNSjZIJtSEtWJj/2catoIqIBxVYxiECQmFbuJBJkCaGchJSA8CI/nKwDH15KwDpuFdY6l4F1sA2Qvw1a/1RUpMmyAAAAAElFTkSuQmCC") 13 14;
-  --cool-text:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABsAAAAaCAYAAABGiCfwAAAB7klEQVR4nLVWsW7CMBB1EH/AFyAR1PQDokyVKqYgMdCdsQsDSxc2lA2GrEzd2GFAaieExITyAQ0CpHxBv4HqTC45bMdxUHlSRILse3fP72xbTIHx/NJmJZgOrWOVudOhdbQ0E1wNV6QiHOdErmp8XZf96zNbvDzF2ffu4LDtDxukwSIMPr0l5USTt3ghjq8xQwRLZ4BBSFAeeDy/tKl8kGTD7rJ+r8nf8X9jMiCByRAEApAgLiUGQDWrdcLfqTJaGVX4PX0xxmJOulonWdbbq1y4Pi58j2YJC5b53EoyYrZICpVC5vArVImk9LlWZmJ1kNHzQ7b//lBWuzvka0NNQQ1U19hVgkhktzrZe7/XTCUGOAuRkMrIiXDh8SHyGJEHqWNBWupCySBiT4EBqsBudbK2AFIVWaFBcknMsCdVYpsYk2G29yAQnKskA7cVZVsFE5PKTueNRPiQyrbpFvNfhCogWSQSPgI1cjxwQrQ/WP+eCj0/5G2kWjOr6MDECVVboGF3+RxscCgCCxKtH4mSVqnOk8dmWxVAuhbQvRIsDJliv+lawfPDbK1Hs0SqSlXZzREPUoAkZYbxCojEcboLD6+Orp9uRzmdNxKReCFSkomEJicAS7c3//0TCG/kKyUjhKXnnAJKMpM7iKT9vfgDvNAHrw2P2EgAAAAASUVORK5CYII=") 15 3;
-  /* deep space is the ground this site stands on, so the lit hand is default */
-  --hand-rest:var(--cool-rest);
-  --hand-hover:var(--cool-hover);
-  --hand-click:var(--cool-click);
-  --hand-grab:var(--cool-grab);
-  --hand-grabbing:var(--cool-grabbing);
-  --hand-text:var(--cool-text);
-}
-/* and paper takes the warm one — the threshold's left column, and the manual */
-.th-world--works,#works{
-  --hand-rest:var(--warm-rest);
-  --hand-hover:var(--warm-hover);
-  --hand-click:var(--warm-click);
-  --hand-grab:var(--warm-grab);
-  --hand-grabbing:var(--warm-grabbing);
-  --hand-text:var(--warm-text);
-}
-
-html,body{cursor:var(--hand-rest),auto}
-.nav button,.wk-toc button,.wk-see button,#readClose,
-a,button,summary,[role="button"],[data-nav],[data-sheet],[data-see],
-.th-world,.tray,.wk-btn,.ctl{cursor:var(--hand-hover),pointer}
-.nav button:active,.wk-toc button:active,.wk-see button:active,#readClose:active,
-a:active,button:active,summary:active,[role="button"]:active,[data-nav]:active,
-[data-sheet]:active,[data-see]:active,.th-world:active,.tray:active,
-.wk-btn:active,.ctl:active{cursor:var(--hand-click),pointer}
-/* THE SKY IS TURNED, NOT PRESSED. Dragging it rotates the constellation, so it
-   takes the grab pair rather than the pointing pair — the only place on the
-   site where the hand closes. */
-#gl{cursor:var(--hand-grab),grab}
-#gl:active,body.mind-dragging #gl{cursor:var(--hand-grabbing),grabbing}
-/* prose is read rather than pressed */
-.docbody,.th-desc,#gloss,.wk-line,#works p,.wk-desc{cursor:var(--hand-text),text}
 </style>
 
 <a id="skip" href="#semantic">Skip to the structure</a>
