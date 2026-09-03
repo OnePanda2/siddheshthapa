@@ -45,6 +45,13 @@ const konst = fs.readFileSync('data/constellation-ursa-major.json', 'utf8');
    known failures. Same rule as the astronomy — injected, never retyped, so
    the manual cannot drift from the mind it came out of. */
 const worksData = fs.readFileSync('data/works.json', 'utf8');
+/* LIVE NOTES. The only input to this build that is not written by hand — the
+   editor writes it and commits it, and the build is what turns a commit into a
+   published page. NOTES_FILE exists so the pipeline can be exercised against a
+   fixture without fabricating published content. */
+const notesFile = process.env.NOTES_FILE || 'data/notes.json';
+const notesData = fs.readFileSync(notesFile, 'utf8');
+const notes = JSON.parse(notesData);
 const worksApp  = fs.readFileSync('src/v02-works.js', 'utf8');
 const works = worksApp.replace('/*__WORKSDATA__*/', () => worksData);
 if (works === worksApp) throw new Error('the /*__WORKSDATA__*/ marker was not found in the manual');
@@ -56,6 +63,9 @@ if (appWithAstro === app) throw new Error('the /*__ASTRO__*/ marker was not foun
 const withConst = appWithAstro.replace('/*__CONST__*/', () => konst);
 if (withConst === appWithAstro) throw new Error('the /*__CONST__*/ marker was not found in the app');
 appWithAstro = withConst;
+const withNotes = appWithAstro.replace('/*__NOTES__*/', () => notesData);
+if (withNotes === appWithAstro) throw new Error('the /*__NOTES__*/ marker was not found in the app');
+appWithAstro = withNotes;
 
 const out = shell
   .replace('/*__THREE__*/', () => three)
@@ -71,6 +81,10 @@ console.log('wrote ' + OUT + '  ' + kb(out.length) +
 console.log('data block: ' + counts.migs + ' declared objects, ' + counts.edges + ' relationship rows');
 console.log('manual: ' + (JSON.parse(worksData).sheets || []).length + ' sheet(s) written, ' +
             kb(works.length) + ' of layer');
+console.log('live notes: ' + (notes.notes || []).length + ' note(s), ' +
+            (notes.minors || []).length + ' concept(s), ' +
+            (notes.edges || []).length + ' relationship(s)' +
+            (notesFile === 'data/notes.json' ? '' : '   [fixture: ' + notesFile + ']'));
 if (out.indexOf('/*__WORKS__*/') >= 0) throw new Error('the manual was not injected into the shell');
 if (/src="http|href="http|fetch\(|import\(/.test(out.replace(three,'')))
   console.error('WARNING: an external reference appeared outside the three.js payload');

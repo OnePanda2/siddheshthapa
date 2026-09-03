@@ -1,0 +1,208 @@
+/* notescheck.js — the gate between a commit and a published page.
+
+   data/notes.json is the only input to this site that a form can write. Every
+   other input is authored by hand by someone reading CONTENT-MODEL.md while
+   they type. A form has no such reader, so the rules that file states in prose
+   are restated here as assertions, and the build refuses rather than publishing
+   something the graph would have to render as nonsense.
+
+   WHAT THIS PROTECTS AGAINST AND WHAT IT DOES NOT. It catches malformed,
+   contradictory or graph-breaking content — a note pointing at a region that
+   does not exist, an id that collides with the locked corpus and would be
+   silently dropped, an edge whose direction inverts a claim that already
+   exists. It does NOT and cannot decide whether a well-formed note is really
+   Siddhesh's. Nothing running after the fact can. That question is answered
+   earlier, by GitHub refusing a push from anyone else.
+
+   TRUTH COMES FROM THE GRAPH, NOT FROM A LIST TYPED HERE. The region ids, the
+   existing node ids and the existing edges are all extracted from preview.html
+   and src/v02-app.js at run time, the same material the build extracts, so
+   this file cannot quietly disagree with what actually ships.
+
+   usage: node tools/notescheck.js [data/notes.json]
+*/
+const fs = require('fs');
+
+const FILE = process.argv[2] || process.env.NOTES_FILE || 'data/notes.json';
+
+/* ── the vocabularies. CONTENT-MODEL.md is the authority; these are its lists,
+      and a value outside them is a typo rather than a new category. ───────── */
+const TYPES = ['belief', 'thought', 'question', 'contradiction', 'project',
+               'experiment', 'person', 'reference'];
+const STATES = ['seed', 'growing', 'formed', 'tested', 'proven', 'changed', 'open'];
+const GLOSS_MIN = 25;
+
+const fails = [];
+const fail = (where, msg) => fails.push(where + ' — ' + msg);
+
+/* ── the locked graph, extracted exactly as tools/build-v02.js extracts it ── */
+function lockedGraph() {
+  const src = fs.readFileSync('preview.html', 'utf8');
+  const a = src.indexOf('  var MIGS=[');
+  const b = src.indexOf('  var NODES=[],byId={},owned={};');
+  if (a < 0 || b < 0 || b <= a) throw new Error('could not locate the data block in preview.html');
+  const block = src.slice(a, b);
+  return new Function(block + '\nreturn {MIGS:MIGS,MINORS:MINORS,THOUGHTS:THOUGHTS,EDGES:EDGES};')();
+}
+
+/* ── the overlay, sliced out of the app by matching braces. It is pure data,
+      but it is data written in JavaScript, so it is read as JavaScript rather
+      than guessed at with a regex. ─────────────────────────────────────────── */
+function overlay() {
+  const app = fs.readFileSync('src/v02-app.js', 'utf8');
+  const start = app.indexOf('var V02_OVERLAY={');
+  if (start < 0) throw new Error('V02_OVERLAY not found in src/v02-app.js');
+  let i = app.indexOf('{', start), depth = 0, end = -1, inStr = null, inCmt = null;
+  for (; i < app.length; i++) {
+    const c = app[i], n = app[i + 1];
+    if (inCmt) { if (inCmt === '*' && c === '*' && n === '/') { inCmt = null; i++; }
+                 else if (inCmt === '/' && c === '\n') inCmt = null; continue; }
+    if (inStr) { if (c === '\\') { i++; continue; } if (c === inStr) inStr = null; continue; }
+    if (c === '/' && n === '*') { inCmt = '*'; i++; continue; }
+    if (c === '/' && n === '/') { inCmt = '/'; continue; }
+    if (c === '"' || c === "'") { inStr = c; continue; }
+    if (c === '{') depth++;
+    else if (c === '}') { depth--; if (depth === 0) { end = i; break; } }
+  }
+  if (end < 0) throw new Error('could not find the end of V02_OVERLAY');
+  return new Function('return ' + app.slice(app.indexOf('{', start), end + 1) + ';')();
+}
+
+const G = lockedGraph();
+const OV = overlay();
+
+/* the regions that actually exist once the overlay has had its say: a note
+   filed under a hidden region would render nowhere, and one filed under a
+   region the overlay added is perfectly legal */
+const hidden = new Set((OV.hideMIGs || []).map(h => h.id));
+const migIds = new Set(
+  G.MIGS.map(m => m.id)
+   .concat((OV.addMIGs || []).map(m => m.id))
+   .filter(id => !hidden.has(id)));
+
+/* every id the graph already knows. addOnce SILENTLY skips a duplicate, so a
+   colliding note would simply never appear — the worst failure mode there is,
+   because the editor would report success and the page would show nothing. */
+const takenIds = new Set(
+  G.MIGS.map(n => n.id)
+   .concat(G.MINORS.map(n => n.id), G.THOUGHTS.map(n => n.id),
+           (OV.addMIGs || []).map(n => n.id), (OV.addMinors || []).map(n => n.id),
+           (OV.addWritings || []).map(n => n.id)));
+
+const existingEdges = G.EDGES.concat(OV.addEdges || []);
+
+/* ── the store ────────────────────────────────────────────────────────────── */
+let store;
+try { store = JSON.parse(fs.readFileSync(FILE, 'utf8')); }
+catch (e) { console.error('notescheck: ' + FILE + ' is not valid JSON — ' + e.message); process.exit(1); }
+
+if (store.version !== 1) fail('store', 'version must be 1, found ' + JSON.stringify(store.version));
+['notes', 'minors', 'edges'].forEach(k => {
+  if (!Array.isArray(store[k])) fail('store', k + ' must be an array');
+});
+if (fails.length) { report(); process.exit(1); }
+
+const notes  = store.notes;
+const minors = store.minors;
+const edges  = store.edges;
+
+/* ids introduced by this store, checked against each other as well as against
+   the graph, because two notes can collide with one another */
+const seen = new Set();
+function checkId(row, where) {
+  if (typeof row.id !== 'string' || !/^[a-z0-9][a-z0-9-]*$/.test(row.id))
+    return fail(where, 'id must be a lowercase slug, found ' + JSON.stringify(row.id));
+  if (takenIds.has(row.id))
+    fail(where, 'id "' + row.id + '" already exists in the graph; the merge would silently drop this note');
+  if (seen.has(row.id)) fail(where, 'id "' + row.id + '" appears twice in this file');
+  seen.add(row.id);
+}
+
+function checkRegion(row, where) {
+  if (!migIds.has(row.mig))
+    fail(where, 'mig "' + row.mig + '" is not a region that exists' +
+                (hidden.has(row.mig) ? ' any more (it is hidden)' : ''));
+  if (!Array.isArray(row.crosses)) return fail(where, 'crosses must be an array');
+  row.crosses.forEach(c => {
+    if (!migIds.has(c)) fail(where, 'crosses "' + c + '" is not a region that exists');
+    if (c === row.mig) fail(where, 'crosses lists its own region "' + c + '"');
+  });
+  if (new Set(row.crosses).size !== row.crosses.length) fail(where, 'crosses repeats a region');
+  /* THE HISTORICAL TRAP, kept as an assertion. Minor IGs once used x for
+     crossings and the layout pass overwrote it, destroying every crossing at
+     load. Nothing below a MIG may carry x. */
+  if ('x' in row) fail(where, 'x is a MIG-only layout field; use crosses');
+}
+
+notes.forEach((n, i) => {
+  const where = 'notes[' + i + ']' + (n && n.id ? ' (' + n.id + ')' : '');
+  if (!n || typeof n !== 'object') return fail(where, 'not an object');
+  checkId(n, where);
+  if (!TYPES.includes(n.t)) fail(where, 't must be one of ' + TYPES.join('|') + ', found ' + JSON.stringify(n.t));
+  if (!STATES.includes(n.state)) fail(where, 'state must be one of ' + STATES.join('|') + ', found ' + JSON.stringify(n.state));
+  if (typeof n.label !== 'string' || !n.label.trim()) fail(where, 'label is required');
+  else if (n.label !== n.label.toUpperCase()) fail(where, 'label must be uppercase, found ' + JSON.stringify(n.label));
+  if (typeof n.register !== 'string' || !n.register.trim()) fail(where, 'register is required');
+  /* "No src = not his writing." A live note IS his writing, so an absent src
+     would be a lie about provenance rather than a missing field. */
+  if (typeof n.src !== 'string' || !n.src.trim()) fail(where, 'src is required — an absent src means "not his writing"');
+  if (typeof n.line !== 'string' || !n.line.trim()) fail(where, 'line is required — a note with no material is not a note');
+  if (typeof n.added !== 'string' || isNaN(Date.parse(n.added))) fail(where, 'added must be an ISO date');
+  checkRegion(n, where);
+});
+
+minors.forEach((m, i) => {
+  const where = 'minors[' + i + ']' + (m && m.id ? ' (' + m.id + ')' : '');
+  if (!m || typeof m !== 'object') return fail(where, 'not an object');
+  checkId(m, where);
+  if (typeof m.label !== 'string' || !m.label.trim()) fail(where, 'label is required');
+  else if (m.label !== m.label.toUpperCase()) fail(where, 'label must be uppercase');
+  if (!STATES.includes(m.state)) fail(where, 'state must be one of ' + STATES.join('|'));
+  /* scaffolding is not his words, and the ABSENCE of src is how the page says
+     so. Giving a concept a src would claim authorship the file cannot support. */
+  if ('src' in m) fail(where, 'a concept carries no src — that absence is the honesty signal');
+  if ('t' in m) fail(where, 't is implied by being a concept; remove it');
+  checkRegion(m, where);
+});
+
+/* ── relationships ────────────────────────────────────────────────────────── */
+const knownId = id => takenIds.has(id) || seen.has(id);
+const pairSeen = new Map();
+existingEdges.forEach(e => pairSeen.set(e[0] + ' ' + e[1], 'the graph'));
+
+edges.forEach((e, i) => {
+  const where = 'edges[' + i + ']';
+  if (!Array.isArray(e) || e.length !== 4)
+    return fail(where, 'must be [fromId, toId, verb, gloss], found ' + JSON.stringify(e));
+  const [from, to, verb, gloss] = e;
+  if (!knownId(from)) fail(where, 'from "' + from + '" is not a node that exists');
+  if (!knownId(to)) fail(where, 'to "' + to + '" is not a node that exists');
+  if (from === to) fail(where, 'self-loop');
+  if (typeof verb !== 'string' || !verb.trim()) fail(where, 'verb is required');
+  else if (/^related to$/i.test(verb.trim()))
+    fail(where, 'the verb must be semantic — "related to" says nothing');
+  if (typeof gloss !== 'string' || gloss.trim().length < GLOSS_MIN)
+    fail(where, 'gloss must be at least ' + GLOSS_MIN + ' characters; it answers why this edge exists');
+  /* DIRECTION IS LOAD-BEARING. An inverted duplicate does not merely repeat an
+     edge, it asserts the opposite claim — V0.2 shipped exactly that bug and
+     rendered "VALUE INTERROGATES PHILOSOPHY". */
+  const key = from + ' ' + to, inv = to + ' ' + from;
+  if (pairSeen.has(key)) fail(where, 'duplicate of an edge already in ' + pairSeen.get(key));
+  else if (pairSeen.has(inv)) fail(where, 'inverts an edge already in ' + pairSeen.get(inv) + ' — direction is load-bearing');
+  else pairSeen.set(key, 'this file');
+});
+
+function report() {
+  fails.forEach(f => console.error('  ' + f));
+}
+
+if (fails.length) {
+  console.error('\nnotescheck: ' + fails.length + ' problem(s) in ' + FILE);
+  report();
+  console.error('\nnothing was published.');
+  process.exit(1);
+}
+
+console.log('notescheck clean — ' + notes.length + ' note(s), ' + minors.length +
+            ' concept(s), ' + edges.length + ' relationship(s) checked against ' +
+            migIds.size + ' regions and ' + takenIds.size + ' existing ids');

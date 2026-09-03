@@ -19,6 +19,11 @@ var NODES=[],byId={},owned={};
    able to say where they are — it simply cannot travel there, because there is
    no such room any more. */
 var HIDDEN_MIG_LABEL={};
+/* LIVE NOTES, injected from data/notes.json at build time. Declared here rather
+   than beside the merge because the merge runs inside an IIFE further down, and
+   a var that is only ASSIGNED after that IIFE executes would hoist as undefined
+   and merge nothing — which is precisely how HIDDEN_MIG_LABEL broke once. */
+var V02_NOTES=/*__NOTES__*/;
 var V02_OVERLAY={
   /* THE BORROWED LABEL IS RETURNED. MY WORKS was renamed to ART because the
      welcome page had no second door and ART had no contents — one placeholder
@@ -197,11 +202,33 @@ var V02_OVERLAY={
   });
   addOnce(MINORS, V02_OVERLAY.addMinors);
   addOnce(THOUGHTS, V02_OVERLAY.addWritings);
-  (V02_OVERLAY.addEdges||[]).forEach(function(e){
-    for(var i=0;i<EDGES.length;i++)
-      if(EDGES[i][0]===e[0] && EDGES[i][1]===e[1]) return;
-    EDGES.push(e);
-  });
+  function addEdgesOnce(rows){
+    (rows||[]).forEach(function(e){
+      for(var i=0;i<EDGES.length;i++)
+        if(EDGES[i][0]===e[0] && EDGES[i][1]===e[1]) return;
+      EDGES.push(e);
+    });
+  }
+  addEdgesOnce(V02_OVERLAY.addEdges);
+
+  /* ── LIVE NOTES ───────────────────────────────────────────────────────
+     The one channel that fills from outside this file. Everything above was
+     authored by hand; this arrives from data/notes.json, written through the
+     editor and committed to the repo by whoever GitHub says may push.
+
+     IT MERGES LAST, AND THROUGH THE SAME GUARDS. addOnce refuses an id the
+     graph already declares, so a note can never overwrite the locked corpus —
+     the mind Siddhesh wrote by hand stays the senior document and the notes
+     accumulate around it. Order matters for the same reason: running this
+     before the overlay would let a note occupy an id the overlay then wanted,
+     and the overlay is the more considered statement.
+
+     A malformed note cannot get this far. tools/notescheck.js validates the
+     store against CONTENT-MODEL.md and fails the build rather than publishing
+     something the graph would have to render as nonsense. */
+  addOnce(MINORS,   V02_NOTES.minors);
+  addOnce(THOUGHTS, V02_NOTES.notes);
+  addEdgesOnce(V02_NOTES.edges);
 })();
 MIGS.forEach(function(m){ m.t='mig'; m.mig=m.id; NODES.push(m); owned[m.id]=[]; });
 /* a hidden region keeps its ownership books. Its objects still belong to it —
