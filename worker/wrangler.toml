@@ -1,0 +1,9 @@
+name = "siddheshthapa-auth"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+# NOTHING SECRET LIVES IN THIS FILE. The client id is public by design; the
+# secret is set with `wrangler secret put` and stored by Cloudflare, never here
+# and never in git.
+[vars]
+GITHUB_CLIENT_ID = "Ov23liUFkEsCvRKgBSH8"
