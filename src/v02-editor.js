@@ -518,7 +518,7 @@ function confirmDelete(node, onYes){
     box.appendChild(el("p", null, "A concept \u2014 one of the ideas this topic is built out of, " +
       "rather than something written."));
 
-  var isOriginal = !liveNoteIds()[node.id];
+  var isOriginal = node.t !== "sheet" && !liveNoteIds()[node.id];
   if(isOriginal){
     var w = el("p", "warn");
     w.textContent = "This is one of the original writings, taken from your own " +
@@ -541,13 +541,24 @@ function confirmDelete(node, onYes){
      takes it, and the editor cannot yet add one. Saying so here is better than
      letting the sheet imply a reuse that will not come. */
   var isMinor = node.t === "minor";
+  var isSheet = node.t === "sheet";
   var keeps = el("div", "keeps");
-  keeps.appendChild(el("div", null, "Its star stays lit where it is, carrying nothing."));
-  keeps.appendChild(el("div", null, isMinor
-    ? "That star waits for another concept \u2014 a writing cannot take it."
-    : "The next writing you add here takes that star."));
-  keeps.appendChild(el("div", null, "Its connections go with it."));
-  keeps.appendChild(el("div", null, "Nothing is destroyed \u2014 this is reversible."));
+  if(isSheet){
+    /* A SHEET IS NOT A BODY IN THE SKY. Unwriting one removes the manual entry
+       and nothing else - the work itself is a project in the mind, declared by
+       the graph, and it keeps its star and its place either way. */
+    keeps.appendChild(el("div", null, "The work stays in the mind, with its star."));
+    keeps.appendChild(el("div", null, "Only the manual entry goes \u2014 purpose, parts, procedure."));
+    keeps.appendChild(el("div", null, "The contents page stamps it NOT YET WRITTEN again."));
+    keeps.appendChild(el("div", null, "You can write it afresh whenever you like."));
+  } else {
+    keeps.appendChild(el("div", null, "Its star stays lit where it is, carrying nothing."));
+    keeps.appendChild(el("div", null, isMinor
+      ? "That star waits for another concept \u2014 a writing cannot take it."
+      : "The next writing you add here takes that star."));
+    keeps.appendChild(el("div", null, "Its connections go with it."));
+    keeps.appendChild(el("div", null, "Nothing is destroyed \u2014 this is reversible."));
+  }
   box.appendChild(keeps);
 
   var btns = el("div", "btns");
@@ -1263,8 +1274,25 @@ function loadWorks(then){
 }
 
 /* a repeatable block of rows, which is what three of these four fields are */
-function rowsField(items, fields, addLabel){
+function rowsField(items, fields, addLabel, numbered){
   var wrap = el("div");
+  /* THE NUMBER IS DERIVED FROM POSITION, both here and in the manual, so the
+     form shows the number the sheet will print rather than one typed by hand.
+     Renumbering after every move is what makes the order visible while it is
+     being decided. */
+  function renumber(){
+    if(!numbered) return;
+    [].forEach.call(wrap.children, function(row, i){
+      var tag = row.querySelector(".wf-n");
+      if(!tag){
+        tag = el("span", "wf-n");
+        tag.style.cssText = "font:11px/1 ui-monospace,monospace;color:#69718a;" +
+          "min-width:22px;padding-top:12px";
+        row.insertBefore(tag, row.firstChild);
+      }
+      tag.textContent = (i + 1 < 10 ? "0" : "") + (i + 1);
+    });
+  }
   function add(v){
     v = v || {};
     var r = el("div", "ed-rel");
@@ -1277,10 +1305,35 @@ function rowsField(items, fields, addLabel){
       input.value = v[f.key] == null ? "" : String(v[f.key]);
       r.appendChild(input);
     });
+    /* A PROCEDURE IS AN ORDER, NOT A SET. Steps are numbered by where they
+       sit, so a step remembered after the fact belongs where it actually
+       happens - and without a way to move one, the only way to insert at the
+       front was to retype every line below it. Parts are numbered the same
+       way, from position, so the same is true of them.
+
+       Moving is a swap with the neighbour rather than a drag: it works with a
+       thumb on a phone, it cannot half-happen, and it needs no notion of where
+       a finger let go. */
+    var tools = el("div");
+    tools.style.cssText = "display:flex;gap:6px;align-items:center";
+    var up = el("button", "drop", "\u2191"); up.type = "button"; up.title = "Move up";
+    var down = el("button", "drop", "\u2193"); down.type = "button"; down.title = "Move down";
+    up.onclick = function(){
+      var prev = r.previousElementSibling;
+      if(prev) wrap.insertBefore(r, prev);
+      renumber();
+    };
+    down.onclick = function(){
+      var next = r.nextElementSibling;
+      if(next) wrap.insertBefore(next, r);
+      renumber();
+    };
     var drop = el("button", "drop", "remove"); drop.type = "button";
-    drop.onclick = function(){ r.remove(); };
-    r.appendChild(drop);
+    drop.onclick = function(){ r.remove(); renumber(); };
+    tools.appendChild(up); tools.appendChild(down); tools.appendChild(drop);
+    r.appendChild(tools);
     wrap.appendChild(r);
+    renumber();
   }
   (items || []).forEach(add);
   var more = el("button", "drop", addLabel); more.type = "button";
@@ -1329,12 +1382,12 @@ function openWorksForm(nodeId){
     var parts = rowsField(sheet && sheet.parts,
       [{key:"name", placeholder:"part name"},
        {key:"note", big:true, placeholder:"what it does, and what breaks without it"}],
-      "+ part");
+      "+ part", true);
     formIn.appendChild(field("Parts", "numbered in the order you put them in", parts.wrap));
     formIn.appendChild(parts.more);
 
     var proc = rowsField((sheet && sheet.procedure || []).map(function(t){ return {step:t}; }),
-      [{key:"step", big:true, placeholder:"one step"}], "+ step");
+      [{key:"step", big:true, placeholder:"one step"}], "+ step", true);
     formIn.appendChild(field("Procedure", "the steps, in order", proc.wrap));
     formIn.appendChild(proc.more);
 
@@ -1359,6 +1412,40 @@ function openWorksForm(nodeId){
     var cancel = el("button", null, "Cancel"); cancel.id = "edCancel"; cancel.type = "button";
     cancel.onclick = closeForm;
     act.appendChild(save); act.appendChild(cancel);
+
+    /* UNWRITING A SHEET IS NOT THE SAME AS DELETING A WORK. The work stays in
+       the mind - it is one of his projects and the graph declares it. What goes
+       is the manual entry: the purpose, the parts, the procedure, the known
+       failures. The contents page then stamps it NOT YET WRITTEN again, which
+       is a legitimate state the manual already knows how to say, and the sheet
+       can be written afresh whenever there is something true to put on it.
+
+       Only offered when a sheet exists, because there is nothing to unwrite
+       otherwise. */
+    if(sheet){
+      var del = el("button", null, "Delete this sheet");
+      del.type = "button";
+      del.style.cssText = "margin-left:auto;color:#c98b8b;background:none;" +
+        "border:1px solid #4a2a2a;border-radius:3px;font:11px/1 ui-monospace,monospace;" +
+        "letter-spacing:.12em;text-transform:uppercase;padding:12px 18px;cursor:pointer";
+      del.onclick = function(){
+        confirmDelete({ id: nodeId,
+                        label: ((node && node.label) || nodeId) + " \u2014 the sheet",
+                        t: "sheet",
+                        line: sheet.purpose || "" },
+          function(done){
+            commitTo(WORKS_FILE, "Manual: unwrite " + ((node && node.label) || nodeId),
+              function(st){
+                st.sheets = (st.sheets || []).filter(function(x){ return x.node !== nodeId; });
+              })
+              .then(function(){ worksStore = null; done(null); closeForm();
+                                if(window.__v02 && window.__v02.works) window.__v02.works.open(); })
+              .catch(function(e){ done(e.message); });
+          });
+      };
+      act.appendChild(del);
+    }
+
     act.appendChild(el("span", "ed-small", "Publishing commits to " + CFG.owner + "/" + CFG.repo + "."));
     formIn.appendChild(act);
 
