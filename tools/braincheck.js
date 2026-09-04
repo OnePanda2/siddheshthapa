@@ -254,6 +254,14 @@ const charted = menu.filter(x => x.source && x.source !== 'not yet charted');
    inventing a heritage it does not have — every source shown is the one the
    profile assigns, no region shows a source it lacks, and no two share one. */
 const sky = r.mmm.sky || [];
+/* THE DECLARATION IS BACK, AND SO IS THE HALF OF THIS ASSERTION THAT DIED WITH
+   IT. The sky names only the worlds that have a system, so it can say nothing
+   at all about the ones that do not — and a region silently showing no
+   heritage is indistinguishable from one whose label failed to render. The
+   menu carries "not yet charted" for exactly those, and for no others, so
+   between the two surfaces every region states its position and none states it
+   twice. */
+const menuSrc = {}; menu.forEach(x => menuSrc[x.id] = x.source);
 const skyCharted = sky.filter(x => x.shown);
 const wantCharted = sky.filter(x => x.expected && x.expected !== 'not yet charted');
 ck('B19', menu.length === r.mmm.arch.migCount &&
@@ -261,10 +269,13 @@ ck('B19', menu.length === r.mmm.arch.migCount &&
           sky.every(x => x.shown === null || x.shown === x.expected) &&
           skyCharted.length === wantCharted.length && skyCharted.length >= 6 &&
           skyCharted.length < sky.length &&
-          new Set(skyCharted.map(x => x.shown)).size === skyCharted.length,
+          new Set(skyCharted.map(x => x.shown)).size === skyCharted.length &&
+          sky.filter(x => !x.shown).every(x => menuSrc[x.id] === 'not yet charted') &&
+          skyCharted.every(x => menuSrc[x.id] == null),
    'the sky names each charted world and no other — ' +
    skyCharted.map(x => x.id + '=' + x.shown).join(', ') + '; the other ' +
-   (sky.length - skyCharted.length) + ' show none rather than inventing one');
+   (sky.length - skyCharted.length) + ' declare "not yet charted" in the menu, ' +
+   'where the sky cannot speak for them');
 
 /* B20 — visiting a world does not rewrite the anatomy. Compared DURING the
    world as well as after it: a figure rewritten while a world is open and

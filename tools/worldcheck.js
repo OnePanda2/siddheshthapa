@@ -330,18 +330,22 @@ ck('W8', psy.id === 'psychology' && rn.from === 'psychology' &&
 
 /* W9 — every MIG states its source, and an unassigned one says so */
 const sky9 = r.closed.sky || [];
+const menuSrc9 = {}; (r.closed.menu || []).forEach(m => menuSrc9[m.id] = m.source);
 const srcBad = sky9.filter(m => m.shown !== null && m.shown !== m.expected);
+/* an uncharted region must SAY so somewhere, and the sky cannot say it */
+const silent = sky9.filter(m => !m.shown && menuSrc9[m.id] !== 'not yet charted');
 const charted = sky9.filter(m => m.shown);
 /* derived rather than listed, for the reason recorded on braincheck B19: a
    hardcoded roster of system names is maintenance, not a test, and each world
    added was making the same edit in two files. A source must be unique to its
    region, and no region may invent one. */
-ck('W9', srcBad.length === 0 && charted.length >= 6 &&
+ck('W9', srcBad.length === 0 && silent.length === 0 && charted.length >= 6 &&
          charted.length < sky9.length &&
          new Set(charted.map(m => m.shown)).size === charted.length,
    'no world claims a heritage it does not have — ' +
    charted.map(m => m.id + '=' + m.shown).join(', ') + '; the other ' +
-   (sky9.length - charted.length) + ' name none' +
+   (sky9.length - charted.length) + ' declare themselves uncharted' +
+   (silent.length ? ' — SILENT: ' + silent.map(m => m.id).join(', ') : '') +
    (srcBad.length ? ' — WRONG: ' + srcBad.map(m => m.id).join(', ') : ''));
 
 /* M6 — the whole brain is in frame, not cropped and not zoomed into a MIG */

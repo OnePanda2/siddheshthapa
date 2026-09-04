@@ -5498,12 +5498,29 @@ function row(n, meta, onClick, current){
   if(current) b.setAttribute('aria-current','true');
   var l=document.createElement('span'); l.className='lbl'; l.textContent=n.label||n.id;
   b.appendChild(l);
-  /* THE SYSTEM NAME IS NOT REPEATED HERE. Every MIG row used to carry the name
-     of its planetary system under the region's own name — TRAPPIST-1 beneath
-     PHILOSOPHY — while the sky already writes that name under the world itself.
-     Saying it twice made the menu look like it held two facts where it held
-     one. It is still drawn in the sky, where it belongs: beside the thing it
-     names. */
+  /* A CHARTED SYSTEM IS NOT NAMED TWICE; AN UNCHARTED ONE IS STILL DECLARED.
+     Every MIG row used to carry its planetary system beneath the region's own
+     name — TRAPPIST-1 under PHILOSOPHY — while the sky already writes that
+     same name beside the world itself. Saying it twice made the menu look like
+     it held two facts where it held one, so the charted ones were removed.
+
+     That took something else with it. The sky names only the worlds that HAVE
+     a system, so the twelve regions without one went from declaring "not yet
+     charted" to saying nothing at all — and silence is not a declaration. A
+     region that quietly shows no heritage is indistinguishable from one whose
+     label failed to render, which is exactly the ambiguity the line existed to
+     remove. So the declaration comes back for those, and only those: the menu
+     now carries what the sky cannot say. */
+  if(n.t==='mig'){
+    var sLabel=sourceLabelOf(n.id);
+    if(sLabel==='not yet charted'){
+      var src=document.createElement('span');
+      src.className='src'; src.setAttribute('data-src',n.id);
+      src.textContent=sLabel;
+      b.appendChild(src);
+      b.setAttribute('aria-label',(n.label||n.id)+' — '+sLabel);
+    }
+  }
   if(meta){ var m=document.createElement('span'); m.className='meta'; m.innerHTML=meta; b.appendChild(m); }
   b.addEventListener('click',onClick);
   /* hovering a MIG row identifies its world in the sky. Pointer events only —
