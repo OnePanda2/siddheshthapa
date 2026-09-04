@@ -48,7 +48,7 @@ var FIGURES = {
     caption: 'the diagnostic stands before the generator',
     parts: [1, 2, 3, 4],
     svg: [
-      '<svg class="wk-svg" viewBox="0 0 660 200" role="img" aria-label="Exploded view: trigger, diagnostic, level estimate, course. The diagnostic sits between the request and anything being generated.">',
+      '<svg class="wk-svg" viewBox="0 0 660 200" role="img" aria-label="Assembly drawing: trigger, diagnostic, level estimate, course. The diagnostic sits between the request and anything being generated.">',
       '<g class="part p1">',
       '<rect x="14" y="78" width="118" height="44" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
       '<text x="73" y="98" text-anchor="middle" font-size="10" fill="#1a1d1f">TRIGGER</text>',
@@ -398,11 +398,15 @@ function renderContents(){
 
   var lede = el('p', 'wk-lede');
   var written = SHEETS.filter(function(n){ return WORKS_BY_NODE[n.id]; }).length;
-  lede.textContent = 'Six things built, and the manual for each: what it is for, ' +
+  /* COUNTED, NOT TYPED. This opened "Six things built" beside a derived
+     "N of M sheets are written", so the same page stated the number twice and
+     only one of the two could survive a seventh sheet. */
+  var reserved = SHEETS.filter(function(n){ return !WORKS_BY_NODE[n.id] && !n.brief; }).length;
+  lede.textContent = 'The things built, and the manual for each: what it is for, ' +
     'what it is made of, how it runs, and what is known to break. ' +
-    written + ' of ' + SHEETS.length + ' sheets are written. ' +
-    'The rest are reserved — listed, numbered, and left blank until there is ' +
-    'something true to put on them.';
+    written + ' of ' + SHEETS.length + ' sheets carry a manual. ' +
+    (reserved ? 'The rest are reserved — listed, numbered, and left blank until ' +
+                'there is something true to put on them.' : '');
   wkBody.appendChild(lede);
 
   var ol = el('ul', 'wk-toc');
@@ -414,9 +418,13 @@ function renderContents(){
     b.setAttribute('data-sheet', n.id);
     b.appendChild(el('span', 'wk-no', pad(i + 1)));
     b.appendChild(el('span', 'wk-ttl', n.label));
-    var st = el('span', 'wk-state' + (has ? '' : ' latent'),
-                has ? String(n.state || '') : 'not yet written');
-    b.appendChild(st);
+    /* the contents must agree with the sheet it opens: a brief sheet is not
+       waiting for anything, so the list does not label it as if it were */
+    if(has || !n.brief){
+      var st = el('span', 'wk-state' + (has ? '' : ' latent'),
+                  has ? String(n.state || '') : 'not yet written');
+      b.appendChild(st);
+    }
     b.appendChild(el('span', 'wk-sub', n.line || ''));
     b.addEventListener('click', function(){ renderSheet(n.id); });
     li.appendChild(b);
@@ -454,14 +462,17 @@ function renderSheet(id){
     String(n.register || n.t || '')));
   left.appendChild(el('h2', 'wk-name', n.label));
   top.appendChild(left);
-  top.appendChild(el('div', 'wk-stamp', sh ? String(n.state || '') : 'not yet written'));
+  /* a brief sheet carries no stamp at all: "not yet written" would be untrue
+     and its state would be a fact about the work rather than about the sheet */
+  if(sh || !n.brief)
+    top.appendChild(el('div', 'wk-stamp', sh ? String(n.state || '') : 'not yet written'));
   wkBody.appendChild(top);
 
   /* the graph's own sentence about this work — derived, never retyped */
   if(n.line) wkBody.appendChild(el('p', 'wk-line', n.line));
 
-  if(sh) renderWritten(sh, n, idx);
-  else   renderReserved(n);
+  if(sh)          renderWritten(sh, n, idx);
+  else if(!n.brief) renderReserved(n);
 
   /* the title block, bottom, where a drawing puts it */
   var plate = el('div', 'wk-plate');
@@ -572,22 +583,22 @@ function renderFigure(fig, idx){
   var bar = el('div', 'wk-figbar');
   bar.appendChild(el('span', 'wk-cap',
     'Fig. ' + pad(idx + 1) + '.1 — ' + fig.caption));
-  var btn = el('button', 'wk-btn', 'Explode');
-  btn.type = 'button';
-  bar.appendChild(btn);
+  /* NO EXPLODE CONTROL. Every figure carried a button that pulled its parts
+     apart and pushed them back. The drawings are already part-numbered and
+     already read as assemblies, so the control was offering a second way to
+     look at something that was legible the first way — and it was the only
+     interactive element on a sheet that is otherwise a document.
+
+     The .exploded CSS in the shell is deliberately left in place: it is what
+     the transform would need if the view is ever wanted again, it costs
+     nothing when no element carries the class, and deleting it would make
+     restoring the feature a rewrite rather than a line. */
   wrap.appendChild(bar);
 
   var scroll = el('div', 'wk-figscroll');
   scroll.innerHTML = fig.svg;
   wrap.appendChild(scroll);
   wkBody.appendChild(wrap);
-
-  var svg = scroll.querySelector('.wk-svg');
-  btn.addEventListener('click', function(){
-    var on = svg.classList.toggle('exploded');
-    btn.textContent = on ? 'Assemble' : 'Explode';
-    say(on ? 'Exploded view.' : 'Assembled view.');
-  });
 }
 
 function renderDiagnostic(){
@@ -773,6 +784,8 @@ window.__v02.works = {
   view:     function(){ return wkView; },
   sheets:   function(){ return SHEETS.map(function(n){ return n.id; }); },
   written:  function(){ return Object.keys(WORKS_BY_NODE); },
+  brief:    function(){ return SHEETS.filter(function(n){ return n.brief; })
+                                     .map(function(n){ return n.id; }); },
   data:     function(){ return WORKS_DATA; },
   figures:  function(){ return FIGURES; },
   /* navigate whether or not the layer is already up. openWorks returns early

@@ -53,7 +53,24 @@ var V02_OVERLAY={
      welcome page had no second door and ART had no contents — one placeholder
      covering for the other. The door exists now and ART has its own contents
      below, so the region goes back to its own name. */
-  relabel:[],
+  relabel:[
+    { id:'building', to:'MESSAGES FOR THE ELITE',
+      why:'the topic is no longer about the act of building — the works have their own door for that, and this section now holds writing addressed to a particular reader. Its contents, its system HD 10180 and every relationship are untouched: only the name on the door changes.' }
+  ],
+  /* ORDER IN THE MENU IS NOT ORDER IN THE MIND.
+
+     MIGS comes verbatim from preview.html, and a region's INDEX in it decides
+     where its world stands in space — reordering that array would pick the
+     star up and move it. The menu is a list of doors, and which door is listed
+     last is a question about the list.
+
+     So the two are allowed to differ, in the one place divergence is declared
+     rather than discovered. Named regions go to the end of the menu in the
+     order given here; every other row keeps the mind's own order. */
+  menuLast:[
+    { id:'building',
+      why:'it addresses a narrower reader than the rest of the mind, so it sits at the foot of the list rather than in the middle of topics anyone can read.' }
+  ],
   /* ONE SENTENCE IS REWRITTEN FOR V02.
      The graph's line for COTSI describes the mechanism, which is the right
      register inside the mind and the wrong one on a card a stranger reads in
@@ -156,6 +173,22 @@ var V02_OVERLAY={
       src:'Master Context §14',
       line:'He values both. Something can be right and still fail because of how it was presented, and the reverse is worse.' }
   ],
+  addWorks:[
+    /* MY WORKS IS DERIVED FROM THE GRAPH, so a sheet is added by adding the
+       thing it documents — never by writing a sheet into works.json, which is
+       Tier 2 and may not invent a work that the graph does not have.
+
+       brief:true is a DECLARATION, not a shortcut. A sheet with no Tier-2
+       record normally renders stamped "not yet written" over a paragraph
+       saying its procedure is not written down anywhere quotable — which is
+       the honest thing to say about a work that is waiting for one. This sheet
+       is not waiting. It is a standing pointer to work in progress, complete
+       as a title and a line, and stamping it would promise a manual that is
+       not coming. */
+    { id:'p-building', t:'project', label:'BUILDING', mig:'my-works',
+      crosses:['business','technology'], state:'formed', brief:true,
+      line:"Projects I'm working on" }
+  ],
   addEdges:[
     ['visual-identity','presentation','sits beside','Both are about what a thing says before anyone reads it.'],
     ['b-feels','interfaces','tested against','An interface is where the claim that feel matters stops being an opinion.'],
@@ -226,6 +259,9 @@ var V02_OVERLAY={
   });
   addOnce(MINORS, V02_OVERLAY.addMinors);
   addOnce(THOUGHTS, V02_OVERLAY.addWritings);
+  /* works are objects of the site rather than of the mind, but they are still
+     nodes and still come from one graph, so they are added the same way */
+  addOnce(THOUGHTS, V02_OVERLAY.addWorks);
   function addEdgesOnce(rows){
     (rows||[]).forEach(function(e){
       for(var i=0;i<EDGES.length;i++)
@@ -3454,14 +3490,22 @@ function paintDOM(){
     /* the menu used to lift MY WORKS to the top, because the works were the
        thing a visitor was meant to find first and they were a region. They are
        a door of their own now, so the list is simply the mind's own order. */
-    var ordered=MIGS.slice();
+    /* the declared tail, lifted out of the mind's order and put at the foot */
+    var tail=(V02_OVERLAY.menuLast||[]).map(function(x){return x.id;});
+    var ordered=MIGS.filter(function(m){ return tail.indexOf(m.id)<0; })
+      .concat(tail.map(function(id){
+        for(var i=0;i<MIGS.length;i++) if(MIGS[i].id===id) return MIGS[i];
+        return null;
+      }).filter(Boolean));
+    /* A TOPIC IS NAMED, NOT MEASURED. Each row carried "4 concepts · 7
+       writings" underneath it, which invited the menu to be read as a
+       leaderboard: MUSIC with nothing in it announced that it had nothing, and
+       PHILOSOPHY's 7 and 14 sat there looking like a score. The size of a
+       topic is not what a visitor is choosing between, and the sheet says it
+       anyway once you are inside. row() omits the element entirely when there
+       is no meta, so nothing is left behind to lay out. */
     var rows=ordered.map(function(m){
-      var mem=owned[m.id]||[];
-      /* concepts are the Minor IGs, not every member — mem.length counts the
-         writings too and stated them twice */
-      var c=mem.filter(function(id){return byId[id].t==='minor';}).length;
-      var w=mem.filter(function(id){return byId[id].src;}).length;
-      return row(m, c+' concepts · '+w+' writings', function(){ travelTo('region',m.id); });
+      return row(m, '', function(){ travelTo('region',m.id); });
     });
     put(group(T('mind.topics'),rows));
     say('The whole mind. '+MIGS.length+' topics.');

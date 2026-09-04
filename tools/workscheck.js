@@ -41,6 +41,7 @@ setTimeout(function(){
     out.data=W.data();
     out.sheets=W.sheets();
     out.written=W.written();
+    out.brief=W.brief?W.brief():[];
     out.figures=Object.keys(W.figures()).map(function(k){
       return { key:k, parts:W.figures()[k].parts };
     });
@@ -292,7 +293,18 @@ ck('W4', r.see.length > 0 && invented.length === 0 && wrongVerb.length === 0,
 
 /* W5 — EVERY undocumented work is reserved: stamped, not hidden, not padded,
    and still carrying the tier the graph declares. */
-const reservedIds = r.sheets.filter(id => r.written.indexOf(id) < 0);
+/* A BRIEF SHEET IS NOT A RESERVED ONE, and the difference is a declaration in
+   the graph rather than an absence in works.json. Reserved means "a manual is
+   owed here and has not been written"; brief means "this sheet is a title and
+   a line, and that is all it will ever be". Stamping the second as the first
+   would print a promise nobody intends to keep.
+
+   The exemption is narrow on purpose: brief sheets are excluded from THIS
+   clause and immediately held to their own in W11, so declaring brief buys a
+   sheet a different guarantee rather than no guarantee. */
+const briefIds = r.brief || [];
+const reservedIds = r.sheets.filter(id => r.written.indexOf(id) < 0 &&
+                                          briefIds.indexOf(id) < 0);
 const wrong = reservedIds.filter(id => {
   const p = r.perSheet[id];
   return !p || p.stamp !== 'not yet written' || !p.hasNone || p.steps !== 0 ||
@@ -313,7 +325,28 @@ ck('W5', probeIds.length > 0 && probeWrong.length === 0 && wrong.length === 0,
    probeIds.length + ' proved on demand: stamped, no steps, no parts, no ' +
    'figure, and still printing the line, the plate and its relationships' +
    (wrong.length ? ' — LIVE WRONG: ' + wrong.join(', ') : '') +
-   (probeWrong.length ? ' — WRONG: ' + probeWrong.join(', ') : ''));
+   (probeWrong.length ? ' — WRONG: ' + probeWrong.join(', ') : '') +
+   (briefIds.length ? ' · ' + briefIds.length + ' brief sheet(s) held to W11 instead' : ''));
+
+/* W11 — A BRIEF SHEET IS FINISHED, AND SAYS SO BY SAYING NOTHING EXTRA.
+   It carries its title, its line and its plate, and it carries no stamp and no
+   reserved paragraph. It must also have no Tier-2 record: brief is a statement
+   that there is nothing more to show, so a sheet that HAS a manual and hides it
+   behind this flag is a defect and not a variation. */
+const briefWrong = briefIds.filter(id => {
+  const p = r.perSheet[id];
+  if(!p) return true;
+  return p.stamp !== '' || p.hasNone || p.steps !== 0 ||
+         !p.hasLine || p.plateCount !== 1 ||
+         r.written.indexOf(id) >= 0;
+});
+ck('W11', briefIds.length === 0 || briefWrong.length === 0,
+   briefIds.length
+     ? briefIds.length + ' brief sheet(s) render finished rather than pending — ' +
+       briefIds.join(', ') + ': a title, a line and a plate, with no stamp and no ' +
+       'reserved paragraph, and no hidden manual behind the flag' +
+       (briefWrong.length ? ' — WRONG: ' + briefWrong.join(', ') : '')
+     : 'no sheet declares itself brief, so there is nothing to hold to this');
 
 /* W6 — no drawing has drifted from its own parts list, on any sheet */
 const num = a => a.slice().sort((x, y) => x - y).join('/');
