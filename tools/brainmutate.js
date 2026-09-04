@@ -97,7 +97,20 @@ const M = [
     find: 'var BRAIN_SPREAD=0.46;',
     repl: 'MIGS.forEach(function(mm){ if(mm.id==="love") mm.mig="philosophy"; });\nvar BRAIN_SPREAD=0.46;' },
 
+  /* THE GUARD THIS BREAKS IS UNREACHABLE UNTIL A WORLD HAS NO SYSTEM, and once
+     MUSIC, PSYCHOLOGY and ART were charted there was no such world left. The
+     mutation went on being applied and the check went on passing — not because
+     the assertion was strong but because the line it corrupted could no longer
+     run. That is the worst way for a mutation to fail: silently, looking
+     exactly like a mutation that was caught, until someone reads the count.
+
+     So the mutation now creates the condition first — ART loses its system, as
+     a topic added tomorrow would have none — and only then invents a heritage
+     for it. That is the real claim: not "this line is correct" but "a world
+     with nothing behind it never claims something". */
   { id: 'B19', why: 'invent a source for a world that has none',
+    also: { find: "'music':'Kepler-80', 'psychology':'Kepler-62', 'art':'HD 40307' };",
+            repl: "'music':'Kepler-80', 'psychology':'Kepler-62' };" },
     find: "  if(p.worldType==='latent' || !p.astronomyTemplate) return 'not yet charted';",
     repl: "  if(p.worldType==='latent' || !p.astronomyTemplate) return 'HR 8799';" },
 
@@ -122,6 +135,10 @@ if (DRY) {
   M.forEach(m => {
     const hits = original.split(m.find).length - 1;
     if (hits !== 1) { bad++; console.log('  x' + hits + '  ' + m.id + '  "' + m.find.slice(0, 58) + '"'); }
+    if (m.also) {
+      const h2 = original.split(m.also.find).length - 1;
+      if (h2 !== 1) { bad++; console.log('  x' + h2 + '  ' + m.id + ' (precondition)  "' + m.also.find.slice(0, 46) + '"'); }
+    }
   });
   console.log(bad ? '\n' + bad + ' BAD ANCHOR(S) of ' + M.length
                   : '\nall ' + M.length + ' anchors match exactly once');
@@ -137,7 +154,20 @@ try {
       console.log('BAD  ' + m.id.padEnd(4) + ' anchor matched ' + hits + ' times — UNVERIFIED');
       continue;
     }
-    fs.writeFileSync(APP, original.replace(m.find, m.repl), 'utf8');
+    /* the precondition is applied FIRST and audited exactly as strictly: an
+       'also' that silently matched nothing would hand back a mutation that
+       once again corrupts an unreachable line. */
+    let mutated = original;
+    if (m.also) {
+      const h2 = mutated.split(m.also.find).length - 1;
+      if (h2 !== 1) {
+        bad++;
+        console.log('BAD  ' + m.id.padEnd(4) + ' precondition anchor matched ' + h2 + ' times — UNVERIFIED');
+        continue;
+      }
+      mutated = mutated.replace(m.also.find, m.also.repl);
+    }
+    fs.writeFileSync(APP, mutated.replace(m.find, m.repl), 'utf8');
     execSync('node tools/build-v02.js', { stdio: 'pipe' });
     let failed = false, line = '';
     try {

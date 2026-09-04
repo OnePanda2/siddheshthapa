@@ -14,7 +14,8 @@
    H5 hover mutates no state: no navigation, no camera move, no ownership change
    H6 all 14 MIGs remain in the Main Mind Menu throughout
    H7 keyboard focus gives the same highlight as pointer hover
-   H8 a planetary world's orbits answer the hover too
+   H8 a planetary world's orbits answer the hover, and a world without orbits
+      does not — the subject for the second half is found at run time, not named
 
    usage: node tools/highlightcheck.js [v02.html]
 */
@@ -50,6 +51,30 @@ const PROBE = `(function(){
      measuring the difference between a full world and an empty one rather
      than whether the highlight works. */
   M.highlight('life');       M.settle(40); var hLife=snap();
+
+  /* H8 NEEDS A WORLD WITH NO ORBITS, AND IT HAS TO GO AND FIND ONE. It used to
+     name PSYCHOLOGY, on the grounds that psychology was uncharted and so had
+     nothing orbiting in it. Then psychology was given Kepler-62, and the check
+     went on comparing a planetary world against what it still believed was an
+     empty one — reporting a failure that was entirely about its own stale
+     casting, and saying nothing about the highlight.
+
+     So the subject is chosen from what the app reports rather than from what
+     this file remembers. A constellation world is preferred over a latent one
+     because latency is temporary by design — every latent world becomes
+     planetary the moment it is written into — whereas OBSERVATION is Ursa
+     Major and has stars without orbits as a matter of what it is. */
+  var noOrbit=null, wp=M.worlds().profiles;
+  Object.keys(wp).forEach(function(k){
+    var t=wp[k]&&wp[k].worldType;
+    if(t==='constellation' && !noOrbit) noOrbit=k;
+  });
+  if(!noOrbit) Object.keys(wp).forEach(function(k){
+    var t=wp[k]&&wp[k].worldType;
+    if(t==='latent' && !noOrbit) noOrbit=k;
+  });
+  var hNone=null;
+  if(noOrbit){ M.highlight(noOrbit); M.settle(40); hNone=snap(); }
   M.highlight(null);         M.settle(40); var rel=snap();
 
   /* H7 — the keyboard must reach the same behaviour as the mouse */
@@ -63,6 +88,7 @@ const PROBE = `(function(){
   }
 
   return {base:base, hPhil:hPhil, hWork:hWork, hLife:hLife, rel:rel, kb:kb,
+          noOrbit:noOrbit, hNone:hNone,
           migCount:M.arch().migCount};
 })()`;
 
@@ -183,10 +209,20 @@ ck('H7', r.kb && r.kb.hoverRegion === r.hPhil.state.hoverRegion,
    r.kb ? 'keyboard focus highlights the same world (region ' + r.kb.hoverRegion + ')'
         : 'keyboard focus did not reach the highlight');
 
-// H8 — a planetary world's orbits answer too
-ck('H8', r.hPhil.state.orbitHover === 1 && r.hWork.state.orbitHover === 0 &&
-         r.rel.state.orbitHover === 0,
-   'the orbital paths answer the hover for a planetary world, and not for a world without one');
+// H8 — a planetary world's orbits answer too, and a world without orbits stays quiet
+if (!r.noOrbit) {
+  ck('H8', false,
+     'no world without orbits exists to contrast against — every world is now ' +
+     'planetary or circumbinary, so half of this claim cannot be tested. ' +
+     'Give one world a constellation, or retire the half.');
+} else {
+  ck('H8', r.hPhil.state.orbitHover === 1 && r.hNone && r.hNone.state.orbitHover === 0 &&
+           r.rel.state.orbitHover === 0,
+     'the orbital paths answer the hover for a planetary world (philosophy ' +
+     r.hPhil.state.orbitHover + '), and not for one without them (' + r.noOrbit + ' ' +
+     (r.hNone ? r.hNone.state.orbitHover : '?') + '), and release clears it (' +
+     r.rel.state.orbitHover + ')');
+}
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' highlight invariants hold');
 console.log('  palette in use: ' + r.base.state.palette);

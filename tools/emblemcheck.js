@@ -171,11 +171,18 @@ ck('E6', !!r.obsWorld && r.obsWorld.max < 38 && r.obsWorld.sum <= 2,
    two different hex values can land on the same screen colour, which is the
    whole failure being tested for.
 
-   The NINE latent regions are excluded, and deliberately: they share one
-   neutral palette because they have no world yet, which the source states in
-   as many words — "inventing thirteen palettes before their geometry exists
-   would be decoration". They look alike because they ARE alike: not yet
-   charted. E7 asserts that too, rather than leaving it to chance. */
+   NOTHING IS EXCLUDED, and this paragraph used to say the opposite. It
+   described nine latent regions sharing one neutral palette and being exempt
+   from the comparison for that reason. That exemption was removed further down
+   this same file — "an uncharted region takes the emptiest place left on a
+   ring of constant perceived brightness ... there is nothing left to exempt"
+   — and the paragraph up here was left behind describing the older check.
+
+   It has since become wrong twice over: there are no latent regions at all now
+   that MUSIC, PSYCHOLOGY and ART have their systems. E7 compares every region
+   against every other, at two bars, and derives which bar applies from whether
+   each has a palette of its own — so it holds a rule and not a roll-call, and
+   no count in a comment needs revising when a world is added. */
 function toLab(c) {
   const f = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
   const R = f(c[0]), G = f(c[1]), B = f(c[2]);

@@ -66,13 +66,44 @@ const M = [
   /* THE PHONE HALF. The generic branch is the one twelve regions take, and on
      a phone the sheet is below rather than beside — so removing its lift puts
      those twelve back under the panel while the desktop stays perfect. */
-  { id:'T11', why:'stop lifting the generic worlds on a phone, putting them under the sheet',
-    find:'    if(upS.lengthSq()>1e-6) aimN.addScaledVector(upS.normalize(), -dOut*0.22);',
-    repl:'    if(upS.lengthSq()>1e-6) aimN.addScaledVector(upS.normalize(), 0.0);' },
+  /* THE LINE THIS BREAKS CANNOT RUN ANY MORE, and the mutation went on being
+     applied as though it could. frameForRaw answers a region from one of three
+     early branches — constellation, circumbinary, planetary — and only falls
+     through to the generic branch, where this lift lives, for a world with no
+     system at all. Giving MUSIC, PSYCHOLOGY and ART their systems left no such
+     world, so the lift became unreachable and removing it changed nothing.
 
+     MEASURED, because "the guard stopped mattering" and "the assertion went
+     soft" are the same pass/fail line and only a number tells them apart. At a
+     true 390x844 the tightest world clears the sheet by 73px with the lift in
+     place, and by 73px with it removed — not nearly the same, identical, which
+     is the signature of dead code rather than of a redundant guard.
+
+     So the mutation makes a generic world first: ART loses HD 40307 and falls
+     through to the branch this lift belongs to, exactly as a topic added
+     tomorrow would arrive. The claim is unchanged and worth keeping — a world
+     with no system of its own is still lifted clear of the sheet on a phone —
+     and it is now tested against a world that reaches the code being broken.
+
+     Two steps rather than one, which this runner already supports: the first
+     establishes the precondition, the second is the mutation proper. */
+  { id:'T11', why:'stop lifting the generic worlds on a phone, putting them under the sheet',
+    steps:[
+      { find:"'music':'Kepler-80', 'psychology':'Kepler-62', 'art':'HD 40307' };",
+        repl:"'music':'Kepler-80', 'psychology':'Kepler-62' };" },
+      { find:'    if(upS.lengthSq()>1e-6) aimN.addScaledVector(upS.normalize(), -dOut*0.22);',
+        repl:'    if(upS.lengthSq()>1e-6) aimN.addScaledVector(upS.normalize(), 0.0);' }
+    ] },
+
+  /* THE ANCHOR FOLLOWED ITS CODE. Concepts moved below Writings and the
+     heading became a text-store key, so this matched nothing and the mutation
+     silently stopped being run — the anchor audit is the only reason that was
+     visible at all. The claim is unchanged: put() is what tolerates an empty
+     group, and a call site that appends directly throws on a region that has
+     nothing in it yet. */
   { id:'T10', why:'append an empty section unchecked, so a region with nothing in it throws',
-    find:"    put(group('Concepts', mem.filter(function(id){return byId[id].t==='minor';})",
-    repl:"    elGroups.appendChild(group('Concepts', mem.filter(function(id){return byId[id].t==='minor';})" },
+    find:"    put(group(T('topic.concepts'), mem.filter(function(id){",
+    repl:"    elGroups.appendChild(group(T('topic.concepts'), mem.filter(function(id){" },
 
   /* T12's TWO APP-SIDE GUARDS HAVE STOPPED BEING LOAD-BEARING, and this
      mutation was reported as surviving for that reason rather than because the

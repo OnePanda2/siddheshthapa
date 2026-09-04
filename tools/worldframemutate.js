@@ -96,7 +96,21 @@ const M = [
     find:'  var shiftPx=Math.max(Wpx/2, panelR+0.20*Wpx)-Wpx/2;',
     repl:'  var shiftPx=Math.max(Wpx/2, panelR+0.15*Wpx)-Wpx/2;' },
 
+  /* THIS MUTATION LOST ITS SUBJECT AND WENT ON BEING APPLIED. WF12 frames
+     "whichever world is latent", written that way so that charting a region
+     could never empty it — but giving MUSIC, PSYCHOLOGY and ART their systems
+     left no latent world at all, and a check with nothing to measure cannot be
+     made to fail by breaking the measurement.
+
+     A latent world is one with a shape and nothing in it yet, so the mutation
+     makes one: ART is stripped of HD 40307, exactly as a topic added tomorrow
+     would arrive. Only then is the framing broken. The claim being verified is
+     unchanged and is the one that matters — a world with nothing in it is
+     framed by its own size and not by a constant — and it is now verified
+     against a world that actually exists while the mutation runs. */
   { id:'WF12', why:'frame a latent world from a constant instead of from its own size',
+    also:{ find:"'music':'Kepler-80', 'psychology':'Kepler-62', 'art':'HD 40307' };",
+           repl:"'music':'Kepler-80', 'psychology':'Kepler-62' };" },
     find:'    out.normalize().multiplyScalar(fwG.d);\n    dOut=fwG.d;',
     repl:'    out.normalize().multiplyScalar(dOut);' },
 
@@ -112,6 +126,10 @@ const original = fs.readFileSync(APP, 'utf8');
 let bad = 0;
 if (DRY) {
   M.forEach(m => {
+    if (m.also) {
+      const h2 = original.split(m.also.find).length - 1;
+      if (h2 !== 1) { bad++; console.log('  x' + h2 + '  ' + m.id + ' (precondition)  "' + m.also.find.slice(0, 46) + '"'); }
+    }
     const hits = original.split(m.find).length - 1;
     if (hits !== 1) { bad++; console.log('  x' + hits + '  ' + m.id + '  "' + m.find.slice(0, 60) + '"'); }
   });
@@ -129,7 +147,17 @@ try {
       console.log('BAD  ' + m.id.padEnd(5) + ' anchor matched ' + hits + ' times — UNVERIFIED');
       continue;
     }
-    fs.writeFileSync(APP, original.replace(m.find, m.repl), 'utf8');
+    let mutated = original;
+    if (m.also) {
+      const h2 = mutated.split(m.also.find).length - 1;
+      if (h2 !== 1) {
+        bad++;
+        console.log('BAD  ' + m.id.padEnd(5) + ' precondition anchor matched ' + h2 + ' times — UNVERIFIED');
+        continue;
+      }
+      mutated = mutated.replace(m.also.find, m.also.repl);
+    }
+    fs.writeFileSync(APP, mutated.replace(m.find, m.repl), 'utf8');
     execSync('node tools/build-v02.js', { stdio: 'pipe' });
     let failed = false, line = '';
     try {

@@ -137,7 +137,13 @@ const MUTATIONS = [
     find: `      if(o.id===rn.from){ o.id=rn.to; moved++; }`,
     repl: `      if(false){ o.id=rn.to; moved++; }   // mutation: never re-key` },
 
+  /* SEE braincheck B19 for why this grew a precondition. The line it breaks
+     cannot run while every world has a system, so the mutation was landing on
+     dead code and the pass meant nothing. ART is stripped first, so there IS an
+     unassigned world, and only then is a heritage invented for it. */
   { n: 'W9', file: APP, name: 'an unassigned MIG never invents a source',
+    also: { find: `'music':'Kepler-80', 'psychology':'Kepler-62', 'art':'HD 40307' };`,
+            repl: `'music':'Kepler-80', 'psychology':'Kepler-62' };` },
     find: `  if(p.worldType==='latent' || !p.astronomyTemplate) return 'not yet charted';`,
     repl: `  if(p.worldType==='latent' || !p.astronomyTemplate) return 'TRAPPIST-1';` },
 
@@ -183,6 +189,10 @@ if (process.argv.indexOf('--dry') >= 0) {
   MUTATIONS.forEach(m => {
     const hits = ORIG[m.file].split(m.find).length - 1;
     if (hits !== 1) { bad2++; console.log('  x' + hits + '  ' + m.n + '  ' + JSON.stringify(m.find.slice(0, 56))); }
+    if (m.also) {
+      const h2 = ORIG[m.also.file || m.file].split(m.also.find).length - 1;
+      if (h2 !== 1) { bad2++; console.log('  x' + h2 + '  ' + m.n + ' (precondition)  ' + JSON.stringify(m.also.find.slice(0, 46))); }
+    }
   });
   console.log(bad2 ? bad2 + ' BAD ANCHOR(S) of ' + MUTATIONS.length
                    : 'all ' + MUTATIONS.length + ' anchors match exactly once');
@@ -191,6 +201,17 @@ if (process.argv.indexOf('--dry') >= 0) {
 
 const ONLY = (process.argv[2] || '').split(',').filter(Boolean);
 const SEL = ONLY.length ? MUTATIONS.filter(m => ONLY.indexOf(m.n) >= 0) : MUTATIONS;
+/* A NAME THAT MATCHES NOTHING IS A TYPO, NOT AN EMPTY TEST RUN. Without this,
+   ONLY filters the table to nothing, the loop has no work, and the summary
+   prints 0/0 with exit 0 — a green result for a set that was never tested,
+   which is the one outcome these harnesses exist to prevent. lovemutate was
+   caught doing exactly that when asked for a flag it did not understand. */
+if (ONLY.length && SEL.length !== ONLY.length) {
+  const missing = ONLY.filter(x => !MUTATIONS.some(m => String(m.n) === String(x)));
+  console.error('no mutation named ' + missing.join(', ') +
+                ' — refusing to report a result for a set that was never tested');
+  process.exit(1);
+}
 
 function build() { execSync('node tools/build-v02.js', { stdio: 'pipe' }); }
 function run() {
@@ -215,7 +236,19 @@ for (const m of SEL) {
                   m.find.slice(0, 56));
     restoreAll(); process.exit(3);
   }
-  fs.writeFileSync(m.file, src.replace(m.find, m.repl), 'utf8');
+  /* the precondition goes on first, audited as strictly as the mutation */
+  if (m.also) {
+    const af = m.also.file || m.file, asrc = ORIG[af];
+    const h2 = asrc.split(m.also.find).length - 1;
+    if (h2 !== 1) {
+      console.error('STOP: precondition for ' + m.n + ' matched ' + h2 + ' times — UNVERIFIED: ' +
+                    m.also.find.slice(0, 56));
+      restoreAll(); process.exit(3);
+    }
+    fs.writeFileSync(af, asrc.replace(m.also.find, m.also.repl), 'utf8');
+  }
+  fs.writeFileSync(m.file, (m.also && (m.also.file || m.file) === m.file
+                              ? fs.readFileSync(m.file, 'utf8') : src).replace(m.find, m.repl), 'utf8');
   const applied = fs.readFileSync(m.file, 'utf8') !== src;
   build();
   const res = run();

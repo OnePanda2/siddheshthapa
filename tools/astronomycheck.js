@@ -285,14 +285,28 @@ ck('A20', mvOK, 'HR 8799 is rendered at its measured spacing — ' + mvDetail);
    resonances of four bodies spread from 16 to 68 AU). One tightens, the other
    opens. That is a property of the astronomy, and it survives any change of
    scene scale because both are ratios. */
+/* A20 GUARDS ITS SUBJECT AND THIS DID NOT, so taking HR 8799 away from MOVIES
+   — which is exactly what A19's mutation does — reached mvAssigned.axes on a
+   world that no longer had any and threw a TypeError out of the whole file.
+   Everything after it went unmeasured, and the run reported a stack trace
+   instead of a result. A crash names no assertion: it cannot be told apart
+   from the check being broken, which is the one thing a check must never be
+   ambiguous about. So a missing subject is a plain failure that says which
+   world went missing. */
 const gapsOf = a => a.slice(1).map((v, i) => v / a[i]);
-const trGaps = gapsOf(assigned.axes), mvGaps = gapsOf(mvAssigned.axes);
-const trTightens = trGaps[trGaps.length - 1] < trGaps[0];
-const mvOpens = mvGaps.every((g, i) => i === 0 || g > mvGaps[i - 1]);
-ck('A21', trTightens && mvOpens && mvGaps[mvGaps.length - 1] > trGaps[trGaps.length - 1] * 1.3,
-   'the two worlds are opposite shapes — TRAPPIST-1 tightens outward (' +
-   trGaps.map(g => g.toFixed(2)).join(' > ') + ') while HR 8799 opens (' +
-   mvGaps.map(g => g.toFixed(2)).join(' < ') + ')');
+if (!assigned || !assigned.axes || !mvAssigned || !mvAssigned.axes) {
+  ck('A21', false, 'the two worlds are opposite shapes — NOT MEASURABLE: ' +
+     (!assigned || !assigned.axes ? 'PHILOSOPHY has no rendered orbits' : 'MOVIES has no rendered orbits') +
+     ', so there is no second shape to contrast');
+} else {
+  const trGaps = gapsOf(assigned.axes), mvGaps = gapsOf(mvAssigned.axes);
+  const trTightens = trGaps[trGaps.length - 1] < trGaps[0];
+  const mvOpens = mvGaps.every((g, i) => i === 0 || g > mvGaps[i - 1]);
+  ck('A21', trTightens && mvOpens && mvGaps[mvGaps.length - 1] > trGaps[trGaps.length - 1] * 1.3,
+     'the two worlds are opposite shapes — TRAPPIST-1 tightens outward (' +
+     trGaps.map(g => g.toFixed(2)).join(' > ') + ') while HR 8799 opens (' +
+     mvGaps.map(g => g.toFixed(2)).join(' < ') + ')');
+}
 
 /* ── THE FIFTH WORLD ──────────────────────────────────────────────────
    LIFE is Kepler-33, and it is the third PLANETARY world — the point at which
@@ -335,13 +349,29 @@ ck('A23', lfOK, 'Kepler-33 is rendered at its measured spacing — ' + lfDetail)
 
    Strictly ordered and straddling 1.0. That is three genuinely different
    shapes, not three paint jobs. */
+/* GUARDED FOR THE REASON A21 IS, and found the same way: A19's mutation takes
+   HR 8799 away from MOVIES, and this reached straight into its axes and threw a
+   TypeError out of the whole file. A21 was fixed first and this one was still
+   waiting three hundred lines further down — the fix had been applied to the
+   line that failed rather than to the pattern, which is how a second instance
+   survives. Every other world's spacing is read inside a guard already; these
+   three were the exception. */
 const trendOf = a => { const g = gapsOf(a); return g[g.length - 1] / g[0]; };
-const tKep = trendOf(lfAssigned.axes), tTra = trendOf(assigned.axes),
-      tHR = trendOf(mvAssigned.axes);
-ck('A24', tKep < tTra && tTra < tHR && tKep < 0.85 && tHR > 1.15,
-   'the three planetary worlds are three regimes in order — Kepler-33 ' +
-   tKep.toFixed(2) + ' (compresses) < TRAPPIST-1 ' + tTra.toFixed(2) +
-   ' (nearly even) < HR 8799 ' + tHR.toFixed(2) + ' (opens)');
+const haveThree = lfAssigned && lfAssigned.axes && assigned && assigned.axes &&
+                  mvAssigned && mvAssigned.axes;
+if (!haveThree) {
+  ck('A24', false, 'the three planetary worlds are three regimes in order — NOT MEASURABLE: ' +
+     [['LIFE', lfAssigned], ['PHILOSOPHY', assigned], ['MOVIES', mvAssigned]]
+       .filter(x => !x[1] || !x[1].axes).map(x => x[0]).join(' and ') +
+     ' has no rendered orbits, so there are not three shapes to order');
+} else {
+  const tKep = trendOf(lfAssigned.axes), tTra = trendOf(assigned.axes),
+        tHR = trendOf(mvAssigned.axes);
+  ck('A24', tKep < tTra && tTra < tHR && tKep < 0.85 && tHR > 1.15,
+     'the three planetary worlds are three regimes in order — Kepler-33 ' +
+     tKep.toFixed(2) + ' (compresses) < TRAPPIST-1 ' + tTra.toFixed(2) +
+     ' (nearly even) < HR 8799 ' + tHR.toFixed(2) + ' (opens)');
+}
 
 /* ── THE SIXTH WORLD ──────────────────────────────────────────────────
    TECHNOLOGY is GJ 876, and it is the first world whose signature is DYNAMICAL

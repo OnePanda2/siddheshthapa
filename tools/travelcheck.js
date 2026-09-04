@@ -399,12 +399,24 @@ ck('T10', threw.length === 0,
    number means a different screen shift per region, and BUILDING — the most
    steeply inclined — still landed 6px inside the sheet while the other
    fourteen cleared it. */
+/* REPORT THE TIGHTEST WORLD, NOT A SAMPLE ONE. This printed LEARNING's two
+   numbers, chosen because learning takes the generic branch — which says
+   nothing about how close the check came to failing. Every world is measured
+   already; the one that matters is whichever has least room, and naming it
+   turns "it passes" into "it passes by N pixels". That difference is the whole
+   question when asking whether a guard is still load-bearing. */
+const clearances = feP.ids
+  .filter(id => rp.firstEntry[id].on && rp.firstEntry[id].y !== null)
+  .map(id => ({ id, gap: rp.firstEntry[id].shTop - rp.firstEntry[id].y }))
+  .sort((a, b) => a.gap - b.gap);
+const tight = clearances[0];
 ck('T11', feP.ids.length === MIG_TOTAL && feP.bad.length === 0,
    'and on a phone, where the sheet is below rather than beside — all ' + MIG_TOTAL + ' ' +
    'arrive above it at ' + rp.vw + 'x' + rp.vh +
    (feP.bad.length ? ' — MISSED: ' + show(rp, feP)
-    : ' (y' + rp.firstEntry.learning.y + ', above a sheet starting at ' +
-      rp.firstEntry.learning.shTop + ')'));
+    : tight ? ' (tightest is ' + tight.id.toUpperCase() + ', clearing the sheet by ' +
+              tight.gap + 'px; the sheet starts at y' + rp.firstEntry[tight.id].shTop + ')'
+            : ' (no world reported a position)'));
 
 /* T12 — AND ONCE THERE, THE NAMES ARE NOT BURIED BY THE PANEL.
 

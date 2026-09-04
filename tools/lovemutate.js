@@ -132,8 +132,42 @@ const MUTATIONS = [
     expect: 'exact TRAPPIST-1 spacing' }
 ];
 
-const ONLY = (process.argv[2] || '').split(',').filter(Boolean);
+/* --dry AUDITS THE ANCHORS AND RUNS NOTHING, which every other harness in this
+   project offers and this one did not. That was not a missing convenience, it
+   was a trap: '--dry' fell through into ONLY, matched no mutation name, and the
+   run selected zero mutations, went green, and printed
+
+     0/0 contrast assertions mutation-verified
+
+   in a full twenty-four seconds of looking busy. A suite reporting success
+   having tested nothing is the one outcome these harnesses exist to make
+   impossible, and it was reachable here by typing a flag that every sibling
+   tool accepts.
+
+   So the flag is understood, and it is also removed from ONLY — a mutation can
+   never be named '--dry', and treating it as one is how the silence happened. */
+const DRY = process.argv.indexOf('--dry') >= 0;
+const ONLY = (process.argv[2] || '').split(',').filter(Boolean).filter(x => x !== '--dry');
 const SEL = ONLY.length ? MUTATIONS.filter(m => ONLY.indexOf(m.n) >= 0) : MUTATIONS;
+
+if (ONLY.length && !SEL.length) {
+  console.error('no mutation named ' + ONLY.join(',') + ' — nothing would have been tested');
+  process.exit(1);
+}
+
+if (DRY) {
+  let bad2 = 0;
+  MUTATIONS.forEach(m => {
+    const hits = ORIG[m.file].split(m.find).length - 1;
+    if (hits !== 1) {
+      bad2++;
+      console.log('  x' + hits + '  ' + m.n + '  ' + JSON.stringify(m.find.slice(0, 56)));
+    }
+  });
+  console.log(bad2 ? bad2 + ' BAD ANCHOR(S) of ' + MUTATIONS.length
+                   : 'all ' + MUTATIONS.length + ' anchors match exactly once');
+  process.exit(bad2 ? 1 : 0);
+}
 
 function build(){ execSync('node tools/build-v02.js', { stdio: 'pipe' }); }
 function run(){

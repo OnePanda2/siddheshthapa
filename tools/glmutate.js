@@ -77,6 +77,17 @@ const MUTATIONS = [
 
 const ONLY = (process.argv[2] || '').split(',').filter(Boolean);
 const SEL = ONLY.length ? MUTATIONS.filter(m => ONLY.indexOf(m.n) >= 0) : MUTATIONS;
+/* A NAME THAT MATCHES NOTHING IS A TYPO, NOT AN EMPTY TEST RUN. Without this,
+   ONLY filters the table to nothing, the loop has no work, and the summary
+   prints 0/0 with exit 0 — a green result for a set that was never tested,
+   which is the one outcome these harnesses exist to prevent. lovemutate was
+   caught doing exactly that when asked for a flag it did not understand. */
+if (ONLY.length && SEL.length !== ONLY.length) {
+  const missing = ONLY.filter(x => !MUTATIONS.some(m => String(m.n) === String(x)));
+  console.error('no mutation named ' + missing.join(', ') +
+                ' — refusing to report a result for a set that was never tested');
+  process.exit(1);
+}
 
 function build(){ execSync('node tools/build-v02.js', { stdio: 'pipe' }); }
 function run(){
