@@ -64,6 +64,12 @@ jobs:
           # .nojekyll stops Pages running the files through Jekyll, which would
           # otherwise mangle anything it decided looked like a template
           touch _site/.nojekyll
+          # THE DOMAIN IS DECLARED IN A FILE, not typed into this workflow. A
+          # custom domain deployed by Actions is whatever CNAME says in the
+          # artifact, so if it were only a literal here, "where is the domain
+          # set" would be answered by reading a build script. It is answered by
+          # a file called CNAME, which is where anyone would look first.
+          cp CNAME _site/CNAME
 
       - name: Prove what is about to be served
         run: |
