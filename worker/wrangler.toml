@@ -6,4 +6,4 @@ compatibility_date = "2025-01-01"
 # secret is set with `wrangler secret put` and stored by Cloudflare, never here
 # and never in git.
 [vars]
-GITHUB_CLIENT_ID = "Ov23liUFkEsCvRKgBSH8"
+GITHUB_CLIENT_ID = "Iv23liHkt15sY3qrtzOB"

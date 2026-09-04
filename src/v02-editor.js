@@ -295,10 +295,19 @@ function signIn(){
   }
   var st = Math.random().toString(36).slice(2) + Date.now().toString(36);
   try{ sessionStorage.setItem(STATEKEY, st); }catch(_){}
+  /* NO SCOPE FOR A GITHUB APP. An OAuth App is granted breadth by the scope it
+     asks for, and the narrowest one that can write to a public repository is
+     public_repo - which reaches EVERY public repository the signer owns. A
+     GitHub App is granted breadth by where it is INSTALLED and what permissions
+     it was given, so it ignores this parameter entirely. Sending one anyway
+     would be a claim about reach that nothing honours.
+
+     It is still sent when configured, so an OAuth App keeps working: the config
+     decides which kind of application this is, and the code serves both. */
   location.href = 'https://github.com/login/oauth/authorize' +
     '?client_id=' + encodeURIComponent(CFG.clientId) +
     '&redirect_uri=' + encodeURIComponent(redirectUri()) +
-    '&scope=' + encodeURIComponent(CFG.scope) +
+    (CFG.scope ? '&scope=' + encodeURIComponent(CFG.scope) : '') +
     '&state=' + encodeURIComponent(st);
 }
 function setToken(t){
@@ -318,9 +327,17 @@ function identify(){
     /* THE AUTHORITY IS GITHUB'S, NOT THIS FILE'S. Asking whether the account
        can push is the same question the eventual commit will ask, so a person
        who would be refused at the end is told at the beginning. */
+    /* CAN THIS TOKEN ACTUALLY WRITE HERE? Asked of the repository itself, so
+       the answer comes from GitHub rather than from an assumption. A GitHub App
+       token only reaches repositories the app is installed on, so a repository
+       it cannot see returns 404 - which is the same answer as 'no' and is
+       treated as such rather than as an error to report. */
     return gh('/repos/' + CFG.owner + '/' + CFG.repo).then(function(r){
       canPush = !!(r.permissions && r.permissions.push);
       paintBar();
+    }).catch(function(e){
+      if(e.status === 404){ canPush = false; paintBar(); return; }
+      throw e;
     });
   }).catch(function(e){
     if(e.status === 401){ signOut(); alert('That token is not valid (or has expired).'); }
