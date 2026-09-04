@@ -36,9 +36,15 @@ function run(W, H) {
       if(!latentId && prof[id] && prof[id].worldType==='latent' &&
          (M.framing(id)||{}).radius) latentId=id;
     });
-    M.go('region',latentId); M.settle(220);
+    /* THERE MAY NO LONGER BE ONE. This drove M.go(region, null) when every
+       world had been charted, and the app looked up byId[null] and threw - so
+       a check that had simply run out of subject reported itself as a crash
+       and said nothing about which line. */
     out.latentId=latentId;
-    out.business=M.framing(latentId);
+    if(latentId){
+      M.go('region',latentId); M.settle(220);
+      out.business=M.framing(latentId);
+    }
     /* and back — the world camera must not still be driving */
     M.go('universe'); M.settle(260);
     out.after={ mind:M.mind(), organ:{ frame:M.organ().frame, lateralDeg:M.organ().lateralDeg } };
@@ -261,15 +267,32 @@ ck('WF11', N.worlds.philosophy.principal.inSafe >= D.worlds.philosophy.principal
    fitted from 136 rather than 62 — the fit wins by a factor of two and the
    camera stands exactly on it. That is the one place the claim is observable,
    so that is where it is now made. */
+/* AND THE SUBJECT CAN RUN OUT. A latent world is one with a shape but nothing
+   in it yet, and giving MUSIC, PSYCHOLOGY and ART their systems left none: every
+   topic in the mind is now planetary, circumbinary or a constellation.
+
+   The claim is not retired, because it will be true again the moment a new
+   topic is added - and the whole point of picking whichever world is latent,
+   rather than naming one, was to survive exactly this. What it could not
+   survive was there being none at all.
+
+   So it reports having no subject rather than passing quietly. A check that
+   says "nothing to measure" can be read and questioned; one that returns green
+   on an empty set is indistinguishable from one that verified something. */
 const lat = P.business;
-ck('WF12', !!P.latentId && lat && lat.camDist > 100 &&
-           Math.abs(lat.camDist - lat.fit) < 2 &&
-           lat.principal.inSafe === lat.principal.total,
-   'a latent world is framed by its own size, not a constant — ' +
-   String(P.latentId).toUpperCase() + ' stands at ' + lat.camDist +
-   ' on a phone, which is its computed fit of ' + lat.fit +
-   ' rather than the 62 a constant would give, with ' +
-   lat.principal.inSafe + '/' + lat.principal.total + ' readable');
+if(!P.latentId){
+  ck('WF12', true, 'no latent world exists to frame — every topic now has one, ' +
+     'so this has nothing to measure. It will apply again to the next topic added.');
+} else {
+  ck('WF12', lat && lat.camDist > 100 &&
+             Math.abs(lat.camDist - lat.fit) < 2 &&
+             lat.principal.inSafe === lat.principal.total,
+     'a latent world is framed by its own size, not a constant — ' +
+     String(P.latentId).toUpperCase() + ' stands at ' + lat.camDist +
+     ' on a phone, which is its computed fit of ' + lat.fit +
+     ' rather than the 62 a constant would give, with ' +
+     lat.principal.inSafe + '/' + lat.principal.total + ' readable');
+}
 
 console.log('\n  1440: ' + all.map(f => f.id + ' ' + f.principal.inSafe + '/' + f.principal.total + ' @' + f.camDist).join(' · '));
 console.log('  900 : ' + nw.map(f => f.id + ' ' + f.principal.inSafe + '/' + f.principal.total + ' @' + f.camDist).join(' · '));

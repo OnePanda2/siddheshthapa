@@ -1,462 +1,564 @@
 {
- "_note": "Every orbital figure here was retrieved from the NASA Exoplanet Archive TAP service, table pscomppars (Planetary Systems Composite Parameters), on 2026-08-19. Nothing is estimated, rounded from memory, or invented. Where the archive returned no value the field is null and the confidence is lowered accordingly. These are SPATIAL TEMPLATES: the geometry is borrowed, the meaning comes from Siddhesh's graph.",
- "_source": "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+hostname,pl_letter,pl_orbper,pl_orbsmax,sy_pnum+from+pscomppars",
- "_sourceType": "NASA Exoplanet Archive (IPAC/Caltech), pscomppars",
- "_retrieved": "2026-08-19",
- "systems": [
-  {
-   "system": "TRAPPIST-1",
-   "sourceType": "exoplanet-system",
-   "planetCount": 7,
-   "semiMajorAxisAU": [
-    0.01154,
-    0.0158,
-    0.02227,
-    0.02925,
-    0.03849,
-    0.04683,
-    0.06189
-   ],
-   "orbitalPeriodDays": [
-    1.510826,
-    2.421937,
-    4.049219,
-    6.101013,
-    9.20754,
-    12.352446,
-    18.772866
-   ],
-   "letters": [
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "g",
-    "h"
-   ],
-   "geometryBasis": "Extremely compact resonant chain. All seven orbits lie inside 0.062 AU — the whole system would fit well inside Mercury's orbit. Spacing ratio outer/inner = 5.4.",
-   "visualCharacter": "dense, tightly nested, near-equal spacing, everything close to the star",
-   "confidence": "high",
-   "notes": "Complete measured geometry for all 7 planets."
-  },
-  {
-   "system": "HR 8799",
-   "sourceType": "exoplanet-system",
-   "planetCount": 4,
-   "semiMajorAxisAU": [
-    16.4,
-    24,
-    38,
-    68
-   ],
-   "orbitalPeriodDays": [
-    20815.6,
-    37000,
-    69000,
-    170000
-   ],
-   "letters": [
-    "e",
-    "d",
-    "c",
-    "b"
-   ],
-   "geometryBasis": "Directly imaged, enormously wide. Outer planet is 4.1x the inner. Spans 16-68 AU.",
-   "visualCharacter": "vast, sparse, four widely separated bodies, huge negative space",
-   "confidence": "high",
-   "notes": "The strongest available contrast to TRAPPIST-1."
-  },
-  {
-   "system": "55 Cnc",
-   "sourceType": "exoplanet-system",
-   "planetCount": 7,
-   "semiMajorAxisAU": [
-    0.01544,
-    0.118,
-    0.247,
-    0.802,
-    5.6
-   ],
-   "orbitalPeriodDays": [
-    0.7365474,
-    14.651552,
-    44.3936,
-    260.58,
-    4799
-   ],
-   "letters": [
-    "e",
-    "b",
-    "c",
-    "f",
-    "d"
-   ],
-   "geometryBasis": "Extreme dynamic range: an ultra-short-period planet at 0.015 AU and a distant giant at 5.6 AU — a 363x span.",
-   "visualCharacter": "one body almost touching the star, then a huge leap outward",
-   "confidence": "medium",
-   "notes": "Archive reports sy_pnum 7 but returned geometry for only 5. Two planets lack values in pscomppars.",
-   "illustrative": {
-    "_warning": "NOT ASTRONOMY. Orbits beyond the fifth are spaced by a declared rule and must never be presented as measured.",
-    "orbitSpacingRule": "successive 3:2 period ratio, a proportional to P^(2/3), step 1.31037 — the same rule Kepler-16 uses, so two worlds do not invent two different conventions",
-    "orbitSpacingStep": 1.31037,
-    "_whySpacing": "The archive reports sy_pnum 7 for 55 Cnc but returns semi-major axes for only 5; the other two lack values in pscomppars. BUSINESS has 7 concepts. Orbits 0-4 are the five real measurements. Orbits 5-6 are spaced by this rule and are NOT measurements — the same treatment Kepler-16's orbits 1-3 receive."
-   }
-  },
-  {
-   "system": "HD 10180",
-   "sourceType": "exoplanet-system",
-   "planetCount": 6,
-   "semiMajorAxisAU": [
-    0.06412,
-    0.12859,
-    0.2699,
-    0.4929,
-    1.427,
-    3.381
-   ],
-   "orbitalPeriodDays": [
-    5.75969,
-    16.357,
-    49.748,
-    122.744,
-    604.67,
-    2205
-   ],
-   "letters": [
-    "c",
-    "d",
-    "e",
-    "f",
-    "g",
-    "h"
-   ],
-   "geometryBasis": "Strikingly regular near-geometric progression — each orbit roughly 2x the previous.",
-   "visualCharacter": "orderly, systematic, evenly graded outward — the most 'architectural' spacing available",
-   "confidence": "high",
-   "notes": "Complete geometry for all 6."
-  },
-  {
-   "system": "HD 219134",
-   "sourceType": "exoplanet-system",
-   "planetCount": 6,
-   "semiMajorAxisAU": [
-    0.03876,
-    0.0653,
-    0.1463,
-    0.237,
-    0.3753,
-    3.11
-   ],
-   "orbitalPeriodDays": [
-    3.092926,
-    6.76458,
-    22.717,
-    46.859,
-    94.2,
-    2247
-   ],
-   "letters": [
-    "b",
-    "c",
-    "f",
-    "d",
-    "g",
-    "h"
-   ],
-   "geometryBasis": "Five planets packed inside 0.38 AU, then one distant outlier at 3.11 AU — an 8x jump.",
-   "visualCharacter": "compact core plus one far-flung body — a system with an outlier",
-   "confidence": "high"
-  },
-  {
-   "system": "Kepler-11",
-   "sourceType": "exoplanet-system",
-   "planetCount": 6,
-   "semiMajorAxisAU": [
-    0.091,
-    0.107,
-    0.155,
-    0.195,
-    0.25,
-    0.466
-   ],
-   "orbitalPeriodDays": [
-    10.3039,
-    13.0241,
-    22.6845,
-    31.9996,
-    46.6888,
-    118.3807
-   ],
-   "letters": [
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "g"
-   ],
-   "geometryBasis": "Remarkably flat and coplanar; five inner planets crowded between 0.09 and 0.25 AU.",
-   "visualCharacter": "a flat, layered plane — the most 'stratified' system available",
-   "confidence": "high"
-  },
-  {
-   "system": "TOI-178",
-   "sourceType": "exoplanet-system",
-   "planetCount": 6,
-   "semiMajorAxisAU": [
-    0.02607,
-    0.037,
-    0.0592,
-    0.0783,
-    0.1039,
-    0.1275
-   ],
-   "orbitalPeriodDays": [
-    1.9145601,
-    3.238486,
-    6.557569,
-    9.96318,
-    15.23335,
-    20.71663
-   ],
-   "letters": [
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "g"
-   ],
-   "geometryBasis": "Resonant chain — the outer five are in a 2:4:6:9:12 Laplace resonance.",
-   "visualCharacter": "rhythmic, synchronised, mathematically periodic motion",
-   "confidence": "high",
-   "notes": "The resonance is the reason this is the natural candidate for MUSIC."
-  },
-  {
-   "system": "K2-138",
-   "sourceType": "exoplanet-system",
-   "planetCount": 6,
-   "semiMajorAxisAU": [
-    0.03385,
-    0.04461,
-    0.05893,
-    0.0782,
-    0.10447,
-    0.23109
-   ],
-   "orbitalPeriodDays": [
-    2.35309,
-    3.56004,
-    5.40479,
-    8.26146,
-    12.75758,
-    41.96797
-   ],
-   "letters": [
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "g"
-   ],
-   "geometryBasis": "Unbroken 3:2 resonant chain for the inner five, then a gap to the sixth.",
-   "visualCharacter": "an ordered inner sequence, then a break — progression with a discontinuity",
-   "confidence": "high"
-  },
-  {
-   "system": "Kepler-33",
-   "sourceType": "exoplanet-system",
-   "planetCount": 5,
-   "semiMajorAxisAU": [
-    0.0677,
-    0.1189,
-    0.1662,
-    0.2138,
-    0.2535
-   ],
-   "orbitalPeriodDays": [
-    5.66793,
-    13.17562,
-    21.77596,
-    31.7844,
-    41.02902
-   ],
-   "letters": [
-    "b",
-    "c",
-    "d",
-    "e",
-    "f"
-   ],
-   "geometryBasis": "Evenly graded, closely spaced, increasing planet size outward.",
-   "visualCharacter": "steady outward growth — each shell slightly larger than the last",
-   "confidence": "high"
-  },
-  {
-   "system": "GJ 876",
-   "sourceType": "exoplanet-system",
-   "planetCount": 4,
-   "semiMajorAxisAU": [
-    0.02080665,
-    0.12959,
-    0.208317,
-    0.3343
-   ],
-   "orbitalPeriodDays": [
-    1.93778,
-    30.0881,
-    61.1166,
-    124.26
-   ],
-   "letters": [
-    "d",
-    "c",
-    "b",
-    "e"
-   ],
-   "geometryBasis": "Three outer planets in a Laplace resonance (1:2:4); one very close inner planet.",
-   "visualCharacter": "coupled bodies whose motions are locked to each other",
-   "confidence": "high"
-  },
-  {
-   "system": "Proxima Cen",
-   "sourceType": "exoplanet-system",
-   "planetCount": 2,
-   "semiMajorAxisAU": [
-    0.02881,
-    0.04848
-   ],
-   "orbitalPeriodDays": [
-    5.12338,
-    11.18465
-   ],
-   "letters": [
-    "d",
-    "b"
-   ],
-   "geometryBasis": "Only two confirmed planets, both very close in. The nearest star to the Sun.",
-   "visualCharacter": "sparse, quiet, almost empty — a system defined by what it lacks",
-   "confidence": "high",
-   "notes": "Its emptiness is the point; the natural candidate for a MIG with almost no content."
-  },
-  {
-   "system": "Kepler-16",
-   "sourceType": "circumbinary-system",
-   "planetCount": 1,
-   "semiMajorAxisAU": [
-    0.7048
-   ],
-   "orbitalPeriodDays": [
-    228.776
-   ],
-   "letters": [
-    "b"
-   ],
-   "measured": {
-    "planet": {
-     "semiMajorAxisAU": 0.7048,
-     "orbitalPeriodDays": 228.776,
-     "eccentricity": 0.0069,
-     "inclinationDeg": 90.0322,
-     "massJupiter": 0.333,
-     "radiusJupiter": 0.7538
+  "_note": "Every orbital figure here was retrieved from the NASA Exoplanet Archive TAP service, table pscomppars (Planetary Systems Composite Parameters), on 2026-08-19. Nothing is estimated, rounded from memory, or invented. Where the archive returned no value the field is null and the confidence is lowered accordingly. These are SPATIAL TEMPLATES: the geometry is borrowed, the meaning comes from Siddhesh's graph.",
+  "_source": "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+hostname,pl_letter,pl_orbper,pl_orbsmax,sy_pnum+from+pscomppars",
+  "_sourceType": "NASA Exoplanet Archive (IPAC/Caltech), pscomppars",
+  "_retrieved": "2026-08-19",
+  "systems": [
+    {
+      "system": "TRAPPIST-1",
+      "sourceType": "exoplanet-system",
+      "planetCount": 7,
+      "semiMajorAxisAU": [
+        0.01154,
+        0.0158,
+        0.02227,
+        0.02925,
+        0.03849,
+        0.04683,
+        0.06189
+      ],
+      "orbitalPeriodDays": [
+        1.510826,
+        2.421937,
+        4.049219,
+        6.101013,
+        9.20754,
+        12.352446,
+        18.772866
+      ],
+      "letters": [
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h"
+      ],
+      "geometryBasis": "Extremely compact resonant chain. All seven orbits lie inside 0.062 AU — the whole system would fit well inside Mercury's orbit. Spacing ratio outer/inner = 5.4.",
+      "visualCharacter": "dense, tightly nested, near-equal spacing, everything close to the star",
+      "confidence": "high",
+      "notes": "Complete measured geometry for all 7 planets."
     },
-    "stars": {
-     "count": 2,
-     "massSolar": [
-      0.6897,
-      0.2
-     ],
-     "primaryRadiusSolar": 0.6489,
-     "primaryTeffK": 4450
+    {
+      "system": "HR 8799",
+      "sourceType": "exoplanet-system",
+      "planetCount": 4,
+      "semiMajorAxisAU": [
+        16.4,
+        24,
+        38,
+        68
+      ],
+      "orbitalPeriodDays": [
+        20815.6,
+        37000,
+        69000,
+        170000
+      ],
+      "letters": [
+        "e",
+        "d",
+        "c",
+        "b"
+      ],
+      "geometryBasis": "Directly imaged, enormously wide. Outer planet is 4.1x the inner. Spans 16-68 AU.",
+      "visualCharacter": "vast, sparse, four widely separated bodies, huge negative space",
+      "confidence": "high",
+      "notes": "The strongest available contrast to TRAPPIST-1."
     },
-    "binary": {
-     "periodDays": 41,
-     "eccentric": true
+    {
+      "system": "55 Cnc",
+      "sourceType": "exoplanet-system",
+      "planetCount": 7,
+      "semiMajorAxisAU": [
+        0.01544,
+        0.118,
+        0.247,
+        0.802,
+        5.6
+      ],
+      "orbitalPeriodDays": [
+        0.7365474,
+        14.651552,
+        44.3936,
+        260.58,
+        4799
+      ],
+      "letters": [
+        "e",
+        "b",
+        "c",
+        "f",
+        "d"
+      ],
+      "geometryBasis": "Extreme dynamic range: an ultra-short-period planet at 0.015 AU and a distant giant at 5.6 AU — a 363x span.",
+      "visualCharacter": "one body almost touching the star, then a huge leap outward",
+      "confidence": "medium",
+      "notes": "Archive reports sy_pnum 7 but returned geometry for only 5. Two planets lack values in pscomppars.",
+      "illustrative": {
+        "_warning": "NOT ASTRONOMY. Orbits beyond the fifth are spaced by a declared rule and must never be presented as measured.",
+        "orbitSpacingRule": "successive 3:2 period ratio, a proportional to P^(2/3), step 1.31037 — the same rule Kepler-16 uses, so two worlds do not invent two different conventions",
+        "orbitSpacingStep": 1.31037,
+        "_whySpacing": "The archive reports sy_pnum 7 for 55 Cnc but returns semi-major axes for only 5; the other two lack values in pscomppars. BUSINESS has 7 concepts. Orbits 0-4 are the five real measurements. Orbits 5-6 are spaced by this rule and are NOT measurements — the same treatment Kepler-16's orbits 1-3 receive."
+      }
     },
-    "coplanarWithinDeg": 0.5,
-    "circumbinaryFlag": 1,
-    "_massSource": "primary 0.6897 from pscomppars; secondary 0.20 from the Doyle et al. 2011 abstract (\"20% and 69% as massive as the sun\")",
-    "_binarySource": "Doyle et al. 2011 abstract: \"The eclipsing stars are 20% and 69% as massive as the sun, and have an eccentric 41-day orbit.\"",
-    "_coplanarSource": "Doyle et al. 2011 abstract: \"The motions of all three bodies are confined to within 0.5 degree of a single plane.\""
-   },
-   "derived": {
-    "_formula": "Kepler's third law, a^3 = M_total * (P/365.25)^2 in AU / solar masses / years",
-    "binarySemiMajorAxisAU": 0.22381,
-    "barycentreOffsetAU": [
-     0.05031,
-     0.1735
-    ],
-    "swingRatioBoverA": 3.4485,
-    "_swingMeaning": "the small star swings 3.45x wider than the massive one — they are bound, but they do not move equally",
-    "planetToBinaryRatio": 3.14912,
-    "_planetMeaning": "the planet orbits at 3.15x the stellar separation, so the centre of this system is a large empty region",
-    "stabilityLowerBoundRatio": 2.26894,
-    "stabilityLowerBoundAU": 0.50781,
-    "_stabilitySource": "Holman & Wiegert 1999 critical semi-major axis for P-type orbits, evaluated at e=0. Because the binary is eccentric the true limit is LARGER than this; this is a lower bound only.",
-    "visualSizeRatioAoverB": 1.51081,
-    "_sizeMeaning": "cube root of the measured mass ratio, used only to size the two stars relative to each other",
-    "secondaryIsCoolerThanPrimary": true,
-    "_tempMeaning": "follows from 0.20 < 0.69 solar masses on the main sequence; the secondary Teff itself was NOT measured"
-   },
-   "illustrative": {
-    "_warning": "NOT ASTRONOMY. Chosen for rendering because the measured value could not be sourced. Must never be presented as measured.",
-    "binaryEccentricity": 0.16,
-    "_why": "Doyle et al. 2011 states the binary orbit IS eccentric but gives no number in any abstract or archive table reachable here, so the orbit is drawn visibly non-circular at a declared value rather than drawn as a circle, which would contradict the published description.",
-    "orbitSpacingRule": "successive 3:2 period ratio, a ∝ P^(2/3), step 1.31037",
-    "orbitSpacingStep": 1.31037,
-    "_whySpacing": "Kepler-16 has exactly ONE measured planet. LOVE has four Minor IGs. Orbit 0 is the real measured orbit; orbits 1-3 are spaced by this declared rule and are NOT measurements."
-   },
-   "unverified": {
-    "binaryEccentricityValue": "no numeric value in NASA pscomppars, the ps table, or any fetchable abstract",
-    "secondaryRadiusSolar": null,
-    "secondaryTeffK": null,
-    "binaryArgumentOfPeriapsis": null
-   },
-   "geometryBasis": "CIRCUMBINARY. Two stars of 0.69 and 0.20 solar masses on an eccentric 41-day mutual orbit, derived separation 0.2238 AU. The single measured planet orbits the PAIR at 0.7048 AU — 3.15x the stellar separation — leaving a large dynamically empty centre.",
-   "visualCharacter": "two unequal centres swinging anti-phase about a shared barycentre, a wide hollow middle where nothing can hold an orbit, then a small number of far, slow bodies",
-   "confidence": "high",
-   "notes": "Planet geometry and primary star from pscomppars (Doyle et al. 2011). Secondary mass, binary period, eccentric-ness and 0.5-degree coplanarity from the Doyle et al. 2011 abstract. Binary semi-major axis and barycentre split DERIVED via Kepler third law. Binary eccentricity value remains UNVERIFIED.",
-   "_provenance": [
-    "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+*+from+pscomppars+where+hostname=%27Kepler-16%27",
-    "https://arxiv.org/abs/1109.3432  (Doyle et al. 2011, Science 333, 1602)",
-    "https://ui.adsabs.harvard.edu/abs/2011Sci...333.1602D/abstract"
-   ]
-  }
- ],
- "gaps": [
-  {
-   "issue": "Kepler-90 returned no rows",
-   "detail": "Queried by hostname 'Kepler-90' against pscomppars and got nothing back. It is an 8-planet system and would have been a strong candidate, but it is NOT verified and must not be used until it is.",
-   "action": "re-query with correct hostname spelling before use"
-  },
-  {
-   "issue": "HD 158259 has no semi-major axes",
-   "detail": "The archive returned orbital periods for 5 planets but pl_orbsmax was null for every one. Periods alone cannot place bodies in space without assuming a stellar mass.",
-   "action": "either derive from Kepler's third law with a sourced stellar mass, or do not use"
-  },
-  {
-   "issue": "Only 12 systems verified, 14 MIGs",
-   "detail": "Two MIGs have no exoplanet template yet. Per the brief the fallback is REAL constellation geometry, never an invented system.",
-   "action": "source two documented constellation star patterns, or verify two more exoplanet systems"
-  },
-  {
-   "issue": "55 Cnc count mismatch",
-   "detail": "sy_pnum says 7; only 5 planets returned usable geometry.",
-   "action": "use the 5 measured orbits only, and say so"
-  },
-  {
-   "issue": "Kepler-16 binary eccentricity has no numeric value",
-   "detail": "Doyle et al. 2011 describes the 41-day stellar orbit as eccentric but states no figure in the abstract, and neither pscomppars nor the ps table carries stellar binary elements. The renderer therefore uses a declared ILLUSTRATIVE eccentricity, flagged as such in systems[].illustrative.",
-   "action": "read the value out of the Science paper or its supplementary material, then move it from illustrative to measured"
-  },
-  {
-   "issue": "Kepler-16 has one planet; LOVE has four Minor IGs",
-   "detail": "Only orbit 0 is a measurement. Orbits 1-3 are spaced by a declared 3:2 period rule recorded in systems[].illustrative.orbitSpacingRule and must never be described as measured.",
-   "action": "none — the split is recorded and machine-checked"
-  }
- ],
- "_retrieved_kepler16": "2026-08-20"
+    {
+      "system": "HD 10180",
+      "sourceType": "exoplanet-system",
+      "planetCount": 6,
+      "semiMajorAxisAU": [
+        0.06412,
+        0.12859,
+        0.2699,
+        0.4929,
+        1.427,
+        3.381
+      ],
+      "orbitalPeriodDays": [
+        5.75969,
+        16.357,
+        49.748,
+        122.744,
+        604.67,
+        2205
+      ],
+      "letters": [
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h"
+      ],
+      "geometryBasis": "Strikingly regular near-geometric progression — each orbit roughly 2x the previous.",
+      "visualCharacter": "orderly, systematic, evenly graded outward — the most 'architectural' spacing available",
+      "confidence": "high",
+      "notes": "Complete geometry for all 6."
+    },
+    {
+      "system": "HD 219134",
+      "sourceType": "exoplanet-system",
+      "planetCount": 6,
+      "semiMajorAxisAU": [
+        0.03876,
+        0.0653,
+        0.1463,
+        0.237,
+        0.3753,
+        3.11
+      ],
+      "orbitalPeriodDays": [
+        3.092926,
+        6.76458,
+        22.717,
+        46.859,
+        94.2,
+        2247
+      ],
+      "letters": [
+        "b",
+        "c",
+        "f",
+        "d",
+        "g",
+        "h"
+      ],
+      "geometryBasis": "Five planets packed inside 0.38 AU, then one distant outlier at 3.11 AU — an 8x jump.",
+      "visualCharacter": "compact core plus one far-flung body — a system with an outlier",
+      "confidence": "high"
+    },
+    {
+      "system": "Kepler-11",
+      "sourceType": "exoplanet-system",
+      "planetCount": 6,
+      "semiMajorAxisAU": [
+        0.091,
+        0.107,
+        0.155,
+        0.195,
+        0.25,
+        0.466
+      ],
+      "orbitalPeriodDays": [
+        10.3039,
+        13.0241,
+        22.6845,
+        31.9996,
+        46.6888,
+        118.3807
+      ],
+      "letters": [
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g"
+      ],
+      "geometryBasis": "Remarkably flat and coplanar; five inner planets crowded between 0.09 and 0.25 AU.",
+      "visualCharacter": "a flat, layered plane — the most 'stratified' system available",
+      "confidence": "high"
+    },
+    {
+      "system": "TOI-178",
+      "sourceType": "exoplanet-system",
+      "planetCount": 6,
+      "semiMajorAxisAU": [
+        0.02607,
+        0.037,
+        0.0592,
+        0.0783,
+        0.1039,
+        0.1275
+      ],
+      "orbitalPeriodDays": [
+        1.9145601,
+        3.238486,
+        6.557569,
+        9.96318,
+        15.23335,
+        20.71663
+      ],
+      "letters": [
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g"
+      ],
+      "geometryBasis": "Resonant chain — the outer five are in a 2:4:6:9:12 Laplace resonance.",
+      "visualCharacter": "rhythmic, synchronised, mathematically periodic motion",
+      "confidence": "high",
+      "notes": "The resonance is the reason this is the natural candidate for MUSIC."
+    },
+    {
+      "system": "K2-138",
+      "sourceType": "exoplanet-system",
+      "planetCount": 6,
+      "semiMajorAxisAU": [
+        0.03385,
+        0.04461,
+        0.05893,
+        0.0782,
+        0.10447,
+        0.23109
+      ],
+      "orbitalPeriodDays": [
+        2.35309,
+        3.56004,
+        5.40479,
+        8.26146,
+        12.75758,
+        41.96797
+      ],
+      "letters": [
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g"
+      ],
+      "geometryBasis": "Unbroken 3:2 resonant chain for the inner five, then a gap to the sixth.",
+      "visualCharacter": "an ordered inner sequence, then a break — progression with a discontinuity",
+      "confidence": "high"
+    },
+    {
+      "system": "Kepler-33",
+      "sourceType": "exoplanet-system",
+      "planetCount": 5,
+      "semiMajorAxisAU": [
+        0.0677,
+        0.1189,
+        0.1662,
+        0.2138,
+        0.2535
+      ],
+      "orbitalPeriodDays": [
+        5.66793,
+        13.17562,
+        21.77596,
+        31.7844,
+        41.02902
+      ],
+      "letters": [
+        "b",
+        "c",
+        "d",
+        "e",
+        "f"
+      ],
+      "geometryBasis": "Evenly graded, closely spaced, increasing planet size outward.",
+      "visualCharacter": "steady outward growth — each shell slightly larger than the last",
+      "confidence": "high"
+    },
+    {
+      "system": "GJ 876",
+      "sourceType": "exoplanet-system",
+      "planetCount": 4,
+      "semiMajorAxisAU": [
+        0.02080665,
+        0.12959,
+        0.208317,
+        0.3343
+      ],
+      "orbitalPeriodDays": [
+        1.93778,
+        30.0881,
+        61.1166,
+        124.26
+      ],
+      "letters": [
+        "d",
+        "c",
+        "b",
+        "e"
+      ],
+      "geometryBasis": "Three outer planets in a Laplace resonance (1:2:4); one very close inner planet.",
+      "visualCharacter": "coupled bodies whose motions are locked to each other",
+      "confidence": "high"
+    },
+    {
+      "system": "Proxima Cen",
+      "sourceType": "exoplanet-system",
+      "planetCount": 2,
+      "semiMajorAxisAU": [
+        0.02881,
+        0.04848
+      ],
+      "orbitalPeriodDays": [
+        5.12338,
+        11.18465
+      ],
+      "letters": [
+        "d",
+        "b"
+      ],
+      "geometryBasis": "Only two confirmed planets, both very close in. The nearest star to the Sun.",
+      "visualCharacter": "sparse, quiet, almost empty — a system defined by what it lacks",
+      "confidence": "high",
+      "notes": "Its emptiness is the point; the natural candidate for a MIG with almost no content."
+    },
+    {
+      "system": "Kepler-16",
+      "sourceType": "circumbinary-system",
+      "planetCount": 1,
+      "semiMajorAxisAU": [
+        0.7048
+      ],
+      "orbitalPeriodDays": [
+        228.776
+      ],
+      "letters": [
+        "b"
+      ],
+      "measured": {
+        "planet": {
+          "semiMajorAxisAU": 0.7048,
+          "orbitalPeriodDays": 228.776,
+          "eccentricity": 0.0069,
+          "inclinationDeg": 90.0322,
+          "massJupiter": 0.333,
+          "radiusJupiter": 0.7538
+        },
+        "stars": {
+          "count": 2,
+          "massSolar": [
+            0.6897,
+            0.2
+          ],
+          "primaryRadiusSolar": 0.6489,
+          "primaryTeffK": 4450
+        },
+        "binary": {
+          "periodDays": 41,
+          "eccentric": true
+        },
+        "coplanarWithinDeg": 0.5,
+        "circumbinaryFlag": 1,
+        "_massSource": "primary 0.6897 from pscomppars; secondary 0.20 from the Doyle et al. 2011 abstract (\"20% and 69% as massive as the sun\")",
+        "_binarySource": "Doyle et al. 2011 abstract: \"The eclipsing stars are 20% and 69% as massive as the sun, and have an eccentric 41-day orbit.\"",
+        "_coplanarSource": "Doyle et al. 2011 abstract: \"The motions of all three bodies are confined to within 0.5 degree of a single plane.\""
+      },
+      "derived": {
+        "_formula": "Kepler's third law, a^3 = M_total * (P/365.25)^2 in AU / solar masses / years",
+        "binarySemiMajorAxisAU": 0.22381,
+        "barycentreOffsetAU": [
+          0.05031,
+          0.1735
+        ],
+        "swingRatioBoverA": 3.4485,
+        "_swingMeaning": "the small star swings 3.45x wider than the massive one — they are bound, but they do not move equally",
+        "planetToBinaryRatio": 3.14912,
+        "_planetMeaning": "the planet orbits at 3.15x the stellar separation, so the centre of this system is a large empty region",
+        "stabilityLowerBoundRatio": 2.26894,
+        "stabilityLowerBoundAU": 0.50781,
+        "_stabilitySource": "Holman & Wiegert 1999 critical semi-major axis for P-type orbits, evaluated at e=0. Because the binary is eccentric the true limit is LARGER than this; this is a lower bound only.",
+        "visualSizeRatioAoverB": 1.51081,
+        "_sizeMeaning": "cube root of the measured mass ratio, used only to size the two stars relative to each other",
+        "secondaryIsCoolerThanPrimary": true,
+        "_tempMeaning": "follows from 0.20 < 0.69 solar masses on the main sequence; the secondary Teff itself was NOT measured"
+      },
+      "illustrative": {
+        "_warning": "NOT ASTRONOMY. Chosen for rendering because the measured value could not be sourced. Must never be presented as measured.",
+        "binaryEccentricity": 0.16,
+        "_why": "Doyle et al. 2011 states the binary orbit IS eccentric but gives no number in any abstract or archive table reachable here, so the orbit is drawn visibly non-circular at a declared value rather than drawn as a circle, which would contradict the published description.",
+        "orbitSpacingRule": "successive 3:2 period ratio, a ∝ P^(2/3), step 1.31037",
+        "orbitSpacingStep": 1.31037,
+        "_whySpacing": "Kepler-16 has exactly ONE measured planet. LOVE has four Minor IGs. Orbit 0 is the real measured orbit; orbits 1-3 are spaced by this declared rule and are NOT measurements."
+      },
+      "unverified": {
+        "binaryEccentricityValue": "no numeric value in NASA pscomppars, the ps table, or any fetchable abstract",
+        "secondaryRadiusSolar": null,
+        "secondaryTeffK": null,
+        "binaryArgumentOfPeriapsis": null
+      },
+      "geometryBasis": "CIRCUMBINARY. Two stars of 0.69 and 0.20 solar masses on an eccentric 41-day mutual orbit, derived separation 0.2238 AU. The single measured planet orbits the PAIR at 0.7048 AU — 3.15x the stellar separation — leaving a large dynamically empty centre.",
+      "visualCharacter": "two unequal centres swinging anti-phase about a shared barycentre, a wide hollow middle where nothing can hold an orbit, then a small number of far, slow bodies",
+      "confidence": "high",
+      "notes": "Planet geometry and primary star from pscomppars (Doyle et al. 2011). Secondary mass, binary period, eccentric-ness and 0.5-degree coplanarity from the Doyle et al. 2011 abstract. Binary semi-major axis and barycentre split DERIVED via Kepler third law. Binary eccentricity value remains UNVERIFIED.",
+      "_provenance": [
+        "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select+*+from+pscomppars+where+hostname=%27Kepler-16%27",
+        "https://arxiv.org/abs/1109.3432  (Doyle et al. 2011, Science 333, 1602)",
+        "https://ui.adsabs.harvard.edu/abs/2011Sci...333.1602D/abstract"
+      ]
+    },
+    {
+      "system": "Kepler-80",
+      "sourceType": "exoplanet-system",
+      "planetCount": 6,
+      "semiMajorAxisAU": [
+        0.0175,
+        0.0372,
+        0.0491,
+        0.0648,
+        0.0792
+      ],
+      "orbitalPeriodDays": [
+        0.9867873,
+        3.07222,
+        4.64489,
+        7.05246,
+        9.52355
+      ],
+      "letters": [
+        "f",
+        "d",
+        "e",
+        "b",
+        "c"
+      ],
+      "geometryBasis": "Five bodies inside 0.08 AU, a 4.5x span — the tightest packing in this set. The periods stand in near whole-number ratios to each other.",
+      "visualCharacter": "close, ordered, rhythmic — bodies locked to one another rather than merely near one another",
+      "confidence": "medium",
+      "notes": "Archive reports sy_pnum 6 but returned a semi-major axis for only 5; Kepler-80 g has no pl_orbsmax value in pscomppars.",
+      "illustrative": {
+        "_warning": "NOT ASTRONOMY. Orbits beyond the fifth are spaced by a declared rule and must never be presented as measured.",
+        "orbitSpacingRule": "successive 3:2 period ratio, a proportional to P^(2/3), step 1.31037 — the same rule Kepler-16 and 55 Cnc use, so no world invents its own convention",
+        "orbitSpacingStep": 1.31037,
+        "_whySpacing": "Orbits 0-4 are the five real measurements. Anything beyond them is spaced by this rule and is NOT a measurement."
+      }
+    },
+    {
+      "system": "Kepler-62",
+      "sourceType": "exoplanet-system",
+      "planetCount": 5,
+      "semiMajorAxisAU": [
+        0.0553,
+        0.0929,
+        0.12,
+        0.427,
+        0.718
+      ],
+      "orbitalPeriodDays": [
+        5.714932,
+        12.4417,
+        18.16406,
+        122.3874,
+        267.291
+      ],
+      "letters": [
+        "b",
+        "c",
+        "d",
+        "e",
+        "f"
+      ],
+      "geometryBasis": "A 13x span with the width concentrated in one place: gaps of 1.68, 1.29, 3.56 and 1.68, so the third step is more than twice any other.",
+      "visualCharacter": "an inner cluster and a distant pair, with a conspicuous emptiness between them",
+      "confidence": "high",
+      "notes": "All five planets returned both a period and a semi-major axis."
+    },
+    {
+      "system": "HD 40307",
+      "sourceType": "exoplanet-system",
+      "planetCount": 5,
+      "semiMajorAxisAU": [
+        0.0468,
+        0.0799,
+        0.1321,
+        0.247,
+        0.6
+      ],
+      "orbitalPeriodDays": [
+        4.3123,
+        9.6184,
+        20.432,
+        51.76,
+        197.8
+      ],
+      "letters": [
+        "b",
+        "c",
+        "d",
+        "f",
+        "g"
+      ],
+      "geometryBasis": "A 12.8x span whose gaps WIDEN outward - 1.71, 1.65, 1.87, 2.43 - the most steadily opening system in this set.",
+      "visualCharacter": "open and unhurried, each body further from its neighbour than the last",
+      "confidence": "high",
+      "notes": "Lettered b, c, d, f, g: the archive returns no e for this host. All five returned both a period and a semi-major axis."
+    }
+  ],
+  "gaps": [
+    {
+      "issue": "Kepler-90 returned no rows",
+      "detail": "Queried by hostname 'Kepler-90' against pscomppars and got nothing back. It is an 8-planet system and would have been a strong candidate, but it is NOT verified and must not be used until it is.",
+      "action": "re-query with correct hostname spelling before use"
+    },
+    {
+      "issue": "HD 158259 has no semi-major axes",
+      "detail": "The archive returned orbital periods for 5 planets but pl_orbsmax was null for every one. Periods alone cannot place bodies in space without assuming a stellar mass.",
+      "action": "either derive from Kepler's third law with a sourced stellar mass, or do not use"
+    },
+    {
+      "issue": "Only 12 systems verified, 14 MIGs",
+      "detail": "Two MIGs have no exoplanet template yet. Per the brief the fallback is REAL constellation geometry, never an invented system.",
+      "action": "source two documented constellation star patterns, or verify two more exoplanet systems"
+    },
+    {
+      "issue": "55 Cnc count mismatch",
+      "detail": "sy_pnum says 7; only 5 planets returned usable geometry.",
+      "action": "use the 5 measured orbits only, and say so"
+    },
+    {
+      "issue": "Kepler-16 binary eccentricity has no numeric value",
+      "detail": "Doyle et al. 2011 describes the 41-day stellar orbit as eccentric but states no figure in the abstract, and neither pscomppars nor the ps table carries stellar binary elements. The renderer therefore uses a declared ILLUSTRATIVE eccentricity, flagged as such in systems[].illustrative.",
+      "action": "read the value out of the Science paper or its supplementary material, then move it from illustrative to measured"
+    },
+    {
+      "issue": "Kepler-16 has one planet; LOVE has four Minor IGs",
+      "detail": "Only orbit 0 is a measurement. Orbits 1-3 are spaced by a declared 3:2 period rule recorded in systems[].illustrative.orbitSpacingRule and must never be described as measured.",
+      "action": "none — the split is recorded and machine-checked"
+    },
+    {
+      "issue": "Kepler-90 still returns no rows",
+      "detail": "Re-queried on 2026-09-04 against pscomppars by hostname, as the earlier gap entry instructed. The archive returned nothing again, so the eight-planet system remains unverified and unused.",
+      "action": "leave unused"
+    }
+  ],
+  "_retrieved_kepler16": "2026-08-20",
+  "_retrieved_2026_09_04": "Kepler-80, Kepler-62 and HD 40307 retrieved from the same TAP service and table as the rest, on 2026-09-04."
 }

@@ -432,11 +432,37 @@ var ASTRO={}; (ASTRO_DATA.systems||[]).forEach(function(sy){ ASTRO[sy.system]=sy
 
 /* Two worlds are assigned, chosen to be structurally opposite: one star with
    seven packed orbits, against two stars with a hollow centre. */
+/* THE LAST THREE TOPICS GET THEIR WORLDS, and they were chosen for what the
+   archive actually says about each system rather than for the name.
+
+   MUSIC is Kepler-80, a RESONANT CHAIN: five bodies inside 0.08 AU whose
+   periods stand in near whole-number ratios to one another. That is the
+   physics of harmony and not a metaphor reached for afterwards - a chord is
+   the same arithmetic.
+
+   PSYCHOLOGY is Kepler-62: three planets close together, a gap of 3.56x where
+   every other step is under 1.7x, then two far out. An inner cluster and a
+   distant pair, with a conspicuous emptiness between them.
+
+   ART is HD 40307, whose gaps WIDEN outward - 1.71, 1.65, 1.87, 2.43 - the
+   most steadily opening system in the set, and the exact opposite shape to
+   the packing MUSIC gets.
+
+   THE ORBITS EXIST BEFORE ANYTHING IS WRITTEN. orbitalSlots returns a ring
+   for every measured axis regardless of how much a topic holds, and a concept
+   takes orbit k by its position - so the first thing written into MUSIC or
+   PSYCHOLOGY lands on the innermost orbit of a system that was already there
+   waiting, with no assignment step to remember.
+
+   Proxima Cen stays unassigned on purpose. Its own record calls it "the
+   natural candidate for a MIG with almost no content", and every topic now
+   has a world, so it waits for the next one rather than being spent. */
 var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799',
                  'life':'Kepler-33', 'technology':'GJ 876', 'business':'55 Cnc',
                  'society':'Kepler-11', 'building':'HD 10180',
                  'learning':'K2-138', 'behaviour':'TOI-178',
-                 'food':'HD 219134' };
+                 'food':'HD 219134',
+                 'music':'Kepler-80', 'psychology':'Kepler-62', 'art':'HD 40307' };
 function templateFor(migId){ return ASTRO[MIG_SYSTEM[migId]]||null; }
 
 var ORBIT_R0=13;                     // the innermost orbit, in scene units

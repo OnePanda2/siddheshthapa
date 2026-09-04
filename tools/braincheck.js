@@ -267,8 +267,17 @@ const wantCharted = sky.filter(x => x.expected && x.expected !== 'not yet charte
 ck('B19', menu.length === r.mmm.arch.migCount &&
           sky.length === r.mmm.arch.migCount &&
           sky.every(x => x.shown === null || x.shown === x.expected) &&
+/* EVERY TOPIC HAS A WORLD NOW, so this no longer requires that some do not.
+   It read skyCharted.length < sky.length, which was a true statement about the
+   mind for as long as MUSIC, PSYCHOLOGY and ART had no system - and became a
+   demand that at least one topic stay uncharted the moment they were given
+   one. An assertion should hold the RULE, not the census: no world names a
+   system it does not have, every world that has one names it, and no two share
+   one. Those survive a sixteenth world; a count does not.
+
+   The uncharted clause below is kept and simply has nothing to check today. It
+   is what would catch a future topic added without a world. */
           skyCharted.length === wantCharted.length && skyCharted.length >= 6 &&
-          skyCharted.length < sky.length &&
           new Set(skyCharted.map(x => x.shown)).size === skyCharted.length &&
           sky.filter(x => !x.shown).every(x => menuSrc[x.id] === 'not yet charted') &&
           skyCharted.every(x => menuSrc[x.id] == null),

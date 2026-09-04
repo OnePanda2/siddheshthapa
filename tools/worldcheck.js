@@ -339,8 +339,9 @@ const charted = sky9.filter(m => m.shown);
    hardcoded roster of system names is maintenance, not a test, and each world
    added was making the same edit in two files. A source must be unique to its
    region, and no region may invent one. */
+/* the same census turned rule: it required a topic without a world, and there
+   is no longer one. What is asserted is that nothing claims what it lacks. */
 ck('W9', srcBad.length === 0 && silent.length === 0 && charted.length >= 6 &&
-         charted.length < sky9.length &&
          new Set(charted.map(m => m.shown)).size === charted.length,
    'no world claims a heritage it does not have — ' +
    charted.map(m => m.id + '=' + m.shown).join(', ') + '; the other ' +
