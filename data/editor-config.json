@@ -5,7 +5,7 @@
   "branch": "main",
   "path": "data/notes.json",
   "scope": "public_repo",
-  "exchange": "",
+  "exchange": "https://siddheshthapa-auth.onepanda2.workers.dev",
   "_readme": [
     "Configuration for editor.html. Everything here is PUBLIC by design and none",
     "of it is a secret: a Client ID identifies the app, it does not authorise",
