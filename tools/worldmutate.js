@@ -13,7 +13,18 @@ const MUTATIONS = [
     repl: `    if(m.id==='music') return;          // mutation: one region left out
     MIG_WORLD_PROFILE[m.id]={` },
 
+  /* THE SIXTH ASSERTION EMPTIED BY CHARTING THE LAST THREE TOPICS, and the
+     last of them to be found. Nothing reaches the 'latent' fallback now, so
+     replacing it with undefined left no world undeclared and W2 passed having
+     tested nothing — it was one of the two survivors in a 28/30 run whose name
+     scrolled past the captured tail, which is its own small lesson about
+     truncating the output of a suite you intend to act on.
+
+     See W9 below for the same shape and the same remedy: make a world that
+     falls through, then break what is supposed to catch it. */
   { n: 'W2', file: APP, name: 'an unbuilt world is DECLARED latent, not a silent fallback',
+    also: { find: `'music':'Kepler-80', 'psychology':'Kepler-62', 'art':'HD 40307' };`,
+            repl: `'music':'Kepler-80', 'psychology':'Kepler-62' };` },
     find: `             : tpl ? 'planetary'
              : 'latent';`,
     repl: `             : tpl ? 'planetary'
