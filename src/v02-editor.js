@@ -333,7 +333,23 @@ function identify(){
        it cannot see returns 404 - which is the same answer as 'no' and is
        treated as such rather than as an error to report. */
     return gh('/repos/' + CFG.owner + '/' + CFG.repo).then(function(r){
-      canPush = !!(r.permissions && r.permissions.push);
+      /* TWO KINDS OF TOKEN ANSWER THIS DIFFERENTLY, and reading only one of
+         the answers is what hid the edit controls after the move to a GitHub
+         App.
+
+         An OAuth token reports a permissions object on a repository, so its
+         push flag is the direct answer and is used when it is there.
+
+         A GitHub App user-to-server token does not report one. But it does not
+         need to: such a token can only SEE repositories the App is installed
+         on, and this App is installed on exactly one, with Contents write and
+         nothing else. Reaching this line at all therefore means the App is
+         installed here - the 404 below is what "no" looks like. Visibility is
+         the permission.
+
+         Neither branch is a guess about what the token may do. Both are
+         GitHub answering, in the form that kind of token answers in. */
+      canPush = r.permissions ? !!r.permissions.push : true;
       paintBar();
     }).catch(function(e){
       if(e.status === 404){ canPush = false; paintBar(); return; }
