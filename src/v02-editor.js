@@ -310,6 +310,24 @@ window.__editor = {
   authorised: function(){ return authorised(); },
   who: function(){ return me ? me.login : null; },
 
+  /* every work, written or not, gets a way in from the contents page */
+  paintWorks: function(list){
+    if(!authorised()) return;
+    var W = window.__v02 && window.__v02.works;
+    var written = W ? W.written() : [];
+    [].forEach.call(list.querySelectorAll("[data-sheet]"), function(btn){
+      var id = btn.getAttribute("data-sheet");
+      var bar = el("div", "ed-row");
+      var b = el("button", null, written.indexOf(id) >= 0 ? "edit sheet" : "write sheet");
+      b.type = "button";
+      b.onclick = function(e){ e.stopPropagation(); openWorksForm(id); };
+      bar.appendChild(b);
+      btn.appendChild(bar);
+    });
+  },
+
+  worksForm: function(id){ openWorksForm(id); },
+
   paintRegion: function(migId, groups){
     if(!authorised()) return;
     var M = getModel();
@@ -700,17 +718,25 @@ function validate(n, rels, M, editingId){
    Passing a FUNCTION rather than a finished document matters: the change is
    applied to whatever is on the server right now, not to a copy this browser
    loaded some minutes ago. */
-function commit(message, change){
-  var path = "/repos/" + CFG.owner + "/" + CFG.repo + "/contents/" + CFG.path;
+function commit(message, change){ return commitTo(CFG.path, message, change); }
+
+/* THE SAME ONE PATH SERVES BOTH STORES. The manual lives in data/works.json
+   and the notes in data/notes.json, and there is no reason for two ways to
+   read-change-write a file - the sha check, the conflict message and the
+   apply-to-what-is-there-now behaviour all matter equally to both. */
+function commitTo(file, message, change){
+  var path = "/repos/" + CFG.owner + "/" + CFG.repo + "/contents/" + file;
   return gh(path + "?ref=" + encodeURIComponent(CFG.branch)).then(function(file){
     var store;
     try { store = JSON.parse(unb64(file.content)); }
     catch(e){ throw new Error("The store in the repository is not valid JSON; nothing was changed."); }
-    store.notes   = store.notes   || [];
-    store.minors  = store.minors  || [];
-    store.edges   = store.edges   || [];
-    store.retired = store.retired || [];
-    store.edits   = store.edits   || {};
+    if(file === CFG.path){
+      store.notes   = store.notes   || [];
+      store.minors  = store.minors  || [];
+      store.edges   = store.edges   || [];
+      store.retired = store.retired || [];
+      store.edits   = store.edits   || {};
+    }
     change(store);
     return gh(path, {
       method: "PUT",
@@ -725,7 +751,7 @@ function commit(message, change){
     if(e.status === 409 || /does not match/i.test(e.message || ""))
       throw new Error("The store changed while you were working. Reload and try again.");
     if(e.status === 404)
-      throw new Error("Could not find " + CFG.path + " on " + CFG.branch + ".");
+      throw new Error("Could not find " + file + " on " + CFG.branch + ".");
     throw e;
   });
 }
@@ -772,6 +798,199 @@ function say(msg){
   var b = document.getElementById("edBar");
   if(b) b.title = msg;
   console.log("[editor] " + msg);
+}
+
+/* ── THE MANUAL ────────────────────────────────────────────────────────────
+   MY WORKS is a different kind of writing and gets a different form. A sheet
+   carries what a manual needs and the graph does not: purpose, parts,
+   procedure, known failures.
+
+   IT OFFERS NOTHING ELSE, AND THAT IS THE POINT. data/works.json states the
+   rule in its own first line - a sheet may never restate label, line, src,
+   state, register, mig or any relationship, because a second copy of those is
+   a second truth. A form that offered those fields would be an invitation to
+   create one. So the title, the sentence under it and everything about where
+   the work sits in the mind are shown here as READ-ONLY context, derived live
+   from the graph, and cannot be typed into.
+
+   An unwritten sheet is a legitimate state, not a gap to be filled with
+   plausible text - the manual stamps it NOT YET WRITTEN and says so. This form
+   will happily leave it that way; it saves nothing until you write something.
+*/
+var WORKS_FILE = "data/works.json";
+var worksStore = null;
+
+function loadWorks(then){
+  if(worksStore) return then(worksStore);
+  gh("/repos/" + CFG.owner + "/" + CFG.repo + "/contents/" + WORKS_FILE +
+     "?ref=" + encodeURIComponent(CFG.branch))
+    .then(function(file){ worksStore = JSON.parse(unb64(file.content)); then(worksStore); })
+    .catch(function(e){ alert("Could not read the manual: " + e.message); });
+}
+
+/* a repeatable block of rows, which is what three of these four fields are */
+function rowsField(items, fields, addLabel){
+  var wrap = el("div");
+  function add(v){
+    v = v || {};
+    var r = el("div", "ed-rel");
+    fields.forEach(function(f){
+      var input = f.big ? el("textarea") : el("input");
+      if(!f.big) input.type = "text";
+      input.className = "wf-" + f.key;
+      input.placeholder = f.placeholder || f.key;
+      if(f.big) input.style.minHeight = "62px";
+      input.value = v[f.key] == null ? "" : String(v[f.key]);
+      r.appendChild(input);
+    });
+    var drop = el("button", "drop", "remove"); drop.type = "button";
+    drop.onclick = function(){ r.remove(); };
+    r.appendChild(drop);
+    wrap.appendChild(r);
+  }
+  (items || []).forEach(add);
+  var more = el("button", "drop", addLabel); more.type = "button";
+  more.style.cssText = "margin-bottom:14px";
+  more.onclick = function(){ add({}); };
+  return { wrap: wrap, more: more,
+    read: function(){
+      return [].slice.call(wrap.children).map(function(r){
+        var o = {};
+        fields.forEach(function(f){ o[f.key] = r.querySelector(".wf-" + f.key).value.trim(); });
+        return o;
+      }).filter(function(o){ return fields.some(function(f){ return o[f.key]; }); });
+    } };
+}
+
+function openWorksForm(nodeId){
+  loadWorks(function(store){
+    var W = window.__v02 && window.__v02.works;
+    var node = W ? W.node(nodeId) : null;
+    var sheet = (store.sheets || []).filter(function(x){ return x.node === nodeId; })[0] || null;
+    formIn.innerHTML = "";
+
+    formIn.appendChild(el("h2", null, (sheet ? "Editing the sheet for " : "Writing the sheet for ") +
+                                     ((node && node.label) || nodeId)));
+    formIn.appendChild(el("p", "ed-sub", sheet
+      ? "A manual sheet. Everything the graph already says about this work is read from the graph."
+      : "Not yet written. Leave it and it stays honestly blank."));
+
+    var errBox = el("div"); formIn.appendChild(errBox);
+
+    /* WHAT THE GRAPH ALREADY SAYS, shown so it is not retyped */
+    if(node){
+      var ctx = el("div", "keeps");
+      ctx.style.cssText = "margin:0 0 26px;border-left:2px solid #2a3145;padding-left:12px";
+      ctx.appendChild(el("div", null, "from the mind, not editable here:"));
+      ctx.appendChild(el("div", null, "  " + (node.label || nodeId)));
+      if(node.line) ctx.appendChild(el("div", null, "  " + node.line.slice(0, 120)));
+      formIn.appendChild(ctx);
+    }
+
+    var fPurpose = el("textarea");
+    fPurpose.value = sheet && sheet.purpose ? sheet.purpose : "";
+    fPurpose.placeholder = "What this exists to do, and what it refuses to do.";
+    formIn.appendChild(field("Purpose", "what the thing is for", fPurpose));
+
+    var parts = rowsField(sheet && sheet.parts,
+      [{key:"name", placeholder:"part name"},
+       {key:"note", big:true, placeholder:"what it does, and what breaks without it"}],
+      "+ part");
+    formIn.appendChild(field("Parts", "numbered in the order you put them in", parts.wrap));
+    formIn.appendChild(parts.more);
+
+    var proc = rowsField((sheet && sheet.procedure || []).map(function(t){ return {step:t}; }),
+      [{key:"step", big:true, placeholder:"one step"}], "+ step");
+    formIn.appendChild(field("Procedure", "the steps, in order", proc.wrap));
+    formIn.appendChild(proc.more);
+
+    var fails = rowsField(sheet && sheet.knownFailures,
+      [{key:"name", placeholder:"the failure"},
+       {key:"note", big:true, placeholder:"how it happens, and what it costs"}],
+      "+ known failure");
+    formIn.appendChild(field("Known failures",
+      "the ones you have actually seen. An empty list here claims the thing has never failed.",
+      fails.wrap));
+    formIn.appendChild(fails.more);
+
+    var auth = rowsField((sheet && sheet.authority || []).map(function(t){ return {ref:t}; }),
+      [{key:"ref", placeholder:"where this sheet's content came from"}], "+ source");
+    formIn.appendChild(field("Authority",
+      "what this sheet is drawn from, so a reader can check it", auth.wrap));
+    formIn.appendChild(auth.more);
+
+    var act = el("div", "ed-act");
+    var save = el("button", null, sheet ? "Save the sheet" : "Write the sheet");
+    save.id = "edSave"; save.type = "button";
+    var cancel = el("button", null, "Cancel"); cancel.id = "edCancel"; cancel.type = "button";
+    cancel.onclick = closeForm;
+    act.appendChild(save); act.appendChild(cancel);
+    act.appendChild(el("span", "ed-small", "Publishing commits to " + CFG.owner + "/" + CFG.repo + "."));
+    formIn.appendChild(act);
+
+    save.onclick = function(){
+      var record = {
+        node: nodeId,
+        authority: auth.read().map(function(o){ return o.ref; }),
+        purpose: fPurpose.value.trim(),
+        parts: parts.read().map(function(o, i){ return { n: i + 1, name: o.name, note: o.note }; }),
+        procedure: proc.read().map(function(o){ return o.step; }),
+        knownFailures: fails.read()
+      };
+      if(sheet && sheet.figure) record.figure = sheet.figure;
+      if(sheet && sheet.operable !== undefined) record.operable = sheet.operable;
+
+      var problems = [];
+      if(!record.purpose) problems.push("A sheet with no purpose is not a sheet. Say what the thing is for.");
+      if(!record.parts.length) problems.push("List at least one part.");
+      if(!record.procedure.length) problems.push("List at least one step.");
+      record.parts.forEach(function(pt, i){
+        if(!pt.name) problems.push("Part " + (i + 1) + " has no name.");
+        if(!pt.note) problems.push("Part " + (i + 1) + " has no note saying what it does.");
+      });
+      record.knownFailures.forEach(function(kf, i){
+        if(!kf.name || !kf.note) problems.push("Known failure " + (i + 1) + " needs both a name and a note.");
+      });
+
+      errBox.innerHTML = "";
+      if(problems.length){
+        var e = el("div", "ed-err");
+        e.appendChild(el("b", null, problems.length + " thing" + (problems.length > 1 ? "s" : "") + " to fix"));
+        problems.forEach(function(t){ e.appendChild(el("div", null, "\u00b7 " + t)); });
+        errBox.appendChild(e);
+        return;
+      }
+
+      save.disabled = true; save.textContent = "Saving\u2026";
+      commitTo(WORKS_FILE, (sheet ? "Manual: " : "Manual, new sheet: ") + ((node && node.label) || nodeId),
+        function(st){
+          st.sheets = st.sheets || [];
+          for(var i = 0; i < st.sheets.length; i++)
+            if(st.sheets[i].node === nodeId){ st.sheets[i] = record; return; }
+          st.sheets.push(record);
+        })
+        .then(function(){
+          worksStore = null;
+          errBox.innerHTML = "";
+          var ok = el("div", "ed-ok");
+          ok.appendChild(el("div", null, "Saved. The sheet is in the repository."));
+          ok.appendChild(el("div", null, "It appears in the manual once the build finishes."));
+          errBox.appendChild(ok);
+          save.textContent = "Saved";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        })
+        .catch(function(e){
+          save.disabled = false; save.textContent = sheet ? "Save the sheet" : "Write the sheet";
+          var bx = el("div", "ed-err");
+          bx.appendChild(el("b", null, "Nothing was saved"));
+          bx.appendChild(el("div", null, e.message));
+          errBox.appendChild(bx);
+        });
+    };
+
+    form.classList.add("open");
+    fPurpose.focus();
+  });
 }
 
 /* ── publish ───────────────────────────────────────────────────────────── */

@@ -423,6 +423,11 @@ function renderContents(){
     ol.appendChild(li);
   });
   wkBody.appendChild(ol);
+  /* THE EDITOR'S DOOR INTO THE MANUAL. Inert in the published artifact, which
+     never loads an editor. The contents page is the right place for it: it is
+     the only view that lists every work at once, written and unwritten alike,
+     so a sheet that has never been written is as reachable as one that has. */
+  if(window.__editor && window.__editor.paintWorks) window.__editor.paintWorks(ol);
   wkLayer.scrollTop = 0;
   say('My works. ' + SHEETS.length + ' sheets, ' + written + ' written.');
 }
