@@ -4364,6 +4364,16 @@ var pts=null, lineSeg=null, orbitLines=null, nodeOrder=[], nodeIndex={};
 var BRAIN_CURVE_COUNT=0;
 /* how far the mind has turned, and how it is being turned */
 var MIND_YAW=0, MIND_PITCH=0, MIND_DRAG=false, MIND_HELD=0, MIND_LAST=0;
+/* TURNING A WORLD YOU ARE STANDING IN is a different rotation from turning the
+   brain, and has to be, because the brain is framed by a declared lateral axis
+   that brainView() turns - while a world is framed from its own size and
+   contents. So a world orbits the camera around what it is aiming at, and the
+   brain keeps the view it was designed with. Reset on arrival, so every world
+   opens at the composition it was framed for rather than at whatever angle the
+   last one was left at. */
+var ORBIT_YAW=0, ORBIT_PITCH=0;
+/* filled by the input layer, attached to the harness once that exists */
+var GESTURE=null;
 var MIND_DRIFT=0.026;                 // radians per second — slow enough to be weather
 /* the declared lateral axis, turned by however far the visitor has turned it.
    Everything that frames or shades the mind reads THIS, so one value moves the
@@ -5653,6 +5663,7 @@ function travelTo(mode,id,push){
       FLIGHT_ON=true;
     } else FLIGHT_ON=false;
   }
+  ORBIT_YAW=0; ORBIT_PITCH=0;   // a new place opens at its own angle
   paintDOM();
   pushUrl();
 }
@@ -5935,6 +5946,17 @@ function step(){
   var k=reduced?1:0.055;
   var aim=wantPos.clone();
   aim.z+=dolly;
+  /* INSIDE A WORLD, the visitor turns the camera around what it is looking at.
+     Outside it, brainView() has already turned the frame itself and applying
+     this too would turn it twice. */
+  if((ORBIT_YAW||ORBIT_PITCH) && (mindOpen>0.5 || state.region)){
+    var UPV=new THREE.Vector3(0,1,0);
+    var off=aim.clone().sub(wantAim);
+    off.applyAxisAngle(UPV, ORBIT_YAW);
+    var rt=new THREE.Vector3().crossVectors(off, UPV).normalize();
+    if(rt.lengthSq()>0.5) off.applyAxisAngle(rt, ORBIT_PITCH);
+    aim.copy(wantAim).add(off);
+  }
   /* A pattern depends on where you stand. Inside a constellation the viewpoint
      is the subject, so the same pointer travel carries much further there. */
   var par=(state.region && CONSTELLATIONS[state.region]) ? 13.0 : 1.0;
@@ -6108,16 +6130,60 @@ function loop(){
    drift off for a moment afterwards so what you positioned stays put. */
 (function(){
   if(!glOK||!renderer) return;
-  var el=renderer.domElement, px=0, py=0, pid=null;
+  var el=renderer.domElement;
+
+  /* EVERY FINGER ON THE GLASS, not just the first. One pointer turns; two
+     pinch. Tracking them in a map rather than a single id is what makes the
+     difference between a gesture and a guess: a second finger arriving used to
+     be ignored, so a pinch registered as a one-finger drag from whichever
+     finger happened to be first, and the mind lurched. */
+  var pts={}, n=0;
+  function count(){ return n; }
+  function two(){
+    var k=Object.keys(pts);
+    return k.length>=2 ? [pts[k[0]], pts[k[1]]] : null;
+  }
+  function spread(a,b){ var dx=a.x-b.x, dy=a.y-b.y; return Math.sqrt(dx*dx+dy*dy); }
+  var pinch0=0, dolly0=0;
+
   el.addEventListener('pointerdown',function(e){
-    if(mindOpen>0.5 || state.region) return;
-    pid=e.pointerId; px=e.clientX; py=e.clientY; MIND_DRAG=true;
-    try{ el.setPointerCapture(pid); }catch(_){}
+    pts[e.pointerId]={x:e.clientX,y:e.clientY}; n++;
+    try{ el.setPointerCapture(e.pointerId); }catch(_){}
+    var t=two();
+    if(t){ pinch0=spread(t[0],t[1]); dolly0=dolly; MIND_DRAG=false; return; }
+    MIND_DRAG=true;
   });
+
   el.addEventListener('pointermove',function(e){
-    if(!MIND_DRAG || e.pointerId!==pid) return;
-    var dx=e.clientX-px, dy=e.clientY-py;
-    px=e.clientX; py=e.clientY;
+    var was=pts[e.pointerId]; if(!was) return;
+    var dx=e.clientX-was.x, dy=e.clientY-was.y;
+    was.x=e.clientX; was.y=e.clientY;
+
+    var t=two();
+    if(t){
+      /* TWO FINGERS ARE A ZOOM, and zoom is dolly - the one value the camera
+         already reads in every state, so pinching works on the brain and
+         inside a world without a second mechanism. Measured against the
+         spread at the moment the second finger landed rather than
+         accumulated per move, so a pinch cannot drift. */
+      var now=spread(t[0],t[1]);
+      if(pinch0>8 && now>8)
+        dolly=Math.max(-40,Math.min(90, dolly0 + (pinch0-now)*0.42));
+      invalidate(10);
+      return;
+    }
+    if(!MIND_DRAG) return;
+
+    /* ONE FINGER TURNS WHATEVER YOU ARE LOOKING AT. It used to refuse the
+       moment the mind opened or a topic was chosen, so the whole inside of
+       this site could not be turned at all - the thing a visitor most wants
+       to do with a world is walk around it. */
+    if(mindOpen>0.5 || state.region){
+      ORBIT_YAW -= dx*0.0060;
+      ORBIT_PITCH = Math.max(-1.05, Math.min(1.05, ORBIT_PITCH - dy*0.0045));
+      invalidate(8);
+      return;
+    }
     MIND_YAW -= dx*0.0052;
     /* pitch is bounded: past about fifty degrees you are looking at the mind
        from underneath, which is a view of a brain nobody can read */
@@ -6126,14 +6192,46 @@ function loop(){
     wantPos.copy(bf2.p); wantAim.copy(bf2.a);
     invalidate(8);
   });
+
   function release(e){
-    if(!MIND_DRAG || (e && e.pointerId!==pid)) return;
-    MIND_DRAG=false; MIND_HELD=performance.now(); MIND_LAST=MIND_HELD;
-    try{ el.releasePointerCapture(pid); }catch(_){}
-    pid=null;
+    if(e && pts[e.pointerId]){ delete pts[e.pointerId]; n=Math.max(0,n-1); }
+    else { pts={}; n=0; }
+    try{ if(e) el.releasePointerCapture(e.pointerId); }catch(_){}
+    /* LIFTING ONE OF TWO IS NOT THE END OF THE GESTURE. The remaining finger
+       becomes a turn, and its position is re-read on the next move, so the
+       view does not jump by the distance between the two fingers. */
+    if(n>=1){ MIND_DRAG=true; return; }
+    MIND_DRAG=false;
+    MIND_HELD=performance.now(); MIND_LAST=MIND_HELD;
   }
   el.addEventListener('pointerup',release);
   el.addEventListener('pointercancel',release);
+  el.addEventListener('lostpointercapture',function(e){ if(pts[e.pointerId]) release(e); });
+
+  /* BUILT HERE, ATTACHED LATER. window.__v02 is assigned further down this
+     file, so writing a property on it from here reads undefined and throws -
+     and it throws before the harness exists, so every check reports "the app
+     did not boot" and points nowhere. Third time in this file: a thing that
+     hoists is not a thing that is ready. */
+  GESTURE={
+    turn:function(dx,dy){
+      el.dispatchEvent(new PointerEvent('pointerdown',{pointerId:900,clientX:100,clientY:100,bubbles:true}));
+      el.dispatchEvent(new PointerEvent('pointermove',{pointerId:900,clientX:100+dx,clientY:100+dy,bubbles:true}));
+      el.dispatchEvent(new PointerEvent('pointerup',{pointerId:900,clientX:100+dx,clientY:100+dy,bubbles:true}));
+      return {yaw:+MIND_YAW.toFixed(4), pitch:+MIND_PITCH.toFixed(4),
+              orbitYaw:+ORBIT_YAW.toFixed(4), orbitPitch:+ORBIT_PITCH.toFixed(4)};
+    },
+    pinch:function(from,to){
+      el.dispatchEvent(new PointerEvent('pointerdown',{pointerId:901,clientX:200-from/2,clientY:200,bubbles:true}));
+      el.dispatchEvent(new PointerEvent('pointerdown',{pointerId:902,clientX:200+from/2,clientY:200,bubbles:true}));
+      el.dispatchEvent(new PointerEvent('pointermove',{pointerId:901,clientX:200-to/2,clientY:200,bubbles:true}));
+      el.dispatchEvent(new PointerEvent('pointermove',{pointerId:902,clientX:200+to/2,clientY:200,bubbles:true}));
+      el.dispatchEvent(new PointerEvent('pointerup',{pointerId:901,clientX:200-to/2,clientY:200,bubbles:true}));
+      el.dispatchEvent(new PointerEvent('pointerup',{pointerId:902,clientX:200+to/2,clientY:200,bubbles:true}));
+      return {dolly:+dolly.toFixed(2)};
+    },
+    fingers:count
+  };
 })();
 
 if(glOK){ resize(); travelTo('universe',null,false); if(!LITE) loop(); else step(); }
@@ -7539,6 +7637,7 @@ function paintControls(){
   exitBtn.hidden=!entered;
 }
 enterBtn.addEventListener('click',enterMind);
+window.__v02.gesture=GESTURE;
 window.__v02.enter=enterMind;
 window.__v02.atThreshold=function(){ return !entered; };
 
@@ -7597,14 +7696,26 @@ var WORKS_DATA = {
       ],
       "purpose": "To stop a teacher — human or machine — from explaining what the student already knows. The skill refuses to generate a course until it has established what the person in front of it can already do.",
       "parts": [
-        { "n": 1, "name": "trigger",
-          "note": "The request and a topic. Nothing is generated at this point, which is the whole departure from a normal prompt." },
-        { "n": 2, "name": "diagnostic",
-          "note": "Closed questions only. This is the single load-bearing part; remove it and what remains is a generic course generator." },
-        { "n": 3, "name": "level estimate",
-          "note": "One of five bands: beginner, familiar, intermediate, advanced, highly advanced." },
-        { "n": 4, "name": "course",
-          "note": "Assembled upward from the estimate, so the starting point moves with the student rather than sitting at zero." }
+        {
+          "n": 1,
+          "name": "trigger",
+          "note": "The request and a topic. Nothing is generated at this point, which is the whole departure from a normal prompt."
+        },
+        {
+          "n": 2,
+          "name": "diagnostic",
+          "note": "Closed questions only. This is the single load-bearing part; remove it and what remains is a generic course generator."
+        },
+        {
+          "n": 3,
+          "name": "level estimate",
+          "note": "One of five bands: beginner, familiar, intermediate, advanced, highly advanced."
+        },
+        {
+          "n": 4,
+          "name": "course",
+          "note": "Assembled upward from the estimate, so the starting point moves with the student rather than sitting at zero."
+        }
       ],
       "procedure": [
         "Receive the trigger and a topic. Do not generate a course yet.",
@@ -7614,10 +7725,14 @@ var WORKS_DATA = {
         "Build the course from that band upward. Do not assume the person knows nothing, and skip what they already hold."
       ],
       "knownFailures": [
-        { "name": "Assumed ignorance",
-          "note": "The failure this exists to prevent: teaching chapter one to someone who came for chapter nine. It is the default behaviour of every course generator that skips step 2." },
-        { "name": "The open question",
-          "note": "Asking someone to state their own level returns a guess rather than a measurement — people under-state and over-state. The questions have to be answerable without self-assessment, which is why the constraint on question type is a rule and not a preference." }
+        {
+          "name": "Assumed ignorance",
+          "note": "The failure this exists to prevent: teaching chapter one to someone who came for chapter nine. It is the default behaviour of every course generator that skips step 2."
+        },
+        {
+          "name": "The open question",
+          "note": "Asking someone to state their own level returns a guess rather than a measurement — people under-state and over-state. The questions have to be answerable without self-assessment, which is why the constraint on question type is a rule and not a preference."
+        }
       ],
       "figure": "diagnostic-before-generation",
       "operable": true
@@ -7632,16 +7747,31 @@ var WORKS_DATA = {
       ],
       "purpose": "To put a way of thinking somewhere it can be walked through rather than described. The constraint that shapes everything else is that it must not be able to lie: a claim on the page has to come from a source the project holds, or it does not go on the page.",
       "parts": [
-        { "n": 1, "name": "the graph",
-          "note": "143 declared objects and 126 relationships, extracted verbatim from the locked source at build time. It is never retyped, so the experience layer cannot disagree with the content it renders." },
-        { "n": 2, "name": "the shell",
-          "note": "Markup, style, and the DOM structure. Delete the canvas and this still carries the whole mind — the 3D is an experience over the structure, not the structure itself." },
-        { "n": 3, "name": "the renderer",
-          "note": "three.js r149, 594KB, inlined rather than linked. The artifact's content policy blocks every CDN, and a blocked script fails silently — so the library ships inside the file or the page dies without saying why." },
-        { "n": 4, "name": "the scene",
-          "note": "The constellation, the fold from brain to universe, and the twelve charted planetary systems. Renders on demand: idle costs zero frames." },
-        { "n": 5, "name": "the manual",
-          "note": "This. A second door off the same threshold, and the only part of the site that is deliberately not the mind." }
+        {
+          "n": 1,
+          "name": "the graph",
+          "note": "143 declared objects and 126 relationships, extracted verbatim from the locked source at build time. It is never retyped, so the experience layer cannot disagree with the content it renders."
+        },
+        {
+          "n": 2,
+          "name": "the shell",
+          "note": "Markup, style, and the DOM structure. Delete the canvas and this still carries the whole mind — the 3D is an experience over the structure, not the structure itself."
+        },
+        {
+          "n": 3,
+          "name": "the renderer",
+          "note": "three.js r149, 594KB, inlined rather than linked. The artifact's content policy blocks every CDN, and a blocked script fails silently — so the library ships inside the file or the page dies without saying why."
+        },
+        {
+          "n": 4,
+          "name": "the scene",
+          "note": "The constellation, the fold from brain to universe, and the twelve charted planetary systems. Renders on demand: idle costs zero frames."
+        },
+        {
+          "n": 5,
+          "name": "the manual",
+          "note": "This. A second door off the same threshold, and the only part of the site that is deliberately not the mind."
+        }
       ],
       "procedure": [
         "Declare each thing once, in the locked source, with where it came from. Nothing is written twice.",
@@ -7651,14 +7781,22 @@ var WORKS_DATA = {
         "Leave what is not yet documented visibly undocumented, and ship it in that state."
       ],
       "knownFailures": [
-        { "name": "Every check passed while it was broken",
-          "note": "Choosing a region from the closed mind flew the camera to where the region had been before the mind unfolded. Thirteen of fifteen landed completely off screen — one at y=2710, another at -6070,-38218 — and the entire suite passed throughout, because the checks run under reduced motion, where the fold completes before the framing is computed and the ordering that caused it cannot occur. A suite that only exercises one path proves things about one path." },
-        { "name": "The navigation was invisible",
-          "note": "The fifteen region emblems are the only things to aim at in the menu, and they were being drawn dimmer than the constellation's own decorative stars — Philosophy at 45, Observation at 72, against background stars near 250. Choosing a region flew you into what looked like empty space. Nothing was broken; it was simply unlit." },
-        { "name": "An assertion went quiet",
-          "note": "A check claimed to prove that hovering a region brightens it, but measured any rise at all across a wide window — and a hover also enlarges the point. With the brightening removed entirely, growth alone moved the reading from 62 to 64 and the check still passed. It now measures the core in a tight window, where growth spreads light outward and only emphasis raises it: +36% healthy against +0% mutated. A test that cannot fail is not a test." },
-        { "name": "The organ was built twice before it read as one",
-          "note": "The first attempt drew evenly spaced curves across a closed shell and read as a helmet. The second was a lit mesh of 26,624 triangles, and was recognisable and wrong — a translucent clay organ, the object rather than the mind. Both were rejected outright rather than tuned." }
+        {
+          "name": "Every check passed while it was broken",
+          "note": "Choosing a region from the closed mind flew the camera to where the region had been before the mind unfolded. Thirteen of fifteen landed completely off screen — one at y=2710, another at -6070,-38218 — and the entire suite passed throughout, because the checks run under reduced motion, where the fold completes before the framing is computed and the ordering that caused it cannot occur. A suite that only exercises one path proves things about one path."
+        },
+        {
+          "name": "The navigation was invisible",
+          "note": "The fifteen region emblems are the only things to aim at in the menu, and they were being drawn dimmer than the constellation's own decorative stars — Philosophy at 45, Observation at 72, against background stars near 250. Choosing a region flew you into what looked like empty space. Nothing was broken; it was simply unlit."
+        },
+        {
+          "name": "An assertion went quiet",
+          "note": "A check claimed to prove that hovering a region brightens it, but measured any rise at all across a wide window — and a hover also enlarges the point. With the brightening removed entirely, growth alone moved the reading from 62 to 64 and the check still passed. It now measures the core in a tight window, where growth spreads light outward and only emphasis raises it: +36% healthy against +0% mutated. A test that cannot fail is not a test."
+        },
+        {
+          "name": "The organ was built twice before it read as one",
+          "note": "The first attempt drew evenly spaced curves across a closed shell and read as a helmet. The second was a lit mesh of 26,624 triangles, and was recognisable and wrong — a translucent clay organ, the object rather than the mind. Both were rejected outright rather than tuned."
+        }
       ],
       "figure": "five-parts-one-file"
     },
@@ -7670,26 +7808,51 @@ var WORKS_DATA = {
       ],
       "purpose": "To keep the procedures worth repeating where they can be run again — by the person who wrote them and by the friends they were written for. A skill here is a piece of thinking that stopped being advice and became something a machine performs the same way twice.",
       "parts": [
-        { "n": 1, "name": "cotsi",
-          "note": "The only one with a folder of its own, and the only one whose argument is written down anywhere. It has its own sheet in this manual." },
-        { "n": 2, "name": "job-hunter",
-          "note": "Named, not described. What it does is not stated in the repository." },
-        { "n": 3, "name": "out-of-the-box3.5",
-          "note": "Named, not described. The version sits in the filename, which means the history of it is not anywhere else." },
-        { "n": 4, "name": "primis",
-          "note": "Named, not described. The name gives a reader nothing to go on." },
-        { "n": 5, "name": "prospect-intel1.0",
-          "note": "Named, not described. Versioned in the filename, like 03." },
-        { "n": 6, "name": "unfair-advantage",
-          "note": "Named, not described." },
-        { "n": 7, "name": "wave-predict (1)",
-          "note": "Named, not described. The name still carries the suffix a browser adds to a second copy of a download, so the file was moved into the repository rather than written into it." }
+        {
+          "n": 1,
+          "name": "cotsi",
+          "note": "The only one with a folder of its own, and the only one whose argument is written down anywhere. It has its own sheet in this manual."
+        },
+        {
+          "n": 2,
+          "name": "job-hunter",
+          "note": "Named, not described. What it does is not stated in the repository."
+        },
+        {
+          "n": 3,
+          "name": "out-of-the-box3.5",
+          "note": "Named, not described. The version sits in the filename, which means the history of it is not anywhere else."
+        },
+        {
+          "n": 4,
+          "name": "primis",
+          "note": "Named, not described. The name gives a reader nothing to go on."
+        },
+        {
+          "n": 5,
+          "name": "prospect-intel1.0",
+          "note": "Named, not described. Versioned in the filename, like 03."
+        },
+        {
+          "n": 6,
+          "name": "unfair-advantage",
+          "note": "Named, not described."
+        },
+        {
+          "n": 7,
+          "name": "wave-predict (1)",
+          "note": "Named, not described. The name still carries the suffix a browser adds to a second copy of a download, so the file was moved into the repository rather than written into it."
+        }
       ],
       "knownFailures": [
-        { "name": "Six of seven cannot be chosen",
-          "note": "A skill is reached for by its description — the model decides whether to use one by reading what it says it is for. Six of these say nothing beyond a filename, so nothing can reach for them on purpose and a stranger cannot tell what any of them does. The collection is a folder, not yet a set of tools." },
-        { "name": "The filename is the version",
-          "note": "Two of the names carry a version and one carries a browser's duplicate-download suffix. Where the version lives in the filename there is no record of what changed between one and the next, and the earlier one is usually gone." }
+        {
+          "name": "Six of seven cannot be chosen",
+          "note": "A skill is reached for by its description — the model decides whether to use one by reading what it says it is for. Six of these say nothing beyond a filename, so nothing can reach for them on purpose and a stranger cannot tell what any of them does. The collection is a folder, not yet a set of tools."
+        },
+        {
+          "name": "The filename is the version",
+          "note": "Two of the names carry a version and one carries a browser's duplicate-download suffix. Where the version lives in the filename there is no record of what changed between one and the next, and the earlier one is usually gone."
+        }
       ],
       "figure": "one-documented-six-named"
     },
@@ -7702,14 +7865,26 @@ var WORKS_DATA = {
       ],
       "purpose": "Three years of being paid by people who were watching the result. The through-line across both halves is the same habit: get next to whoever will actually use the thing before deciding what it should be, and keep asking them while it is being built.",
       "parts": [
-        { "n": 1, "name": "the freelance work",
-          "note": "Marketing, content, positioning, online presence, website design and proofreading, across multiple businesses and startups. Paid work for people measuring whether it worked." },
-        { "n": 2, "name": "the defence startup",
-          "note": "A bootstrapped research and technology business building independent tech that does not depend on another country's. Its primary product is kamikaze drones for the Indian army — hitting a target from further away, so fewer people have to be near it." },
-        { "n": 3, "name": "the people who use it",
-          "note": "Veteran and experienced soldiers, consulted before the design and present during it: they train with the team roughly six days a week. The customer is not researched at a distance; they are in the room." },
-        { "n": 4, "name": "the constraints",
-          "note": "No budget, as a bootstrapped young startup, and nowhere to test — the team does not own dedicated land. Both shaped the work rather than merely slowing it." }
+        {
+          "n": 1,
+          "name": "the freelance work",
+          "note": "Marketing, content, positioning, online presence, website design and proofreading, across multiple businesses and startups. Paid work for people measuring whether it worked."
+        },
+        {
+          "n": 2,
+          "name": "the defence startup",
+          "note": "A bootstrapped research and technology business building independent tech that does not depend on another country's. Its primary product is kamikaze drones for the Indian army — hitting a target from further away, so fewer people have to be near it."
+        },
+        {
+          "n": 3,
+          "name": "the people who use it",
+          "note": "Veteran and experienced soldiers, consulted before the design and present during it: they train with the team roughly six days a week. The customer is not researched at a distance; they are in the room."
+        },
+        {
+          "n": 4,
+          "name": "the constraints",
+          "note": "No budget, as a bootstrapped young startup, and nowhere to test — the team does not own dedicated land. Both shaped the work rather than merely slowing it."
+        }
       ],
       "procedure": [
         "Generate the idea, then go and check it rather than defending it.",
@@ -7720,12 +7895,18 @@ var WORKS_DATA = {
         "Enter government procurement and bid."
       ],
       "knownFailures": [
-        { "name": "Moved too fast to the pitch",
-          "note": "An outreach to a startup founder went straight for the meeting, the pitch, the brainstorm, and the consultant framing. The founder answered: I am a spontaneous person, you just be by yourself, we will figure this out together if we are a great fit for each other. The lesson recorded at the time was two words — stop performing — and it is the exact opposite of the instinct that produced the message." },
-        { "name": "The first pitch explained instead of positioning",
-          "note": "The original freelance pitch ran 54 words and spent its last sentence explaining why the reader should believe it. The refined version is 8 claims in 24 words and explains nothing. The principle it was rewritten against: show relevance, demonstrate understanding, then ask for the opportunity — and avoid generic consultant language, which is what the first version was made of." },
-        { "name": "Nowhere to test",
-          "note": "Not owning land is not a problem that can be engineered around, and it is recorded as a constraint rather than solved. Some limits are conditions of the work, and the honest thing is to name them instead of implying they were overcome." }
+        {
+          "name": "Moved too fast to the pitch",
+          "note": "An outreach to a startup founder went straight for the meeting, the pitch, the brainstorm, and the consultant framing. The founder answered: I am a spontaneous person, you just be by yourself, we will figure this out together if we are a great fit for each other. The lesson recorded at the time was two words — stop performing — and it is the exact opposite of the instinct that produced the message."
+        },
+        {
+          "name": "The first pitch explained instead of positioning",
+          "note": "The original freelance pitch ran 54 words and spent its last sentence explaining why the reader should believe it. The refined version is 8 claims in 24 words and explains nothing. The principle it was rewritten against: show relevance, demonstrate understanding, then ask for the opportunity — and avoid generic consultant language, which is what the first version was made of."
+        },
+        {
+          "name": "Nowhere to test",
+          "note": "Not owning land is not a problem that can be engineered around, and it is recorded as a constraint rather than solved. Some limits are conditions of the work, and the honest thing is to name them instead of implying they were overcome."
+        }
       ],
       "figure": "two-halves-one-habit"
     },
@@ -7736,16 +7917,27 @@ var WORKS_DATA = {
       ],
       "purpose": "To find a random-number generator faster than the one securing most of the internet, that needs no special chip to run. Speed alone is not the test: a candidate has to be enough better to be worth changing something almost everything depends on.",
       "parts": [
-        { "n": 1, "name": "the incumbent",
-          "note": "The generator securing most of the internet — the thing any candidate has to beat. Which one it is is not stated here." },
-        { "n": 2, "name": "the constraint",
-          "note": "No special chip. A candidate that needs particular hardware to be fast does not count, however fast it is on that hardware." },
-        { "n": 3, "name": "the candidate",
-          "note": "After months of testing, one is 3% faster — and carries the first real evidence that it might be genuinely stronger per unit of work, not merely quicker." }
+        {
+          "n": 1,
+          "name": "the incumbent",
+          "note": "The generator securing most of the internet — the thing any candidate has to beat. Which one it is is not stated here."
+        },
+        {
+          "n": 2,
+          "name": "the constraint",
+          "note": "No special chip. A candidate that needs particular hardware to be fast does not count, however fast it is on that hardware."
+        },
+        {
+          "n": 3,
+          "name": "the candidate",
+          "note": "After months of testing, one is 3% faster — and carries the first real evidence that it might be genuinely stronger per unit of work, not merely quicker."
+        }
       ],
       "knownFailures": [
-        { "name": "3% is not enough",
-          "note": "Nobody replaces the thing securing most of the internet for 3%. A margin has to be worth the cost and risk of changing it, and this one is not, so the result is a real finding and not yet a reason to switch. The hunt continues." }
+        {
+          "name": "3% is not enough",
+          "note": "Nobody replaces the thing securing most of the internet for 3%. A margin has to be worth the cost and risk of changing it, and this one is not, so the result is a real finding and not yet a reason to switch. The hunt continues."
+        }
       ],
       "figure": "three-percent-is-not-enough"
     },
@@ -7756,16 +7948,31 @@ var WORKS_DATA = {
       ],
       "purpose": "To hold automation work as systems that run rather than as claims that they would. Each project is a pipeline someone else could pick up: a lead arrives, and it is validated, enriched, judged, routed and reported on without anyone touching it.",
       "parts": [
-        { "n": 1, "name": "RevenuePilot OS",
-          "note": "The flagship, and the fullest version of the idea: ten workflows from lead capture to cash. Built on Activepieces with Airtable, Slack, Gmail and OpenAI." },
-        { "n": 2, "name": "RevFlow AI",
-          "note": "The same shape at six workflows — capture through to opportunity, with AI qualification and routing. An MVP of the flagship rather than a different idea." },
-        { "n": 3, "name": "CRM Lead Capture",
-          "note": "The floor of the same pipeline: validate a website lead, store it in Airtable, alert Slack. The smallest version that is still useful." },
-        { "n": 4, "name": "Pipeline-Leak-Engine",
-          "note": "In the repository. Not in the README, so what it does is not stated anywhere a reader can reach." },
-        { "n": 5, "name": "02-crm-slack-onboarding",
-          "note": "In the repository, not in the README, and still carrying the ordinal prefix of a numbering scheme the other four do not use." }
+        {
+          "n": 1,
+          "name": "RevenuePilot OS",
+          "note": "The flagship, and the fullest version of the idea: ten workflows from lead capture to cash. Built on Activepieces with Airtable, Slack, Gmail and OpenAI."
+        },
+        {
+          "n": 2,
+          "name": "RevFlow AI",
+          "note": "The same shape at six workflows — capture through to opportunity, with AI qualification and routing. An MVP of the flagship rather than a different idea."
+        },
+        {
+          "n": 3,
+          "name": "CRM Lead Capture",
+          "note": "The floor of the same pipeline: validate a website lead, store it in Airtable, alert Slack. The smallest version that is still useful."
+        },
+        {
+          "n": 4,
+          "name": "Pipeline-Leak-Engine",
+          "note": "In the repository. Not in the README, so what it does is not stated anywhere a reader can reach."
+        },
+        {
+          "n": 5,
+          "name": "02-crm-slack-onboarding",
+          "note": "In the repository, not in the README, and still carrying the ordinal prefix of a numbering scheme the other four do not use."
+        }
       ],
       "procedure": [
         "Capture the lead where it arrives, rather than waiting for someone to copy it across.",
@@ -7776,10 +7983,14 @@ var WORKS_DATA = {
         "Report on the whole thing, catch the errors, and leave an assistant that can be asked about it in plain language."
       ],
       "knownFailures": [
-        { "name": "Two of five cannot be read",
-          "note": "Pipeline-Leak-Engine and 02-crm-slack-onboarding are in the repository and not in the README. This is the same failure recorded on the skills sheet, in a different repository and a different year: the work gets done and the description does not, so a stranger cannot tell what is there. Repeating a failure across two collections makes it a habit rather than an oversight." },
-        { "name": "Production-style",
-          "note": "The README calls these production-style, which is an honest word and a careful one. None of them is stated to be running for anyone. Built to production shape is a real claim and it is not the same claim as in production, and the distinction is worth keeping rather than blurring." }
+        {
+          "name": "Two of five cannot be read",
+          "note": "Pipeline-Leak-Engine and 02-crm-slack-onboarding are in the repository and not in the README. This is the same failure recorded on the skills sheet, in a different repository and a different year: the work gets done and the description does not, so a stranger cannot tell what is there. Repeating a failure across two collections makes it a habit rather than an oversight."
+        },
+        {
+          "name": "Production-style",
+          "note": "The README calls these production-style, which is an honest word and a careful one. None of them is stated to be running for anyone. Built to production shape is a real claim and it is not the same claim as in production, and the distinction is worth keeping rather than blurring."
+        }
       ],
       "figure": "one-pipeline-three-depths"
     }

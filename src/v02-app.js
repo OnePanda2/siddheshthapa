@@ -2008,6 +2008,16 @@ var pts=null, lineSeg=null, orbitLines=null, nodeOrder=[], nodeIndex={};
 var BRAIN_CURVE_COUNT=0;
 /* how far the mind has turned, and how it is being turned */
 var MIND_YAW=0, MIND_PITCH=0, MIND_DRAG=false, MIND_HELD=0, MIND_LAST=0;
+/* TURNING A WORLD YOU ARE STANDING IN is a different rotation from turning the
+   brain, and has to be, because the brain is framed by a declared lateral axis
+   that brainView() turns - while a world is framed from its own size and
+   contents. So a world orbits the camera around what it is aiming at, and the
+   brain keeps the view it was designed with. Reset on arrival, so every world
+   opens at the composition it was framed for rather than at whatever angle the
+   last one was left at. */
+var ORBIT_YAW=0, ORBIT_PITCH=0;
+/* filled by the input layer, attached to the harness once that exists */
+var GESTURE=null;
 var MIND_DRIFT=0.026;                 // radians per second — slow enough to be weather
 /* the declared lateral axis, turned by however far the visitor has turned it.
    Everything that frames or shades the mind reads THIS, so one value moves the
@@ -3297,6 +3307,7 @@ function travelTo(mode,id,push){
       FLIGHT_ON=true;
     } else FLIGHT_ON=false;
   }
+  ORBIT_YAW=0; ORBIT_PITCH=0;   // a new place opens at its own angle
   paintDOM();
   pushUrl();
 }
@@ -3579,6 +3590,17 @@ function step(){
   var k=reduced?1:0.055;
   var aim=wantPos.clone();
   aim.z+=dolly;
+  /* INSIDE A WORLD, the visitor turns the camera around what it is looking at.
+     Outside it, brainView() has already turned the frame itself and applying
+     this too would turn it twice. */
+  if((ORBIT_YAW||ORBIT_PITCH) && (mindOpen>0.5 || state.region)){
+    var UPV=new THREE.Vector3(0,1,0);
+    var off=aim.clone().sub(wantAim);
+    off.applyAxisAngle(UPV, ORBIT_YAW);
+    var rt=new THREE.Vector3().crossVectors(off, UPV).normalize();
+    if(rt.lengthSq()>0.5) off.applyAxisAngle(rt, ORBIT_PITCH);
+    aim.copy(wantAim).add(off);
+  }
   /* A pattern depends on where you stand. Inside a constellation the viewpoint
      is the subject, so the same pointer travel carries much further there. */
   var par=(state.region && CONSTELLATIONS[state.region]) ? 13.0 : 1.0;
@@ -3752,16 +3774,60 @@ function loop(){
    drift off for a moment afterwards so what you positioned stays put. */
 (function(){
   if(!glOK||!renderer) return;
-  var el=renderer.domElement, px=0, py=0, pid=null;
+  var el=renderer.domElement;
+
+  /* EVERY FINGER ON THE GLASS, not just the first. One pointer turns; two
+     pinch. Tracking them in a map rather than a single id is what makes the
+     difference between a gesture and a guess: a second finger arriving used to
+     be ignored, so a pinch registered as a one-finger drag from whichever
+     finger happened to be first, and the mind lurched. */
+  var pts={}, n=0;
+  function count(){ return n; }
+  function two(){
+    var k=Object.keys(pts);
+    return k.length>=2 ? [pts[k[0]], pts[k[1]]] : null;
+  }
+  function spread(a,b){ var dx=a.x-b.x, dy=a.y-b.y; return Math.sqrt(dx*dx+dy*dy); }
+  var pinch0=0, dolly0=0;
+
   el.addEventListener('pointerdown',function(e){
-    if(mindOpen>0.5 || state.region) return;
-    pid=e.pointerId; px=e.clientX; py=e.clientY; MIND_DRAG=true;
-    try{ el.setPointerCapture(pid); }catch(_){}
+    pts[e.pointerId]={x:e.clientX,y:e.clientY}; n++;
+    try{ el.setPointerCapture(e.pointerId); }catch(_){}
+    var t=two();
+    if(t){ pinch0=spread(t[0],t[1]); dolly0=dolly; MIND_DRAG=false; return; }
+    MIND_DRAG=true;
   });
+
   el.addEventListener('pointermove',function(e){
-    if(!MIND_DRAG || e.pointerId!==pid) return;
-    var dx=e.clientX-px, dy=e.clientY-py;
-    px=e.clientX; py=e.clientY;
+    var was=pts[e.pointerId]; if(!was) return;
+    var dx=e.clientX-was.x, dy=e.clientY-was.y;
+    was.x=e.clientX; was.y=e.clientY;
+
+    var t=two();
+    if(t){
+      /* TWO FINGERS ARE A ZOOM, and zoom is dolly - the one value the camera
+         already reads in every state, so pinching works on the brain and
+         inside a world without a second mechanism. Measured against the
+         spread at the moment the second finger landed rather than
+         accumulated per move, so a pinch cannot drift. */
+      var now=spread(t[0],t[1]);
+      if(pinch0>8 && now>8)
+        dolly=Math.max(-40,Math.min(90, dolly0 + (pinch0-now)*0.42));
+      invalidate(10);
+      return;
+    }
+    if(!MIND_DRAG) return;
+
+    /* ONE FINGER TURNS WHATEVER YOU ARE LOOKING AT. It used to refuse the
+       moment the mind opened or a topic was chosen, so the whole inside of
+       this site could not be turned at all - the thing a visitor most wants
+       to do with a world is walk around it. */
+    if(mindOpen>0.5 || state.region){
+      ORBIT_YAW -= dx*0.0060;
+      ORBIT_PITCH = Math.max(-1.05, Math.min(1.05, ORBIT_PITCH - dy*0.0045));
+      invalidate(8);
+      return;
+    }
     MIND_YAW -= dx*0.0052;
     /* pitch is bounded: past about fifty degrees you are looking at the mind
        from underneath, which is a view of a brain nobody can read */
@@ -3770,14 +3836,46 @@ function loop(){
     wantPos.copy(bf2.p); wantAim.copy(bf2.a);
     invalidate(8);
   });
+
   function release(e){
-    if(!MIND_DRAG || (e && e.pointerId!==pid)) return;
-    MIND_DRAG=false; MIND_HELD=performance.now(); MIND_LAST=MIND_HELD;
-    try{ el.releasePointerCapture(pid); }catch(_){}
-    pid=null;
+    if(e && pts[e.pointerId]){ delete pts[e.pointerId]; n=Math.max(0,n-1); }
+    else { pts={}; n=0; }
+    try{ if(e) el.releasePointerCapture(e.pointerId); }catch(_){}
+    /* LIFTING ONE OF TWO IS NOT THE END OF THE GESTURE. The remaining finger
+       becomes a turn, and its position is re-read on the next move, so the
+       view does not jump by the distance between the two fingers. */
+    if(n>=1){ MIND_DRAG=true; return; }
+    MIND_DRAG=false;
+    MIND_HELD=performance.now(); MIND_LAST=MIND_HELD;
   }
   el.addEventListener('pointerup',release);
   el.addEventListener('pointercancel',release);
+  el.addEventListener('lostpointercapture',function(e){ if(pts[e.pointerId]) release(e); });
+
+  /* BUILT HERE, ATTACHED LATER. window.__v02 is assigned further down this
+     file, so writing a property on it from here reads undefined and throws -
+     and it throws before the harness exists, so every check reports "the app
+     did not boot" and points nowhere. Third time in this file: a thing that
+     hoists is not a thing that is ready. */
+  GESTURE={
+    turn:function(dx,dy){
+      el.dispatchEvent(new PointerEvent('pointerdown',{pointerId:900,clientX:100,clientY:100,bubbles:true}));
+      el.dispatchEvent(new PointerEvent('pointermove',{pointerId:900,clientX:100+dx,clientY:100+dy,bubbles:true}));
+      el.dispatchEvent(new PointerEvent('pointerup',{pointerId:900,clientX:100+dx,clientY:100+dy,bubbles:true}));
+      return {yaw:+MIND_YAW.toFixed(4), pitch:+MIND_PITCH.toFixed(4),
+              orbitYaw:+ORBIT_YAW.toFixed(4), orbitPitch:+ORBIT_PITCH.toFixed(4)};
+    },
+    pinch:function(from,to){
+      el.dispatchEvent(new PointerEvent('pointerdown',{pointerId:901,clientX:200-from/2,clientY:200,bubbles:true}));
+      el.dispatchEvent(new PointerEvent('pointerdown',{pointerId:902,clientX:200+from/2,clientY:200,bubbles:true}));
+      el.dispatchEvent(new PointerEvent('pointermove',{pointerId:901,clientX:200-to/2,clientY:200,bubbles:true}));
+      el.dispatchEvent(new PointerEvent('pointermove',{pointerId:902,clientX:200+to/2,clientY:200,bubbles:true}));
+      el.dispatchEvent(new PointerEvent('pointerup',{pointerId:901,clientX:200-to/2,clientY:200,bubbles:true}));
+      el.dispatchEvent(new PointerEvent('pointerup',{pointerId:902,clientX:200+to/2,clientY:200,bubbles:true}));
+      return {dolly:+dolly.toFixed(2)};
+    },
+    fingers:count
+  };
 })();
 
 if(glOK){ resize(); travelTo('universe',null,false); if(!LITE) loop(); else step(); }
@@ -5183,6 +5281,7 @@ function paintControls(){
   exitBtn.hidden=!entered;
 }
 enterBtn.addEventListener('click',enterMind);
+window.__v02.gesture=GESTURE;
 window.__v02.enter=enterMind;
 window.__v02.atThreshold=function(){ return !entered; };
 
