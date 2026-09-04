@@ -477,7 +477,7 @@ body.works-open .ctl{display:none}
 <a id="skip" href="#semantic">Skip to the structure</a>
 
 <div id="threshold">
-  <h1 class="sr-only">Siddhesh Thapa</h1>
+  <h1 class="sr-only" data-t="threshold.name">Siddhesh Thapa</h1>
   <div class="th-worlds">
     <button class="th-world th-world--works" id="worksBtn" type="button">
       <span class="th-mark" aria-hidden="true">
@@ -632,10 +632,10 @@ body.works-open .ctl{display:none}
         <span class="th-name">Siddhesh Thapa</span>
       </span>
       <span class="th-world-in">
-        <span class="th-kicker">One &middot; the evidence</span>
+        <span class="th-kicker" data-t="threshold.works.kicker">One &middot; the evidence</span>
         <span class="th-rule"></span>
-        <span class="th-door">My works</span>
-        <span class="th-desc">Everything I have built so far, and the manual for each.</span>
+        <span class="th-door" data-t="threshold.works.title">My works</span>
+        <span class="th-desc" data-t="threshold.works.desc">Everything I have built so far, and the manual for each.</span>
         <span class="th-meta" id="thWorksFacts"></span>
       </span>
     </button>
@@ -644,10 +644,10 @@ body.works-open .ctl{display:none}
         <span class="th-name">Siddhesh Thapa</span>
       </span>
       <span class="th-world-in">
-        <span class="th-kicker">Two &middot; the thinking</span>
+        <span class="th-kicker" data-t="threshold.mind.kicker">Two &middot; the thinking</span>
         <span class="th-rule"></span>
-        <span class="th-door">Enter the mind</span>
-        <span class="th-desc">A copy of my brain &mdash; a living archive of beliefs, ideas, projects, experiments, questions, contradictions and intellectual evolution.</span>
+        <span class="th-door" data-t="threshold.mind.title">Enter the mind</span>
+        <span class="th-desc" data-t="threshold.mind.desc">A copy of my brain &mdash; a living archive of beliefs, ideas, projects, experiments, questions, contradictions and intellectual evolution.</span>
         <span class="th-meta" id="thFacts"></span>
       </span>
     </button>
@@ -655,7 +655,7 @@ body.works-open .ctl{display:none}
 </div>
 <canvas id="gl" aria-hidden="true"></canvas>
 
-<nav id="semantic" aria-label="Where you are and what it connects to">
+<nav id="semantic" data-t-aria="aria.semantic" aria-label="Where you are and what it connects to">
   <h1 id="tier">The mind of</h1>
   <p id="where">Siddhesh Thapa</p>
   <p id="gloss"></p>
@@ -663,10 +663,11 @@ body.works-open .ctl{display:none}
 </nav>
 <div id="status" role="status" aria-live="polite"></div>
 
-<button class="ctl" id="backBtn" title="Back" aria-label="Back one step" hidden>&lt;</button>
+<button class="ctl" id="backBtn" title="Back" data-t-aria="aria.back" aria-label="Back one step" hidden>&lt;</button>
 <button class="ctl" id="exitBtn" type="button" title="Back to the main menu"
+        data-t="nav.menu" data-t-aria="aria.menu"
         aria-label="Leave the mind and return to the main menu" hidden>Menu</button>
-<button class="ctl" id="mindBtn" title="Go back to Mind map" aria-label="Return to the whole mind" hidden>
+<button class="ctl" id="mindBtn" title="Go back to Mind map" data-t-aria="aria.mind" aria-label="Return to the whole mind" hidden>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">
     <path d="M12 3.5c-2 0-3.2 1.2-3.4 2.6C7 6.3 5.8 7.4 5.8 9c0 .7.2 1.3.6 1.8-.7.5-1.1 1.3-1.1 2.2 0 1.2.8 2.2 1.9 2.6.1 1.5 1.4 2.7 3 2.7.7 0 1.4-.3 1.8-.7"/>
     <path d="M12 3.5c2 0 3.2 1.2 3.4 2.6 1.6.2 2.8 1.3 2.8 2.9 0 .7-.2 1.3-.6 1.8.7.5 1.1 1.3 1.1 2.2 0 1.2-.8 2.2-1.9 2.6-.1 1.5-1.4 2.7-3 2.7-.7 0-1.4-.3-1.8-.7"/>
@@ -674,13 +675,13 @@ body.works-open .ctl{display:none}
   </svg>
 </button>
 
-<div id="works" role="dialog" aria-modal="true" aria-label="My works — the manual" aria-hidden="true">
+<div id="works" role="dialog" aria-modal="true" data-t-aria="aria.works" aria-label="My works — the manual" aria-hidden="true">
   <div class="wk-in">
     <div class="wk-bar">
-      <span class="wk-bar-l" id="wkRunning">My works — the manual</span>
+      <span class="wk-bar-l" id="wkRunning" data-t="works.running">My works — the manual</span>
       <div class="wk-btns">
-        <button class="wk-btn" id="wkIndex" type="button" hidden>← Contents</button>
-        <button class="wk-btn" id="wkClose" type="button">Close</button>
+        <button class="wk-btn" id="wkIndex" type="button" data-t="works.contents" hidden>← Contents</button>
+        <button class="wk-btn" id="wkClose" type="button" data-t="works.close">Close</button>
       </div>
     </div>
     <div id="wkBody"></div>
@@ -693,7 +694,7 @@ body.works-open .ctl{display:none}
     <div class="dochead"><span id="readRunning"></span><span id="readFolio"></span></div>
     <p class="docbody" id="readTitle"></p>
     <div class="docplate" id="readPlate"></div>
-    <button id="readClose">← Return to where you were</button>
+    <button id="readClose" data-t="reader.close">← Return to where you were</button>
   </article>
 </div>
 

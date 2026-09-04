@@ -18,6 +18,20 @@ var NODES=[],byId={},owned={};
    survives the region: objects still belong to it and the mind still has to be
    able to say where they are — it simply cannot travel there, because there is
    no such room any more. */
+/* ── WHAT THE SITE SAYS ABOUT ITSELF ──────────────────────────────────
+   Injected from data/text.json. The writings are content and live in the
+   graph; this is the furniture - the doors, the headings, the words on the
+   buttons that carry you back. It is a store rather than a page of literals so
+   that changing any of it is editing a value, not editing a program.
+
+   T falls back to the key itself rather than to an empty string. A missing key
+   should look wrong on the page instead of leaving a silent gap - and
+   tools/textcheck.js refuses the build before it can get that far. */
+var V02_TEXT=/*__TEXT__*/;
+function T(k){
+  var t=V02_TEXT && V02_TEXT.text;
+  return (t && typeof t[k]==="string") ? t[k] : k;
+}
 var HIDDEN_MIG_LABEL={};
 /* LIVE NOTES, injected from data/notes.json at build time. Declared here rather
    than beside the merge because the merge runs inside an IIFE further down, and
@@ -3367,15 +3381,14 @@ function paintDOM(){
   exitBtn.hidden=!entered;
 
   if(state.mode==='universe'){
-    elTier.textContent='The mind of';
-    elWhere.textContent='Siddhesh Thapa';
+    elTier.textContent=T('mind.tier');
+    elWhere.textContent=T('mind.name');
     /* HIS SENTENCE, NOT THE FILE'S ARITHMETIC. This counted things - regions,
        objects, relationships - and then explained the layout. The counts are
        still stated on the threshold, where a visitor is deciding whether to
        come in; here, standing inside the mind, a number is the least
        interesting thing that could be said. */
-    elGloss.textContent='We divided knowledge for the sake of understanding it, '+
-      "but we shouldn't let those divisions limit our curiosity";
+    elGloss.textContent=T('mind.line');
     /* the menu used to lift MY WORKS to the top, because the works were the
        thing a visitor was meant to find first and they were a region. They are
        a door of their own now, so the list is simply the mind's own order. */
@@ -3388,13 +3401,13 @@ function paintDOM(){
       var w=mem.filter(function(id){return byId[id].src;}).length;
       return row(m, c+' concepts · '+w+' writings', function(){ travelTo('region',m.id); });
     });
-    put(group('Topics',rows));
+    put(group(T('mind.topics'),rows));
     say('The whole mind. '+MIGS.length+' topics.');
     return;
   }
   if(state.mode==='region'){
     var m=byId[state.region];
-    elTier.textContent='The topic of';
+    elTier.textContent=T('topic.tier');
     elWhere.textContent=m.label;
     elGloss.textContent=m.line||'';
     var mem=owned[m.id]||[];
@@ -3406,13 +3419,13 @@ function paintDOM(){
        A vacancy is excluded from both lists. It has no src, which drops it
        from the writings on its own, and it is filtered out of the concepts
        explicitly - a nameless row is not something anyone can choose. */
-    put(group('Writings', mem.filter(function(id){return byId[id].src;})
+    put(group(T('topic.writings'), mem.filter(function(id){return byId[id].src;})
       .map(function(id){ var n=byId[id];
         return row(n, esc(n.t), function(){ openReader(id); }); })));
-    put(group('Concepts', mem.filter(function(id){
+    put(group(T('topic.concepts'), mem.filter(function(id){
         return byId[id].t==='minor' && !byId[id].vacant; })
       .map(function(id){ var n=byId[id];
-        return row(n, adj[id].length+' connections', function(){ travelTo('concept',id); }); })));
+        return row(n, adj[id].length+' '+T('topic.connections'), function(){ travelTo('concept',id); }); })));
     /* THE EDITOR'S ONE DOOR INTO THE PAGE. Inert in the published artifact,
        which never loads an editor, so this line costs the public page a single
        property lookup and changes nothing it renders. Placed inside the region
@@ -4019,6 +4032,9 @@ window.__v02={
     };
   },
   repaint:function(){ paintDOM(); return true; },
+  /* the words as this page actually shipped them, which is what the editor
+     falls back to when it cannot reach the file they came from */
+  text:function(){ return (V02_TEXT && V02_TEXT.text) || {}; },
   lite:function(){ return LITE; },
   reduced:function(){ return reduced; },
   frame:function(){ if(glOK) step(); return true; },
@@ -4992,6 +5008,17 @@ var workCount=NODES.filter(function(n){
    which was the real reason the second door read as a footnote: nothing on
    the page said what was behind it. Both lines are derived, so neither can
    drift from what it points at. */
+/* THE MARKUP KEEPS ITS WORDS AND THE STORE OVERWRITES THEM. Leaving the real
+   sentence in the HTML rather than an empty placeholder means the page still
+   reads correctly if this pass never runs - a browser with a broken script
+   shows the site's own words instead of a row of blank boxes. */
+[].forEach.call(document.querySelectorAll('[data-t]'), function(e){
+  e.textContent = T(e.getAttribute('data-t'));
+});
+[].forEach.call(document.querySelectorAll('[data-t-aria]'), function(e){
+  e.setAttribute('aria-label', T(e.getAttribute('data-t-aria')));
+});
+
 var thFacts=document.getElementById('thFacts');
 if(thFacts) thFacts.textContent=
   MIGS.length+' topics · '+NODES.length+' objects · '+LINKS.length+

@@ -185,12 +185,17 @@ var CSS = [
 ].join('\n').replace('#495june','#495066');
 
 /* ── the bar ───────────────────────────────────────────────────────────── */
-var bar, barText, signBtn;
+var bar, barText, signBtn, wordsBtn;
 function buildBar(){
   bar = el('div'); bar.id = 'edBar';
   bar.appendChild(el('span','dot'));
   barText = el('span'); bar.appendChild(barText);
   signBtn = el('button'); bar.appendChild(signBtn);
+  /* THE WORDS BELONG TO NO ONE TOPIC, so this lives on the bar rather than
+     inside a place. It is only shown to someone who can actually publish. */
+  wordsBtn = el('button'); wordsBtn.textContent = 'Words';
+  wordsBtn.onclick = function(){ openTextForm(); };
+  bar.appendChild(wordsBtn);
   document.body.appendChild(bar);
   paintBar();
 }
@@ -214,6 +219,7 @@ function paintBar(){
     signBtn.textContent = 'Sign out';
     signBtn.onclick = signOut;
   }
+  if(wordsBtn) wordsBtn.hidden = !authorised();
   if(window.__v02 && window.__v02.repaint) window.__v02.repaint();
 }
 function esc(s){
@@ -339,6 +345,7 @@ window.__editor = {
 
   worksForm: function(id){ openWorksForm(id); },
   topicForm: function(id){ openTopicForm(id); },
+  textForm: function(){ openTextForm(); },
 
   paintRegion: function(migId, groups){
     if(!authorised()) return;
@@ -938,6 +945,149 @@ function say(msg){
   var b = document.getElementById("edBar");
   if(b) b.title = msg;
   console.log("[editor] " + msg);
+}
+
+/* ── EVERY OTHER WORD ON THE SITE ──────────────────────────────────────────
+   The writings are content. This is the furniture: the two doors and what they
+   promise, the line under his name, the headings above a list, the words on the
+   buttons that carry you back. Until now those could be changed only by someone
+   willing to open an HTML file and find them, which meant only by asking.
+
+   THE LIST IS THE STORE, not a copy of it. It is drawn from data/text.json as
+   the site actually ships it, so a string that exists is offered and a string
+   that does not is absent - there is no second list here to fall out of step.
+   tools/textcheck.js refuses a build where the store and the code disagree in
+   either direction, so this cannot start offering something that changes
+   nothing.
+
+   Grouped by where a reader meets the words, because "threshold.works.desc" is
+   an address and not a description. */
+var TEXT_FILE = "data/text.json";
+var textStore = null;
+
+var TEXT_GROUPS = [
+  ["The front page",  "threshold."],
+  ["Inside the mind", "mind."],
+  ["Inside a topic",  "topic."],
+  ["The manual",      "works."],
+  ["Reading a piece", "reader."],
+  ["Navigation",      "nav."],
+  ["Read aloud to screen readers", "aria."]
+];
+
+function openTextForm(){
+  /* THE FILE FIRST, THE PAGE SECOND. The repository is the truth and is read
+     first. But this page was BUILT from that file, so its own copy is a
+     faithful fallback when the file cannot be reached - before it has ever
+     been pushed, or on a bad connection. Falling back means the screen still
+     opens and still shows the real words; only the save can fail, and the save
+     re-reads the server anyway. */
+  var load = textStore
+    ? Promise.resolve(textStore)
+    : gh("/repos/" + CFG.owner + "/" + CFG.repo + "/contents/" + TEXT_FILE +
+         "?ref=" + encodeURIComponent(CFG.branch))
+        .then(function(file){ textStore = JSON.parse(unb64(file.content)); return textStore; })
+        .catch(function(){
+          var live = (window.__v02 && window.__v02.text) ? window.__v02.text() : null;
+          if(!live) throw new Error("the words could not be read");
+          return { version:1, text:JSON.parse(JSON.stringify(live)) };
+        });
+
+  load.then(function(store){
+    var text = store.text || {};
+    formIn.innerHTML = "";
+    formIn.appendChild(el("h2", null, "The words of the site"));
+    formIn.appendChild(el("p", "ed-sub",
+      "Everything written here that is not one of your writings."));
+    var errBox = el("div"); formIn.appendChild(errBox);
+
+    var inputs = {};
+    var placed = {};
+    TEXT_GROUPS.forEach(function(g){
+      var keys = Object.keys(text).filter(function(k){ return k.indexOf(g[1]) === 0; });
+      if(!keys.length) return;
+      var h = el("div", "ed-sub");
+      h.style.cssText = "margin:30px 0 12px;color:#8fa0c0";
+      h.textContent = g[0];
+      formIn.appendChild(h);
+      keys.forEach(function(k){
+        placed[k] = true;
+        var v = text[k];
+        var input = v.length > 70 ? el("textarea") : el("input");
+        if(v.length <= 70) input.type = "text";
+        input.value = v;
+        inputs[k] = input;
+        formIn.appendChild(field(k.split(".").slice(1).join(" ") || k, k, input));
+      });
+    });
+    /* ANYTHING A GROUP DID NOT CLAIM STILL GETS SHOWN. A key added later with an
+       unfamiliar prefix would otherwise be editable everywhere except here. */
+    var rest = Object.keys(text).filter(function(k){ return !placed[k]; });
+    if(rest.length){
+      var h2 = el("div", "ed-sub");
+      h2.style.cssText = "margin:30px 0 12px;color:#8fa0c0";
+      h2.textContent = "Elsewhere";
+      formIn.appendChild(h2);
+      rest.forEach(function(k){
+        var input = el("input"); input.type = "text"; input.value = text[k];
+        inputs[k] = input;
+        formIn.appendChild(field(k, k, input));
+      });
+    }
+
+    var act = el("div", "ed-act");
+    var save = el("button", null, "Save the words"); save.id = "edSave"; save.type = "button";
+    var cancel = el("button", null, "Cancel"); cancel.id = "edCancel"; cancel.type = "button";
+    cancel.onclick = closeForm;
+    act.appendChild(save); act.appendChild(cancel);
+    act.appendChild(el("span", "ed-small", "Saving commits to " + CFG.owner + "/" + CFG.repo + "."));
+    formIn.appendChild(act);
+
+    save.onclick = function(){
+      var changed = {}, blank = [];
+      Object.keys(inputs).forEach(function(k){
+        var v = inputs[k].value;
+        if(!v.trim()) blank.push(k);
+        else if(v !== text[k]) changed[k] = v;
+      });
+      errBox.innerHTML = "";
+      if(blank.length){
+        var e = el("div", "ed-err");
+        e.appendChild(el("b", null, "Emptied, which the site cannot render"));
+        blank.forEach(function(k){ e.appendChild(el("div", null, "\u00b7 " + k)); });
+        errBox.appendChild(e);
+        return;
+      }
+      var n = Object.keys(changed).length;
+      if(!n){
+        var same = el("div", "ed-ok");
+        same.appendChild(el("div", null, "Nothing changed."));
+        errBox.appendChild(same);
+        return;
+      }
+      save.disabled = true; save.textContent = "Saving\u2026";
+      commitTo(TEXT_FILE, "Words: " + n + " change" + (n > 1 ? "s" : ""), function(st){
+        st.text = st.text || {};
+        Object.keys(changed).forEach(function(k){ st.text[k] = changed[k]; });
+      }).then(function(){
+        textStore = null;
+        var ok = el("div", "ed-ok");
+        ok.appendChild(el("div", null, n + " change" + (n > 1 ? "s" : "") + " saved."));
+        ok.appendChild(el("div", null, "They appear once the build finishes."));
+        errBox.appendChild(ok);
+        save.textContent = "Saved";
+        window.scrollTo({top:0, behavior:"smooth"});
+      }).catch(function(err){
+        save.disabled = false; save.textContent = "Save the words";
+        var bx = el("div", "ed-err");
+        bx.appendChild(el("b", null, "Nothing was saved"));
+        bx.appendChild(el("div", null, err.message));
+        errBox.appendChild(bx);
+      });
+    };
+
+    form.classList.add("open");
+  }).catch(function(e){ alert("Could not read the words: " + e.message); });
 }
 
 /* ── THE SENTENCE A TOPIC OWNS ─────────────────────────────────────────────

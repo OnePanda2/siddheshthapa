@@ -47,6 +47,10 @@ jobs:
       - name: Check the live notes before anything is built
         run: node tools/notescheck.js
 
+      # the site's own words, which are as publishable as the writings now
+      - name: Check the words of the site
+        run: node tools/textcheck.js
+
       - name: Build both artifacts
         run: node tools/build-v02.js
 

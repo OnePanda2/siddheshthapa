@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "_readme": [
+    "EVERY PIECE OF THE SITE'S FURNITURE, IN ONE PLACE.",
+    "",
+    "The writings, the concepts, the topic descriptions and the manual sheets are",
+    "content and live in the graph or in data/notes.json. This file holds the",
+    "other kind of text: the words the site says about itself. The two doors and",
+    "what they promise, the line under his name, the headings above a list, the",
+    "words on the buttons that carry you back.",
+    "",
+    "It exists so that changing any of them is editing a value rather than",
+    "editing a program. Before this, a sentence like 'Everything I have built so",
+    "far' could only be changed by someone willing to open an HTML file and find",
+    "it, which meant it could only be changed by asking.",
+    "",
+    "HOW IT REACHES THE PAGE. Markup carries data-t=\"key\" and is filled at boot;",
+    "text built in JavaScript calls T('key'). Nothing is duplicated between the",
+    "two, and tools/textcheck.js refuses a build where a key is used and missing,",
+    "or present and unused - the first renders a blank space on the page, and the",
+    "second is a value someone will edit expecting it to do something.",
+    "",
+    "WHAT IS NOT HERE, and deliberately. The threshold's two count lines are",
+    "derived from the graph itself - '15 topics, 153 objects' - and a person",
+    "editing those by hand would be writing a number that the mind could then",
+    "contradict. They are computed, and the only honest way to change them is to",
+    "change what they count."
+  ],
+  "text": {
+    "threshold.name": "Siddhesh Thapa",
+    "threshold.works.kicker": "One · the evidence",
+    "threshold.works.title": "My works",
+    "threshold.works.desc": "Everything I have built so far, and the manual for each.",
+    "threshold.mind.kicker": "Two · the thinking",
+    "threshold.mind.title": "Enter the mind",
+    "threshold.mind.desc": "A copy of my brain — a living archive of beliefs, ideas, projects, experiments, questions, contradictions and intellectual evolution.",
+
+    "mind.tier": "The mind of",
+    "mind.name": "Siddhesh Thapa",
+    "mind.line": "We divided knowledge for the sake of understanding it, but we shouldn't let those divisions limit our curiosity",
+    "mind.topics": "Topics",
+
+    "topic.tier": "The topic of",
+    "topic.writings": "Writings",
+    "topic.concepts": "Concepts",
+    "topic.connections": "connections",
+
+    "works.running": "My works — the manual",
+    "works.contents": "← Contents",
+    "works.close": "Close",
+
+    "reader.close": "← Return to where you were",
+    "nav.menu": "Menu",
+
+    "aria.semantic": "Where you are and what it connects to",
+    "aria.back": "Back one step",
+    "aria.menu": "Leave the mind and return to the main menu",
+    "aria.mind": "Return to the whole mind",
+    "aria.works": "My works — the manual"
+  }
+}

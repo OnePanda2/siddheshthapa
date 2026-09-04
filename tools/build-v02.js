@@ -51,6 +51,9 @@ const worksData = fs.readFileSync('data/works.json', 'utf8');
    editor writes it and commits it, and the build is what turns a commit into a
    published page. NOTES_FILE exists so the pipeline can be exercised against a
    fixture without fabricating published content. */
+/* THE SITE'S OWN WORDS. Injected like every other dataset, so the furniture
+   cannot drift from what the editor is changing. */
+const textData = fs.readFileSync('data/text.json', 'utf8');
 const notesFile = process.env.NOTES_FILE || 'data/notes.json';
 const notesData = fs.readFileSync(notesFile, 'utf8');
 const notes = JSON.parse(notesData);
@@ -65,6 +68,9 @@ if (appWithAstro === app) throw new Error('the /*__ASTRO__*/ marker was not foun
 const withConst = appWithAstro.replace('/*__CONST__*/', () => konst);
 if (withConst === appWithAstro) throw new Error('the /*__CONST__*/ marker was not found in the app');
 appWithAstro = withConst;
+const withText = appWithAstro.replace('/*__TEXT__*/', () => textData);
+if (withText === appWithAstro) throw new Error('the /*__TEXT__*/ marker was not found in the app');
+appWithAstro = withText;
 const withNotes = appWithAstro.replace('/*__NOTES__*/', () => notesData);
 if (withNotes === appWithAstro) throw new Error('the /*__NOTES__*/ marker was not found in the app');
 appWithAstro = withNotes;
@@ -100,6 +106,7 @@ console.log('wrote ' + OUT + '  ' + kb(out.length) +
 console.log('data block: ' + counts.migs + ' declared objects, ' + counts.edges + ' relationship rows');
 console.log('manual: ' + (JSON.parse(worksData).sheets || []).length + ' sheet(s) written, ' +
             kb(works.length) + ' of layer');
+console.log('site text: ' + Object.keys(JSON.parse(textData).text || {}).length + ' editable string(s)');
 console.log('live notes: ' + (notes.notes || []).length + ' note(s), ' +
             (notes.minors || []).length + ' concept(s), ' +
             (notes.edges || []).length + ' relationship(s)' +

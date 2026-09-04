@@ -477,7 +477,7 @@ body.works-open .ctl{display:none}
 <a id="skip" href="#semantic">Skip to the structure</a>
 
 <div id="threshold">
-  <h1 class="sr-only">Siddhesh Thapa</h1>
+  <h1 class="sr-only" data-t="threshold.name">Siddhesh Thapa</h1>
   <div class="th-worlds">
     <button class="th-world th-world--works" id="worksBtn" type="button">
       <span class="th-mark" aria-hidden="true">
@@ -632,10 +632,10 @@ body.works-open .ctl{display:none}
         <span class="th-name">Siddhesh Thapa</span>
       </span>
       <span class="th-world-in">
-        <span class="th-kicker">One &middot; the evidence</span>
+        <span class="th-kicker" data-t="threshold.works.kicker">One &middot; the evidence</span>
         <span class="th-rule"></span>
-        <span class="th-door">My works</span>
-        <span class="th-desc">Everything I have built so far, and the manual for each.</span>
+        <span class="th-door" data-t="threshold.works.title">My works</span>
+        <span class="th-desc" data-t="threshold.works.desc">Everything I have built so far, and the manual for each.</span>
         <span class="th-meta" id="thWorksFacts"></span>
       </span>
     </button>
@@ -644,10 +644,10 @@ body.works-open .ctl{display:none}
         <span class="th-name">Siddhesh Thapa</span>
       </span>
       <span class="th-world-in">
-        <span class="th-kicker">Two &middot; the thinking</span>
+        <span class="th-kicker" data-t="threshold.mind.kicker">Two &middot; the thinking</span>
         <span class="th-rule"></span>
-        <span class="th-door">Enter the mind</span>
-        <span class="th-desc">A copy of my brain &mdash; a living archive of beliefs, ideas, projects, experiments, questions, contradictions and intellectual evolution.</span>
+        <span class="th-door" data-t="threshold.mind.title">Enter the mind</span>
+        <span class="th-desc" data-t="threshold.mind.desc">A copy of my brain &mdash; a living archive of beliefs, ideas, projects, experiments, questions, contradictions and intellectual evolution.</span>
         <span class="th-meta" id="thFacts"></span>
       </span>
     </button>
@@ -655,7 +655,7 @@ body.works-open .ctl{display:none}
 </div>
 <canvas id="gl" aria-hidden="true"></canvas>
 
-<nav id="semantic" aria-label="Where you are and what it connects to">
+<nav id="semantic" data-t-aria="aria.semantic" aria-label="Where you are and what it connects to">
   <h1 id="tier">The mind of</h1>
   <p id="where">Siddhesh Thapa</p>
   <p id="gloss"></p>
@@ -663,10 +663,11 @@ body.works-open .ctl{display:none}
 </nav>
 <div id="status" role="status" aria-live="polite"></div>
 
-<button class="ctl" id="backBtn" title="Back" aria-label="Back one step" hidden>&lt;</button>
+<button class="ctl" id="backBtn" title="Back" data-t-aria="aria.back" aria-label="Back one step" hidden>&lt;</button>
 <button class="ctl" id="exitBtn" type="button" title="Back to the main menu"
+        data-t="nav.menu" data-t-aria="aria.menu"
         aria-label="Leave the mind and return to the main menu" hidden>Menu</button>
-<button class="ctl" id="mindBtn" title="Go back to Mind map" aria-label="Return to the whole mind" hidden>
+<button class="ctl" id="mindBtn" title="Go back to Mind map" data-t-aria="aria.mind" aria-label="Return to the whole mind" hidden>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">
     <path d="M12 3.5c-2 0-3.2 1.2-3.4 2.6C7 6.3 5.8 7.4 5.8 9c0 .7.2 1.3.6 1.8-.7.5-1.1 1.3-1.1 2.2 0 1.2.8 2.2 1.9 2.6.1 1.5 1.4 2.7 3 2.7.7 0 1.4-.3 1.8-.7"/>
     <path d="M12 3.5c2 0 3.2 1.2 3.4 2.6 1.6.2 2.8 1.3 2.8 2.9 0 .7-.2 1.3-.6 1.8.7.5 1.1 1.3 1.1 2.2 0 1.2-.8 2.2-1.9 2.6-.1 1.5-1.4 2.7-3 2.7-.7 0-1.4-.3-1.8-.7"/>
@@ -674,13 +675,13 @@ body.works-open .ctl{display:none}
   </svg>
 </button>
 
-<div id="works" role="dialog" aria-modal="true" aria-label="My works — the manual" aria-hidden="true">
+<div id="works" role="dialog" aria-modal="true" data-t-aria="aria.works" aria-label="My works — the manual" aria-hidden="true">
   <div class="wk-in">
     <div class="wk-bar">
-      <span class="wk-bar-l" id="wkRunning">My works — the manual</span>
+      <span class="wk-bar-l" id="wkRunning" data-t="works.running">My works — the manual</span>
       <div class="wk-btns">
-        <button class="wk-btn" id="wkIndex" type="button" hidden>← Contents</button>
-        <button class="wk-btn" id="wkClose" type="button">Close</button>
+        <button class="wk-btn" id="wkIndex" type="button" data-t="works.contents" hidden>← Contents</button>
+        <button class="wk-btn" id="wkClose" type="button" data-t="works.close">Close</button>
       </div>
     </div>
     <div id="wkBody"></div>
@@ -693,7 +694,7 @@ body.works-open .ctl{display:none}
     <div class="dochead"><span id="readRunning"></span><span id="readFolio"></span></div>
     <p class="docbody" id="readTitle"></p>
     <div class="docplate" id="readPlate"></div>
-    <button id="readClose">← Return to where you were</button>
+    <button id="readClose" data-t="reader.close">← Return to where you were</button>
   </article>
 </div>
 
@@ -1348,6 +1349,81 @@ var NODES=[],byId={},owned={};
    survives the region: objects still belong to it and the mind still has to be
    able to say where they are — it simply cannot travel there, because there is
    no such room any more. */
+/* ── WHAT THE SITE SAYS ABOUT ITSELF ──────────────────────────────────
+   Injected from data/text.json. The writings are content and live in the
+   graph; this is the furniture - the doors, the headings, the words on the
+   buttons that carry you back. It is a store rather than a page of literals so
+   that changing any of it is editing a value, not editing a program.
+
+   T falls back to the key itself rather than to an empty string. A missing key
+   should look wrong on the page instead of leaving a silent gap - and
+   tools/textcheck.js refuses the build before it can get that far. */
+var V02_TEXT={
+  "version": 1,
+  "_readme": [
+    "EVERY PIECE OF THE SITE'S FURNITURE, IN ONE PLACE.",
+    "",
+    "The writings, the concepts, the topic descriptions and the manual sheets are",
+    "content and live in the graph or in data/notes.json. This file holds the",
+    "other kind of text: the words the site says about itself. The two doors and",
+    "what they promise, the line under his name, the headings above a list, the",
+    "words on the buttons that carry you back.",
+    "",
+    "It exists so that changing any of them is editing a value rather than",
+    "editing a program. Before this, a sentence like 'Everything I have built so",
+    "far' could only be changed by someone willing to open an HTML file and find",
+    "it, which meant it could only be changed by asking.",
+    "",
+    "HOW IT REACHES THE PAGE. Markup carries data-t=\"key\" and is filled at boot;",
+    "text built in JavaScript calls T('key'). Nothing is duplicated between the",
+    "two, and tools/textcheck.js refuses a build where a key is used and missing,",
+    "or present and unused - the first renders a blank space on the page, and the",
+    "second is a value someone will edit expecting it to do something.",
+    "",
+    "WHAT IS NOT HERE, and deliberately. The threshold's two count lines are",
+    "derived from the graph itself - '15 topics, 153 objects' - and a person",
+    "editing those by hand would be writing a number that the mind could then",
+    "contradict. They are computed, and the only honest way to change them is to",
+    "change what they count."
+  ],
+  "text": {
+    "threshold.name": "Siddhesh Thapa",
+    "threshold.works.kicker": "One · the evidence",
+    "threshold.works.title": "My works",
+    "threshold.works.desc": "Everything I have built so far, and the manual for each.",
+    "threshold.mind.kicker": "Two · the thinking",
+    "threshold.mind.title": "Enter the mind",
+    "threshold.mind.desc": "A copy of my brain — a living archive of beliefs, ideas, projects, experiments, questions, contradictions and intellectual evolution.",
+
+    "mind.tier": "The mind of",
+    "mind.name": "Siddhesh Thapa",
+    "mind.line": "We divided knowledge for the sake of understanding it, but we shouldn't let those divisions limit our curiosity",
+    "mind.topics": "Topics",
+
+    "topic.tier": "The topic of",
+    "topic.writings": "Writings",
+    "topic.concepts": "Concepts",
+    "topic.connections": "connections",
+
+    "works.running": "My works — the manual",
+    "works.contents": "← Contents",
+    "works.close": "Close",
+
+    "reader.close": "← Return to where you were",
+    "nav.menu": "Menu",
+
+    "aria.semantic": "Where you are and what it connects to",
+    "aria.back": "Back one step",
+    "aria.menu": "Leave the mind and return to the main menu",
+    "aria.mind": "Return to the whole mind",
+    "aria.works": "My works — the manual"
+  }
+}
+;
+function T(k){
+  var t=V02_TEXT && V02_TEXT.text;
+  return (t && typeof t[k]==="string") ? t[k] : k;
+}
 var HIDDEN_MIG_LABEL={};
 /* LIVE NOTES, injected from data/notes.json at build time. Declared here rather
    than beside the merge because the merge runs inside an IIFE further down, and
@@ -5661,15 +5737,14 @@ function paintDOM(){
   exitBtn.hidden=!entered;
 
   if(state.mode==='universe'){
-    elTier.textContent='The mind of';
-    elWhere.textContent='Siddhesh Thapa';
+    elTier.textContent=T('mind.tier');
+    elWhere.textContent=T('mind.name');
     /* HIS SENTENCE, NOT THE FILE'S ARITHMETIC. This counted things - regions,
        objects, relationships - and then explained the layout. The counts are
        still stated on the threshold, where a visitor is deciding whether to
        come in; here, standing inside the mind, a number is the least
        interesting thing that could be said. */
-    elGloss.textContent='We divided knowledge for the sake of understanding it, '+
-      "but we shouldn't let those divisions limit our curiosity";
+    elGloss.textContent=T('mind.line');
     /* the menu used to lift MY WORKS to the top, because the works were the
        thing a visitor was meant to find first and they were a region. They are
        a door of their own now, so the list is simply the mind's own order. */
@@ -5682,13 +5757,13 @@ function paintDOM(){
       var w=mem.filter(function(id){return byId[id].src;}).length;
       return row(m, c+' concepts · '+w+' writings', function(){ travelTo('region',m.id); });
     });
-    put(group('Topics',rows));
+    put(group(T('mind.topics'),rows));
     say('The whole mind. '+MIGS.length+' topics.');
     return;
   }
   if(state.mode==='region'){
     var m=byId[state.region];
-    elTier.textContent='The topic of';
+    elTier.textContent=T('topic.tier');
     elWhere.textContent=m.label;
     elGloss.textContent=m.line||'';
     var mem=owned[m.id]||[];
@@ -5700,13 +5775,13 @@ function paintDOM(){
        A vacancy is excluded from both lists. It has no src, which drops it
        from the writings on its own, and it is filtered out of the concepts
        explicitly - a nameless row is not something anyone can choose. */
-    put(group('Writings', mem.filter(function(id){return byId[id].src;})
+    put(group(T('topic.writings'), mem.filter(function(id){return byId[id].src;})
       .map(function(id){ var n=byId[id];
         return row(n, esc(n.t), function(){ openReader(id); }); })));
-    put(group('Concepts', mem.filter(function(id){
+    put(group(T('topic.concepts'), mem.filter(function(id){
         return byId[id].t==='minor' && !byId[id].vacant; })
       .map(function(id){ var n=byId[id];
-        return row(n, adj[id].length+' connections', function(){ travelTo('concept',id); }); })));
+        return row(n, adj[id].length+' '+T('topic.connections'), function(){ travelTo('concept',id); }); })));
     /* THE EDITOR'S ONE DOOR INTO THE PAGE. Inert in the published artifact,
        which never loads an editor, so this line costs the public page a single
        property lookup and changes nothing it renders. Placed inside the region
@@ -6313,6 +6388,9 @@ window.__v02={
     };
   },
   repaint:function(){ paintDOM(); return true; },
+  /* the words as this page actually shipped them, which is what the editor
+     falls back to when it cannot reach the file they came from */
+  text:function(){ return (V02_TEXT && V02_TEXT.text) || {}; },
   lite:function(){ return LITE; },
   reduced:function(){ return reduced; },
   frame:function(){ if(glOK) step(); return true; },
@@ -7286,6 +7364,17 @@ var workCount=NODES.filter(function(n){
    which was the real reason the second door read as a footnote: nothing on
    the page said what was behind it. Both lines are derived, so neither can
    drift from what it points at. */
+/* THE MARKUP KEEPS ITS WORDS AND THE STORE OVERWRITES THEM. Leaving the real
+   sentence in the HTML rather than an empty placeholder means the page still
+   reads correctly if this pass never runs - a browser with a broken script
+   shows the site's own words instead of a row of blank boxes. */
+[].forEach.call(document.querySelectorAll('[data-t]'), function(e){
+  e.textContent = T(e.getAttribute('data-t'));
+});
+[].forEach.call(document.querySelectorAll('[data-t-aria]'), function(e){
+  e.setAttribute('aria-label', T(e.getAttribute('data-t-aria')));
+});
+
 var thFacts=document.getElementById('thFacts');
 if(thFacts) thFacts.textContent=
   MIGS.length+' topics · '+NODES.length+' objects · '+LINKS.length+
