@@ -2016,6 +2016,20 @@ var MIND_YAW=0, MIND_PITCH=0, MIND_DRAG=false, MIND_HELD=0, MIND_LAST=0;
    opens at the composition it was framed for rather than at whatever angle the
    last one was left at. */
 var ORBIT_YAW=0, ORBIT_PITCH=0;
+/* THE VISITOR TURNS IT; THE MIND STILL DRIFTS. Two contributions to one angle,
+   kept apart because only one of them should be limited.
+
+   A person gets a bounded look around - far enough to see the organ from other
+   sides, not far enough to send it spinning like a toy. The drift is the mind
+   breathing on its own and is not bounded at all: clamping the total would
+   have stopped the drift dead the moment it reached the edge, which is the
+   opposite of what it is for.
+
+   MIND_YAW stays the sum, because everything that frames or shades the mind
+   reads that one value and they must not disagree. */
+var USER_YAW=0, DRIFT_YAW=0;
+var TURN_LIMIT=1.05;      // about sixty degrees either way
+var TILT_LIMIT=0.62;      // about thirty-five: below that a brain reads as a brain
 /* filled by the input layer, attached to the harness once that exists */
 var GESTURE=null;
 var MIND_DRIFT=0.026;                 // radians per second — slow enough to be weather
@@ -3589,7 +3603,16 @@ function step(){
   var t0=(performance&&performance.now)?performance.now():Date.now();
   var k=reduced?1:0.055;
   var aim=wantPos.clone();
-  aim.z+=dolly;
+  /* ZOOM MOVES ALONG THE LINE OF SIGHT, not along world Z. Adding to z was a
+     zoom only when the camera happened to be looking down that axis - and the
+     brain is framed LATERALLY, so on the front page it slid the view sideways
+     instead. The value changed, which is why it looked like it worked when
+     measured and did nothing when used. */
+  if(dolly){
+    var los=aim.clone().sub(wantAim);
+     var losLen=los.length();
+    if(losLen>0.001) aim.copy(wantAim).add(los.multiplyScalar((losLen+dolly)/losLen));
+  }
   /* INSIDE A WORLD, the visitor turns the camera around what it is looking at.
      Outside it, brainView() has already turned the frame itself and applying
      this too would turn it twice. */
@@ -3754,19 +3777,32 @@ function loop(){
      people never drag anything. That metering is roughly a third of the cost
      of an unthrottled spin, which is the difference between weather and a
      machine working hard for nothing. */
-  if(!reduced && !MIND_DRAG && mindOpen<0.5 && !state.region){
-    var nowT=performance.now();
-    if(nowT-MIND_LAST > 48 && nowT > MIND_HELD+2400){
-      var dt=Math.min(0.25,(nowT-MIND_LAST)/1000);
-      MIND_LAST=nowT;
-      MIND_YAW += MIND_DRIFT*dt;
-      var bf=frameFor('universe');
-      wantPos.copy(bf.p); wantAim.copy(bf.a);
-      invalidate(2);
-    }
-  }
+  driftTick();
   if(needFrames<=0) return;                       // P4 a still universe is free
   needFrames--; step();
+}
+
+/* THE MIND BREATHES WHEN NOTHING IS TOUCHING IT. Lifted out of the render loop
+   into a function of its own for one reason: rAF does not run in a hidden
+   page, so inside the loop this could not be exercised by any check - and an
+   unobservable behaviour is one that quietly stops working. It is the loop's
+   own code, called by the loop; nothing is duplicated to make it testable.
+
+   The drift is deliberately NOT bounded while the visitor's turn is. Clamping
+   the total would stop the breathing dead at the edge, which is the opposite
+   of what it is for. */
+function driftTick(){
+  if(reduced || MIND_DRAG || mindOpen>=0.5 || state.region) return false;
+  var nowT=performance.now();
+  if(nowT-MIND_LAST <= 48 || nowT <= MIND_HELD+2400) return false;
+  var dt=Math.min(0.25,(nowT-MIND_LAST)/1000);
+  MIND_LAST=nowT;
+  DRIFT_YAW += MIND_DRIFT*dt;
+  MIND_YAW = DRIFT_YAW + USER_YAW;
+  var bf=frameFor('universe');
+  wantPos.copy(bf.p); wantAim.copy(bf.a);
+  invalidate(2);
+  return true;
 }
 
 /* ── TAKING HOLD OF THE MIND ─────────────────────────────────────────
@@ -3823,15 +3859,20 @@ function loop(){
        this site could not be turned at all - the thing a visitor most wants
        to do with a world is walk around it. */
     if(mindOpen>0.5 || state.region){
-      ORBIT_YAW -= dx*0.0060;
-      ORBIT_PITCH = Math.max(-1.05, Math.min(1.05, ORBIT_PITCH - dy*0.0045));
+      ORBIT_YAW = Math.max(-TURN_LIMIT, Math.min(TURN_LIMIT, ORBIT_YAW - dx*0.0060));
+      ORBIT_PITCH = Math.max(-TILT_LIMIT, Math.min(TILT_LIMIT, ORBIT_PITCH + dy*0.0045));
       invalidate(8);
       return;
     }
-    MIND_YAW -= dx*0.0052;
-    /* pitch is bounded: past about fifty degrees you are looking at the mind
-       from underneath, which is a view of a brain nobody can read */
-    MIND_PITCH = Math.max(-0.88, Math.min(0.88, MIND_PITCH - dy*0.0040));
+    USER_YAW = Math.max(-TURN_LIMIT, Math.min(TURN_LIMIT, USER_YAW - dx*0.0052));
+    MIND_YAW = DRIFT_YAW + USER_YAW;
+    /* THE TILT FOLLOWS THE FINGER. It was subtracted, which sent the mind the
+       other way from the hand - the single most disorienting thing a direct
+       manipulation can do, because there is nothing to learn: it is simply
+       backwards every time. And it is bounded, because past about thirty-five
+       degrees you are looking at a brain from underneath, which nobody can
+       read. */
+    MIND_PITCH = Math.max(-TILT_LIMIT, Math.min(TILT_LIMIT, MIND_PITCH + dy*0.0040));
     var bf2=frameFor('universe');
     wantPos.copy(bf2.p); wantAim.copy(bf2.a);
     invalidate(8);
@@ -3874,6 +3915,14 @@ function loop(){
       el.dispatchEvent(new PointerEvent('pointerup',{pointerId:902,clientX:200+to/2,clientY:200,bubbles:true}));
       return {dolly:+dolly.toFixed(2)};
     },
+    /* READ-ONLY, because turn(0,0) dispatches real pointer events and a
+       release resets the idle timer - so using it to READ the angle held the
+       drift off and made a working drift look dead. A probe that disturbs its
+       subject measures the probe. */
+    view:function(){ return {yaw:+MIND_YAW.toFixed(4), pitch:+MIND_PITCH.toFixed(4),
+                             userYaw:+USER_YAW.toFixed(4), driftYaw:+DRIFT_YAW.toFixed(4),
+                             orbitYaw:+ORBIT_YAW.toFixed(4), dolly:+dolly.toFixed(2)}; },
+    drift:function(){ return driftTick(); },
     fingers:count
   };
 })();
