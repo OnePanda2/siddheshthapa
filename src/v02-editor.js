@@ -243,8 +243,17 @@ function buildBar(){
   paintBar();
 }
 function paintBar(){
-  var authorised = !!(token && me && canPush && me.login.toLowerCase() === CFG.owner.toLowerCase());
-  bar.className = authorised ? 'on' : '';
+  /* ONE ANSWER, ASKED ONCE. This computed the test again in a local variable
+     called `authorised`, which shadowed the FUNCTION of that name for the whole
+     of this scope - so a later call to authorised() in here was a call to a
+     boolean, and threw. It threw at boot, before the bar was painted or any
+     control was attached, which is why the editor looked signed out and inert
+     rather than looking broken.
+
+     Two copies of one rule was the underlying fault; the shadowing only decided
+     how it would surface. There is one copy now, and this asks it. */
+  var ok = authorised();
+  bar.className = ok ? 'on' : '';
   if(!token){
     barText.innerHTML = 'Editor &middot; <b>signed out</b>';
     signBtn.textContent = 'Sign in';
@@ -253,7 +262,7 @@ function paintBar(){
     barText.innerHTML = 'Editor &middot; <b>checking&hellip;</b>';
     signBtn.textContent = 'Cancel';
     signBtn.onclick = signOut;
-  } else if(!authorised){
+  } else if(!ok){
     barText.innerHTML = 'Editor &middot; <b>' + esc(me.login) + '</b> cannot publish here';
     signBtn.textContent = 'Sign out';
     signBtn.onclick = signOut;
@@ -262,7 +271,7 @@ function paintBar(){
     signBtn.textContent = 'Sign out';
     signBtn.onclick = signOut;
   }
-  if(wordsBtn) wordsBtn.hidden = !authorised();
+  if(wordsBtn) wordsBtn.hidden = !ok;
   if(window.__v02 && window.__v02.repaint) window.__v02.repaint();
 }
 function esc(s){
