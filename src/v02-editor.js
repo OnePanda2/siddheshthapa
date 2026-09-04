@@ -347,7 +347,11 @@ window.__editor = {
     M.nodes.forEach(function(n){ byId[n.id] = n; });
     [].forEach.call(groups.querySelectorAll("[data-nav]"), function(btn){
       var n = byId[btn.getAttribute("data-nav")];
-      if(!n || n.t === 'mig' || n.t === 'minor' || n.vacant) return;
+      /* CONCEPTS GET THE SAME TWO CONTROLS. They are structure rather than
+         prose, so the form they open asks fewer questions - but a concept is
+         as much his as a writing is, and there is no reason one may be
+         corrected and the other not. */
+      if(!n || n.t === 'mig' || n.vacant) return;
       var bar = el("div", "ed-row");
       var ed = el("button", null, "edit"); ed.type = "button";
       var rm = el("button", "del", "delete"); rm.type = "button";
@@ -395,6 +399,9 @@ function confirmDelete(node, onYes){
   askIn.innerHTML = "";
   var box = el("div", "ed-ask");
   box.appendChild(el("h3", null, "Delete " + node.label + "?"));
+  if(node.t === "minor")
+    box.appendChild(el("p", null, "A concept \u2014 one of the ideas this topic is built out of, " +
+      "rather than something written."));
 
   var isOriginal = !liveNoteIds()[node.id];
   if(isOriginal){
@@ -408,11 +415,24 @@ function confirmDelete(node, onYes){
       node.line.slice(0, 160).replace(/\s+/g, " ") + (node.line.length > 160 ? "\u2026" : "") +
       "\u201D"));
   }
+  /* WHAT A CONCEPT LEAVES BEHIND IS NOT WHAT A WRITING LEAVES BEHIND, and the
+     sheet must not promise otherwise. A writing's empty star is claimed by the
+     next writing added to that region. A concept's is not: concepts and
+     writings are placed by different rules - in a planetary region the concepts
+     take the orbits and the writings hang off them - so handing a concept's
+     orbit to a writing would put the wrong kind of body in it.
+
+     So a retired concept leaves a star that stays empty until another concept
+     takes it, and the editor cannot yet add one. Saying so here is better than
+     letting the sheet imply a reuse that will not come. */
+  var isMinor = node.t === "minor";
   var keeps = el("div", "keeps");
   keeps.appendChild(el("div", null, "Its star stays lit where it is, carrying nothing."));
-  keeps.appendChild(el("div", null, "The next writing you add here takes that star."));
+  keeps.appendChild(el("div", null, isMinor
+    ? "That star waits for another concept \u2014 a writing cannot take it."
+    : "The next writing you add here takes that star."));
   keeps.appendChild(el("div", null, "Its connections go with it."));
-  keeps.appendChild(el("div", null, "The text is not destroyed \u2014 this is reversible."));
+  keeps.appendChild(el("div", null, "Nothing is destroyed \u2014 this is reversible."));
   box.appendChild(keeps);
 
   var btns = el("div", "btns");
@@ -486,6 +506,11 @@ function openForm(migId, editing){
 
   var region = (M.migs.filter(function(x){ return x.id === migId; })[0]) || {label:migId};
   var isOriginal = editing && !liveNoteIds()[editing.id];
+  /* A CONCEPT HAS NO PROSE AND NO PROVENANCE. It is a name and the regions it
+     reaches, and CONTENT-MODEL.md is explicit that it carries no src - that
+     absence is the honesty signal saying the words are not his. Offering the
+     writing fields for one would invite exactly the claim the absence denies. */
+  var isConcept = editing && editing.t === 'minor';
   if(editing){
     formIn.appendChild(el('h2', null, 'Editing ' + editing.label));
     formIn.appendChild(el('p','ed-sub', isOriginal
@@ -528,15 +553,25 @@ function openForm(migId, editing){
     if(!idTouched) fId.value = 'n-' + slug(fLabel.value);
   };
 
-  formIn.appendChild(field('Kind', 'what sort of statement this is', fType));
+  /* A CONCEPT IS ASKED FOR LESS, because a concept HAS less. It is a name and
+     the regions it reaches. It has no kind, no prose and no provenance, and the
+     absence of provenance is load-bearing: CONTENT-MODEL.md says a concept
+     carries no src precisely so the page can tell his words from the file's
+     scaffolding. A form offering those fields would invite the claim that
+     absence exists to deny. */
+  if(!isConcept){
+    formIn.appendChild(field('Kind', 'what sort of statement this is', fType));
+  }
   formIn.appendChild(field('Title', 'uppercase, as everything in the mind is', fLabel));
-  formIn.appendChild(field('The writing', 'the material itself', fLine));
-  formIn.appendChild(field('Register',
-    'so a joke can never be read as a conviction. A disclaimer after an em-dash is doing safety work.',
-    fRegister));
-  formIn.appendChild(field('Provenance',
-    'an absent source would say "not his writing", which of a live note would be untrue', fSrc));
-  formIn.appendChild(dl);
+  if(!isConcept){
+    formIn.appendChild(field('The writing', 'the material itself', fLine));
+    formIn.appendChild(field('Register',
+      'so a joke can never be read as a conviction. A disclaimer after an em-dash is doing safety work.',
+      fRegister));
+    formIn.appendChild(field('Provenance',
+      'an absent source would say "not his writing", which of a live note would be untrue', fSrc));
+    formIn.appendChild(dl);
+  }
 
   /* crossings */
   var chips = el('div','ed-chips');
@@ -574,7 +609,7 @@ function openForm(migId, editing){
      a one-line row in a list. It is the same confirmation either way, and it
      is set apart from Save so the two are never reached for by accident. */
   if(editing){
-    var del = el("button", null, "Delete this writing");
+    var del = el("button", null, isConcept ? "Delete this concept" : "Delete this writing");
     del.type = "button";
     del.style.cssText = "margin-left:auto;color:#c98b8b;background:none;" +
       "border:1px solid #4a2a2a;border-radius:3px;font:11px/1 ui-monospace,monospace;" +
@@ -613,9 +648,14 @@ function openForm(migId, editing){
       line: fLine.value.trim(), added: new Date().toISOString().slice(0,10)
     };
     if(pending.takes) note2.takes = pending.takes;
+    if(isConcept) note2.isConcept = true;   // read by validate, never stored
     /* an id that already exists is a collision when writing something new and
        simply the subject when editing, so the check is told which it is */
     var problems = validate(note2, rels, M, editing ? editing.id : null);
+    /* it was set for the validator and must not travel any further: nothing in
+       the store has an isConcept field, and a stray one would be a field the
+       schema does not know and the checker would rightly refuse. */
+    delete note2.isConcept;
     errBox.innerHTML = '';
     if(problems.length){
       var e = el('div','ed-err');
@@ -627,10 +667,11 @@ function openForm(migId, editing){
     }
     save.disabled = true; save.textContent = editing ? "Saving\u2026" : "Publishing\u2026";
     if(editing){
-      saveEdit(editing, {
-        label: note2.label, line: note2.line, register: note2.register,
-        crosses: note2.crosses, src: note2.src
-      }, function(err){
+      saveEdit(editing, isConcept
+        ? { label: note2.label, crosses: note2.crosses }
+        : { label: note2.label, line: note2.line, register: note2.register,
+            crosses: note2.crosses, src: note2.src },
+        function(err){
         errBox.innerHTML = "";
         if(err){
           save.disabled = false; save.textContent = "Save changes";
@@ -723,9 +764,13 @@ function validate(n, rels, M, editingId){
   if(TYPES.indexOf(n.t) < 0) p.push('Unknown kind.');
   if(!n.label) p.push('A title is required.');
   else if(n.label !== n.label.toUpperCase()) p.push('The title must be uppercase.');
-  if(!n.register) p.push('A register is required — it is what stops a joke being read as a conviction.');
-  if(!n.src) p.push('Provenance is required. An absent source means "not his writing".');
-  if(!n.line) p.push('A note with no material is not a note.');
+  /* a concept answers for none of these, and requiring them would make it
+     impossible to correct the name of one */
+  if(!n.isConcept){
+    if(!n.register) p.push('A register is required — it is what stops a joke being read as a conviction.');
+    if(!n.src) p.push('Provenance is required. An absent source means "not his writing".');
+    if(!n.line) p.push('A note with no material is not a note.');
+  }
   if(!migs[n.mig]) p.push('That region does not exist.');
   n.crosses.forEach(function(c){
     if(!migs[c]) p.push('Crosses a region that does not exist: ' + c);

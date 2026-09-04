@@ -271,11 +271,19 @@ var V02_OVERLAY={
   (V02_NOTES.retired||[]).forEach(function(r){
     RETIRED[r.id]=r.at||'';
   });
-  THOUGHTS.forEach(function(n){
-    if(!RETIRED.hasOwnProperty(n.id)) return;
-    n.vacant=true; n.retiredAt=RETIRED[n.id];
-    n.label=''; n.line=''; n.src=null; n.register=null;
-  });
+  /* A CONCEPT CAN BE RETIRED TOO, and for the same reason it is blanked
+     rather than removed: its place in the region is its index in this list.
+     A concept carries no src to lose, so the writings filter never sees it
+     either way - it is dropped from the concepts list by its vacancy. */
+  function retireIn(list){
+    list.forEach(function(n){
+      if(!RETIRED.hasOwnProperty(n.id)) return;
+      n.vacant=true; n.retiredAt=RETIRED[n.id];
+      n.label=''; n.line=''; n.src=null; n.register=null;
+    });
+  }
+  retireIn(THOUGHTS);
+  retireIn(MINORS);
   /* a relationship to a vacancy is a line drawn to nothing, so it goes with
      the writing rather than outliving it */
   for(var ei=EDGES.length-1;ei>=0;ei--)
@@ -3348,8 +3356,13 @@ function paintDOM(){
   if(state.mode==='universe'){
     elTier.textContent='The mind of';
     elWhere.textContent='Siddhesh Thapa';
-    elGloss.textContent=MIGS.length+' regions of thinking, '+NODES.length+' objects, '+LINKS.length+
-      ' relationships. Nothing here is arranged — regions that share thinking sit closer together.';
+    /* HIS SENTENCE, NOT THE FILE'S ARITHMETIC. This counted things - regions,
+       objects, relationships - and then explained the layout. The counts are
+       still stated on the threshold, where a visitor is deciding whether to
+       come in; here, standing inside the mind, a number is the least
+       interesting thing that could be said. */
+    elGloss.textContent='We divided knowledge for the sake of understanding it, '+
+      "but we shouldn't let those divisions limit our curiosity";
     /* the menu used to lift MY WORKS to the top, because the works were the
        thing a visitor was meant to find first and they were a region. They are
        a door of their own now, so the list is simply the mind's own order. */
@@ -3362,22 +3375,31 @@ function paintDOM(){
       var w=mem.filter(function(id){return byId[id].src;}).length;
       return row(m, c+' concepts · '+w+' writings', function(){ travelTo('region',m.id); });
     });
-    put(group('Regions',rows));
-    say('The whole mind. '+MIGS.length+' regions.');
+    put(group('Topics',rows));
+    say('The whole mind. '+MIGS.length+' topics.');
     return;
   }
   if(state.mode==='region'){
     var m=byId[state.region];
-    elTier.textContent='The region of';
+    elTier.textContent='The topic of';
     elWhere.textContent=m.label;
     elGloss.textContent=m.line||'';
     var mem=owned[m.id]||[];
-    put(group('Concepts', mem.filter(function(id){return byId[id].t==='minor';})
-      .map(function(id){ var n=byId[id];
-        return row(n, adj[id].length+' connections', function(){ travelTo('concept',id); }); })));
+    /* WRITINGS FIRST. What a person came here to read is the writing; the
+       concepts are the scaffolding that holds the writings apart from each
+       other. Putting the scaffolding first made you scroll past the frame to
+       reach the picture.
+
+       A vacancy is excluded from both lists. It has no src, which drops it
+       from the writings on its own, and it is filtered out of the concepts
+       explicitly - a nameless row is not something anyone can choose. */
     put(group('Writings', mem.filter(function(id){return byId[id].src;})
       .map(function(id){ var n=byId[id];
         return row(n, esc(n.t), function(){ openReader(id); }); })));
+    put(group('Concepts', mem.filter(function(id){
+        return byId[id].t==='minor' && !byId[id].vacant; })
+      .map(function(id){ var n=byId[id];
+        return row(n, adj[id].length+' connections', function(){ travelTo('concept',id); }); })));
     /* THE EDITOR'S ONE DOOR INTO THE PAGE. Inert in the published artifact,
        which never loads an editor, so this line costs the public page a single
        property lookup and changes nothing it renders. Placed inside the region
@@ -4959,7 +4981,7 @@ var workCount=NODES.filter(function(n){
    drift from what it points at. */
 var thFacts=document.getElementById('thFacts');
 if(thFacts) thFacts.textContent=
-  MIGS.length+' regions · '+NODES.length+' objects · '+LINKS.length+
+  MIGS.length+' topics · '+NODES.length+' objects · '+LINKS.length+
   ' relationships · '+crossCount+' of them crossing';
 var thWorks=document.getElementById('thWorksFacts');
 if(thWorks) thWorks.textContent=
@@ -4980,7 +5002,7 @@ function enterMind(){
   paintDOM();
   setTimeout(function(){ var f=document.querySelector('#groups [data-nav]'); if(f) f.focus(); },
              (reduced?0:540));
-  say('You are in the mind. '+MIGS.length+' regions.');
+  say('You are in the mind. '+MIGS.length+' topics.');
   paintControls();
 }
 
