@@ -160,7 +160,8 @@ var CSS = [
 '.ed-ok{border-left:2px solid #5ad07a;background:rgba(90,208,122,.08);',
 '  padding:14px;margin:0 0 18px;font:12px/1.7 ui-monospace,monospace;color:#b6e3c4}',
 '.ed-ok a{color:#8fe0a8}',
-'.ed-row{display:flex;gap:5px;margin-left:auto;padding-left:8px}',
+'.ed-row{display:flex;gap:5px;justify-content:flex-end;padding:0 2px 10px}',
+'.wk-toc .ed-row{padding:0 0 14px}',
 '.ed-row button{font:10px/1 ui-monospace,monospace;letter-spacing:.08em;',
 '  text-transform:uppercase;color:#8b93a7;background:none;border:1px solid #232a3d;',
 '  border-radius:2px;padding:4px 7px;cursor:pointer}',
@@ -305,7 +306,11 @@ window.__editor = {
      drives the real form proves more than one that re-implements it. Exposing
      it costs nothing, because the form is not the lock — anyone may open it
      and fill it in, and the publish at the end still has to satisfy GitHub. */
-  open: function(migId){ openForm(migId); },
+  /* the harness takes the same two arguments the edit control passes, so a
+     check drives the form the way the page does rather than a simpler version
+     of it - the first attempt to test edit mode through here opened the NEW
+     note form and looked like a broken feature. */
+  open: function(migId, editing){ openForm(migId, editing); },
   validate: function(n, rels){ return validate(n, rels, getModel()); },
   authorised: function(){ return authorised(); },
   who: function(){ return me ? me.login : null; },
@@ -322,7 +327,7 @@ window.__editor = {
       b.type = "button";
       b.onclick = function(e){ e.stopPropagation(); openWorksForm(id); };
       bar.appendChild(b);
-      btn.appendChild(bar);
+      (btn.parentNode || btn).appendChild(bar);
     });
   },
 
@@ -353,7 +358,12 @@ window.__editor = {
         confirmDelete(n, function(done){ retire(n, done); });
       };
       bar.appendChild(ed); bar.appendChild(rm);
-      btn.appendChild(bar);
+      /* BESIDE THE ROW, NEVER INSIDE IT. These went inside the row's own
+         button first, which puts a button inside a button - invalid, and a
+         thing browsers are entitled to reshuffle or drop. The row's parent is
+         a list item and has no such problem, so the controls go there and the
+         row stays a plain button that navigates. */
+      (btn.parentNode || btn).appendChild(bar);
     });
 
     var vac = M.nodes.filter(function(n){ return n.vacant && n.mig === migId; }).length;
@@ -557,7 +567,35 @@ function openForm(migId, editing){
   var cancel = el('button', null, 'Cancel'); cancel.id = 'edCancel'; cancel.type = 'button';
   cancel.onclick = closeForm;
   act.appendChild(save); act.appendChild(cancel);
-  var note = el('span','ed-small', 'Publishing commits to ' + CFG.owner + '/' + CFG.repo + '.');
+
+  /* DELETE LIVES HERE TOO, not only on the row. By the time a writing is open
+     you are already looking at the whole of it - the title, the material, what
+     it crosses into - which is a far better place to decide it should go than
+     a one-line row in a list. It is the same confirmation either way, and it
+     is set apart from Save so the two are never reached for by accident. */
+  if(editing){
+    var del = el("button", null, "Delete this writing");
+    del.type = "button";
+    del.style.cssText = "margin-left:auto;color:#c98b8b;background:none;" +
+      "border:1px solid #4a2a2a;border-radius:3px;font:11px/1 ui-monospace,monospace;" +
+      "letter-spacing:.12em;text-transform:uppercase;padding:12px 18px;cursor:pointer";
+    del.onclick = function(){
+      confirmDelete(editing, function(done){
+        retire(editing, function(err){
+          done(err);
+          if(!err){
+            closeForm();
+            if(window.__v02 && window.__v02.repaint) window.__v02.repaint();
+          }
+        });
+      });
+    };
+    act.appendChild(del);
+  }
+
+  var note = el('span','ed-small', editing
+    ? 'Saving commits to ' + CFG.owner + '/' + CFG.repo + '.'
+    : 'Publishing commits to ' + CFG.owner + '/' + CFG.repo + '.');
   act.appendChild(note);
   formIn.appendChild(act);
 
