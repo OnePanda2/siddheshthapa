@@ -32,6 +32,16 @@ function T(k){
   var t=V02_TEXT && V02_TEXT.text;
   return (t && typeof t[k]==="string") ? t[k] : k;
 }
+/* DECLARED HERE, NOT BESIDE THE FUNCTIONS THAT USE THEM, and for the reason
+   the line below this one exists. Function declarations hoist and their bodies
+   can be called from anywhere; a var assigned two thousand lines later hoists
+   as UNDEFINED. pushUrl is reached during boot, and with URL_KINDS still
+   undefined at that moment, reading a key off it threw - before
+   window.__v02 was ever assigned, so every check reported "the app did not
+   boot" rather than pointing at the line. Exactly the trap HIDDEN_MIG_LABEL
+   fell into, in the same file, which is why it is declared up here too. */
+var URL_QUIET=false;
+var URL_KINDS={ threshold:1, mind:1, focus:1, read:1 };
 var HIDDEN_MIG_LABEL={};
 /* LIVE NOTES, injected from data/notes.json at build time. Declared here rather
    than beside the merge because the merge runs inside an IIFE further down, and
@@ -3288,6 +3298,7 @@ function travelTo(mode,id,push){
     } else FLIGHT_ON=false;
   }
   paintDOM();
+  pushUrl();
 }
 
 /* ── 5. THE DOM LAYER IS THE STRUCTURE ────────────────────────────────
@@ -3484,6 +3495,7 @@ function openReader(id){
   readPlate.innerHTML=n.register?esc(n.register):'';
   reader.classList.add('on'); reader.setAttribute('aria-hidden','false');
   readClose.focus();
+  pushUrl();
   say('Reading '+n.label+'.');
 }
 function closeReader(){
@@ -3493,6 +3505,7 @@ function closeReader(){
   var b=document.querySelector('[data-nav="'+(state.focus||state.region||'')+'"]');
   if(b) b.focus();
   say('Back where you were.');
+  pushUrl();
 }
 readClose.addEventListener('click',closeReader);
 
@@ -5019,6 +5032,91 @@ var workCount=NODES.filter(function(n){
   e.setAttribute('aria-label', T(e.getAttribute('data-t-aria')));
 });
 
+/* ── THE URL IS WHERE YOU ARE ──────────────────────────────────────────
+   Every move through this mind changed the page and left the address bar
+   saying the same thing, so the browser believed nothing had happened. Back
+   left the site entirely - a visitor three topics deep who wanted the previous
+   one was thrown out of the door.
+
+   The vocabulary is not invented here. tools/capture.js has driven this site
+   by hash since long before this - #threshold, #mind, #focus:<id>,
+   #focus:<mig>:<concept>, #read:<id> - and a second vocabulary for the same
+   states would be one more thing to keep in step. So the address bar now says
+   what the capture tool has always said, which also means every place in here
+   is a link somebody can send.
+
+   A HASH RATHER THAN A PATH, because this is one file served by Pages: a path
+   would 404 on reload, and a place you cannot reload is not a place.
+
+   URL_QUIET is what stops the loop. Applying a URL navigates, navigating
+   writes a URL, and without a flag the two would chase each other. */
+
+function urlFor(){
+  if(!entered) return '';
+  if(readingId) return '#read:'+readingId;
+  if(state.mode==='universe') return '#mind';
+  if(state.mode==='region') return '#focus:'+state.region;
+  return '#focus:'+state.region+':'+state.focus;
+}
+/* IT MAY ONLY WRITE A HASH IT OWNS. This page has accepted other hashes far
+   longer than it has written any: lite, the palette overrides, and the
+   combined forms the checks drive states with - "lite&focus:curiosity". A hash
+   is one string, so writing a place into it REPLACED those, and glcheck went
+   from measuring a lite render to measuring a full one halfway through a run.
+   Nothing was wrong with the scene; the instruction to render it small had
+   been erased by the address bar.
+
+   So the address is written only when the address is being used for places -
+   when it is empty, or already one of ours. Anything else is somebody driving
+   this page on purpose and is left exactly as they set it. */
+function ownsHash(){
+  var h=(location.hash||"").slice(1);
+  if(!h) return true;
+  if(h.indexOf("&")>=0) return false;
+  return !!URL_KINDS[h.split(":")[0]];
+}
+function pushUrl(replace){
+  if(URL_QUIET) return;
+  if(!ownsHash()) return;
+  var want=urlFor();
+  if(!replace && (location.hash||'')===want) return;   // no entry for standing still
+  try{
+    var url=location.pathname+location.search+want;
+    if(replace) window.history.replaceState({v02:1},'',url);
+    else window.history.pushState({v02:1},'',url);
+  }catch(_){}
+}
+function applyUrl(){
+  var h=decodeURIComponent((location.hash||'').slice(1));
+  var kind=h.split(':')[0];
+  /* the page has always accepted other hashes - palette overrides among them -
+     and this must not swallow them by treating an unknown word as a place */
+  if(h && !URL_KINDS[kind]) return;
+  URL_QUIET=true;
+  try{
+    if(!h || kind==='threshold'){ if(entered) leaveMind(); return; }
+    if(!entered) enterMind();
+    var parts=h.split(':'); parts.shift();
+    if(kind==='mind'){
+      if(readingId) closeReader();
+      travelTo('universe',null,false);
+    } else if(kind==='focus'){
+      if(readingId) closeReader();
+      if(parts[1]) travelTo('concept',parts[1],false);
+      else travelTo('region',parts[0],false);
+    } else if(kind==='read'){
+      var n=byId[parts[0]];
+      if(n){ travelTo('region',n.mig,false); openReader(parts[0]); }
+    }
+  } finally { URL_QUIET=false; }
+}
+window.addEventListener('popstate', applyUrl);
+/* A LINK SOMEBODY SENT SHOULD OPEN WHERE IT POINTS. Writing the address was
+   only half of it: an address that cannot be typed back in is a label, not a
+   location. Deferred by a tick so the scene has finished booting - entering
+   the mind from a standing start needs the frames and the layout to exist. */
+if(location.hash) setTimeout(applyUrl, 0);
+
 var thFacts=document.getElementById('thFacts');
 if(thFacts) thFacts.textContent=
   MIGS.length+' topics · '+NODES.length+' objects · '+LINKS.length+
@@ -5044,6 +5142,8 @@ function enterMind(){
              (reduced?0:540));
   say('You are in the mind. '+MIGS.length+' topics.');
   paintControls();
+  /* the threshold and the mind are two places, and the browser should know it */
+  pushUrl();
 }
 
 /* THE WAY BACK OUT, and the exact reverse of entering.
@@ -5072,6 +5172,7 @@ function leaveMind(){
   paintControls();
   if(enterBtn) enterBtn.focus();
   say('Back at the main menu.');
+  pushUrl();
 }
 
 /* the three controls are painted together because their visibility is one
