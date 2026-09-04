@@ -159,7 +159,28 @@ var CSS = [
 '  letter-spacing:.08em;text-transform:uppercase;font-size:11px}',
 '.ed-ok{border-left:2px solid #5ad07a;background:rgba(90,208,122,.08);',
 '  padding:14px;margin:0 0 18px;font:12px/1.7 ui-monospace,monospace;color:#b6e3c4}',
-'.ed-ok a{color:#8fe0a8}'
+'.ed-ok a{color:#8fe0a8}',
+'.ed-row{display:flex;gap:5px;margin-left:auto;padding-left:8px}',
+'.ed-row button{font:10px/1 ui-monospace,monospace;letter-spacing:.08em;',
+'  text-transform:uppercase;color:#8b93a7;background:none;border:1px solid #232a3d;',
+'  border-radius:2px;padding:4px 7px;cursor:pointer}',
+'.ed-row button:hover{color:#cfd6e6;border-color:#3d6ea8}',
+'.ed-row button.del:hover{color:#e8a0a0;border-color:#8a3a3a}',
+'#edAsk{position:fixed;inset:0;z-index:95;background:rgba(3,4,9,.86);',
+'  display:none;align-items:center;justify-content:center;padding:24px}',
+'#edAsk.open{display:flex}',
+'.ed-ask{max-width:520px;background:#0b0e18;border:1px solid #2a3145;',
+'  border-radius:4px;padding:26px 26px 22px}',
+'.ed-ask h3{font:400 20px/1.3 Georgia,serif;color:#e8ecf5;margin:0 0 12px}',
+'.ed-ask p{font:13px/1.65 Georgia,serif;color:#9aa2b6;margin:0 0 10px}',
+'.ed-ask .warn{color:#e3b6b6}',
+'.ed-ask .keeps{font:11px/1.6 ui-monospace,monospace;color:#69718a;',
+'  border-left:2px solid #2a3145;padding-left:11px;margin:14px 0 0}',
+'.ed-ask .btns{display:flex;gap:10px;margin-top:20px}',
+'.ed-ask button{font:11px/1 ui-monospace,monospace;letter-spacing:.12em;',
+'  text-transform:uppercase;padding:11px 18px;border-radius:3px;cursor:pointer}',
+'.ed-ask .go{color:#180606;background:#d98080;border:1px solid #d98080}',
+'.ed-ask .no{color:#9aa2b6;background:none;border:1px solid #2a3145}'
 ].join('\n').replace('#495june','#495066');
 
 /* ── the bar ───────────────────────────────────────────────────────────── */
@@ -241,6 +262,7 @@ function signOut(){
 }
 function identify(){
   paintBar();
+  loadLiveIds();
   gh('/user').then(function(u){
     me = u;
     /* THE AUTHORITY IS GITHUB'S, NOT THIS FILE'S. Asking whether the account
@@ -290,8 +312,35 @@ window.__editor = {
 
   paintRegion: function(migId, groups){
     if(!authorised()) return;
-    var m = (getModel().migs.filter(function(x){ return x.id === migId; })[0]) || {label:migId};
-    var b = el('button','ed-add','+ Add to ' + m.label);
+    var M = getModel();
+    var m = (M.migs.filter(function(x){ return x.id === migId; })[0]) || {label:migId};
+
+    /* EDIT AND DELETE SIT ON THE ROW THEY ACT ON. A separate panel listing
+       everything would make you match a name against a name; a control on the
+       row is unambiguous about what it is about to change. They are appended
+       to rows the app has already painted, so this cannot disagree with what
+       the page is showing. */
+    var byId = {};
+    M.nodes.forEach(function(n){ byId[n.id] = n; });
+    [].forEach.call(groups.querySelectorAll("[data-nav]"), function(btn){
+      var n = byId[btn.getAttribute("data-nav")];
+      if(!n || n.t === 'mig' || n.t === 'minor' || n.vacant) return;
+      var bar = el("div", "ed-row");
+      var ed = el("button", null, "edit"); ed.type = "button";
+      var rm = el("button", "del", "delete"); rm.type = "button";
+      /* the row itself navigates, so these must not */
+      ed.onclick = function(e){ e.stopPropagation(); openForm(migId, n); };
+      rm.onclick = function(e){
+        e.stopPropagation();
+        confirmDelete(n, function(done){ retire(n, done); });
+      };
+      bar.appendChild(ed); bar.appendChild(rm);
+      btn.appendChild(bar);
+    });
+
+    var vac = M.nodes.filter(function(n){ return n.vacant && n.mig === migId; }).length;
+    var b = el('button','ed-add','+ Add to ' + m.label +
+              (vac ? "   \u00b7   " + vac + " empty star" + (vac>1?"s":"") + " waiting" : ""));
     b.type = 'button';
     b.onclick = function(){ openForm(migId); };
     groups.appendChild(b);
@@ -300,6 +349,84 @@ window.__editor = {
 function getModel(){
   if(!model && window.__v02 && window.__v02.model) model = window.__v02.model();
   return model || {migs:[],nodes:[],registers:[]};
+}
+
+/* ── ASKING FIRST ──────────────────────────────────────────────────────────
+   EVERY deletion is confirmed, not only the ones that touch the corpus. A
+   writing is not a row in a list; it is the only copy of something somebody
+   sat down and meant, and one stray click on a small button should not be
+   able to end it. The sheet names the writing and quotes its opening words,
+   so the thing being confirmed is the thing you think it is.
+
+   An original carries an extra line, because retiring one hides a piece of the
+   corpus the whole site was extracted from. Nothing is ever destroyed either
+   way: the text stays in preview.html or in the store, and the retirement is
+   one line that can be deleted to bring it back. */
+var ask, askIn;
+function confirmDelete(node, onYes){
+  askIn.innerHTML = "";
+  var box = el("div", "ed-ask");
+  box.appendChild(el("h3", null, "Delete " + node.label + "?"));
+
+  var isOriginal = !liveNoteIds()[node.id];
+  if(isOriginal){
+    var w = el("p", "warn");
+    w.textContent = "This is one of the original writings, taken from your own " +
+      "documents rather than written here.";
+    box.appendChild(w);
+  }
+  if(node.line){
+    box.appendChild(el("p", null, "\u201C" +
+      node.line.slice(0, 160).replace(/\s+/g, " ") + (node.line.length > 160 ? "\u2026" : "") +
+      "\u201D"));
+  }
+  var keeps = el("div", "keeps");
+  keeps.appendChild(el("div", null, "Its star stays lit where it is, carrying nothing."));
+  keeps.appendChild(el("div", null, "The next writing you add here takes that star."));
+  keeps.appendChild(el("div", null, "Its connections go with it."));
+  keeps.appendChild(el("div", null, "The text is not destroyed \u2014 this is reversible."));
+  box.appendChild(keeps);
+
+  var btns = el("div", "btns");
+  var go = el("button", "go", "Delete it"); go.type = "button";
+  var no = el("button", "no", "Keep it");  no.type = "button";
+  no.onclick = function(){ ask.classList.remove("open"); };
+  go.onclick = function(){
+    go.disabled = true; go.textContent = "Deleting\u2026";
+    onYes(function(err){
+      if(err){ go.disabled = false; go.textContent = "Delete it";
+               var e = el("p", "warn", err); box.appendChild(e); return; }
+      ask.classList.remove("open");
+    });
+  };
+  btns.appendChild(go); btns.appendChild(no);
+  box.appendChild(btns);
+  askIn.appendChild(box);
+  ask.classList.add("open");
+  no.focus();
+}
+
+/* WHICH IDS THIS STORE WROTE, as opposed to inherited from the corpus. The
+   difference decides how an edit is saved - rewriting a note in place, or
+   declaring an override beside a locked original - and what the delete sheet
+   warns about. It is read from the store itself rather than guessed from the
+   id, because a slug says nothing about where a writing came from.
+
+   Until it arrives, everything is treated as an original: that is the cautious
+   way round. The worst case is an extra warning on a note you wrote, rather
+   than a missing one on a piece of the corpus. */
+var liveIds = null;
+function liveNoteIds(){ return liveIds || {}; }
+function loadLiveIds(){
+  gh("/repos/" + CFG.owner + "/" + CFG.repo + "/contents/" + CFG.path +
+     "?ref=" + encodeURIComponent(CFG.branch))
+    .then(function(file){
+      var store = JSON.parse(unb64(file.content));
+      var map = {};
+      (store.notes || []).forEach(function(n){ map[n.id] = true; });
+      liveIds = map;
+    })
+    .catch(function(){ liveIds = {}; });
 }
 
 /* ── the form ──────────────────────────────────────────────────────────── */
@@ -319,15 +446,33 @@ function select(options, value, describe){
   });
   return s;
 }
-function openForm(migId){
+/* ONE FORM, TWO JOBS. Writing something new and correcting something already
+   written ask for the same fields, so they get the same form rather than two
+   that can drift apart. What changes is where the answer goes: a new writing
+   is appended to the store, an edit to a live note rewrites it in place, and an
+   edit to an original is DECLARED as an override beside the locked corpus. */
+function openForm(migId, editing){
   var M = getModel();
   pending = { mig: migId, rels: [] };
   formIn.innerHTML = '';
 
   var region = (M.migs.filter(function(x){ return x.id === migId; })[0]) || {label:migId};
-  formIn.appendChild(el('h2', null, 'A new note in ' + region.label));
-  formIn.appendChild(el('p','ed-sub',
-    'It joins the constellation as an object of its own, owned by this region.'));
+  var isOriginal = editing && !liveNoteIds()[editing.id];
+  if(editing){
+    formIn.appendChild(el('h2', null, 'Editing ' + editing.label));
+    formIn.appendChild(el('p','ed-sub', isOriginal
+      ? 'One of the originals. The source document is never rewritten \u2014 your change is recorded beside it and laid over the top, so the original text survives.'
+      : 'A note you wrote. Saving rewrites it where it stands.'));
+  } else {
+    formIn.appendChild(el('h2', null, 'A new note in ' + region.label));
+    /* the oldest empty star in this region is the one it will take */
+    var vacancies = M.nodes.filter(function(n){ return n.vacant && n.mig === migId; })
+      .sort(function(a,b){ return String(a.retiredAt||"") < String(b.retiredAt||"") ? -1 : 1; });
+    pending.takes = vacancies.length ? vacancies[0].id : null;
+    formIn.appendChild(el('p','ed-sub', pending.takes
+      ? 'It takes the star that has been empty longest in this region.'
+      : 'It joins the constellation as an object of its own, owned by this region.'));
+  }
 
   var errBox = el('div'); formIn.appendChild(errBox);
 
@@ -406,12 +551,15 @@ function openForm(migId){
                gloss: r.querySelector('.rel-gloss').value.trim() };
     });
     var note2 = {
-      id: fId.value.trim(), t: fType.value, label: fLabel.value.trim(),
+      id: editing ? editing.id : fId.value.trim(), t: fType.value, label: fLabel.value.trim(),
       mig: migId, crosses: crosses,
       register: fRegister.value.trim(), src: fSrc.value.trim(),
       line: fLine.value.trim(), added: new Date().toISOString().slice(0,10)
     };
-    var problems = validate(note2, rels, M);
+    if(pending.takes) note2.takes = pending.takes;
+    /* an id that already exists is a collision when writing something new and
+       simply the subject when editing, so the check is told which it is */
+    var problems = validate(note2, rels, M, editing ? editing.id : null);
     errBox.innerHTML = '';
     if(problems.length){
       var e = el('div','ed-err');
@@ -421,7 +569,30 @@ function openForm(migId){
       errBox.scrollIntoView({behavior:'smooth', block:'nearest'});
       return;
     }
-    save.disabled = true; save.textContent = 'Publishing…';
+    save.disabled = true; save.textContent = editing ? "Saving\u2026" : "Publishing\u2026";
+    if(editing){
+      saveEdit(editing, {
+        label: note2.label, line: note2.line, register: note2.register,
+        crosses: note2.crosses, src: note2.src
+      }, function(err){
+        errBox.innerHTML = "";
+        if(err){
+          save.disabled = false; save.textContent = "Save changes";
+          var bx = el("div","ed-err");
+          bx.appendChild(el("b", null, "Nothing was saved"));
+          bx.appendChild(el("div", null, err));
+          errBox.appendChild(bx);
+          return;
+        }
+        var ok2 = el("div","ed-ok");
+        ok2.appendChild(el("div", null, "Saved. " + note2.label + " is updated in the repository."));
+        ok2.appendChild(el("div", null, "It appears on the site once the build finishes."));
+        errBox.appendChild(ok2);
+        save.textContent = "Saved";
+        window.scrollTo({top:0, behavior:"smooth"});
+      });
+      return;
+    }
     publish(note2, rels).then(function(res){
       errBox.innerHTML = '';
       var ok = el('div','ed-ok');
@@ -443,6 +614,23 @@ function openForm(migId){
     });
   };
 
+  /* PRE-FILLED FROM WHAT IS ON THE PAGE, not from a copy kept here. The values
+     come through model(), so the form always opens showing what a reader is
+     actually seeing - including a correction made earlier. */
+  if(editing){
+    fType.value = editing.t || "thought";
+    fLabel.value = editing.label || "";
+    fLine.value = editing.line || "";
+    fRegister.value = editing.register || "";
+    fSrc.value = editing.src || "Live note";
+    fId.value = editing.id;
+    fId.disabled = true;
+    (editing.crosses || []).forEach(function(c){
+      var cb = chips.querySelector('input[value="' + c + '"]');
+      if(cb){ cb.checked = true; cb.onchange(); }
+    });
+    save.textContent = "Save changes";
+  }
   form.classList.add('open');
   fLabel.focus();
 }
@@ -468,13 +656,14 @@ function relRow(M){
 function closeForm(){ form.classList.remove('open'); pending = null; }
 
 /* ── the same rules as tools/notescheck.js ─────────────────────────────── */
-function validate(n, rels, M){
+function validate(n, rels, M, editingId){
+  /* when editing, the writing's own id is not a collision - it is the subject */
   var p = [];
   var ids = {}; M.nodes.forEach(function(x){ ids[x.id] = true; });
   var migs = {}; M.migs.forEach(function(x){ migs[x.id] = true; });
 
   if(!/^[a-z0-9][a-z0-9-]*$/.test(n.id)) p.push('The reference must be a lowercase slug.');
-  else if(ids[n.id]) p.push('The reference "' + n.id + '" already exists in the mind — it would be silently dropped.');
+  else if(ids[n.id] && n.id !== editingId) p.push('The reference "' + n.id + '" already exists in the mind — it would be silently dropped.');
   if(TYPES.indexOf(n.t) < 0) p.push('Unknown kind.');
   if(!n.label) p.push('A title is required.');
   else if(n.label !== n.label.toUpperCase()) p.push('The title must be uppercase.');
@@ -500,6 +689,89 @@ function validate(n, rels, M){
     pairs[r.to] = true;
   });
   return p;
+}
+
+/* ── ONE WAY IN AND OUT OF THE STORE ───────────────────────────────────────
+   Every change - a new writing, an edit, a deletion - is the same operation:
+   read the file, hand it to a function that changes it, write it back with the
+   sha we actually read. The sha is the concurrency check, so two devices
+   editing at once cannot silently discard one another.
+
+   Passing a FUNCTION rather than a finished document matters: the change is
+   applied to whatever is on the server right now, not to a copy this browser
+   loaded some minutes ago. */
+function commit(message, change){
+  var path = "/repos/" + CFG.owner + "/" + CFG.repo + "/contents/" + CFG.path;
+  return gh(path + "?ref=" + encodeURIComponent(CFG.branch)).then(function(file){
+    var store;
+    try { store = JSON.parse(unb64(file.content)); }
+    catch(e){ throw new Error("The store in the repository is not valid JSON; nothing was changed."); }
+    store.notes   = store.notes   || [];
+    store.minors  = store.minors  || [];
+    store.edges   = store.edges   || [];
+    store.retired = store.retired || [];
+    store.edits   = store.edits   || {};
+    change(store);
+    return gh(path, {
+      method: "PUT",
+      body: JSON.stringify({
+        message: message,
+        content: b64(JSON.stringify(store, null, 2) + "\n"),
+        sha: file.sha,
+        branch: CFG.branch
+      })
+    });
+  }).catch(function(e){
+    if(e.status === 409 || /does not match/i.test(e.message || ""))
+      throw new Error("The store changed while you were working. Reload and try again.");
+    if(e.status === 404)
+      throw new Error("Could not find " + CFG.path + " on " + CFG.branch + ".");
+    throw e;
+  });
+}
+
+/* DELETION IS A LINE ADDED, NOT A LINE REMOVED. Nothing is cut out of the
+   store or out of preview.html: the id is recorded as retired, with the date
+   that decides which vacancy is oldest, and the build blanks the node in place
+   so its star keeps burning. Deleting the retirement brings the writing back. */
+function retire(node, done){
+  commit("Retire: " + node.label, function(store){
+    if(store.retired.some(function(r){ return r.id === node.id; })) return;
+    store.retired.push({ id: node.id, at: new Date().toISOString().slice(0,10) });
+  }).then(function(){ done(null); reloadSoon(); })
+    .catch(function(e){ done(e.message); });
+}
+
+/* AN EDIT TO A LIVE NOTE REWRITES IT; AN EDIT TO AN ORIGINAL IS AN OVERRIDE.
+   The corpus is locked, so a correction to something extracted from the source
+   documents is DECLARED beside it rather than performed on it - the original
+   text stays where it was and the page renders it with the correction laid
+   over. Same principle as V02_OVERLAY, for the same reason. */
+function saveEdit(node, fields, done){
+  var live = !!liveNoteIds()[node.id];
+  commit((live ? "Edit: " : "Correct: ") + (fields.label || node.label), function(store){
+    if(live){
+      for(var i=0;i<store.notes.length;i++)
+        if(store.notes[i].id === node.id){
+          Object.keys(fields).forEach(function(k){ store.notes[i][k] = fields[k]; });
+          return;
+        }
+      throw new Error("That note is not in the store any more.");
+    }
+    store.edits[node.id] = Object.assign(store.edits[node.id] || {}, fields);
+  }).then(function(){ done(null); reloadSoon(); })
+    .catch(function(e){ done(e.message); });
+}
+
+/* the page is built from the store, so the honest way to show a change is to
+   let the build produce it - until then the page in front of you is stale */
+function reloadSoon(){
+  say("Committed. The site rebuilds in about a minute; reload then to see it.");
+}
+function say(msg){
+  var b = document.getElementById("edBar");
+  if(b) b.title = msg;
+  console.log("[editor] " + msg);
 }
 
 /* ── publish ───────────────────────────────────────────────────────────── */
@@ -550,6 +822,11 @@ function boot(){
   document.addEventListener('keydown', function(e){
     if(e.key === 'Escape' && form.classList.contains('open')) closeForm();
   });
+
+  ask = el("div"); ask.id = "edAsk";
+  askIn = el("div"); ask.appendChild(askIn);
+  document.body.appendChild(ask);
+  ask.addEventListener("click", function(e){ if(e.target === ask) ask.classList.remove("open"); });
 
   buildBar();
   try{ token = localStorage.getItem(KEY); }catch(_){}

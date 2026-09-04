@@ -1639,6 +1639,32 @@ var V02_OVERLAY={
 
      It disappears from the menus for free: a region lists its writings by
      asking which members have a src, and this no longer has one. */
+  /* EDITED WRITINGS. preview.html is the locked source of truth and is never
+     written to, so changing an original means DECLARING an override here - the
+     same principle V02_OVERLAY already works by, and the reason relabel and
+     reline exist. The original text stays in the corpus, recoverable, and what
+     the page renders is the corpus with a stated correction laid over it.
+
+     Applied before retirement, so a writing that was edited and later deleted
+     stays blank, and before claims, so a claimed vacancy is filled by the new
+     writing rather than by an override of the one it replaced. */
+  var EDITS=V02_NOTES.edits||{};
+  function applyEdits(list){
+    list.forEach(function(n){
+      var e=EDITS[n.id]; if(!e) return;
+      Object.keys(e).forEach(function(k){
+        /* an override may not move a writing to another region or change what
+           kind of object it is: both decide where it sits and what draws it,
+           and the graph is built from them before this could be honoured */
+        if(k==="id"||k==="mig"||k==="t") return;
+        n[k]=e[k];
+      });
+      n.edited=true;
+    });
+  }
+  applyEdits(THOUGHTS);
+  applyEdits(MINORS);
+
   var RETIRED={};
   (V02_NOTES.retired||[]).forEach(function(r){
     RETIRED[r.id]=r.at||'';
@@ -6238,7 +6264,15 @@ window.__v02={
   model:function(){
     return {
       migs:  MIGS.map(function(m){ return {id:m.id, label:m.label}; }),
-      nodes: NODES.map(function(n){ return {id:n.id, label:n.label, t:n.t, mig:n.mig}; }),
+      /* vacant and edited are what the editor reads to decide what it may
+         offer: a vacancy can be claimed but not opened, and an edited writing
+         shows its correction rather than the corpus text. */
+      nodes: NODES.map(function(n){
+        return {id:n.id, label:n.label, t:n.t, mig:n.mig,
+                line:n.line||null, register:n.register||null, src:n.src||null,
+                crosses:(n.crosses||[]).slice(),
+                vacant:!!n.vacant, retiredAt:n.retiredAt||null, edited:!!n.edited};
+      }),
       registers: NODES.map(function(n){ return n.register; }).filter(Boolean)
                   .filter(function(v,i,a){ return a.indexOf(v)===i; }).sort()
     };
