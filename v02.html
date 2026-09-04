@@ -1624,7 +1624,6 @@ var V02_OVERLAY={
      A malformed note cannot get this far. tools/notescheck.js validates the
      store against CONTENT-MODEL.md and fails the build rather than publishing
      something the graph would have to render as nonsense. */
-  addOnce(MINORS, V02_NOTES.minors);
 
   /* ── RETIRED WRITINGS, AND THE STARS THEY LEAVE BURNING ────────────────
      A deleted writing is BLANKED IN PLACE, never spliced out.
@@ -1664,6 +1663,11 @@ var V02_OVERLAY={
   }
   applyEdits(THOUGHTS);
   applyEdits(MINORS);
+  /* AND THE TOPICS THEMSELVES. A topic's description is the sentence a reader
+     meets on arriving in it, and it was the one piece of prose on this page
+     that could only be changed by editing the corpus. It is an override like
+     any other now. */
+  applyEdits(MIGS);
 
   var RETIRED={};
   (V02_NOTES.retired||[]).forEach(function(r){
@@ -1693,16 +1697,25 @@ var V02_OVERLAY={
      in its region, chosen by the editor. Notes that claim nothing are
      appended and make a new star, which does re-space that region: a region's
      bodies are distributed across however many it holds. */
-  var claims={}, fresh=[];
-  (V02_NOTES.notes||[]).forEach(function(nn){
-    if(nn.takes) claims[nn.takes]=nn; else fresh.push(nn);
-  });
-  addOnce(THOUGHTS, fresh);
-  Object.keys(claims).forEach(function(oldId){
-    for(var i=0;i<THOUGHTS.length;i++){
-      if(THOUGHTS[i].id===oldId && THOUGHTS[i].vacant){ THOUGHTS[i]=claims[oldId]; return; }
-    }
-  });
+  /* A CLAIM FILLS A VACANCY OF ITS OWN KIND, and only its own kind. Concepts
+     and writings are placed by different rules - in a planetary world the
+     concepts take the orbits and the writings hang off them - so a writing
+     dropped into a concept's orbit would be the wrong sort of body in it.
+     Each list is therefore searched for its own claims and no others. */
+  function claimInto(list, rows){
+    var claims={}, fresh=[];
+    (rows||[]).forEach(function(nn){
+      if(nn.takes) claims[nn.takes]=nn; else fresh.push(nn);
+    });
+    addOnce(list, fresh);
+    Object.keys(claims).forEach(function(oldId){
+      for(var i=0;i<list.length;i++){
+        if(list[i].id===oldId && list[i].vacant){ list[i]=claims[oldId]; return; }
+      }
+    });
+  }
+  claimInto(THOUGHTS, V02_NOTES.notes);
+  claimInto(MINORS,   V02_NOTES.minors);
 
   addEdgesOnce(V02_NOTES.edges);
 })();

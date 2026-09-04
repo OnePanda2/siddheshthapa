@@ -195,18 +195,47 @@ retired.forEach((r, i) => {
   retiredIds.add(r.id);
 });
 
-/* a note may take over the star a retirement left burning */
-notes.forEach((n, i) => {
-  if (!n || !n.takes) return;
-  const where = 'notes[' + i + '] (' + n.id + ')';
-  if (!retiredIds.has(n.takes))
-    fail(where, 'takes "' + n.takes + '", which is not a retired writing; there is no such vacancy');
-  if (n.takes === n.id) fail(where, 'takes its own id');
-});
-const claimed = notes.filter(n => n && n.takes).map(n => n.takes);
-claimed.forEach((t, i) => {
-  if (claimed.indexOf(t) !== i)
-    fail('notes', 'two notes claim the same vacancy "' + t + '"');
+/* A CLAIM MUST MATCH THE KIND OF THE STAR IT TAKES. Concepts and writings are
+   placed by different rules - in a planetary world the concepts take the orbits
+   and the writings hang off them - so a writing dropped into a concept's orbit
+   is the wrong sort of body in it. The merge searches each list only for its
+   own claims, which means a mismatched claim would not fail loudly: it would
+   simply never be applied, and the writing would quietly appear as a new star
+   somewhere else while the vacancy it named stayed empty. Silence is the worst
+   outcome available, so it is refused here.
+
+   Kind is decided by which list an id lives in, not by any field: that is what
+   the layout itself reads. */
+const conceptIds = new Set(G.MINORS.map(n => n.id)
+  .concat((OV.addMinors || []).map(n => n.id), minors.map(n => n && n.id)));
+
+function checkClaims(rows, listName, wantConcept) {
+  rows.forEach((n, i) => {
+    if (!n || !n.takes) return;
+    const where = listName + '[' + i + '] (' + n.id + ')';
+    if (!retiredIds.has(n.takes))
+      return fail(where, 'takes "' + n.takes + '", which is not retired; there is no such vacancy');
+    if (n.takes === n.id) fail(where, 'takes its own id');
+    const targetIsConcept = conceptIds.has(n.takes);
+    if (targetIsConcept !== wantConcept)
+      fail(where, 'takes "' + n.takes + '", which is ' +
+        (targetIsConcept ? "the star of a concept; a writing cannot stand in it"
+                         : "the star of a writing; a concept cannot stand in it"));
+  });
+  const taken = rows.filter(n => n && n.takes).map(n => n.takes);
+  taken.forEach((t, i) => {
+    if (taken.indexOf(t) !== i)
+      fail(listName, 'two rows claim the same vacancy "' + t + '"');
+  });
+}
+checkClaims(notes,  'notes',  false);
+checkClaims(minors, 'minors', true);
+
+/* and never from both lists at once */
+const allClaims = notes.concat(minors).filter(n => n && n.takes).map(n => n.takes);
+allClaims.forEach((t, i) => {
+  if (allClaims.indexOf(t) !== i)
+    fail('store', 'a note and a concept both claim "' + t + '"');
 });
 
 const knownId = id => takenIds.has(id) || seen.has(id);

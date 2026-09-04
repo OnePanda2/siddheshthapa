@@ -310,7 +310,13 @@ window.__editor = {
      check drives the form the way the page does rather than a simpler version
      of it - the first attempt to test edit mode through here opened the NEW
      note form and looked like a broken feature. */
-  open: function(migId, editing){ openForm(migId, editing); },
+  /* FORWARDS EVERYTHING, deliberately. This took two arguments where the
+     page passed three, so driving it through the harness opened the writing
+     form while the button opened the concept form - a check exercising a
+     simpler thing than the page does, which is how the last one hid a bug
+     rather than finding one. Apply the arguments rather than naming them, and
+     it cannot fall behind the call again. */
+  open: function(){ return openForm.apply(null, arguments); },
   validate: function(n, rels){ return validate(n, rels, getModel()); },
   authorised: function(){ return authorised(); },
   who: function(){ return me ? me.login : null; },
@@ -332,6 +338,7 @@ window.__editor = {
   },
 
   worksForm: function(id){ openWorksForm(id); },
+  topicForm: function(id){ openTopicForm(id); },
 
   paintRegion: function(migId, groups){
     if(!authorised()) return;
@@ -371,11 +378,27 @@ window.__editor = {
     });
 
     var vac = M.nodes.filter(function(n){ return n.vacant && n.mig === migId; }).length;
-    var b = el('button','ed-add','+ Add to ' + m.label +
-              (vac ? "   \u00b7   " + vac + " empty star" + (vac>1?"s":"") + " waiting" : ""));
+    /* counted by kind, because a writing and a concept cannot take each
+       other's star and it would be a lie to offer one the other's vacancy */
+    var vacW = M.nodes.filter(function(n){ return n.vacant && n.mig === migId && n.t !== "minor"; }).length;
+    var vacC = M.nodes.filter(function(n){ return n.vacant && n.mig === migId && n.t === "minor"; }).length;
+
+    var b = el('button','ed-add','+ Add a writing' +
+              (vacW ? "   \u00b7   " + vacW + " empty star" + (vacW>1?"s":"") + " waiting" : ""));
     b.type = 'button';
     b.onclick = function(){ openForm(migId); };
     groups.appendChild(b);
+
+    var c = el('button','ed-add','+ Add a concept' +
+              (vacC ? "   \u00b7   " + vacC + " empty star" + (vacC>1?"s":"") + " waiting" : ""));
+    c.type = 'button';
+    c.onclick = function(){ openForm(migId, null, true); };
+    groups.appendChild(c);
+
+    var t = el('button','ed-add','\u270e  Edit what ' + m.label + ' is');
+    t.type = 'button';
+    t.onclick = function(){ openTopicForm(migId); };
+    groups.appendChild(t);
   }
 };
 function getModel(){
@@ -499,7 +522,7 @@ function select(options, value, describe){
    that can drift apart. What changes is where the answer goes: a new writing
    is appended to the store, an edit to a live note rewrites it in place, and an
    edit to an original is DECLARED as an override beside the locked corpus. */
-function openForm(migId, editing){
+function openForm(migId, editing, asConcept){
   var M = getModel();
   pending = { mig: migId, rels: [] };
   formIn.innerHTML = '';
@@ -510,21 +533,29 @@ function openForm(migId, editing){
      reaches, and CONTENT-MODEL.md is explicit that it carries no src - that
      absence is the honesty signal saying the words are not his. Offering the
      writing fields for one would invite exactly the claim the absence denies. */
-  var isConcept = editing && editing.t === 'minor';
+  var isConcept = asConcept || (editing && editing.t === 'minor');
   if(editing){
     formIn.appendChild(el('h2', null, 'Editing ' + editing.label));
     formIn.appendChild(el('p','ed-sub', isOriginal
       ? 'One of the originals. The source document is never rewritten \u2014 your change is recorded beside it and laid over the top, so the original text survives.'
       : 'A note you wrote. Saving rewrites it where it stands.'));
   } else {
-    formIn.appendChild(el('h2', null, 'A new note in ' + region.label));
-    /* the oldest empty star in this region is the one it will take */
-    var vacancies = M.nodes.filter(function(n){ return n.vacant && n.mig === migId; })
+    formIn.appendChild(el('h2', null, (asConcept ? 'A new concept in ' : 'A new note in ') + region.label));
+    /* THE OLDEST EMPTY STAR OF THE RIGHT KIND. A concept may only take a
+       concept's star and a writing only a writing's, because the two are
+       placed by different rules - so the vacancies are filtered by kind before
+       the oldest is chosen. */
+    var vacancies = M.nodes.filter(function(n){
+        return n.vacant && n.mig === migId &&
+               (asConcept ? n.t === "minor" : n.t !== "minor");
+      })
       .sort(function(a,b){ return String(a.retiredAt||"") < String(b.retiredAt||"") ? -1 : 1; });
     pending.takes = vacancies.length ? vacancies[0].id : null;
     formIn.appendChild(el('p','ed-sub', pending.takes
-      ? 'It takes the star that has been empty longest in this region.'
-      : 'It joins the constellation as an object of its own, owned by this region.'));
+      ? 'It takes the ' + (asConcept ? 'concept' : 'writing') + ' star that has been empty longest here.'
+      : (asConcept
+          ? 'A new idea this topic is built out of. It joins as a body of its own.'
+          : 'It joins the constellation as an object of its own, owned by this topic.')));
   }
 
   var errBox = el('div'); formIn.appendChild(errBox);
@@ -666,6 +697,32 @@ function openForm(migId, editing){
       return;
     }
     save.disabled = true; save.textContent = editing ? "Saving\u2026" : "Publishing\u2026";
+    if(!editing && isConcept){
+      save.disabled = true; save.textContent = "Publishing\u2026";
+      var concept = { id: note2.id, label: note2.label, mig: migId, crosses: note2.crosses };
+      if(pending.takes) concept.takes = pending.takes;
+      commit("Concept: " + concept.label, function(store){
+        if(store.minors.some(function(x){ return x.id === concept.id; }))
+          throw new Error("A concept with the reference \"" + concept.id + "\" is already published.");
+        store.minors.push(concept);
+        rels.forEach(function(r){ store.edges.push([concept.id, r.to, r.verb, r.gloss]); });
+      }).then(function(){
+        errBox.innerHTML = "";
+        var ok3 = el("div","ed-ok");
+        ok3.appendChild(el("div", null, "Published. " + concept.label + " is in the repository."));
+        ok3.appendChild(el("div", null, "It appears on the site once the build finishes."));
+        errBox.appendChild(ok3);
+        save.textContent = "Published";
+        window.scrollTo({top:0, behavior:"smooth"});
+      }).catch(function(e){
+        save.disabled = false; save.textContent = "Publish";
+        var bx3 = el("div","ed-err");
+        bx3.appendChild(el("b", null, "Nothing was published"));
+        bx3.appendChild(el("div", null, e.message));
+        errBox.appendChild(bx3);
+      });
+      return;
+    }
     if(editing){
       saveEdit(editing, isConcept
         ? { label: note2.label, crosses: note2.crosses }
@@ -881,6 +938,65 @@ function say(msg){
   var b = document.getElementById("edBar");
   if(b) b.title = msg;
   console.log("[editor] " + msg);
+}
+
+/* ── THE SENTENCE A TOPIC OWNS ─────────────────────────────────────────────
+   The line under a topic's name is the first prose anyone meets on arriving in
+   it, and until now it was the only writing on this page that could be changed
+   nowhere but in the corpus. It is an override like any other: the locked text
+   stays, the correction is declared beside it. */
+function openTopicForm(migId){
+  var M = getModel();
+  var mig = M.migs.filter(function(x){ return x.id === migId; })[0] || {id:migId, label:migId};
+  var node = M.nodes.filter(function(n){ return n.id === migId; })[0] || {};
+  formIn.innerHTML = "";
+  formIn.appendChild(el("h2", null, "Editing " + mig.label));
+  formIn.appendChild(el("p", "ed-sub",
+    "The sentence a reader meets on arriving in this topic."));
+  var errBox = el("div"); formIn.appendChild(errBox);
+
+  var fLine = el("textarea");
+  fLine.value = node.line || "";
+  fLine.placeholder = "What this topic is, in your own words.";
+  formIn.appendChild(field("Description", "shown under the name of the topic", fLine));
+
+  var act = el("div", "ed-act");
+  var save = el("button", null, "Save"); save.id = "edSave"; save.type = "button";
+  var cancel = el("button", null, "Cancel"); cancel.id = "edCancel"; cancel.type = "button";
+  cancel.onclick = closeForm;
+  act.appendChild(save); act.appendChild(cancel);
+  act.appendChild(el("span", "ed-small", "Saving commits to " + CFG.owner + "/" + CFG.repo + "."));
+  formIn.appendChild(act);
+
+  save.onclick = function(){
+    var line = fLine.value.trim();
+    errBox.innerHTML = "";
+    if(!line){
+      var e = el("div", "ed-err");
+      e.appendChild(el("b", null, "Nothing to save"));
+      e.appendChild(el("div", null, "A topic with no description says nothing about itself."));
+      errBox.appendChild(e);
+      return;
+    }
+    save.disabled = true; save.textContent = "Saving\u2026";
+    commit("Topic: " + mig.label, function(store){
+      store.edits[migId] = Object.assign(store.edits[migId] || {}, { line: line });
+    }).then(function(){
+      var ok = el("div", "ed-ok");
+      ok.appendChild(el("div", null, "Saved. It appears once the build finishes."));
+      errBox.appendChild(ok);
+      save.textContent = "Saved";
+    }).catch(function(err){
+      save.disabled = false; save.textContent = "Save";
+      var bx = el("div", "ed-err");
+      bx.appendChild(el("b", null, "Nothing was saved"));
+      bx.appendChild(el("div", null, err.message));
+      errBox.appendChild(bx);
+    });
+  };
+
+  form.classList.add("open");
+  fLine.focus();
 }
 
 /* ── THE MANUAL ────────────────────────────────────────────────────────────
