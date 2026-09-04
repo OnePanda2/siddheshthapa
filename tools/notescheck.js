@@ -97,7 +97,8 @@ try { store = JSON.parse(fs.readFileSync(FILE, 'utf8')); }
 catch (e) { console.error('notescheck: ' + FILE + ' is not valid JSON — ' + e.message); process.exit(1); }
 
 if (store.version !== 1) fail('store', 'version must be 1, found ' + JSON.stringify(store.version));
-['notes', 'minors', 'edges'].forEach(k => {
+['notes', 'minors', 'edges', 'retired'].forEach(k => {
+  if (k === 'retired' && store[k] === undefined) return;   // a store may retire nothing
   if (!Array.isArray(store[k])) fail('store', k + ' must be an array');
 });
 if (fails.length) { report(); process.exit(1); }
@@ -105,6 +106,7 @@ if (fails.length) { report(); process.exit(1); }
 const notes  = store.notes;
 const minors = store.minors;
 const edges  = store.edges;
+const retired = store.retired || [];
 
 /* ids introduced by this store, checked against each other as well as against
    the graph, because two notes can collide with one another */
@@ -174,6 +176,39 @@ minors.forEach((m, i) => {
 });
 
 /* ── relationships ────────────────────────────────────────────────────────── */
+/* RETIRED WRITINGS. A deletion names an id that must really exist, or the star
+   it claims to have emptied is a star nobody has. Retiring twice is a
+   bookkeeping error rather than a stronger deletion, and a note may only CLAIM
+   a vacancy that has actually been made. The date is required because it is
+   what decides which vacancy is the oldest, and the oldest is the one the next
+   writing takes. */
+const retiredIds = new Set();
+retired.forEach((r, i) => {
+  const where = 'retired[' + i + ']' + (r && r.id ? ' (' + r.id + ')' : '');
+  if (!r || typeof r !== 'object') return fail(where, 'not an object');
+  if (typeof r.id !== 'string' || !r.id) return fail(where, 'id is required');
+  if (!takenIds.has(r.id) && !seen.has(r.id))
+    fail(where, 'nothing with the id "' + r.id + '" exists to retire');
+  if (retiredIds.has(r.id)) fail(where, 'retired twice');
+  if (typeof r.at !== 'string' || isNaN(Date.parse(r.at)))
+    fail(where, 'at must be an ISO date - it is what decides which vacancy is oldest');
+  retiredIds.add(r.id);
+});
+
+/* a note may take over the star a retirement left burning */
+notes.forEach((n, i) => {
+  if (!n || !n.takes) return;
+  const where = 'notes[' + i + '] (' + n.id + ')';
+  if (!retiredIds.has(n.takes))
+    fail(where, 'takes "' + n.takes + '", which is not a retired writing; there is no such vacancy');
+  if (n.takes === n.id) fail(where, 'takes its own id');
+});
+const claimed = notes.filter(n => n && n.takes).map(n => n.takes);
+claimed.forEach((t, i) => {
+  if (claimed.indexOf(t) !== i)
+    fail('notes', 'two notes claim the same vacancy "' + t + '"');
+});
+
 const knownId = id => takenIds.has(id) || seen.has(id);
 const pairSeen = new Map();
 existingEdges.forEach(e => pairSeen.set(e[0] + ' ' + e[1], 'the graph'));

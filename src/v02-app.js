@@ -226,8 +226,52 @@ var V02_OVERLAY={
      A malformed note cannot get this far. tools/notescheck.js validates the
      store against CONTENT-MODEL.md and fails the build rather than publishing
      something the graph would have to render as nonsense. */
-  addOnce(MINORS,   V02_NOTES.minors);
-  addOnce(THOUGHTS, V02_NOTES.notes);
+  addOnce(MINORS, V02_NOTES.minors);
+
+  /* ── RETIRED WRITINGS, AND THE STARS THEY LEAVE BURNING ────────────────
+     A deleted writing is BLANKED IN PLACE, never spliced out.
+
+     Position in this mind is an index. owned[mig] is filled in NODES order
+     and a body's place in its region is decided by where it sits in that
+     list, so removing one node would move every star after it — delete one
+     thought and a whole region rearranges itself around the gap. Keeping the
+     node means nothing moves at all: it holds its id, its region and its
+     place, and loses only the things that made it a writing. The star goes on
+     burning exactly where it was, carrying nothing.
+
+     It disappears from the menus for free: a region lists its writings by
+     asking which members have a src, and this no longer has one. */
+  var RETIRED={};
+  (V02_NOTES.retired||[]).forEach(function(r){
+    RETIRED[r.id]=r.at||'';
+  });
+  THOUGHTS.forEach(function(n){
+    if(!RETIRED.hasOwnProperty(n.id)) return;
+    n.vacant=true; n.retiredAt=RETIRED[n.id];
+    n.label=''; n.line=''; n.src=null; n.register=null;
+  });
+  /* a relationship to a vacancy is a line drawn to nothing, so it goes with
+     the writing rather than outliving it */
+  for(var ei=EDGES.length-1;ei>=0;ei--)
+    if(RETIRED.hasOwnProperty(EDGES[ei][0]) || RETIRED.hasOwnProperty(EDGES[ei][1]))
+      EDGES.splice(ei,1);
+
+  /* A NEW WRITING MAY CLAIM A VACANCY. It replaces the blanked node at the
+     SAME index, which is what hands it the same star — the oldest empty one
+     in its region, chosen by the editor. Notes that claim nothing are
+     appended and make a new star, which does re-space that region: a region's
+     bodies are distributed across however many it holds. */
+  var claims={}, fresh=[];
+  (V02_NOTES.notes||[]).forEach(function(nn){
+    if(nn.takes) claims[nn.takes]=nn; else fresh.push(nn);
+  });
+  addOnce(THOUGHTS, fresh);
+  Object.keys(claims).forEach(function(oldId){
+    for(var i=0;i<THOUGHTS.length;i++){
+      if(THOUGHTS[i].id===oldId && THOUGHTS[i].vacant){ THOUGHTS[i]=claims[oldId]; return; }
+    }
+  });
+
   addEdgesOnce(V02_NOTES.edges);
 })();
 MIGS.forEach(function(m){ m.t='mig'; m.mig=m.id; NODES.push(m); owned[m.id]=[]; });
@@ -3357,7 +3401,7 @@ var readingId=null, camMemory=null;
 var WORKS_OPEN=false, onWorksDoor=null, onWorksSheet=null;
 
 function openReader(id){
-  var n=byId[id]; if(!n) return;
+  var n=byId[id]; if(!n || n.vacant) return;
   readingId=id;
   camMemory={p:wantPos.clone(), a:wantAim.clone(), mode:state.mode, focus:state.focus, region:state.region};
   readTitle.textContent=n.line||n.label;
@@ -3662,6 +3706,10 @@ labelLayer.id='labels'; labelLayer.setAttribute('aria-hidden','true');
 document.body.appendChild(labelLayer);
 var labelEls={};
 function labelFor(n,cls){
+  /* A VACANCY IS NAMELESS. The star stays lit and keeps its place; what it
+     lost was the writing, and a label over an empty body would be naming
+     something that is not there. */
+  if(n.vacant) return null;
   var e=labelEls[n.id];
   if(!e){ e=document.createElement('span'); e.className='lb '+cls;
           if(n.t==='mig'){
@@ -3744,6 +3792,7 @@ function layLabels(){
     var v=n.pos.clone().project(camera);
     if(v.z>1||Math.abs(v.x)>1||Math.abs(v.y)>1) return;
     var e=labelFor(n, n.t==='mig'?'lb-mig':(n.t==='minor'?'lb-min':'lb-w'));
+    if(!e) return;                       // a vacancy has no label to place
     var lr=(n.t==='minor'?lp.minor:lp.writing);
     var near = n.t==='mig' ? Math.max(0,Math.min(1,(migRange-d)/(migRange*0.55)))
              : Math.max(0,Math.min(1,(lr-d)/(lr*0.5)));
