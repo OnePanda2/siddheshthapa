@@ -181,7 +181,50 @@ var CSS = [
 '.ed-ask button{font:11px/1 ui-monospace,monospace;letter-spacing:.12em;',
 '  text-transform:uppercase;padding:11px 18px;border-radius:3px;cursor:pointer}',
 '.ed-ask .go{color:#180606;background:#d98080;border:1px solid #d98080}',
-'.ed-ask .no{color:#9aa2b6;background:none;border:1px solid #2a3145}'
+'.ed-ask .no{color:#9aa2b6;background:none;border:1px solid #2a3145}',
+
+/* ── ON A PHONE ─────────────────────────────────────────────────────────
+   Writing from a phone is not the same as reading from one, and three things
+   here were actively hostile to it.
+
+   SIXTEEN PIXELS IS NOT A TASTE, IT IS A THRESHOLD. iOS Safari zooms the page
+   in whenever a focused field is under 16px, and it does not zoom back out
+   afterwards - so typing one title left the whole site magnified and the rest
+   of the form off screen. The fields were 14px.
+
+   THE ACTION ROW OVERFLOWED. Save, Cancel and Delete side by side measured
+   wider than a 375px screen, which put Delete off the edge - the one control
+   that must never be reached for by accident, hidden where you would have to
+   swipe to find it. It wraps now, and Delete sits on its own line beneath.
+
+   AND THE BAR SAT ON TOP OF THE LIST. It is fixed to the bottom of the
+   window; on a phone the writings sheet is bottom-anchored too, so the bar
+   covered the last rows and no amount of scrolling could move them out from
+   under it. The sheet is given room for it instead. */
+'@media (max-width:767px){',
+'  .ed-f input[type=text],.ed-f textarea,.ed-f select{font-size:16px}',
+'  .ed-f select,.ed-f input[type=text].mono{font-size:16px}',
+'  .ed-rel input,.ed-rel textarea,.ed-rel select{font-size:16px}',
+'  .ed-in{padding:26px 16px 120px;max-width:none}',
+'  .ed-in h2{font-size:22px}',
+'  #edForm{background:#04060c}',
+'  .ed-act{flex-wrap:wrap;gap:10px}',
+'  .ed-act button{flex:1 1 auto;min-height:48px}',
+'  .ed-act .ed-small{flex:1 1 100%;order:9}',
+'  #edSave,#edCancel{min-width:44%}',
+'  .ed-rel .row{flex-wrap:wrap}',
+'  .ed-rel .row>*{flex:1 1 100%}',
+'  .ed-rel .drop{flex:0 0 auto;min-height:44px}',
+'  .ed-row{padding:0 2px 14px}',
+'  .ed-row button{flex:1 1 0;min-height:48px}',
+'  .ed-add{min-height:52px;font-size:11px}',
+'  #edBar{left:8px;right:8px;bottom:8px;justify-content:center;flex-wrap:wrap}',
+'  #edBar button{min-height:40px;padding:8px 14px}',
+'  #semantic{padding-bottom:86px}',
+'  .ed-ask{max-width:none;width:100%;padding:20px 18px 18px}',
+'  .ed-ask .btns{flex-wrap:wrap}',
+'  .ed-ask button{flex:1 1 auto;min-height:48px}',
+'}'
 ].join('\n').replace('#495june','#495066');
 
 /* ── the bar ───────────────────────────────────────────────────────────── */
