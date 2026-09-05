@@ -61,7 +61,33 @@ const MUTATIONS = [
      own box against the same obstacles. P4.7 added the FOCUS node to that set,
      which shrank the band far enough that removing only the second test no
      longer produces a collision. Both have to go. */
-  { n: 7, name: 'no mark over a drawn graph label', w: 2560, h: 1080,
+  /* RUN AT 1440x900, WHICH IS THE ONLY THING THAT WAS WRONG WITH IT.
+
+     This sat unverified for weeks and the note above records one earlier
+     attempt: P4.7 added the focus node to the obstacle set, removing only the
+     second guard stopped colliding, so both were removed. Both ARE removed —
+     and it still caught nothing, which is where it was left.
+
+     Measured rather than reasoned about, at four viewports with both guards
+     stripped and preview.html copied rather than touched:
+
+       2560x1080   philosophy 0   curiosity 0   c-curiosity 0
+       1920x1080   philosophy 9   curiosity 2   c-curiosity 0
+       1440x900    philosophy 5   curiosity 4   c-curiosity 0
+       1280x800    philosophy 2   curiosity 2   c-curiosity 1
+
+     The guards are load-bearing everywhere except the one width this was
+     pinned to. At 2560 the annotation band is proportional to the width and
+     the marks — which sit at their fragments' baselines — end up in a
+     different band of y entirely from the rim labels. They overlap in x by
+     some 25px and never in y, so nothing can be caught by removing the thing
+     that keeps them apart.
+
+     1440x900 is marginaliacheck's own default, so this is the size the
+     assertion is checked at in the ordinary course of things, and the same
+     size the suite already proves it PASSES at. Five collisions in one state
+     and four in another is a wide margin, not a lucky pixel. */
+  { n: 7, name: 'no mark over a drawn graph label', w: 1440, h: 900,
     edits: [{ find: "for(var r=0;r<Z.obs.length;r++){",
               repl: "for(var r=0;r<0*Z.obs.length;r++){" },
             { find: "clearOf({x0:marginR-W*annW*.5",

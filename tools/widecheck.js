@@ -95,14 +95,51 @@ const probeFor = id => `(function(){
   };
 })()`;
 
+/* THE TIMEOUT WAS FLAKY, AND THE LOG MADE IT LOOK STRUCTURAL.
+
+   Two states failed a full regression at 320s — philosophy and curiosity — and
+   the obvious reading was that those two are the expensive ones. Run standalone
+   the same minute, both PASSED and MUSIC timed out instead. Every state passes
+   on some run and no state passes on all of them, so nothing is wrong with any
+   particular state: 2.76M pixels in software raster on this machine sits close
+   enough to the ceiling that whichever state loses the scheduling coin toss
+   trips it.
+
+   A bigger number alone would only move the coin toss. What separates a slow
+   run from a broken one is whether it fails TWICE, so a state that times out is
+   given one more attempt and only then reported. The ceiling goes up as well —
+   420s against the ~95s a state actually takes — because a retry is worth
+   nothing if the first attempt was cut off mid-render for want of a few
+   seconds.
+
+   NOT MEASURED is still a failure, never a pass. This makes the check less
+   likely to cry wolf; it does not make it easier to satisfy. */
+const TIMEOUT = 420000, ATTEMPTS = 2;
+
 let bad = 0, measured = 0, stageSeen = '';
 STATES.forEach(id => {
   fs.writeFileSync(tmp + '/p-' + id + '.js', probeFor(id), 'utf8');
   let s;
   try {
-    const raw = execSync('node tools/viewport.js probe "' + file + '" ' + W + ' ' + H +
-                         ' focus:' + id + ' "' + tmp + '/p-' + id + '.js"',
-                         { maxBuffer: 1 << 26, timeout: 320000 }).toString();
+    let raw = null, lastErr = null;
+    for (let attempt = 1; attempt <= ATTEMPTS && raw === null; attempt++) {
+      try {
+        raw = execSync('node tools/viewport.js probe "' + file + '" ' + W + ' ' + H +
+                       ' focus:' + id + ' "' + tmp + '/p-' + id + '.js"',
+                       { maxBuffer: 1 << 26, timeout: TIMEOUT }).toString();
+      } catch (e1) {
+        lastErr = e1;
+        /* only a TIMEOUT is worth retrying. A probe that threw, or a page that
+           reported an error, will throw again just as fast and twice as
+           slowly — and retrying a real failure is how a suite talks itself
+           into a pass. */
+        if (e1.signal !== 'SIGTERM' && !/ETIMEDOUT/.test(String(e1.message))) throw e1;
+        if (attempt < ATTEMPTS)
+          console.log('  ..    ' + id.padEnd(12) + ' timed out at ' + (TIMEOUT / 1000) +
+                      's, one more attempt');
+      }
+    }
+    if (raw === null) throw lastErr;
     const parsed = JSON.parse(raw.slice(raw.indexOf('{')));
     if (Math.abs(parsed.viewport.cssWidth - W) > 24)
       throw new Error('viewport reported ' + parsed.viewport.cssWidth);
