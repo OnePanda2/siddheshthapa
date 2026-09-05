@@ -321,27 +321,6 @@
    "confidence": "high"
   },
   {
-   "system": "Proxima Cen",
-   "sourceType": "exoplanet-system",
-   "planetCount": 2,
-   "semiMajorAxisAU": [
-    0.02881,
-    0.04848
-   ],
-   "orbitalPeriodDays": [
-    5.12338,
-    11.18465
-   ],
-   "letters": [
-    "d",
-    "b"
-   ],
-   "geometryBasis": "Only two confirmed planets, both very close in. The nearest star to the Sun.",
-   "visualCharacter": "sparse, quiet, almost empty — a system defined by what it lacks",
-   "confidence": "high",
-   "notes": "Its emptiness is the point; the natural candidate for a MIG with almost no content."
-  },
-  {
    "system": "Kepler-16",
    "sourceType": "circumbinary-system",
    "planetCount": 1,
@@ -557,6 +536,11 @@
    "issue": "Kepler-90 still returns no rows",
    "detail": "Re-queried on 2026-09-04 against pscomppars by hostname, as the earlier gap entry instructed. The archive returned nothing again, so the eight-planet system remains unverified and unused.",
    "action": "leave unused"
+  },
+  {
+   "issue": "Proxima Cen removed from the set",
+   "detail": "Retrieved and kept as the natural candidate for a topic with almost no content, and briefly assigned to THINGS I WAS WRONG ABOUT. Two confirmed planets inside 0.05 AU render as a star with a smudge rather than as a system, so the topic was given HD 10180 instead and this record was dropped rather than left in the file as a system nothing would ever be assigned to.",
+   "action": "re-retrieve from the archive if a future topic needs a world; nothing here is invented, so it comes back the same way it arrived"
   }
  ],
  "_retrieved_kepler16": "2026-08-20",

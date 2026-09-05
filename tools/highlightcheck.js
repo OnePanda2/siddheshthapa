@@ -38,13 +38,19 @@ const PROBE = `(function(){
      sprite while the reported maximum never moved. Total light in the
      neighbourhood is monotone in the sprite's own contribution. */
   function bright(id){ var b=M.spriteBlobs(id,110); return b? b.sumSignal : null; }
+  /* A SECOND REGION, TAKEN FROM THE MIND. This named 'psychology', which was a
+     region when the line was written and is a concept of HUMAN BEHAVIOUR now.
+     Highlighting a region that does not exist reports -1, which is exactly what
+     a highlight that FAILED reports — so the check could not tell the two apart
+     and blamed the feature for the name. */
+  var SECOND=(M.arch().migIds||[]).filter(function(x){ return x!=='philosophy' && x!=='life'; })[0];
   function snap(){ return {state:M.hoverState(), st:M.state(), arch:M.arch(),
-                           phil:bright('philosophy'), works:bright('psychology'),
+                           phil:bright('philosophy'), works:bright(SECOND),
                            life:bright('life'), menu:M.dom().navRows}; }
   M.highlight(null); M.settle(40);
   var base=snap();
   M.highlight('philosophy'); M.settle(40); var hPhil=snap();
-  M.highlight('psychology');   M.settle(40); var hWork=snap();
+  M.highlight(SECOND);         M.settle(40); var hWork=snap();
   /* a SECOND populated region, for the contrast test. An uncharted one cannot
      serve: its emblem has no world of bodies behind it, so hovering it lifts
      the reading by about 17 against a charted region's 370, and the check was
@@ -89,7 +95,7 @@ const PROBE = `(function(){
 
   return {base:base, hPhil:hPhil, hWork:hWork, hLife:hLife, rel:rel, kb:kb,
           noOrbit:noOrbit, hNone:hNone,
-          migCount:M.arch().migCount};
+          migCount:M.arch().migCount, second:SECOND};
 })()`;
 
 const page = tmp + '/h.html';
@@ -125,7 +131,7 @@ ck('H1', r.hPhil.state.hoverRegion >= 0 && r.hWork.state.hoverRegion >= 0 &&
          r.hPhil.state.hoverRegion !== r.hWork.state.hoverRegion &&
          r.base.state.hoverRegion === -1,
    'MIG -> world mapping is a region index: philosophy=' + r.hPhil.state.hoverRegion +
-   ', psychology=' + r.hWork.state.hoverRegion + ', none=' + r.base.state.hoverRegion);
+   ', ' + r.second + '=' + r.hWork.state.hoverRegion + ', none=' + r.base.state.hoverRegion);
 
 /* H2 — the hovered world brightens AND the rest step back.
 
@@ -159,7 +165,7 @@ ck('H2', r.hPhil.phil > r.base.phil &&
          r.hWork.works >= r.base.works * 0.98,
    'the hovered world brightens and the others step back — philosophy ' +
    r.base.phil + ' -> ' + r.hPhil.phil + ', while life falls ' + h2Fall +
-   ' (needs more than ' + Math.round(h2Floor) + '); hovering psychology leaves it at ' +
+   ' (needs more than ' + Math.round(h2Floor) + '); hovering ' + r.second + ' leaves it at ' +
    r.base.works + ' -> ' + r.hWork.works);
 
 /* H3 — the others recede, so the answer is unambiguous.

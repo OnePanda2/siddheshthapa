@@ -1557,10 +1557,9 @@ var V02_OVERLAY={
      welcome page had no second door and ART had no contents — one placeholder
      covering for the other. The door exists now and ART has its own contents
      below, so the region goes back to its own name. */
-  relabel:[
-    { id:'building', to:'MESSAGES FOR THE ELITE',
-      why:'the topic is no longer about the act of building — the works have their own door for that, and this section now holds writing addressed to a particular reader. Its contents, its system HD 10180 and every relationship are untouched: only the name on the door changes.' }
-  ],
+  /* nothing is renamed. The one entry that lived here renamed BUILDING to
+     MESSAGES FOR THE ELITE, and that topic is gone rather than renamed. */
+  relabel:[],
   /* ORDER IN THE MENU IS NOT ORDER IN THE MIND.
 
      MIGS comes verbatim from preview.html, and a region's INDEX in it decides
@@ -1571,10 +1570,9 @@ var V02_OVERLAY={
      So the two are allowed to differ, in the one place divergence is declared
      rather than discovered. Named regions go to the end of the menu in the
      order given here; every other row keeps the mind's own order. */
-  menuLast:[
-    { id:'building',
-      why:'it addresses a narrower reader than the rest of the mind, so it sits at the foot of the list rather than in the middle of topics anyone can read.' }
-  ],
+  /* nothing is pinned to the foot of the menu today. The mechanism stays: it
+     is where a topic goes when it addresses a narrower reader than the rest. */
+  menuLast:[],
   /* ONE SENTENCE IS REWRITTEN FOR V02.
      The graph's line for COTSI describes the mechanism, which is the right
      register inside the mind and the wrong one on a card a stranger reads in
@@ -1625,7 +1623,20 @@ var V02_OVERLAY={
      The mind keeps fifteen regions; the works are objects of the site. */
   hideMIGs:[
     { id:'my-works',
-      why:'the works have their own section; a region for them as well would be the same six objects twice, and would make the second door read as an appendix to the first.' }
+      why:'the works have their own section; a region for them as well would be the same six objects twice, and would make the second door read as an appendix to the first.' },
+    /* IT WAS BUILDING, THEN IT WAS MESSAGES FOR THE ELITE, AND NOW IT IS
+       NEITHER. The second name was for writing that was going to sit behind a
+       paywall, and that idea was dropped — deliberately, because material that
+       could cost you your career is exposed the moment it is stored anywhere
+       you do not control, whatever the access rules say.
+
+       So the topic goes rather than being renamed a third time. Its five
+       objects stay in the graph exactly as my-works's do: same ids, same
+       relationships, no position, drawn nowhere and listed nowhere. Nothing is
+       cut out of preview.html, which is locked and stays that way, and putting
+       the region back is one line if it is ever wanted. */
+    { id:'building',
+      why:'the paywall it was renamed for was dropped, and an empty topic held open for writing that will not be published is a door onto nothing. Its objects survive in the graph; only the room is gone.' }
   ],
   /* THE COLLISION IS GONE, SO THE WORKAROUND IS GONE WITH IT.
 
@@ -1781,6 +1792,26 @@ var V02_OVERLAY={
       list.push(r);
     });
   }
+  /* A RELATIONSHIP INTO A HIDDEN ROOM IS A DOOR ONTO NOTHING.
+
+     Hiding a region leaves its objects in the graph, which is right — they
+     keep their ids and their history. But a relationship from a VISIBLE topic
+     to one of them still renders a row, and that row goes nowhere: TECHNOLOGY
+     showed "TOOLS · in messages for the elite", pointing at an object that
+     exists nowhere a visitor can reach.
+
+     MY WORKS is the exception and the reason this was never a problem before:
+     its objects have somewhere to go, so a row pointing at one opens its sheet
+     in the manual. A hidden region with no manual behind it has no such
+     destination, so the relationships into it go with the room.
+
+     Both directions, because an edge is a claim with a direction and a claim
+     whose other end cannot be reached is not a claim anyone can follow. */
+  /* THE SWEEP ITSELF RUNS AT THE END, once every source of edges has had its
+     say — see below, after the live notes are merged. Placed here it ran
+     before V02_OVERLAY.addEdges and missed one: b-feels, a belief in ART,
+     pointing at THE DESIGN LOOP inside the room being closed. Five of the six
+     were swept and the sixth was declared twenty lines later. */
   /* removed AFTER the additions, so an id can be added and hidden in one pass
      if it ever needs to be, and BEFORE nodes are derived, so nothing that
      depends on the region list ever sees it */
@@ -1940,6 +1971,37 @@ var V02_OVERLAY={
   for(var ej=EDGES.length-1;ej>=0;ej--)
     if(RETIRED.hasOwnProperty(EDGES[ej][0]) || RETIRED.hasOwnProperty(EDGES[ej][1]))
       EDGES.splice(ej,1);
+
+  /* A RELATIONSHIP INTO A HIDDEN ROOM IS A DOOR ONTO NOTHING.
+
+     Hiding a region leaves its objects in the graph, which is right — they keep
+     their ids and their history. But a relationship from a VISIBLE topic to one
+     of them still renders a row, and that row goes nowhere: TECHNOLOGY showed
+     "TOOLS · in messages for the elite", pointing at an object that exists
+     nowhere a visitor can reach.
+
+     MY WORKS is the exception and the reason this never came up before: its
+     objects have somewhere to go, so a row pointing at one opens its sheet in
+     the manual. A room with nothing behind it has no such destination, so the
+     relationships into it go with it.
+
+     LAST, DELIBERATELY. Edges arrive from three places — the corpus, the
+     overlay, and the live store — and this has to see all three. Run earlier it
+     swept the corpus's five and left the overlay's sixth standing, which is the
+     one failure mode it exists to prevent. Both directions, because a claim
+     whose other end cannot be reached is not a claim anyone can follow. */
+  (function(){
+    var vanish={};
+    (V02_OVERLAY.hideMIGs||[]).forEach(function(h){
+      if(h.id==='my-works') return;           // its objects have the manual
+      MINORS.concat(THOUGHTS).forEach(function(o){ if(o.mig===h.id) vanish[o.id]=1; });
+    });
+    if(!Object.keys(vanish).length) return;
+    var cut=0;
+    for(var vi=EDGES.length-1;vi>=0;vi--)
+      if(vanish[EDGES[vi][0]] || vanish[EDGES[vi][1]]){ EDGES.splice(vi,1); cut++; }
+    V02_OVERLAY._edgesDroppedWithHiddenRooms=cut;
+  })();
 })();
 MIGS.forEach(function(m){ m.t='mig'; m.mig=m.id; NODES.push(m); owned[m.id]=[]; });
 /* a hidden region keeps its ownership books. Its objects still belong to it —
@@ -2346,27 +2408,6 @@ var ASTRO_DATA={
    "confidence": "high"
   },
   {
-   "system": "Proxima Cen",
-   "sourceType": "exoplanet-system",
-   "planetCount": 2,
-   "semiMajorAxisAU": [
-    0.02881,
-    0.04848
-   ],
-   "orbitalPeriodDays": [
-    5.12338,
-    11.18465
-   ],
-   "letters": [
-    "d",
-    "b"
-   ],
-   "geometryBasis": "Only two confirmed planets, both very close in. The nearest star to the Sun.",
-   "visualCharacter": "sparse, quiet, almost empty — a system defined by what it lacks",
-   "confidence": "high",
-   "notes": "Its emptiness is the point; the natural candidate for a MIG with almost no content."
-  },
-  {
    "system": "Kepler-16",
    "sourceType": "circumbinary-system",
    "planetCount": 1,
@@ -2582,6 +2623,11 @@ var ASTRO_DATA={
    "issue": "Kepler-90 still returns no rows",
    "detail": "Re-queried on 2026-09-04 against pscomppars by hostname, as the earlier gap entry instructed. The archive returned nothing again, so the eight-planet system remains unverified and unused.",
    "action": "leave unused"
+  },
+  {
+   "issue": "Proxima Cen removed from the set",
+   "detail": "Retrieved and kept as the natural candidate for a topic with almost no content, and briefly assigned to THINGS I WAS WRONG ABOUT. Two confirmed planets inside 0.05 AU render as a star with a smudge rather than as a system, so the topic was given HD 10180 instead and this record was dropped rather than left in the file as a system nothing would ever be assigned to.",
+   "action": "re-retrieve from the archive if a future topic needs a world; nothing here is invented, so it comes back the same way it arrived"
   }
  ],
  "_retrieved_kepler16": "2026-08-20",
@@ -2619,13 +2665,15 @@ var ASTRO={}; (ASTRO_DATA.systems||[]).forEach(function(sy){ ASTRO[sy.system]=sy
    has a world, so it waits for the next one rather than being spent. */
 var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 8799',
                  'life':'Kepler-33', 'technology':'GJ 876', 'business':'55 Cnc',
-                 'society':'Kepler-11', 'building':'HD 10180',
+                 'society':'Kepler-11',
                  'learning':'K2-138', 'behaviour':'TOI-178',
                  'food':'HD 219134',
                  'music':'Kepler-80', 'books':'Kepler-62', 'art':'HD 40307',
-                 /* the last unassigned system, and the one the archive itself
-                    nominated for a topic with almost nothing in it */
-                 'wrong':'Proxima Cen' };
+                 /* HD 10180, which BUILDING had and no longer needs. Six
+                    measured orbits spreading from 0.064 to 3.4 AU — a real
+                    system with room in it, where Proxima Cen's two planets
+                    huddled inside 0.05 AU and read as a star with a smudge. */
+                 'wrong':'HD 10180' };
 function templateFor(migId){ return ASTRO[MIG_SYSTEM[migId]]||null; }
 
 var ORBIT_R0=13;                     // the innermost orbit, in scene units
@@ -2654,7 +2702,7 @@ var SYS_TILT=0.42;                   // one shared viewing tilt, ~24 degrees
    radius, because that span multiplies it. */
 var WORLD_SCALE={ 'philosophy':13, 'love':52, 'movies':18, 'life':15,
                   'technology':9, 'business':1.1, 'society':16,
-                  'building':11, 'learning':20, 'behaviour':17,
+                  'wrong':11, 'learning':20, 'behaviour':17,
                   'food':13 };
 function scaleFor(migId){ return WORLD_SCALE[migId]||ORBIT_R0; }
 
@@ -3939,6 +3987,9 @@ var MIG_VISUAL={
   /* things given up. A core with a single ring around it and nothing else:
      what is left after something has been let go of. */
   'wrong'       :{family:'nascent',  branches:0, len:0.00, spread:0.00, rings:1, core:0.26},
+  /* BUILDING is hidden and draws nothing, so its species is never asked for.
+     Kept because the region still exists in the locked corpus and would want
+     its own form again the moment it were unhidden. */
   /* how a thing feels rather than whether it works. A wide diffuse halo around
      a modest core: the region is about the light around an object rather than
      the object, which is also the honest shape of five concepts and three
@@ -4214,9 +4265,21 @@ var MIG_PALETTE={};
   var sc=SOC_VARIANTS[SOC_PICK]||SOC_VARIANTS.a;
   MIG_PALETTE['society']={fog:sc.fog, star:sc.star, body:sc.body,
                           orbit:sc.orbit, accent:sc.accent};
+  /* ART TAKES THE COLOUR THE REMOVED TOPIC LEFT BEHIND.
+
+     ART has eight objects and was the only populated topic without a designed
+     palette — it arrived after the twelve were chosen and has been taking
+     whatever the automatic search could find between them ever since. Removing
+     BUILDING freed a hand-picked colour that this mind has already proved:
+     while it was in use every emblem cleared the separation E7 asks for, and
+     it is measured against the same eleven neighbours ART sits among.
+
+     So it is inherited rather than invented, and ART stops competing for
+     scraps. The BUILDING variants stay where they are: the region still exists
+     in the locked corpus and would want its own colour back if it returned. */
   var bd=BUILD_VARIANTS[BUILD_PICK]||BUILD_VARIANTS.a;
-  MIG_PALETTE['building']={fog:bd.fog, star:bd.star, body:bd.body,
-                           orbit:bd.orbit, accent:bd.accent};
+  MIG_PALETTE['art']={fog:bd.fog, star:bd.star, body:bd.body,
+                      orbit:bd.orbit, accent:bd.accent};
   var ln=LEARN_VARIANTS[LEARN_PICK]||LEARN_VARIANTS.a;
   MIG_PALETTE['learning']={fog:ln.fog, star:ln.star, body:ln.body,
                            orbit:ln.orbit, accent:ln.accent};
@@ -4332,35 +4395,135 @@ var NEUTRAL_TINTS={};
   }
   /* scored against `star`, which is the field a MIG node actually draws —
      everything else draws `body`, and spacing those moved nothing in the menu */
-  var taken=[];
-  MIGS.forEach(function(m){ if(MIG_PALETTE[m.id]) taken.push(MIG_PALETTE[m.id].star); });
-  MIGS.filter(function(m){ return !MIG_PALETTE[m.id]; }).forEach(function(m){
-    /* SEARCHED IN TWO DIMENSIONS, not one. On a single ring the sixteen
-       emblems could not all be pulled 18 deltaE apart — the twelve charted
-       colours are fixed, and one ring left the best arrangement at 16.7.
-       Lightness is the second axis: it costs nothing to vary and it is what
-       lets a hue already close to a charted one separate by tone instead. */
-    var best=-1, bestGap=-1, bestSat=RING_S, bestL=RING_L;
-    for(var L=0.40; L<=0.63; L+=0.035){
-      for(var h=0; h<360; h+=3){
-        var sat=satFor(h, L), cand=hsl2hex(h, sat, L), gap=1e9;
-        for(var k=0;k<taken.length;k++) gap=Math.min(gap, dist(cand, taken[k]));
-        if(gap>bestGap){ bestGap=gap; best=h; bestSat=sat; bestL=L; }
+  var fixed=[];
+  MIGS.forEach(function(m){ if(MIG_PALETTE[m.id]) fixed.push(MIG_PALETTE[m.id].star); });
+  var open=MIGS.filter(function(m){ return !MIG_PALETTE[m.id]; });
+
+  /* SEARCHED IN TWO DIMENSIONS, not one. On a single ring the emblems could
+     not all be pulled 18 deltaE apart — the charted colours are fixed, and one
+     ring left the best arrangement at 16.7. Lightness is the second axis: it
+     costs nothing to vary and it is what lets a hue already close to a charted
+     one separate by tone instead.
+
+     AND SEARCHED AGAIN AFTERWARDS, WHICH IS THE PART THAT WAS MISSING.
+
+     One pass is greedy: each region in turn takes the seat furthest from
+     everything placed so far, which is optimal for that region and can leave
+     the LAST one nowhere good. That held while the set of regions did not
+     change. Removing a topic changed the number being packed and the order
+     they were packed in, and the arrangement collapsed to 13.0 deltaE between
+     HUMAN BEHAVIOUR and ART — under the 14 these are held to, which means two
+     topics that look alike in the menu.
+
+     The first instinct was to search harder: six times the grid, every hue,
+     twelve lightness steps. It came out WORSE, at 12.6, which is the useful
+     result — it says the resolution was never the problem. A finer grid only
+     lets an early region find a slightly better seat for itself, at the
+     expense of whoever sits last.
+
+     So each region is placed, and then every region is asked again, in turn,
+     whether it could sit better now that it can see all the others rather than
+     only the ones placed before it. That is a few passes of local improvement
+     over a set of four, and it converges in three. */
+  /* AND HUE IS A CONSTRAINT, NOT ONLY A SCORE.
+
+     dist() divides a colour by its largest channel before measuring, because
+     that is what the points shader does. For two colours whose largest channel
+     is the SAME one, the surviving ratios can differ enough to score far apart
+     while the eye sees one colour twice: HUMAN BEHAVIOUR at #7ff0a6 and ART at
+     #0bda6c measured 33 apart internally and rendered 12.8 apart on screen —
+     both green, eight degrees of hue between them.
+
+     That is why searching harder never helped. The search was optimising a
+     number that had stopped describing the thing being judged. A minimum hue
+     separation is crude next to a colour metric and it is the part the metric
+     was missing, so it is asserted directly: no emblem may sit within HUE_SEP
+     degrees of another, and among the seats that clear it the Lab distance
+     still decides. */
+  var HUE_SEP=17;
+  function hueOf(hex){
+    var r=(hex>>16&255)/255, g=(hex>>8&255)/255, b2=(hex&255)/255;
+    var mx=Math.max(r,g,b2), mn=Math.min(r,g,b2), d=mx-mn;
+    if(d<1e-6) return 0;
+    var h;
+    if(mx===r) h=60*(((g-b2)/d)%6);
+    else if(mx===g) h=60*(((b2-r)/d)+2);
+    else h=60*(((r-g)/d)+4);
+    return ((h%360)+360)%360;
+  }
+  function hueGap(a2,b3){ var d=Math.abs(a2-b3)%360; return d>180?360-d:d; }
+  function seatFor(avoid){
+    var avoidH=avoid.map(hueOf);
+    var bh=-1, bgap=-1, bsat=RING_S, bl=RING_L, relaxed=false;
+    for(var attempt=0; attempt<2 && bh<0; attempt++){
+      var sep=attempt?0:HUE_SEP;
+      relaxed=!!attempt;
+      for(var L=0.40; L<=0.63; L+=0.025){
+        for(var h=0; h<360; h+=2){
+          var ok=true;
+          for(var q=0;q<avoidH.length;q++) if(hueGap(h,avoidH[q])<sep){ ok=false; break; }
+          if(!ok) continue;
+          var sat=satFor(h, L), cand=hsl2hex(h, sat, L), gap=1e9;
+          for(var k=0;k<avoid.length;k++) gap=Math.min(gap, dist(cand, avoid[k]));
+          if(gap>bgap){ bgap=gap; bh=h; bsat=sat; bl=L; }
+        }
       }
     }
-    if(best < 0){ best=0; bestSat=RING_S; bestL=RING_L; }
-    var star=hsl2hex(best, bestSat, bestL);
-    taken.push(star);
+    if(bh<0){ bh=0; bsat=RING_S; bl=RING_L; }
+    return { h:bh, sat:bsat, L:bl, hex:hsl2hex(bh,bsat,bl), gap:bgap, relaxed:relaxed };
+  }
+
+  /* pass one: place them, each against everything already placed */
+  var seat=[];
+  open.forEach(function(m){
+    seat.push(seatFor(fixed.concat(seat.map(function(x){ return x.hex; }))));
+  });
+
+  /* passes two and after: everyone looks again, now that they can see everyone */
+  for(var pass=0; pass<4; pass++){
+    var moved=false;
+    for(var si=0; si<seat.length; si++){
+      var others=fixed.concat(seat.filter(function(_,j){ return j!==si; })
+                                  .map(function(x){ return x.hex; }));
+      /* THE SEAT IT HAS, SCORED AGAINST THE SAME SET the candidate is scored
+         against. The first version compared better.gap with seat[si].gap, and
+         those two numbers were measured against DIFFERENT sets — the stored
+         gap was computed when the region was first placed, against only the
+         regions placed before it. Comparing them meant the pass almost never
+         fired, which is why three attempts at this produced 13.0, 12.6 and
+         12.8 and looked like the wheel had run out of room. It had not: the
+         ring holds 36 colours 14 apart. */
+      var cur=1e9;
+      for(var oi=0;oi<others.length;oi++) cur=Math.min(cur, dist(seat[si].hex, others[oi]));
+      var better=seatFor(others);
+      if(better.gap > cur + 0.01){ seat[si]=better; moved=true; }
+    }
+    if(!moved) break;
+  }
+
+  open.forEach(function(m,i){
+    var st=seat[i];
     NEUTRAL_TINTS[m.id]={
-      fog:   hsl2hex(best, bestSat*0.24, 0.83),
-      star:  star,
-      body:  hsl2hex(best, bestSat*0.49, 0.35),
-      orbit: hsl2hex(best, bestSat*0.56, 0.37),
-      accent:hsl2hex(best, bestSat*0.66, 0.45)
+      fog:   hsl2hex(st.h, st.sat*0.24, 0.83),
+      star:  st.hex,
+      body:  hsl2hex(st.h, st.sat*0.49, 0.35),
+      orbit: hsl2hex(st.h, st.sat*0.56, 0.37),
+      accent:hsl2hex(st.h, st.sat*0.66, 0.45)
     };
   });
 })();
 function paletteOf(migId){ return MIG_PALETTE[migId] || NEUTRAL_TINTS[migId] || NEUTRAL_PALETTE; }
+/* what colour each region was actually given, and whether it designed its own.
+   Without this a check can only measure rendered pixels, which cannot say
+   whether a clash came from the assignment or from the drawing. */
+function paletteReport(){
+  var out={};
+  MIGS.forEach(function(m){
+    var pal=paletteOf(m.id);
+    out[m.id]={ own:!!MIG_PALETTE[m.id], star:pal.star };
+  });
+  return out;
+}
 /* ── THE WORLD PROFILE ────────────────────────────────────────────────
    One entry per MIG. The graph stays the source of truth; this is only the
    visual interpretation of it. Every field the renderer actually consults
@@ -7591,6 +7754,7 @@ window.__v02={
     }).map(function(m){return m.id;});
     return out;
   },
+  palettes:function(){ return paletteReport(); },
   species:function(){
     var out={};
     MIGS.forEach(function(m){

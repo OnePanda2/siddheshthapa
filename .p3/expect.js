@@ -66,7 +66,8 @@ if (require.main === module) {
   console.log('objects: ' + n.inSource + ' in source + ' + n.declared + ' declared - ' +
               n.hidden + ' hidden + ' + n.written + ' written live = ' + n.total);
   console.log('relationships: ' + l.inSource + ' + ' + l.declared + ' declared + ' +
-              l.written + ' written live = ' + l.total);
+              l.written + ' written live - ' + (l.orphaned || 0) +
+              ' into hidden rooms = ' + l.total);
 }
 
 /* the same idea for objects: the graph's own declarations plus what the overlay
@@ -132,6 +133,54 @@ function expectedLinks() {
     declared = (app.slice(at, end > 0 ? end : at + 6000).match(ROW) || []).length;
   }
   const written = liveNotes().edges;
-  return { inSource, declared, written, total: inSource + declared + written };
+
+  /* AND A HIDDEN ROOM TAKES ITS RELATIONSHIPS WITH IT.
+
+     Hiding a region leaves its objects in the graph but gives them no position,
+     so nothing draws them. A relationship from a VISIBLE topic to one of those
+     objects therefore renders a row that goes nowhere — TECHNOLOGY advertising
+     "TOOLS · in messages for the elite", pointing at something a visitor cannot
+     reach. The app drops those edges, and this file is where the expectation
+     has to learn it, exactly as it already learns that a hidden region loses
+     its own node.
+
+     MY WORKS is the exception, and the reason this never came up before: its
+     objects have the manual to open, so a row pointing at one has somewhere to
+     go. Only rooms with nothing behind them lose their edges. */
+  const hidAt = app.indexOf('hideMIGs:[');
+  const hiddenIds = [];
+  if (hidAt >= 0) {
+    const hidEnd = app.indexOf(String.fromCharCode(10) + '  ]', hidAt);
+    const block = app.slice(hidAt, hidEnd > 0 ? hidEnd : hidAt + 4000);
+    (block.match(/\{\s*id:'([a-z-]+)'/g) || []).forEach(t => {
+      const id = /id:'([a-z-]+)'/.exec(t)[1];
+      if (id !== 'my-works') hiddenIds.push(id);
+    });
+  }
+  let orphaned = 0;
+  if (hiddenIds.length) {
+    /* every object the corpus files under a hidden region */
+    const gone = {};
+    const objRe = /\{id:'([a-z0-9-]+)'[^}]*?mig:'([a-z-]+)'/g;
+    let om;
+    while ((om = objRe.exec(src))) if (hiddenIds.includes(om[2])) gone[om[1]] = 1;
+    /* and the same for anything the overlay added into one */
+    const addRe = /\{\s*id:'([a-z0-9-]+)'[^}]*?mig:'([a-z-]+)'/g;
+    let am;
+    while ((am = addRe.exec(app))) if (hiddenIds.includes(am[2])) gone[am[1]] = 1;
+
+    const countIn = text => {
+      const rows = [...text.matchAll(/\['([^']+)','([^']+)'/g)];
+      return rows.filter(r => gone[r[1]] || gone[r[2]]).length;
+    };
+    orphaned = countIn(src.slice(edgesFrom, edgesTo > edgesFrom ? edgesTo : undefined));
+    if (at >= 0) {
+      const end2 = app.indexOf(String.fromCharCode(10) + '  ]', at);
+      orphaned += countIn(app.slice(at, end2 > 0 ? end2 : at + 6000));
+    }
+  }
+
+  return { inSource, declared, written, orphaned,
+           total: inSource + declared + written - orphaned };
 }
 module.exports.expectedLinks = expectedLinks;
