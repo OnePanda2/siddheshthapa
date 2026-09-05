@@ -48,10 +48,20 @@ const PROBE = `(function(){
   /* ---- while the mind is still closed ---- */
   var closed={ mind:M.mind(), brain:M.brain(), menu:M.menuRows(),
                rel:M.relVis(), overlay:M.overlay(), worlds:M.worlds() };
+  /* every object and its kind, so uniqueness of ids can be asserted across the
+     whole mind rather than for one pair that happened to collide once */
+  closed.nodes=(M.model?M.model().nodes:[]).map(function(n){
+    return {id:n.id, t:n.t, mig:n.mig}; });
   closed.base={ phil:b('philosophy'), love:b('love') };
   M.highlight('philosophy'); M.settle(30);
   closed.hPhil={ st:M.hoverState(), phil:b('philosophy'), love:b('love'), rel:M.relVis() };
-  M.highlight('psychology'); M.settle(30);
+  /* A SECOND REGION, CHOSEN FROM THE MIND RATHER THAN NAMED. This hovered
+     'psychology', which stopped being a region the moment that world became
+     BOOKS — and a highlight of a region that does not exist reports -1, which
+     is indistinguishable from a highlight that failed. */
+  var second=(M.arch().migIds||[]).filter(function(x){ return x!=='philosophy'; })[0];
+  closed.secondId=second;
+  M.highlight(second); M.settle(30);
   closed.hPsy={ st:M.hoverState() };
   M.highlight(null); M.settle(30);
   closed.rel2={ st:M.hoverState(), phil:b('philosophy'), love:b('love') };
@@ -157,11 +167,21 @@ ck('W4', r.arch.migCount === OV.migCount && r.arch.reparented.length === 0,
 /* the menu shows every region and ONLY regions. It used to require my-works
    among them; the works are a door now rather than a room, so their presence
    here would be the defect. */
+/* EVERY REGION THE OVERLAY DECLARES, not one named example. This required
+   'psychology' by name, to prove the region the overlay had just added really
+   reached the menu. That was the right claim and the wrong way to hold it: the
+   moment the added region was called something else, the check failed while
+   the property it protects was perfectly intact. Asking for all of them is
+   both stronger and immune to renaming. */
+const declaredIds = (OV.added || []).map(x => x.id);
+const missingFromMenu = declaredIds.filter(id => !r.closed.menu.some(x => x.id === id));
 ck('W5', r.closed.menu.length === OV.migCount &&
-         r.closed.menu.some(x => x.id === 'psychology') &&
+         missingFromMenu.length === 0 &&
          !r.closed.menu.some(x => x.id === 'my-works'),
    'the Main Mind Menu exposes all ' + r.closed.menu.length +
-   ' regions and nothing else — Psychology included, the works not among them');
+   ' regions and nothing else — every one the overlay declares (' +
+   (declaredIds.join(', ') || 'none') + ') is present, the works are not' +
+   (missingFromMenu.length ? ' — MISSING: ' + missingFromMenu.join(', ') : ''));
 
 /* W6 — ART IS A REGION NOW, AND MY WORKS HAS ITS NAME BACK.
 
@@ -183,12 +203,27 @@ ck('W6', art.label === 'ART' && art.empty === false && art.owns >= 8 &&
    'from the mind');
 
 // W7 — Psychology exists and took nothing
-const psy = (OV.added || []).find(x => x.id === 'psychology') || {};
-const oldConcept = OV.existingPsychologyConcept || {};
-ck('W7', psy.label === 'PSYCHOLOGY' && psy.owns === 0 && psy.empty === true &&
-         oldConcept.ownedBy === 'behaviour',
-   'PSYCHOLOGY is a first-class MIG, intentionally empty (' + psy.owns +
-   ' objects), and the existing psychology concept still belongs to ' + oldConcept.ownedBy);
+/* W7 — A REGION DECLARED EMPTY IS ACTUALLY EMPTY, and PSYCHOLOGY is a concept.
+
+   This read "PSYCHOLOGY is a first-class MIG, intentionally empty". It is not
+   one any more: that world is BOOKS, and PSYCHOLOGY is back to being a Minor IG
+   of HUMAN BEHAVIOUR, which is where it was before it was ever promoted.
+
+   The half worth keeping is the half that was doing the work — a region the
+   overlay declares EMPTY must hold nothing, because declaring emptiness and
+   then quietly filling it is the fabrication the content rule forbids. That is
+   now asked of every such region rather than of one by name, and the concept's
+   ownership is asserted alongside it. */
+const declaredEmpty = (OV.added || []).filter(x => x.empty === true);
+const notEmpty = declaredEmpty.filter(x => x.owns !== 0);
+const psyConcept = OV.existingPsychologyConcept || {};
+ck('W7', declaredEmpty.length > 0 && notEmpty.length === 0 &&
+         psyConcept.ownedBy === 'behaviour' && psyConcept.type === 'minor',
+   declaredEmpty.length + ' region(s) declared empty hold nothing (' +
+   declaredEmpty.map(x => x.label + ' ' + x.owns).join(', ') +
+   '), and PSYCHOLOGY is a ' + (psyConcept.type || 'missing') + ' of ' +
+   (psyConcept.ownedBy || 'nothing') + ' rather than a region of its own' +
+   (notEmpty.length ? ' — NOT EMPTY: ' + notEmpty.map(x => x.label).join(', ') : ''));
 
 /* M1 — brain proportions. A human brain is roughly 140 wide x 93 tall x 167
    deep, so h/w near 0.66 and d/w near 1.19. Assert the layout is in that
@@ -226,7 +261,8 @@ ck('M3', r.closed.mind.open === 0 && r.closed.hPhil.st.hoverRegion >= 0 &&
             region against its own baseline cannot be confounded that way. */
          r.closed.hPhil.phil > r.closed.base.phil,
    'hovering identifies the right brain region while the mind is closed — philosophy=' +
-   r.closed.hPhil.st.hoverRegion + ', psychology=' + r.closed.hPsy.st.hoverRegion);
+   r.closed.hPhil.st.hoverRegion + ', ' + r.closed.secondId + '=' +
+   r.closed.hPsy.st.hoverRegion);
 
 // M4
 ck('M4', r.closed.rel2.st.hoverRegion === -1 &&
@@ -254,12 +290,12 @@ ck('M5', r.closed.mind.open === 0 && r.open.afterEnter.open === 0 &&
 /* brain nodes are listed in MIGS order, so a MIG's index there IS its region
    index. Asserting >= 0 let a mutation map every MIG to region 0. */
 const loveIdx = B.nodes.findIndex(nd => nd.id === 'love');
-const psyIdx  = B.nodes.findIndex(nd => nd.id === 'psychology');
+const psyIdx  = B.nodes.findIndex(nd => nd.id === r.closed.secondId);
 ck('H1', loveIdx >= 0 && r.open.hLove.st.hoverRegion === loveIdx &&
          r.open.hLove.st.hovered === 'love' &&
          r.closed.hPsy.st.hoverRegion === psyIdx && loveIdx !== psyIdx,
    'a hover maps to exactly one MIG — love is region ' + r.open.hLove.st.hoverRegion +
-   ' (its own index ' + loveIdx + '), psychology is ' + r.closed.hPsy.st.hoverRegion);
+   ' (its own index ' + loveIdx + '), ' + r.closed.secondId + ' is ' + r.closed.hPsy.st.hoverRegion);
 
 // H2 / H3
 /* strictly brighter: `> base * 0.98` would have accepted it getting darker */
@@ -317,16 +353,30 @@ ck('R1', mixes.every(m => m > 0.5) && originMix.every(m => m < 0.2) &&
      ' from the world, range ' + v.range + ', mix ' + v.focusMix.toFixed(2));
 });
 
-/* W8 — the PSYCHOLOGY identity collision is resolved without moving ownership */
-const rn = (OV.renamed || [])[0] || {};
-ck('W8', psy.id === 'psychology' && rn.from === 'psychology' &&
-         rn.to === 'psychology-behaviour' && rn.moved === 1 &&
-         rn.oldIdHeldBy === 'mig' && rn.label === 'PSYCHOLOGY' &&
-         rn.ownedBy === 'behaviour' && rn.edges === 3,
-   'the identity collision is resolved — the MIG takes the id psychology, the concept is re-keyed to ' +
-   rn.to + ' (the freed id is now held by the ' + rn.oldIdHeldBy +
-   ') but it keeps its label ' + rn.label + ', its owner ' + rn.ownedBy +
-   ' and all ' + rn.edges + ' of its relationships');
+/* W8 — NO TWO OBJECTS SHARE AN ID, AND NO REGION TAKES ONE A CONCEPT HOLDS.
+
+   This asserted that a specific collision had been resolved by a specific
+   rename: PSYCHOLOGY the region took the id, and PSYCHOLOGY the concept was
+   re-keyed out of its way. Both halves of that are gone — the region is BOOKS,
+   the concept has its own id back, and the rename that carried the collision
+   has been deleted rather than left standing over nothing.
+
+   What the rename existed to protect is still true and is worth more as a
+   general rule than as a note about one pair: an id names exactly one thing in
+   this mind, and a region may not take an id a concept is already using. That
+   holds whether or not anyone is being promoted today, and it is what would
+   catch the next promotion done carelessly. */
+const allIds = (r.closed.nodes || []).map(n => n.id);
+const dupIds = allIds.filter((id, i) => allIds.indexOf(id) !== i);
+const conceptIds = {};
+(r.closed.nodes || []).forEach(n => { if (n.t === 'minor') conceptIds[n.id] = n.mig; });
+const stolen = (r.closed.menu || []).filter(m => conceptIds[m.id] !== undefined);
+ck('W8', allIds.length > 0 && dupIds.length === 0 && stolen.length === 0,
+   'an id names exactly one thing — ' + allIds.length + ' objects, no duplicates, ' +
+   'and no region has taken an id a concept holds' +
+   (dupIds.length ? ' — DUPLICATED: ' + dupIds.join(', ') : '') +
+   (stolen.length ? ' — TAKEN FROM A CONCEPT: ' +
+      stolen.map(m => m.id + ' (a concept of ' + conceptIds[m.id] + ')').join(', ') : ''));
 
 /* W9 — every MIG states its source, and an unassigned one says so */
 const sky9 = r.closed.sky || [];

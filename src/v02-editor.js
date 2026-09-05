@@ -697,8 +697,35 @@ function openForm(migId, editing, asConcept){
     formIn.appendChild(field('Kind', 'what sort of statement this is', fType));
   }
   formIn.appendChild(field('Title', 'uppercase, as everything in the mind is', fLabel));
+  /* SECTIONS — THE PART OF A WRITING THAT COMES AFTER THE STATEMENT.
+
+     A writing is one sentence held still, and that is the field above. A
+     section is what follows it: what the quote meant, where it came from, what
+     changed since. They are ordered, they can be moved and removed, and a
+     writing can grow another one at any time — including a writing published
+     months ago, which is the whole point. openForm is the same function for
+     writing a new note and for editing an old one, so building the control
+     from editing.sections gives both behaviours from one place.
+
+     A concept gets no sections for the same reason it gets no prose: it is a
+     name and the regions it reaches, and CONTENT-MODEL.md is explicit that it
+     carries no words of his.
+
+     rowsField is the control the manual already uses for parts and procedure —
+     same add, same move, same remove, so there is one way to edit an ordered
+     list in this editor rather than two. */
+  var secs = rowsField(editing && editing.sections,
+    [{ key:'heading', placeholder:'Heading — optional' },
+     { key:'body', big:true, placeholder:'What this section says. Leave the heading blank for a plain paragraph.' }],
+    '+ section', false);
+
   if(!isConcept){
     formIn.appendChild(field('The writing', 'the material itself', fLine));
+    formIn.appendChild(field('Sections',
+      'anything that comes after the statement — an explanation, a source, a ' +
+      'correction. The heading is optional. Add as many as you need, whenever ' +
+      'you need them.', secs.wrap));
+    formIn.appendChild(secs.more);
     formIn.appendChild(field('Register',
       'so a joke can never be read as a conviction. A disclaimer after an em-dash is doing safety work.',
       fRegister));
@@ -775,12 +802,16 @@ function openForm(migId, editing, asConcept){
                verb: r.querySelector('.rel-verb').value.trim(),
                gloss: r.querySelector('.rel-gloss').value.trim() };
     });
+    var sections = isConcept ? [] : secs.read().filter(function(x){ return x.body; });
     var note2 = {
       id: editing ? editing.id : fId.value.trim(), t: fType.value, label: fLabel.value.trim(),
       mig: migId, crosses: crosses,
       register: fRegister.value.trim(), src: fSrc.value.trim(),
       line: fLine.value.trim(), added: new Date().toISOString().slice(0,10)
     };
+    /* omitted entirely when there are none, so a store full of notes without
+       sections does not fill up with empty arrays */
+    if(sections.length) note2.sections = sections;
     if(pending.takes) note2.takes = pending.takes;
     if(isConcept) note2.isConcept = true;   // read by validate, never stored
     /* an id that already exists is a collision when writing something new and
@@ -829,8 +860,13 @@ function openForm(migId, editing, asConcept){
     if(editing){
       saveEdit(editing, isConcept
         ? { label: note2.label, crosses: note2.crosses }
+        /* sections are sent even when EMPTY, unlike on a new note: an edit is
+           a statement about what the writing should now be, so removing the
+           last section has to travel as [] rather than as silence. Sent as
+           silence it would leave the old sections in the store and the removal
+           would appear to work and then undo itself on the next build. */
         : { label: note2.label, line: note2.line, register: note2.register,
-            crosses: note2.crosses, src: note2.src },
+            crosses: note2.crosses, src: note2.src, sections: sections },
         function(err){
         errBox.innerHTML = "";
         if(err){

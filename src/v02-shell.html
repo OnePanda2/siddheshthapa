@@ -321,6 +321,28 @@ body.th-hover-mind  .th-world--mind  .th-meta{opacity:.55}
   color:var(--ink-subtle);margin:0 0 26px;display:flex;justify-content:space-between}
 .docbody{font-family:var(--serif);font-size:clamp(24px,2.6vw,34px);line-height:1.32;
   letter-spacing:-.02em;margin:0 0 30px}
+/* SECTIONS ARE COMMENTARY, AND THEY READ LIKE IT.
+
+   The statement at the top of a reading is set large because it IS the thing —
+   a writing in this mind is one sentence held still. A section is what comes
+   after it: what the quote meant, where it came from, what changed. Setting
+   those at the same size would turn a held statement into an article and lose
+   the reason the page looks the way it does.
+
+   So they are smaller, quieter and narrower-feeling than the statement above
+   them, and the heading is optional — a bare paragraph of explanation needs no
+   title, and a long piece can grow them when it needs to be scanned. */
+.docsec{margin:34px 0 0}
+.docsec + .docsec{margin-top:26px}
+.docsec-h{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-subtle);font-weight:400;margin:0 0 8px}
+.docsec-b{font-family:var(--serif);font-size:17px;line-height:1.62;
+  color:var(--ink-muted);margin:0;white-space:pre-wrap}
+/* the first section sits away from the statement, which is a different kind of
+   sentence and should not look like the next paragraph of it */
+#readSections .docsec:first-child{margin-top:44px;
+  border-top:1px solid var(--line);padding-top:30px}
+@media (max-width:767px){ .docsec-b{font-size:16px} }
 .docplate{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink-subtle);
   border-top:1px solid var(--line);padding-top:14px}
 .docplate b{font-weight:400;color:var(--ink-muted)}
@@ -714,6 +736,7 @@ body.works-open .ctl{display:none}
   <article class="doc">
     <div class="dochead"><span id="readRunning"></span><span id="readFolio"></span></div>
     <p class="docbody" id="readTitle"></p>
+    <div id="readSections"></div>
     <div class="docplate" id="readPlate"></div>
     <button id="readClose" data-t="reader.close">← Return to where you were</button>
   </article>

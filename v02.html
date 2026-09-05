@@ -321,6 +321,28 @@ body.th-hover-mind  .th-world--mind  .th-meta{opacity:.55}
   color:var(--ink-subtle);margin:0 0 26px;display:flex;justify-content:space-between}
 .docbody{font-family:var(--serif);font-size:clamp(24px,2.6vw,34px);line-height:1.32;
   letter-spacing:-.02em;margin:0 0 30px}
+/* SECTIONS ARE COMMENTARY, AND THEY READ LIKE IT.
+
+   The statement at the top of a reading is set large because it IS the thing —
+   a writing in this mind is one sentence held still. A section is what comes
+   after it: what the quote meant, where it came from, what changed. Setting
+   those at the same size would turn a held statement into an article and lose
+   the reason the page looks the way it does.
+
+   So they are smaller, quieter and narrower-feeling than the statement above
+   them, and the heading is optional — a bare paragraph of explanation needs no
+   title, and a long piece can grow them when it needs to be scanned. */
+.docsec{margin:34px 0 0}
+.docsec + .docsec{margin-top:26px}
+.docsec-h{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-subtle);font-weight:400;margin:0 0 8px}
+.docsec-b{font-family:var(--serif);font-size:17px;line-height:1.62;
+  color:var(--ink-muted);margin:0;white-space:pre-wrap}
+/* the first section sits away from the statement, which is a different kind of
+   sentence and should not look like the next paragraph of it */
+#readSections .docsec:first-child{margin-top:44px;
+  border-top:1px solid var(--line);padding-top:30px}
+@media (max-width:767px){ .docsec-b{font-size:16px} }
 .docplate{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink-subtle);
   border-top:1px solid var(--line);padding-top:14px}
 .docplate b{font-weight:400;color:var(--ink-muted)}
@@ -714,6 +736,7 @@ body.works-open .ctl{display:none}
   <article class="doc">
     <div class="dochead"><span id="readRunning"></span><span id="readFolio"></span></div>
     <p class="docbody" id="readTitle"></p>
+    <div id="readSections"></div>
     <div class="docplate" id="readPlate"></div>
     <button id="readClose" data-t="reader.close">← Return to where you were</button>
   </article>
@@ -1604,17 +1627,46 @@ var V02_OVERLAY={
     { id:'my-works',
       why:'the works have their own section; a region for them as well would be the same six objects twice, and would make the second door read as an appendix to the first.' }
   ],
-  /* an internal key moves; nothing else does */
-  renameIds:[
-    { from:'psychology', to:'psychology-behaviour',
-      why:'frees the id psychology for the top-level MIG. The concept keeps its PSYCHOLOGY label, its owner HUMAN BEHAVIOUR, and all of its relationships.' }
-  ],
+  /* THE COLLISION IS GONE, SO THE WORKAROUND IS GONE WITH IT.
+
+     A Minor IG called PSYCHOLOGY has always lived inside HUMAN BEHAVIOUR. When
+     PSYCHOLOGY was promoted to a topic of its own it needed the id, so the
+     concept was re-keyed to psychology-behaviour to get out of the way — a
+     rename that existed for one reason and no other.
+
+     The promotion is undone: that world is BOOKS now, and nothing claims the
+     id psychology except the concept that always held it. Keeping the rename
+     would leave a workaround standing over a problem that no longer exists,
+     and the next person to read it would have to work out that it protects
+     nothing. The concept goes back to being called what it is. */
+  renameIds:[],
   addMIGs:[
-    { id:'psychology', label:'PSYCHOLOGY',
-      gloss:'Not yet written. The region exists; the thinking has not been filed here.',
+    /* BOOKS. This slot was added as PSYCHOLOGY and never written into, and
+       PSYCHOLOGY belongs where it already was — a concept inside HUMAN
+       BEHAVIOUR — rather than as a topic beside it. The world it was given,
+       Kepler-62, stays exactly as it is: three planets close together, a gap
+       of 3.56x where every other step is under 1.7, then two far out. An inner
+       cluster and a distant pair, which is a reasonable shape for a shelf.
+
+       Created EMPTY, and honestly so: nothing has been filed here, and no
+       book was invented to make the topic look inhabited. */
+    { id:'books', label:'BOOKS',
+      gloss:'Not yet written. The topic exists; what has been read has not been filed here.',
       empty:true,
-      why:'required as a first-class MIG. Created EMPTY on purpose — no concepts were invented.',
-      idNote:'takes the id psychology because the Minor IG that held it has been re-keyed to psychology-behaviour by the declared rename above.',
+      why:'the slot that was added as PSYCHOLOGY, which belongs inside HUMAN BEHAVIOUR as the concept it already is. The world is unchanged; only what it is a world OF has changed.',
+      conflict:null },
+    /* THINGS I WAS WRONG ABOUT. A new topic, and the one system left
+       unassigned was reserved for exactly this case: Proxima Cen's own record
+       in the archive says "its emptiness is the point; the natural candidate
+       for a MIG with almost no content". Two confirmed planets, both very
+       close in, around the nearest star to the Sun.
+
+       SOCIETY is untouched — it keeps Kepler-11 and all ten of its objects.
+       This is a new topic beside it, not a renaming of it. */
+    { id:'wrong', label:'THINGS I WAS WRONG ABOUT',
+      gloss:'Positions I held and no longer hold. Kept rather than quietly deleted, because what changed a mind is worth more than what it now believes.',
+      empty:true,
+      why:'a topic of its own, created empty. Nothing is filed here yet and nothing was invented to fill it.',
       conflict:null },
     /* ART, with contents. It was a borrowed label until now: the MY WORKS
        entry was renamed to it while the works waited for a door of their own.
@@ -2570,7 +2622,10 @@ var MIG_SYSTEM={ 'philosophy':'TRAPPIST-1', 'love':'Kepler-16', 'movies':'HR 879
                  'society':'Kepler-11', 'building':'HD 10180',
                  'learning':'K2-138', 'behaviour':'TOI-178',
                  'food':'HD 219134',
-                 'music':'Kepler-80', 'psychology':'Kepler-62', 'art':'HD 40307' };
+                 'music':'Kepler-80', 'books':'Kepler-62', 'art':'HD 40307',
+                 /* the last unassigned system, and the one the archive itself
+                    nominated for a topic with almost nothing in it */
+                 'wrong':'Proxima Cen' };
 function templateFor(migId){ return ASTRO[MIG_SYSTEM[migId]]||null; }
 
 var ORBIT_R0=13;                     // the innermost orbit, in scene units
@@ -2643,9 +2698,12 @@ var EXTRA_ORBITS={ 'love':3, 'business':2 };
    The point of showing them is that they can be FILLED. A note written into
    one of these takes the innermost planet that is free, and the sky answers
    immediately instead of growing a new ring nobody measured. */
-var FULL_SYSTEM={ 'music':1, 'psychology':1 };
+var FULL_SYSTEM={ 'music':1, 'books':1, 'wrong':1 };
 /* where an unoccupied planet sits, per world, so the renderer can draw it */
 var VACANT_PLANETS={};
+/* the same planets as one flat list, in the order the point cloud writes them —
+   render-only bodies, like the companion star and the background sky */
+var VACANT_BODIES=[];
 function orbitCount(migId,tpl){
   var base=(tpl.sourceType==='circumbinary-system')
     ? 1                                   // Kepler-16 has exactly one measured planet
@@ -3559,8 +3617,10 @@ MIGS.forEach(function(m){
       /* every place the region does not reach is a planet nobody stands on */
       for(var vk=line.length; vk<slots.length; vk++){
         var vth=vk*2.39996+0.6, vin=0.02+((vk%3)*0.012);
-        VACANT_PLANETS[m.id].push({ slot:vk, r:slots[vk], theta:vth, incl:vin,
-          pos:new THREE.Vector3().addVectors(m.pos, localOrbit(slots[vk],vth,vin)) });
+        var vp={ mig:m.id, slot:vk, r:slots[vk], theta:vth, incl:vin,
+          pos:new THREE.Vector3().addVectors(m.pos, localOrbit(slots[vk],vth,vin)) };
+        VACANT_PLANETS[m.id].push(vp);
+        VACANT_BODIES.push(vp);
       }
       return;                       // this world is fully seated; the rules below are the other twelve's
     }
@@ -3873,7 +3933,12 @@ var MIG_VISUAL={
   'society'     :{family:'assembly', branches:0, len:0.00, spread:0.00, rings:1, core:0.44},
   /* a region that exists and has not been written yet. Diffuse, uncondensed —
      not an empty box, but matter that has not yet become a body. */
-  'psychology'  :{family:'nascent',  branches:0, len:0.00, spread:0.00, rings:0, core:0.30},
+  /* a topic that exists and has not been written into yet. Diffuse,
+     uncondensed — not an empty box, but matter that has not become a body. */
+  'books'       :{family:'nascent',  branches:0, len:0.00, spread:0.00, rings:0, core:0.30},
+  /* things given up. A core with a single ring around it and nothing else:
+     what is left after something has been let go of. */
+  'wrong'       :{family:'nascent',  branches:0, len:0.00, spread:0.00, rings:1, core:0.26},
   /* how a thing feels rather than whether it works. A wide diffuse halo around
      a modest core: the region is about the light around an object rather than
      the object, which is also the honest shape of five concepts and three
@@ -4948,7 +5013,7 @@ if(glOK){
   nodeOrder=placed;
   /* render-only bodies occupy vertices AFTER every real node, so picking —
      which walks nodeOrder — can never reach them by construction */
-  var TOTV=placed.length+COMPANIONS.length+CONST_BG.length;
+  var TOTV=placed.length+COMPANIONS.length+CONST_BG.length+VACANT_BODIES.length;
   var NOCTR=new Float32Array(TOTV);
   var P=new Float32Array(TOTV*3), CELLA=new Float32Array(TOTV*2),
       SZ=new Float32Array(TOTV), COL=new Float32Array(TOTV*3),
@@ -5056,6 +5121,36 @@ if(glOK){
     EMPH[i]=1.30;
     REG[i]=(migIndex[c.mig]===undefined?-1:migIndex[c.mig]);  // hover reaches it
   });
+  /* ── THE PLANETS NOBODY STANDS ON ────────────────────────────────────
+     Written last, after the companions and the background sky, so every
+     render-only vertex still sits beyond the last real node and picking
+     cannot reach any of them.
+
+     They are drawn as the world's own body form in the world's own body
+     colour, because that is what they are: the places this system has. They
+     are smaller and dimmer than an occupied one — a place to stand rather than
+     something standing — and the moment a note takes one it stops being in
+     this list and is drawn as a real object instead. REG is set so the world
+     highlight reaches them with everything else in their world; without it
+     hovering MUSIC in the menu would light the star and leave its planets
+     behind. */
+  VACANT_BODIES.forEach(function(v,vi){
+    var i=placed.length+COMPANIONS.length+CONST_BG.length+vi;
+    P[i*3]=v.pos.x; P[i*3+1]=v.pos.y; P[i*3+2]=v.pos.z;
+    var order=Object.keys(MIG_VISUAL).indexOf(v.mig);
+    var gi=order>=0?GLYPHS.length+order:0;      // the world's own stellar form
+    CELLA[i*2]=gi%ATLAS; CELLA[i*2+1]=Math.floor(gi/ATLAS);
+    /* between a writing (44) and a concept (62), and under the cap every other
+       body obeys, so an empty planet can never out-shout an occupied one */
+    SZ[i]=52;
+    CAP[i]=CAP_DEFAULT;
+    var pal=paletteOf(v.mig);
+    var cv=new THREE.Color(pal.body);
+    COL[i*3]=cv.r; COL[i*3+1]=cv.g; COL[i*3+2]=cv.b;
+    EMPH[i]=0.52;                                // dimmer than the least-connected object
+    REG[i]=(migIndex[v.mig]===undefined?-1:migIndex[v.mig]);
+  });
+
   var geo=new THREE.BufferGeometry();
   geo.setAttribute('position',new THREE.BufferAttribute(P,3));
   geo.setAttribute('cell',new THREE.BufferAttribute(CELLA,2));
@@ -5539,28 +5634,15 @@ if(glOK){
        occupants. */
     (VACANT_PLANETS[mid]||[]).forEach(function(vp){ ring(vp.r); });
 
-    /* AND A PLANET ON EACH OF THEM. An empty ring says a place exists; it does
-       not say that the place is a planet waiting to be taken. A small circle
-       does, drawn in the same tilted plane the orbit lies in so it reads as a
-       body on that path rather than a mark floating over it.
+    /* THE PLANET ITSELF IS NOT DRAWN HERE ANY MORE. It was a small circle in
+       this same line buffer, which is a shader written for paths: thin, faint,
+       and faded hard with distance. At the range a world is framed from, that
+       read as a smudge on a ring rather than as a planet — the orbits were
+       visibly there and looked empty.
 
-       Fainter than an occupied body on purpose: it is the outline of somewhere
-       to stand, and the moment a note takes it, a real light is drawn there
-       instead and this is not drawn at all. */
-    var U=new THREE.Vector3(1,0,0), V=localOrbit(1,Math.PI/2,0);
-    (VACANT_PLANETS[mid]||[]).forEach(function(vp){
-      var rad=Math.max(0.9, vp.r*0.045), STEP2=26;
-      var pal=paletteOf(mid);
-      for(var q2=0;q2<STEP2;q2++){
-        [q2,q2+1].forEach(function(w){
-          var a2=(w/STEP2)*6.2832;
-          var pt=vp.pos.clone()
-            .addScaledVector(U, Math.cos(a2)*rad)
-            .addScaledVector(V, Math.sin(a2)*rad);
-          push2(pt, 0.30, pal.body);
-        });
-      }
-    });
+       An empty planet is now a real body in the sprite cloud, written with the
+       companions and the background sky, so it is lit, sized and coloured by
+       the same renderer as everything else in the world. See VACANT_BODIES. */
   });
   /* THE TWO STELLAR ORBITS, and the middle nothing can hold.
      These are what make the world legible as circumbinary without a word of
@@ -6069,7 +6151,8 @@ var elWhere=document.getElementById('where'), elGloss=document.getElementById('g
     /* obtained HERE with the other two, not beside the threshold code far
        below: paintDOM paints all three during boot, and an exitBtn still
        undefined at that moment took the whole app down with it */
-    exitBtn=document.getElementById('exitBtn');
+    exitBtn=document.getElementById('exitBtn'),
+    readSections=document.getElementById('readSections');
 
 function row(n, meta, onClick, current){
   var li=document.createElement('li'), b=document.createElement('button');
@@ -6268,7 +6351,33 @@ function openReader(id){
   readTitle.textContent=n.line||n.label;
   readRunning.textContent=byId[n.mig]?byId[n.mig].label:'';
   readFolio.textContent=esc(n.t).toUpperCase();
-  readPlate.innerHTML=n.register?esc(n.register):'';
+  /* THE SECTIONS UNDER THE STATEMENT.
+
+     A writing used to be exactly one sentence and the reader drew exactly one.
+     It may now carry sections after it — a quote and then what the quote
+     meant, and however many more are added later — so they are painted here,
+     in order, and the container is emptied first because the reader is one
+     element reused for every writing rather than one per note.
+
+     Heading optional, body required: a section with nothing in its body is not
+     a section, and drawing an empty block would put a hole in the page that
+     looked like a rendering fault. Text, never markup — esc() everywhere, and
+     the line breaks a person typed are kept by white-space in the stylesheet
+     rather than by turning newlines into tags. */
+  readSections.innerHTML='';
+  (n.sections||[]).forEach(function(sec){
+    if(!sec || !String(sec.body||'').trim()) return;
+    var wrap=document.createElement('div'); wrap.className='docsec';
+    if(String(sec.heading||'').trim()){
+      var h=document.createElement('p'); h.className='docsec-h';
+      h.textContent=String(sec.heading).trim();
+      wrap.appendChild(h);
+    }
+    var b2=document.createElement('p'); b2.className='docsec-b';
+    b2.textContent=String(sec.body).trim();
+    wrap.appendChild(b2);
+    readSections.appendChild(wrap);
+  });
   reader.classList.add('on'); reader.setAttribute('aria-hidden','false');
   readClose.focus();
   pushUrl();
@@ -6936,6 +7045,11 @@ window.__v02={
         return {id:n.id, label:n.label, t:n.t, mig:n.mig,
                 line:n.line||null, register:n.register||null, src:n.src||null,
                 crosses:(n.crosses||[]).slice(),
+                /* WITHOUT THIS THE EDITOR COULD ADD SECTIONS AND NEVER SEE THE
+                   ONES ALREADY THERE, so opening a writing to add a third
+                   section would have silently replaced the first two. */
+                sections:(n.sections||[]).map(function(sc){
+                  return {heading:sc.heading||'', body:sc.body||''}; }),
                 vacant:!!n.vacant, retiredAt:n.retiredAt||null, edited:!!n.edited};
       }),
       registers: NODES.map(function(n){ return n.register; }).filter(Boolean)
@@ -7450,7 +7564,14 @@ window.__v02={
                edges:LINKS.filter(function(l){ return l.a===rn.to||l.b===rn.to; }).length };
     });
     /* the object the rename is about, so a check can prove it did not move */
-    var p=byId['psychology-behaviour'];
+    /* FOUND BY WHAT IT IS, NOT BY THE ID A WORKAROUND GAVE IT. This looked up
+       'psychology-behaviour', the collision-safe key the concept was moved to
+       when PSYCHOLOGY was promoted to a region. That promotion is undone and
+       the rename with it, so the lookup found nothing and a check reported the
+       concept missing when it had simply gone back to its own name. */
+    var p=null;
+    for(var pi=0;pi<MINORS.length;pi++)
+      if(MINORS[pi].label==='PSYCHOLOGY'){ p=byId[MINORS[pi].id]; break; }
     out.existingPsychologyConcept = p ? {id:p.id, label:p.label, ownedBy:p.mig, type:p.t} : null;
     return out;
   },
@@ -7595,6 +7716,8 @@ window.__v02={
          so the graph is legitimately larger than the drawing. */
       placedNodes:nodeOrder.length,
       companions:COMPANIONS.length,
+      /* the empty planets of a declared world are render-only too */
+      vacantBodies:VACANT_BODIES.length,
       migBodyDrawn:(function(){
         if(!pts) return null;
         var i=nodeIndex[mid];
@@ -7695,7 +7818,7 @@ window.__v02={
       };
     });
     out.totalCompanions=COMPANIONS.length;
-    out.renderOnly=COMPANIONS.length+CONST_BG.length;   // every body that is not an idea
+    out.renderOnly=COMPANIONS.length+CONST_BG.length+VACANT_BODIES.length;  // every body that is not an idea
     out.graphNodes=NODES.length;
     out.placedNodes=nodeOrder.length;
     out.renderedPoints=pts?pts.geometry.attributes.position.count:0;

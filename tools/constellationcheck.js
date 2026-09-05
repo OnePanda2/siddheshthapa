@@ -232,11 +232,22 @@ const skyCount = (K.background || {}).count;
    graph's own total counted a deliberate absence as a missing point. Both
    numbers are still asserted: the graph is unchanged, and every vertex is
    accounted for. */
+/* A THIRD KIND OF RENDER-ONLY BODY EXISTS NOW, and this assertion is the one
+   place that has to know it. The claim is unchanged and is the important one:
+   every vertex in the cloud is either a real object of the graph or a declared
+   render-only body, and the graph itself never grows to accommodate the sky.
+
+   The empty planets of a declared world — the places MUSIC and PSYCHOLOGY have
+   and nobody stands on — are render-only in exactly the sense the companion
+   star and the background sky are. Leaving them out of this sum would not have
+   made the check stricter; it would have made a body that IS accounted for
+   look like a body that is not. */
 ck('CST-11', skyCount === D.background.atmosphericCount &&
-            K.renderedPoints === K.placedNodes + K.companions + skyCount &&
+            K.renderedPoints === K.placedNodes + K.companions + skyCount + (K.vacantBodies || 0) &&
             K.graphNodes === NODE_TOTAL,
    'the sky is render-only — ' + K.placedNodes + ' placed nodes + ' + K.companions +
-   ' companion + ' + skyCount + ' background = ' + K.renderedPoints +
+   ' companion + ' + skyCount + ' background + ' + (K.vacantBodies || 0) +
+   ' empty planets = ' + K.renderedPoints +
    ' rendered points; the graph itself is unchanged at ' + K.graphNodes);
 
 // CST-12 — and it stays tertiary

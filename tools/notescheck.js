@@ -157,6 +157,33 @@ notes.forEach((n, i) => {
   if (typeof n.src !== 'string' || !n.src.trim()) fail(where, 'src is required — an absent src means "not his writing"');
   if (typeof n.line !== 'string' || !n.line.trim()) fail(where, 'line is required — a note with no material is not a note');
   if (typeof n.added !== 'string' || isNaN(Date.parse(n.added))) fail(where, 'added must be an ISO date');
+
+  /* SECTIONS — WHAT COMES AFTER THE STATEMENT.
+
+     Optional: most notes are one sentence and always will be. When present it
+     is an ORDERED list, because position is the only thing that says which
+     explanation belongs to which part of a reading.
+
+     The heading is optional and the body is not. A section with a heading and
+     no body would render as a title over nothing — the reader skips it, so the
+     page would silently drop something the editor believed it had saved, which
+     is the kind of quiet disagreement between store and page this gate exists
+     to stop at the commit rather than discover on the site. */
+  if ('sections' in n) {
+    if (!Array.isArray(n.sections)) fail(where, 'sections, when given, must be an array');
+    else n.sections.forEach((sc, si) => {
+      const w2 = where + '.sections[' + si + ']';
+      if (!sc || typeof sc !== 'object') return fail(w2, 'not an object');
+      if ('heading' in sc && typeof sc.heading !== 'string')
+        fail(w2, 'heading, when given, must be a string');
+      if (typeof sc.body !== 'string' || !sc.body.trim())
+        fail(w2, 'body is required — a section with only a heading renders as a title over nothing');
+      Object.keys(sc).forEach(k => {
+        if (k !== 'heading' && k !== 'body')
+          fail(w2, 'unknown field ' + JSON.stringify(k) + ' — a section is a heading and a body');
+      });
+    });
+  }
   checkRegion(n, where);
 });
 

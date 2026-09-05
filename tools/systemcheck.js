@@ -39,9 +39,18 @@ const PROBE = `(function(){
   var out={ systems:M.systems() };
 
   /* what the SHEET lists for a world, so a queued note can be shown to be
-     absent from the page as well as from the sky */
+     absent from the page as well as from the sky.
+
+     THE WORLDS ARE ASKED FOR, NOT NAMED. This listed ['music','psychology'],
+     which was true when it was written and crashed the whole file the moment
+     PSYCHOLOGY stopped being a topic — reading .queued off an undefined world.
+     Exactly the stale-census failure this project has spent a week removing,
+     written into a brand-new check by the person removing them. Every world
+     that declares itself full-system is visited, whatever it happens to be
+     called today. */
   out.sheet={};
-  ['music','psychology'].forEach(function(id){
+  Object.keys(out.systems).forEach(function(id){
+    if(!out.systems[id].fullSystem) return;
     M.go('region',id); M.settle(60);
     out.sheet[id]=[].slice.call(document.querySelectorAll('#semantic [data-nav]'))
       .map(function(b){ return b.getAttribute('data-nav'); });
@@ -125,6 +134,7 @@ ids.forEach(id => {
 });
 const inSheet = [];
 Object.keys(r.sheet || {}).forEach(id => {
+  if (!S[id]) return;                       // a world can stop existing between probe and assertion
   (S[id].queued || []).forEach(q => { if (r.sheet[id].indexOf(q) >= 0) inSheet.push(id + '/' + q); });
 });
 ck('S6', drawnQueued.length === 0 && inSheet.length === 0,
