@@ -75,10 +75,26 @@ const OV = overlay();
    filed under a hidden region would render nowhere, and one filed under a
    region the overlay added is perfectly legal */
 const hidden = new Set((OV.hideMIGs || []).map(h => h.id));
+/* A NOTE IN A HIDDEN REGION IS INVISIBLE, WITH ONE EXCEPTION.
+
+   Hiding a region leaves its objects in the graph with no position, so they are
+   drawn nowhere and listed nowhere. A note filed into one would be accepted by
+   the editor, committed, built, and then simply not exist on the page — the
+   worst failure this gate can allow, because everything reports success.
+
+   MY WORKS is the exception and always has been. Its objects are not lost when
+   the region is hidden: they become the sheets of the manual, which is the
+   whole reason the region was hidden in the first place. A project filed there
+   is not invisible, it is somewhere else.
+
+   So the rule is not "no hidden regions" but "no region a note would vanish
+   into", which is the same distinction the edge sweep draws when it decides
+   whose relationships die with the room. */
+const WITH_A_DESTINATION = new Set(['my-works']);
 const migIds = new Set(
   G.MIGS.map(m => m.id)
    .concat((OV.addMIGs || []).map(m => m.id))
-   .filter(id => !hidden.has(id)));
+   .filter(id => !hidden.has(id) || WITH_A_DESTINATION.has(id)));
 
 /* every id the graph already knows. addOnce SILENTLY skips a duplicate, so a
    colliding note would simply never appear — the worst failure mode there is,
@@ -87,7 +103,10 @@ const takenIds = new Set(
   G.MIGS.map(n => n.id)
    .concat(G.MINORS.map(n => n.id), G.THOUGHTS.map(n => n.id),
            (OV.addMIGs || []).map(n => n.id), (OV.addMinors || []).map(n => n.id),
-           (OV.addWritings || []).map(n => n.id)));
+           (OV.addWritings || []).map(n => n.id),
+           /* addWorks was missing, so a project written in the editor could
+              take the id of one the overlay declares and be silently dropped */
+           (OV.addWorks || []).map(n => n.id)));
 
 const existingEdges = G.EDGES.concat(OV.addEdges || []);
 

@@ -426,6 +426,15 @@ window.__editor = {
       bar.appendChild(b);
       (btn.parentNode || btn).appendChild(bar);
     });
+
+    /* AND A WAY TO ADD ONE. Every sheet above documents a work that already
+       exists in the graph; this is how a work gets there. Placed under the
+       whole list rather than beside a row, because it belongs to the manual
+       and not to any sheet in it. */
+    var add = el("button", "ed-add", "+ Add a project");
+    add.type = "button";
+    add.onclick = function(e){ e.stopPropagation(); openProjectForm(); };
+    (list.parentNode || list).appendChild(add);
   },
 
   worksForm: function(id){ openWorksForm(id); },
@@ -954,6 +963,11 @@ function validate(n, rels, M, editingId){
   var p = [];
   var ids = {}; M.nodes.forEach(function(x){ ids[x.id] = true; });
   var migs = {}; M.migs.forEach(function(x){ migs[x.id] = true; });
+  /* MY WORKS is not in M.migs — it is hidden from the mind — but it is a real
+     home for a project, which appears in the manual rather than in the sky.
+     See tools/notescheck.js for why the general rule refuses hidden regions
+     and why this one is the exception. */
+  migs["my-works"] = true;
 
   if(!/^[a-z0-9][a-z0-9-]*$/.test(n.id)) p.push('The reference must be a lowercase slug.');
   else if(ids[n.id] && n.id !== editingId) p.push('The reference "' + n.id + '" already exists in the mind — it would be silently dropped.');
@@ -1383,6 +1397,116 @@ function rowsField(items, fields, addLabel, numbered){
         return o;
       }).filter(function(o){ return fields.some(function(f){ return o[f.key]; }); });
     } };
+}
+
+/* A PROJECT IS A NODE, NOT A SHEET.
+
+   The manual is derived: every object filed under my-works that is not the
+   region and not a concept becomes a sheet, written or reserved. So a new
+   project is added to the GRAPH and the sheet follows on its own — writing a
+   sheet into works.json for a work the graph does not have would be a second
+   truth, and the rule against that is why the manual can be trusted at all.
+
+   It asks for less than a writing does, because a work answers different
+   questions: what it is, and where it lives. Its src is not a quotation, it is
+   the repository — that is what provenance means for a thing you built. */
+function openProjectForm(){
+  var M = getModel();
+  pending = { mig: "my-works", rels: [] };
+  formIn.innerHTML = "";
+
+  formIn.appendChild(el("h2", null, "A new project"));
+  formIn.appendChild(el("p", "ed-sub",
+    "It joins the manual as a sheet of its own, reserved until you write it. " +
+    "Nothing else has to change: the numbering, the contents page and the " +
+    "count all come from the graph."));
+
+  var errBox = el("div"); formIn.appendChild(errBox);
+
+  var fLabel = el("input"); fLabel.type = "text";
+  fLabel.placeholder = "The name, as it appears in the manual";
+  var fLine = el("textarea");
+  fLine.placeholder = "What it is, in a sentence a stranger could read.";
+  var fSrc = el("input"); fSrc.type = "text"; fSrc.className = "mono";
+  fSrc.placeholder = "github.com/OnePanda2/… — or wherever it lives";
+  var fId = el("input"); fId.type = "text"; fId.className = "mono";
+
+  var idTouched = false;
+  fId.oninput = function(){ idTouched = true; };
+  fLabel.oninput = function(){
+    fLabel.value = fLabel.value.toUpperCase();
+    if(!idTouched) fId.value = "p-" + slug(fLabel.value);
+  };
+
+  formIn.appendChild(field("Name", "uppercase, as everything here is", fLabel));
+  formIn.appendChild(field("What it is",
+    "the line the contents page and the sheet both print", fLine));
+  formIn.appendChild(field("Where it lives",
+    "the repository or address. For a work, that is what provenance means \u2014 " +
+    "not a quotation but the thing itself", fSrc));
+
+  /* which topics it reaches, the same control a writing uses */
+  var chips = el("div", "ed-chips");
+  M.migs.forEach(function(m){
+    var lab = el("label"), cb = el("input"); cb.type = "checkbox"; cb.value = m.id;
+    cb.onchange = function(){ lab.className = cb.checked ? "on" : ""; };
+    lab.appendChild(cb); lab.appendChild(el("span", null, m.label));
+    chips.appendChild(lab);
+  });
+  formIn.appendChild(field("Reaches into",
+    "the topics of the mind this work touches. It stays in the manual either way.", chips));
+
+  formIn.appendChild(field("Reference", "the id it is filed under; derived from the name", fId));
+
+  var act = el("div", "ed-act");
+  var save = el("button", null, "Publish"); save.id = "edSave"; save.type = "button";
+  var cancel = el("button", null, "Cancel"); cancel.id = "edCancel"; cancel.type = "button";
+  cancel.onclick = closeForm;
+  act.appendChild(save); act.appendChild(cancel);
+  act.appendChild(el("span", "ed-small",
+    "Publishing commits to " + CFG.owner + "/" + CFG.repo + "."));
+  formIn.appendChild(act);
+
+  save.onclick = function(){
+    var crosses = [].slice.call(chips.querySelectorAll("input:checked"))
+      .map(function(c){ return c.value; });
+    var note = {
+      id: fId.value.trim(), t: "project", label: fLabel.value.trim(),
+      mig: "my-works", crosses: crosses, state: "seed",
+      register: "project", src: fSrc.value.trim(), line: fLine.value.trim(),
+      added: new Date().toISOString().slice(0,10)
+    };
+    var problems = validate(note, [], M, null);
+    errBox.innerHTML = "";
+    if(problems.length){
+      var e = el("div", "ed-err");
+      e.appendChild(el("b", null, problems.length + " thing" +
+        (problems.length > 1 ? "s" : "") + " to fix"));
+      problems.forEach(function(x){ e.appendChild(el("div", null, "\u00b7 " + x)); });
+      errBox.appendChild(e);
+      errBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      return;
+    }
+    save.disabled = true; save.textContent = "Publishing\u2026";
+    publish(note, []).then(function(){
+      var ok = el("div", "ed-ok");
+      ok.appendChild(el("div", null, "Published. " + note.label +
+        " is a sheet in the manual."));
+      ok.appendChild(el("div", null,
+        "It appears once the build finishes, reserved until you write it."));
+      errBox.appendChild(ok);
+      save.textContent = "Published";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }).catch(function(err){
+      save.disabled = false; save.textContent = "Publish";
+      var bx = el("div", "ed-err");
+      bx.appendChild(el("b", null, "Nothing was published"));
+      bx.appendChild(el("div", null, err.message));
+      errBox.appendChild(bx);
+    });
+  };
+
+  form.classList.add("open");
 }
 
 function openWorksForm(nodeId){
