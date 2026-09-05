@@ -80,9 +80,14 @@ const MUTATIONS = [
 
      observation is confirmed to be a live region id, so the filter really does
      remove a region rather than quietly doing nothing. */
+  /* THE LINE MOVED when the menu learned to put a declared topic last. The
+     claim is unchanged — the menu keeps every region — so the mutation drops
+     one, and drops it by POSITION rather than by name: naming 'observation'
+     was how the same mutation in worldmutate went stale twice over. */
   { n: 'CST-14', file: APP, name: 'the Main Mind Menu keeps all 14 MIGs',
-    find: `    var ordered=MIGS.slice();`,
-    repl: `    var ordered=MIGS.slice().filter(function(x){ return x.id!=='observation'; });` },
+    find: `    var tail=(V02_OVERLAY.menuLast||[]).map(function(x){return x.id;});`,
+    repl: `    var tail=(V02_OVERLAY.menuLast||[]).map(function(x){return x.id;});
+    MIGS=MIGS.slice(0,-1);                    // mutation: one region never reaches the menu` },
 
   { n: 'CST-15', file: APP, name: 'the highlight is reversible',
     find: `function highlightMIG(migId){

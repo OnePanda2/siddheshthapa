@@ -34,10 +34,15 @@ const MUTATIONS = [
     repl: '"_sourceType": "hand-drawn sketch",',
     expect: 'template drawn from' },
 
+  /* THE LINE LOST ITS CLAMP. It read slots[min(k,last)], which silently
+     stacked every surplus concept on the outermost orbit; a concept past the
+     last orbit waits now, and the placement is a plain slots[k]. The claim is
+     untouched — orbit k belongs to concept k, so radii ascend with slot — and
+     the mutation still reverses the order to prove it. */
   { n: 'A6', name: 'orbital ordering follows the documented ordering',
     file: APP,
-    find: "      var r=slots[Math.min(k,slots.length-1)];",
-    repl: "      var r=slots[Math.min(slots.length-1-k,slots.length-1)];",
+    find: "      var r=slots[k];",
+    repl: "      var r=slots[slots.length-1-k];   // mutation: order the orbits backwards",
     expect: 'radii ascend with slot' },
 
   { n: 'A8', name: 'Philosophy is the gravitational centre',

@@ -102,10 +102,25 @@ const MUTATIONS = [
     repl: "  if(pts) pts.material.uniforms.hoverRegion.value=(migId==='love'?-1:idx);",
     expect: 'same highlightMIG serves both' },
 
+  /* THE LINE THIS BROKE NO LONGER EXISTS. The menu used to print
+     "4 concepts · 7 writings" under every row and this made the count wrong;
+     the counts were removed because they invited the menu to be read as a
+     leaderboard, and the anchor went with them.
+
+     L13 was not retired with them — it holds the promise the counts were only
+     one expression of: the front door must not overstate the mind. It now
+     reads in both directions, so a row that states a count must state a true
+     one and a row that states none cannot be wrong.
+
+     The mutation therefore ADDS a count, and a false one. That is the exact
+     failure the assertion exists to catch, and it is the only way to exercise
+     it while no row states anything — otherwise L13's first clause would sit
+     unverified for as long as the menu stays quiet. */
   { n: 'L13', file: APP, name: 'the menu states true counts, not total members',
-    find: "      var c=mem.filter(function(id){return byId[id].t==='minor';}).length;",
-    repl: "      var c=mem.length;              // total members labelled as concepts",
-    expect: 'TRUE concept and writing counts' },
+    find: "      return row(m, '', function(){ travelTo('region',m.id); });",
+    repl: "      return row(m, (owned[m.id]||[]).length + ' concepts · 99 writings',\n" +
+          "                 function(){ travelTo('region',m.id); });   // mutation: an invented count",
+    expect: 'overstates nothing' },
 
   { n: 'L14', file: APP, name: 'a focus the app moved does not light a world',
     find: "      if(kbNav) highlightMIG(n.id);           // keyboard parity, visitor-driven only",

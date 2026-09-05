@@ -148,16 +148,46 @@ const MUTATIONS = [
     find: `      '    here *= (abs(region-hoverRegion)<0.5) ? 3.60 : 0.30;',`,
     repl: `      '    here *= 1.0;',` },
 
-  { n: 'W8', file: APP, name: 'the rename carries the relationships with it',
-    find: `    EDGES.forEach(function(e){
-      if(e[0]===rn.from){ e[0]=rn.to; }
-      if(e[1]===rn.from){ e[1]=rn.to; }
-    });`,
-    repl: `    /* mutation: re-key the object but orphan its relationships */` },
+  /* THESE TWO BROKE A RENAME THAT NO LONGER HAPPENS. Both mutated the loop
+     that re-keys an object declared in V02_OVERLAY.renameIds, and that list is
+     empty: PSYCHOLOGY was re-keyed only to free its id for a region, that
+     region is BOOKS now, and the workaround was deleted with the reason for
+     it. The loop still stands and the mutations still applied — to code that
+     could not run. Both reported a pass and proved nothing, which is the
+     failure mode this project keeps finding.
 
-  { n: 'W8b', assert: 'W8', file: APP, name: 'the freed id belongs to the MIG, not the concept',
-    find: `      if(o.id===rn.from){ o.id=rn.to; moved++; }`,
-    repl: `      if(false){ o.id=rn.to; moved++; }   // mutation: never re-key` },
+     W8 no longer asserts anything about renaming either. It holds the rule the
+     rename existed to protect: an id names exactly one thing, and no region may
+     take an id a concept already holds. So the mutations now break THAT, which
+     is the only honest pairing — an assertion and a mutation that disagree
+     about their subject can only ever pass by accident. */
+  /* THE OTHER HALF OF W8 CANNOT BE MUTATION-TESTED, and the attempt is worth
+     recording rather than quietly replacing.
+
+     Giving a region the id of a concept was the obvious mutation, and it
+     CRASHED the page: byId holds one entry per id, the region overwrote the
+     concept, and something read .label of undefined long before any assertion
+     ran. A crash is not a catch — it names nothing, and it cannot be told
+     apart from a broken harness.
+
+     That failure is itself the evidence for the rule. A collision between a
+     region and a concept does not degrade this graph, it stops it, which is
+     exactly why the rename machinery existed when PSYCHOLOGY was promoted.
+
+     What can be broken without stopping the page is a duplicate between two
+     objects of the SAME kind. So W8 duplicates a writing and W8b duplicates a
+     concept: one clause, proved on both kinds. */
+  { n: 'W8', file: APP, name: 'no two writings share an id',
+    find: `  applyEdits(THOUGHTS);`,
+    repl: `  if(THOUGHTS.length>1) THOUGHTS[1].id=THOUGHTS[0].id;   // mutation: two writings, one id
+  applyEdits(THOUGHTS);` },
+
+  { n: 'W8b', assert: 'W8', file: APP, name: 'no two objects share an id',
+    find: `  applyEdits(THOUGHTS);
+  applyEdits(MINORS);`,
+    repl: `  applyEdits(THOUGHTS);
+  applyEdits(MINORS);
+  if(MINORS.length>1) MINORS[1].id=MINORS[0].id;   // mutation: two objects, one id` },
 
   /* SEE braincheck B19 for why this grew a precondition. The line it breaks
      cannot run while every world has a system, so the mutation was landing on
