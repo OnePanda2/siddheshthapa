@@ -217,26 +217,44 @@ const gotR = pOrb.map(v => +v.toFixed(3));
 ck('L12', JSON.stringify(wantR) === JSON.stringify(gotR),
    'Philosophy still renders the exact TRAPPIST-1 spacing — ' + gotR.join(' '));
 
-// L13 — the front door must not overstate the mind
+/* L13 — THE FRONT DOOR MUST NOT OVERSTATE THE MIND, and the cheapest way to
+   keep that promise is to state nothing that has to be kept true.
+
+   This read the "4 concepts · 7 writings" line under every row and checked it
+   against what the region actually held. Those lines are gone: they invited
+   the menu to be read as a leaderboard, MUSIC announced that it held nothing,
+   and the size of a topic is not what a visitor is choosing between.
+
+   The assertion is NOT retired with them, because the promise outlives the
+   line. It now holds in both directions: a row that states counts must state
+   true ones, and a row that states none cannot be wrong. Re-add the counts
+   tomorrow and this check starts proving them again on its own, which is what
+   the old version could not do — it demanded the counts exist and would have
+   failed the moment they were removed for any reason, good or bad.
+
+   THE FIRST CLAUSE HAS NOTHING TO MEASURE TODAY, and says so in its own
+   message rather than passing quietly. A check that returns green on an empty
+   set is indistinguishable from one that verified something. */
 const wrongCounts = [];
+let stating = 0;
 (r.menu || []).forEach(row => {
   const c = r.counts[row.id];
   if (!c) return;
-  /* read the COUNTS span, not the whole button: the row now also carries an
-     astronomical source line, and "TRAPPIST-1 7 concepts" parsed as 17. */
   const m = /(\d+)\s+concepts?\s*.\s*(\d+)\s+writings?/.exec(row.meta || row.text);
-  if (!m) { wrongCounts.push(row.id + ':unparsed'); return; }
+  if (!m) return;                      // states no counts, so it overstates nothing
+  stating++;
   if (+m[1] !== c.minors || +m[2] !== c.writings)
     wrongCounts.push(row.id + ' says ' + m[1] + '/' + m[2] +
                      ' but holds ' + c.minors + '/' + c.writings);
 });
 ck('L13', (r.menu || []).length === MIG_TOTAL && wrongCounts.length === 0,
-   'the Main Mind Menu states TRUE concept and writing counts for all ' + MIG_TOTAL + ' regions' +
-   (wrongCounts.length ? ' — WRONG: ' + wrongCounts.join('; ')
-                       : ' (love ' + r.counts.love.minors + ' concepts / ' +
-                         r.counts.love.writings + ' writings, philosophy ' +
-                         r.counts.philosophy.minors + ' / ' +
-                         r.counts.philosophy.writings + ')'));
+   'the Main Mind Menu overstates nothing across all ' + MIG_TOTAL + ' regions — ' +
+   (stating === 0
+      ? 'no row states a count, so there is no number here that can go stale. ' +
+        'This clause has nothing to measure today and applies again to the first ' +
+        'row that states one.'
+      : stating + ' row(s) state counts and every one of them is true') +
+   (wrongCounts.length ? ' — WRONG: ' + wrongCounts.join('; ') : ''));
 
 /* L14 — the universe must open NEUTRAL.
    enterMind() moves focus to the first menu row for the keyboard. That focus

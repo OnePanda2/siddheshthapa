@@ -40,6 +40,27 @@ html,body{margin:0;padding:0;height:100%;background:#05070f;color:var(--ink);
 @media (max-width:767px){
   #semantic{background:linear-gradient(180deg,rgba(5,7,15,0) 0%,var(--scrim) 9%,var(--scrim) 100%)}
 }
+/* A TABLET IS NOT A NARROW DESKTOP, AND IN PORTRAIT IT IS BARELY A DESKTOP.
+
+   The sheet is 380px wherever there is room for it, which is a quarter of a
+   1440 desktop and reads as a column beside the sky. On an iPad held upright
+   the same 380px is HALF THE PAGE: measured at 49% of the width at 768 and 46%
+   at 820, leaving the mind a 388px strip to live in. Nothing was broken and
+   nothing overflowed — the proportion had simply stopped meaning what it means
+   on a desktop, which is why it reads as wrong rather than as damaged.
+
+   So in this band the sheet is a PROPORTION and keeps the share it has always
+   had, rather than a slab that happens to fit. The cap is unchanged, so the
+   moment there is room for 380px the number is 380px again and the desktop is
+   untouched — 40vw reaches 380 at 950, and every width above that was already
+   getting 380, so the two rules meet without a step.
+
+   The world follows on its own: composeForSheet reserves space from the
+   panel's right edge, so a narrower panel hands the sky the difference without
+   anything here having to say so. */
+@media (min-width:768px) and (max-width:1000px){
+  #semantic{width:min(380px,40vw)}
+}
 #semantic h1{font-family:var(--serif);font-weight:400;font-size:15px;letter-spacing:.02em;
   margin:0 0 2px;color:var(--ink-muted)}
 #where{font-family:var(--serif);font-size:clamp(30px,3.4vw,52px);line-height:1.05;

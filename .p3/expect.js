@@ -91,14 +91,20 @@ function expectedNodes() {
   const declaredMigs = expectedMigs().declared;
   const declaredMinors = declaredIn('addMinors:[');
   const declaredWritings = declaredIn('addWritings:[');
-  const declared = declaredMigs + declaredMinors + declaredWritings;
+  /* AND THE OVERLAY CAN DECLARE A WORK. MY WORKS is derived from the graph, so
+     a new sheet is a new node, and adding the BUILDING sheet took the model to
+     154 objects while every check using this still expected 153 — glcheck
+     failed all four states and constellationcheck's render-only count with it.
+     Exactly the staleness this file exists to prevent, one list too late. */
+  const declaredWorks = declaredIn('addWorks:[');
+  const declared = declaredMigs + declaredMinors + declaredWritings + declaredWorks;
   /* a hidden region loses its own node — only the region, never its contents,
      which stay in the graph and are what the manual reads */
   const hidden = expectedMigs().hidden || 0;
   const live = liveNotes();
   const written = live.notes + live.minors;
   return { migs, minors, thoughts, inSource: migs + minors + thoughts,
-           declaredMigs, declaredMinors, declaredWritings, hidden,
+           declaredMigs, declaredMinors, declaredWritings, declaredWorks, hidden,
            written,
            declared, total: migs + minors + thoughts + declared - hidden + written };
 }

@@ -379,7 +379,34 @@ var V02_OVERLAY={
   claimInto(THOUGHTS, V02_NOTES.notes);
   claimInto(MINORS,   V02_NOTES.minors);
 
+  /* AND RETIRE AGAIN, BECAUSE THE FIRST PASS COULD NOT SEE THE LIVE NOTES.
+
+     Deleting anything in this project is a line ADDED, never a line removed:
+     the id goes into retired[] and the note stays in the store, so the build
+     can blank it in place and its star keeps burning. That works perfectly for
+     the locked corpus, which exists before any of this runs.
+
+     A live note does not. It is merged into THOUGHTS by claimInto, several
+     steps AFTER the retire pass had already been and gone — so retiring one
+     recorded the id, blanked nothing, and then claimInto added the note back
+     with its label intact. Deleting a live note simply did not delete it, and
+     nothing said so: the store looked right, the id was in retired[], and the
+     note was still on the page.
+
+     A second pass fixes it because blanking is idempotent — a node already
+     retired is blanked to the same nothing twice. It cannot be a single pass
+     moved later, either: claimInto hands a new note the vacancy of an old one
+     by finding a node that is ALREADY vacant, so the first pass has to happen
+     before it and the second has to happen after. */
+  retireIn(THOUGHTS);
+  retireIn(MINORS);
+
   addEdgesOnce(V02_NOTES.edges);
+  /* the same sweep as above, now that the live edges are in: a relationship to
+     a vacancy is a line drawn to nothing whether the vacancy is corpus or live */
+  for(var ej=EDGES.length-1;ej>=0;ej--)
+    if(RETIRED.hasOwnProperty(EDGES[ej][0]) || RETIRED.hasOwnProperty(EDGES[ej][1]))
+      EDGES.splice(ej,1);
 })();
 MIGS.forEach(function(m){ m.t='mig'; m.mig=m.id; NODES.push(m); owned[m.id]=[]; });
 /* a hidden region keeps its ownership books. Its objects still belong to it —
@@ -534,8 +561,55 @@ function scaleFor(migId){ return WORLD_SCALE[migId]||ORBIT_R0; }
 /* TRAPPIST-1 is famously coplanar — mutual inclinations under ~0.1 degrees —
    so the orbits stay nearly flat. That flatness is a real property of the
    system, not a shortcut, and exaggerating it would misrepresent the source. */
-function orbitalSlots(tpl,R0,want){
+/* HOW MANY ORBITS A WORLD HAS IS SETTLED BEFORE ANYTHING IS WRITTEN IN IT.
+
+   It used to be settled by the writing: ask for more concepts than the archive
+   measured and the extra orbits were invented on the spot by a declared
+   spacing rule. That is how LOVE came to have four orbits around a system with
+   one measured planet, and BUSINESS seven around a system with five.
+
+   Those two are kept exactly as they are — they shipped that way, their
+   invented orbits are declared as illustrative in the data file, and checks
+   pin them. What stops is the INVENTING. The number below is frozen at what
+   each world already draws, so writing a fifth concept into LOVE no longer
+   conjures a fifth orbit for it to sit on; the concept waits for one to be
+   freed instead.
+
+   A world not named here has exactly the orbits the archive measured for it.
+   Nothing is added to this map to make room for a note. That is the whole
+   point of it: room is a property of the system, and the system is a
+   measurement. */
+var EXTRA_ORBITS={ 'love':3, 'business':2 };
+
+/* A WORLD THAT SHOWS ITS EMPTY PLANETS.
+
+   Every planetary world draws a ring for each orbit a concept stands on, and
+   the spare orbits of the system stay dark — SOCIETY has drawn five of
+   Kepler-11's six for as long as it has existed, and nobody has ever wanted
+   the sixth. That is the right default: an empty ring is a promise, and most
+   of these worlds are not making one.
+
+   MUSIC and PSYCHOLOGY were charted with nothing in them, so that default left
+   each of them a single star in an empty sky — not a planetary system at all,
+   just a light with a name under it. They are declared here, and a declared
+   world draws its whole system: every orbit, and a faint planet on each orbit
+   nobody occupies yet.
+
+   The point of showing them is that they can be FILLED. A note written into
+   one of these takes the innermost planet that is free, and the sky answers
+   immediately instead of growing a new ring nobody measured. */
+var FULL_SYSTEM={ 'music':1, 'psychology':1 };
+/* where an unoccupied planet sits, per world, so the renderer can draw it */
+var VACANT_PLANETS={};
+function orbitCount(migId,tpl){
+  var base=(tpl.sourceType==='circumbinary-system')
+    ? 1                                   // Kepler-16 has exactly one measured planet
+    : (tpl.semiMajorAxisAU||[]).length;
+  return base+(EXTRA_ORBITS[migId]||0);
+}
+function orbitalSlots(tpl,R0,migId){
   R0=R0||ORBIT_R0;
+  var want=orbitCount(migId,tpl);
   if(tpl.sourceType==='circumbinary-system'){
     /* Kepler-16 has exactly ONE measured planet. Orbit 0 is that measurement;
        everything beyond it is spaced by the rule declared in the data file and
@@ -562,7 +636,10 @@ function orbitalSlots(tpl,R0,want){
      3:2 period rule. Reading the step from the data means changing the data
      changes the geometry, and a world with no declared rule simply does not
      get extended. */
-  if(want && want>out.length){
+  /* the extension is now bounded by EXTRA_ORBITS, which is frozen, rather than
+     by how much someone has written. A world with no declared rule still does
+     not get extended at all. */
+  if(want>out.length){
     var step=(tpl.illustrative&&tpl.illustrative.orbitSpacingStep)||0;
     if(step>1) while(out.length<want) out.push(out[out.length-1]*step);
   }
@@ -963,9 +1040,79 @@ MIGS.forEach(function(m){
   } else if(tpl){
     var concepts=mem.filter(function(id){ return byId[id].t==='minor'; });
     var writings=mem.filter(function(id){ return byId[id].t!=='minor'; });
-    var slots=orbitalSlots(tpl, scaleFor(m.id), concepts.length);
+    var slots=orbitalSlots(tpl, scaleFor(m.id), m.id);
     ORBITS[m.id]=[];
+    VACANT_PLANETS[m.id]=[];
+    var isFull=!!FULL_SYSTEM[m.id];
+
+    /* ── A DECLARED WORLD SEATS EVERYTHING IT HOLDS ──────────────────────
+       In the other twelve worlds a concept takes an orbit and a writing hangs
+       off the concept it connects to. That rule needs concepts to exist. MUSIC
+       and PSYCHOLOGY have none, so every writing fell through to the belt
+       outside the system and the orbits stayed empty however much was written.
+
+       Here the two kinds share one queue, in the region's own order — the same
+       index model that decides every other position in this mind. A note takes
+       the next place; a note past the last place waits; and a place given up by
+       ANY note can be claimed by ANY waiting note, which is the whole point and
+       is what a concept-only rule could not do. */
+    if(isFull){
+      var line=mem.slice();
+      var gone=[], waits=[];
+      line.forEach(function(id,k){
+        if(k<slots.length){ if(byId[id] && byId[id].vacant) gone.push(k); }
+        else waits.push(id);
+      });
+      var seat={}, seated={};
+      waits.forEach(function(id,i){ if(i<gone.length){ seat[gone[i]]=id; seated[id]=1; } });
+
+      line.forEach(function(id,k){
+        if(k>=slots.length){ if(!seated[id]) byId[id].queued=true; return; }
+        var who=(seat[k]!==undefined) ? seat[k] : id;
+        var node=byId[who]; if(!node) return;
+        var th=k*2.39996+((degree[who]||0)%5)*0.42;
+        var inc=(tpl.sourceType==='circumbinary-system') ? 0.0087 : 0.02+((k%3)*0.012);
+        node.pos=new THREE.Vector3().addVectors(m.pos, localOrbit(slots[k],th,inc));
+        node.home=m.id; node.orbit={r:slots[k],theta:th,slot:k}; node.belt=false;
+        ORBITS[m.id].push({id:who,r:slots[k],theta:th,slot:k});
+      });
+
+      /* every place the region does not reach is a planet nobody stands on */
+      for(var vk=line.length; vk<slots.length; vk++){
+        var vth=vk*2.39996+0.6, vin=0.02+((vk%3)*0.012);
+        VACANT_PLANETS[m.id].push({ slot:vk, r:slots[vk], theta:vth, incl:vin,
+          pos:new THREE.Vector3().addVectors(m.pos, localOrbit(slots[vk],vth,vin)) });
+      }
+      return;                       // this world is fully seated; the rules below are the other twelve's
+    }
+
+    /* A QUEUED NOTE TAKES OVER AN ABANDONED PLANET.
+
+       A retired concept is blanked but keeps its index, which is what keeps
+       every other body in the region exactly where it was. Its orbit is
+       therefore still occupied — by nothing. A concept past the last orbit is
+       waiting for exactly that: somewhere to stand.
+
+       So the two are matched here, before anything is placed. The earliest
+       abandoned orbit goes to the earliest waiting concept, which is the same
+       rule the editor already uses when it hands a new note a vacancy by name;
+       this is that rule applied to the notes nobody named. A concept that
+       takes over stops being queued, and the vacancy it replaced stops being
+       drawn — one body, not two, at one radius. */
+    var abandoned=[];
     concepts.forEach(function(id,k){
+      if(k<slots.length && byId[id] && byId[id].vacant) abandoned.push(k);
+    });
+    var waiting=concepts.slice(slots.length);
+    var takeOver={}, promoted={};
+    waiting.forEach(function(id,i){
+      if(i<abandoned.length){ takeOver[abandoned[i]]=id; promoted[id]=1; }
+    });
+
+    concepts.forEach(function(id,k){
+      /* the note standing on orbit k is whoever was promoted onto it */
+      if(takeOver[k]!==undefined) id=takeOver[k];
+      else if(promoted[id]) return;              // it stands further in, not here
       var node=byId[id];
       /* Exact 7<->7: concept k takes orbit k, no interpolation. Angle comes
          from the concept's own graph degree so the arrangement is derived
@@ -975,7 +1122,18 @@ MIGS.forEach(function(m){
       var incl=tpl.sourceType==='circumbinary-system'
              ? 0.0087                       // measured: coplanar within 0.5 deg
              : 0.02+((k%3)*0.012);          // near-coplanar, as measured
-      var r=slots[Math.min(k,slots.length-1)];
+      /* NO ORBIT, NO PLACE — AND NO SHARING ONE. This read slots[min(k,last)],
+         which quietly stacked every surplus concept on the outermost orbit:
+         two ideas at one radius, which the note beside orbitalSlots says in as
+         many words is the thing to avoid.
+
+         A concept past the last orbit is QUEUED. It keeps its id, its
+         relationships and its place in the region's books, and it is given no
+         position — so nothing draws it, exactly as an object of a hidden
+         region is undrawn. It is waiting for an orbit, and it takes one the
+         moment a concept ahead of it is retired and its index frees up. */
+      if(k>=slots.length){ node.queued=true; return; }
+      var r=slots[k];
       node.pos=new THREE.Vector3().addVectors(m.pos, localOrbit(r,theta,incl));
       node.home=m.id; node.orbit={r:r,theta:theta,slot:k};
       ORBITS[m.id].push({id:id,r:r,theta:theta,slot:k});
@@ -1004,6 +1162,7 @@ MIGS.forEach(function(m){
       }
       node.home=m.id;
     });
+
   } else {
     /* every other MIG keeps the previous spherical distribution */
     mem.forEach(function(id,k){
@@ -1672,8 +1831,7 @@ var WORLD_TYPES=['planetary','circumbinary','constellation','latent'];
    came from. */
 function outerOrbit(mid,tpl){
   if(!tpl) return 0;
-  var n=(owned[mid]||[]).filter(function(id){ return byId[id] && byId[id].t==='minor'; }).length;
-  var slots=orbitalSlots(tpl, scaleFor(mid), n);
+  var slots=orbitalSlots(tpl, scaleFor(mid), mid);
   if(!slots.length) return 0;
   /* The SYSTEM's outermost orbit, deliberately, not the outermost one a
      concept happens to occupy. Narrowing it to the occupied orbit looks more
@@ -2875,19 +3033,52 @@ if(glOK){
     _oc.setHex(hex); oc.push(_oc.r,_oc.g,_oc.b); }
   Object.keys(ORBITS).forEach(function(mid){
     var centre=centreOf(mid), seen={};
-    ORBITS[mid].forEach(function(sl){
-      if(seen[sl.r]) return; seen[sl.r]=1;
+    function ring(r){
+      if(seen[r]) return; seen[r]=1;
       var STEP=110, incl=0.02;
       for(var q=0;q<STEP;q++){
         [q,q+1].forEach(function(w){
           var th=(w/STEP)*6.2832;
-          var pt=new THREE.Vector3().addVectors(centre, localOrbit(sl.r,th,incl));
-          var al=0.16-Math.min(0.09,sl.r*0.0009);     // outer rings quieter
+          var pt=new THREE.Vector3().addVectors(centre, localOrbit(r,th,incl));
+          var al=0.16-Math.min(0.09,r*0.0009);        // outer rings quieter
           if(BINARY[mid]) al*=1.55;   // distance-compensated; the rings still
                                       // sit under the pair in the hierarchy
           /* Philosophy keeps the exact tint it shipped with; only a world that
              declares its own takes it, so this stays a pure addition */
           push2(pt, al, BINARY[mid]?paletteOf(mid).orbit:0x2b4f86);
+        });
+      }
+    }
+    ORBITS[mid].forEach(function(sl){ ring(sl.r); });
+
+    /* THE ORBITS NOBODY STANDS ON, in the worlds that declare them.
+
+       A ring was only ever drawn because something was standing on it, so a
+       world with nothing written in it drew no rings and read as a bare star.
+       These are the same rings by the same rule at the same radii — the only
+       difference is that the reason to draw them is the system rather than its
+       occupants. */
+    (VACANT_PLANETS[mid]||[]).forEach(function(vp){ ring(vp.r); });
+
+    /* AND A PLANET ON EACH OF THEM. An empty ring says a place exists; it does
+       not say that the place is a planet waiting to be taken. A small circle
+       does, drawn in the same tilted plane the orbit lies in so it reads as a
+       body on that path rather than a mark floating over it.
+
+       Fainter than an occupied body on purpose: it is the outline of somewhere
+       to stand, and the moment a note takes it, a real light is drawn there
+       instead and this is not drawn at all. */
+    var U=new THREE.Vector3(1,0,0), V=localOrbit(1,Math.PI/2,0);
+    (VACANT_PLANETS[mid]||[]).forEach(function(vp){
+      var rad=Math.max(0.9, vp.r*0.045), STEP2=26;
+      var pal=paletteOf(mid);
+      for(var q2=0;q2<STEP2;q2++){
+        [q2,q2+1].forEach(function(w){
+          var a2=(w/STEP2)*6.2832;
+          var pt=vp.pos.clone()
+            .addScaledVector(U, Math.cos(a2)*rad)
+            .addScaledVector(V, Math.sin(a2)*rad);
+          push2(pt, 0.30, pal.body);
         });
       }
     });
@@ -3525,11 +3716,22 @@ function paintDOM(){
        A vacancy is excluded from both lists. It has no src, which drops it
        from the writings on its own, and it is filtered out of the concepts
        explicitly - a nameless row is not something anyone can choose. */
-    put(group(T('topic.writings'), mem.filter(function(id){return byId[id].src;})
+    /* A NOTE THAT IS WAITING FOR A PLANET IS NOT ON THE PAGE EITHER.
+
+       A world has a fixed number of places now, and a note written past the
+       last one waits out of sight until one is given up. It was still being
+       listed here — which would have been the worst of both: a row a visitor
+       can click, opening a reader for something that has no body anywhere in
+       the sky, in a world whose whole claim is that every note is a light.
+
+       Waiting is a state of the note, not of the sheet, so both lists ask
+       about it directly rather than inferring it from a missing position. */
+    put(group(T('topic.writings'), mem.filter(function(id){
+        return byId[id].src && !byId[id].queued; })
       .map(function(id){ var n=byId[id];
         return row(n, esc(n.t), function(){ openReader(id); }); })));
     put(group(T('topic.concepts'), mem.filter(function(id){
-        return byId[id].t==='minor' && !byId[id].vacant; })
+        return byId[id].t==='minor' && !byId[id].vacant && !byId[id].queued; })
       .map(function(id){ var n=byId[id];
         return row(n, adj[id].length+' '+T('topic.connections'), function(){ travelTo('concept',id); }); })));
     /* THE EDITOR'S ONE DOOR INTO THE PAGE. Inert in the published artifact,
@@ -4834,6 +5036,45 @@ window.__v02={
       var e=labelEls[id], s=e.querySelector ? e.querySelector('.lb-src') : null;
       return { id:id, shown:s?s.textContent:null, expected:sourceLabelOf(id) };
     });
+  },
+  /* THE CAPACITY OF EVERY WORLD, and what is standing in it.
+
+     Orbits are a property of the system now rather than of how much has been
+     written, so a suite has to be able to ask a world how many places it has,
+     how many are taken, which are empty, and who is waiting — none of which
+     could be seen from the outside before. */
+  systems:function(){
+    var out={};
+    MIGS.forEach(function(m){
+      var tpl=templateFor(m.id);
+      if(!tpl) return;
+      var slots=orbitalSlots(tpl, scaleFor(m.id), m.id);
+      var occ=(ORBITS[m.id]||[]).map(function(o){ return o.slot; }).sort(function(x,y){return x-y;});
+      var mem=owned[m.id]||[];
+      out[m.id]={
+        system:MIG_SYSTEM[m.id]||null,
+        sourceType:tpl.sourceType||null,
+        measured:(tpl.semiMajorAxisAU||[]).length,
+        extra:EXTRA_ORBITS[m.id]||0,
+        declaredCount:orbitCount(m.id,tpl),
+        slots:slots.length,
+        radii:slots.map(function(r){ return +r.toFixed(3); }),
+        occupied:occ,
+        /* who is standing where, and at what radius — so a suite can prove that a
+           freed planet went to the waiting note and that nobody else moved */
+        seats:(ORBITS[m.id]||[]).map(function(o){
+          return {slot:o.slot, id:o.id, r:+o.r.toFixed(3)}; })
+          .sort(function(x,y){ return x.slot-y.slot; }),
+        vacant:(VACANT_PLANETS[m.id]||[]).map(function(v){ return v.slot; }),
+        fullSystem:!!FULL_SYSTEM[m.id],
+        concepts:mem.filter(function(id){ return byId[id].t==='minor'; }).length,
+        writings:mem.filter(function(id){ return byId[id].t!=='minor'; }).length,
+        queued:mem.filter(function(id){ return byId[id].queued; }),
+        placed:mem.filter(function(id){ return byId[id].pos; }).length,
+        unplaced:mem.filter(function(id){ return !byId[id].pos; })
+      };
+    });
+    return out;
   },
   constellation:function(mid){
     mid=mid||'observation';
