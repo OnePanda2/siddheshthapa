@@ -23,8 +23,8 @@ const MUTATIONS = [
      See W9 below for the same shape and the same remedy: make a world that
      falls through, then break what is supposed to catch it. */
   { n: 'W2', file: APP, name: 'an unbuilt world is DECLARED latent, not a silent fallback',
-    also: { find: `'music':'Kepler-80', 'psychology':'Kepler-62', 'art':'HD 40307' };`,
-            repl: `'music':'Kepler-80', 'psychology':'Kepler-62' };` },
+    also: { find: `'music':'Kepler-80', 'books':'Kepler-62', 'art':'HD 40307',`,
+            repl: `'music':'Kepler-80', 'books':'Kepler-62',` },
     find: `             : tpl ? 'planetary'
              : 'latent';`,
     repl: `             : tpl ? 'planetary'
@@ -51,9 +51,20 @@ const MUTATIONS = [
      id, because a filter naming an id that does not exist would remove
      nothing and this would be inert again — which is how L9 spent two days
      asking an empty question. */
+  /* THE LINE MOVED AND THE NAME WENT WITH IT. This anchored on
+     "var ordered=MIGS.slice()", which became a filter and a concat when the
+     menu learned to put a declared topic last, and it dropped 'psychology',
+     which is a concept of HUMAN BEHAVIOUR now rather than a room of its own.
+     Both halves were stale for the same reason: the mutation named things
+     instead of describing what it wanted to break.
+
+     What it wants to break is the menu missing a region, so it now drops
+     whichever region is FIRST in the mind's own order — true whatever the
+     regions are called and however the list is later rearranged. */
   { n: 'W5', file: APP, name: 'the menu exposes every MIG',
-    find: `    var ordered=MIGS.slice();`,
-    repl: `    var ordered=MIGS.slice().filter(function(x){ return x.id!=='psychology'; });` },
+    find: `    var tail=(V02_OVERLAY.menuLast||[]).map(function(x){return x.id;});`,
+    repl: `    var tail=(V02_OVERLAY.menuLast||[]).map(function(x){return x.id;});
+    MIGS=MIGS.slice(1);                       // mutation: one region never reaches the menu` },
 
   /* THE SUBJECT OF THIS MUTATION CEASED TO EXIST. It edited the relabel that
      turned MY WORKS into ART, and there is no such relabel any more: ART was
@@ -153,8 +164,8 @@ const MUTATIONS = [
      dead code and the pass meant nothing. ART is stripped first, so there IS an
      unassigned world, and only then is a heritage invented for it. */
   { n: 'W9', file: APP, name: 'an unassigned MIG never invents a source',
-    also: { find: `'music':'Kepler-80', 'psychology':'Kepler-62', 'art':'HD 40307' };`,
-            repl: `'music':'Kepler-80', 'psychology':'Kepler-62' };` },
+    also: { find: `'music':'Kepler-80', 'books':'Kepler-62', 'art':'HD 40307',`,
+            repl: `'music':'Kepler-80', 'books':'Kepler-62',` },
     find: `  if(p.worldType==='latent' || !p.astronomyTemplate) return 'not yet charted';`,
     repl: `  if(p.worldType==='latent' || !p.astronomyTemplate) return 'TRAPPIST-1';` },
 

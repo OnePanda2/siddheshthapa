@@ -109,8 +109,8 @@ const M = [
      for it. That is the real claim: not "this line is correct" but "a world
      with nothing behind it never claims something". */
   { id: 'B19', why: 'invent a source for a world that has none',
-    also: { find: "'music':'Kepler-80', 'psychology':'Kepler-62', 'art':'HD 40307' };",
-            repl: "'music':'Kepler-80', 'psychology':'Kepler-62' };" },
+    also: { find: "'music':'Kepler-80', 'books':'Kepler-62', 'art':'HD 40307',",
+            repl: "'music':'Kepler-80', 'books':'Kepler-62'," },
     find: "  if(p.worldType==='latent' || !p.astronomyTemplate) return 'not yet charted';",
     repl: "  if(p.worldType==='latent' || !p.astronomyTemplate) return 'HR 8799';" },
 

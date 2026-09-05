@@ -109,8 +109,8 @@ const M = [
      framed by its own size and not by a constant — and it is now verified
      against a world that actually exists while the mutation runs. */
   { id:'WF12', why:'frame a latent world from a constant instead of from its own size',
-    also:{ find:"'music':'Kepler-80', 'psychology':'Kepler-62', 'art':'HD 40307' };",
-           repl:"'music':'Kepler-80', 'psychology':'Kepler-62' };" },
+    also:{ find:"'music':'Kepler-80', 'books':'Kepler-62', 'art':'HD 40307',",
+           repl:"'music':'Kepler-80', 'books':'Kepler-62'," },
     find:'    out.normalize().multiplyScalar(fwG.d);\n    dOut=fwG.d;',
     repl:'    out.normalize().multiplyScalar(dOut);' },
 

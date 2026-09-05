@@ -89,8 +89,8 @@ const M = [
      establishes the precondition, the second is the mutation proper. */
   { id:'T11', why:'stop lifting the generic worlds on a phone, putting them under the sheet',
     steps:[
-      { find:"'music':'Kepler-80', 'psychology':'Kepler-62', 'art':'HD 40307' };",
-        repl:"'music':'Kepler-80', 'psychology':'Kepler-62' };" },
+      { find:"'music':'Kepler-80', 'books':'Kepler-62', 'art':'HD 40307',",
+        repl:"'music':'Kepler-80', 'books':'Kepler-62'," },
       { find:'    if(upS.lengthSq()>1e-6) aimN.addScaledVector(upS.normalize(), -dOut*0.22);',
         repl:'    if(upS.lengthSq()>1e-6) aimN.addScaledVector(upS.normalize(), 0.0);' }
     ] },

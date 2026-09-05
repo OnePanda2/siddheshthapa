@@ -20,6 +20,14 @@
    ──────────────────────────────────────────────────────────────────────── */
 var WORKS_DATA = /*__WORKSDATA__*/;
 
+/* WRITE AN ADDRESS, UNLESS THE ADDRESS IS WHAT MOVED US. Going back to
+   #works:<sheet> must OPEN that sheet, not push another entry for it — without
+   this, walking backwards would lay a fresh trail behind itself and Back would
+   never reach the threshold. Declared here rather than beside the functions
+   that read it: a var assigned late hoists as undefined, and this file is read
+   top to bottom by three of them. */
+var silentUrl = false;
+
 /* ── the six, from the graph ───────────────────────────────────────────────
    Membership is derived, never listed: everything the graph files under
    my-works that is not the region itself and not one of its concepts. Add a
@@ -446,6 +454,9 @@ function pad(n){ return (n < 10 ? '0' : '') + n; }
 function renderSheet(id){
   var n = byId[id];
   if(!n) return renderContents();
+  /* a sheet is its own address, so Back walks sheet by sheet instead of leaping
+     out of the manual from wherever you happened to stop reading */
+  var pushAfter = WORKS_OPEN && !silentUrl && wkView !== id;
   var sh = (RESERVED_PREVIEW === id) ? null : WORKS_BY_NODE[id];
   var idx = SHEETS.map(function(x){ return x.id; }).indexOf(id);
 
@@ -483,6 +494,7 @@ function renderSheet(id){
   renderNight(id);
   wkLayer.scrollTop = 0;
   say(n.label + ', sheet ' + (idx + 1) + ' of ' + SHEETS.length + '.');
+  if(pushAfter) pushUrl();
 }
 
 function renderWritten(sh, n, idx){
@@ -729,9 +741,12 @@ function openWorks(id){
   document.body.classList.add('works-open');
   if(id && byId[id]) renderSheet(id); else renderContents();
   wkClose.focus();
+  /* THE ENTRY THAT WAS MISSING, and the whole of the bug: without it Back from
+     the manual found nothing belonging to this page and left the site. */
+  if(!silentUrl) pushUrl();
 }
 
-function closeWorks(silent){
+function closeWorks(silent, quietUrl){
   if(!WORKS_OPEN) return;
   WORKS_OPEN = false;
   wkView = null;
@@ -741,6 +756,7 @@ function closeWorks(silent){
   invalidate(140);
   if(wkReturnFocus && wkReturnFocus.focus) wkReturnFocus.focus();
   if(!silent) say('Closed the manual.');
+  if(!quietUrl && !silentUrl) pushUrl();
 }
 
 /* the door on the threshold */
@@ -775,6 +791,21 @@ document.addEventListener('keydown', function(e){
     if(kind === 'works') openWorks(m[0] || null);
   });
 })();
+
+/* WHAT THE ADDRESS MACHINERY ASKS OF THE MANUAL. Declared in v02-app.js and
+   filled in here, because this file runs inside the same closure and after it. */
+worksGo = function(id){
+  silentUrl = true;
+  try{
+    if(!WORKS_OPEN) openWorks(id || null);
+    else if(id && id !== wkView) renderSheet(id);
+    else if(!id && wkView) renderContents();
+  } finally { silentUrl = false; }
+};
+worksShut = function(){
+  silentUrl = true;
+  try{ closeWorks(true, true); } finally { silentUrl = false; }
+};
 
 /* the harness, for the suites */
 window.__v02.works = {

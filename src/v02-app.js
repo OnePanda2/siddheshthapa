@@ -41,7 +41,7 @@ function T(k){
    boot" rather than pointing at the line. Exactly the trap HIDDEN_MIG_LABEL
    fell into, in the same file, which is why it is declared up here too. */
 var URL_QUIET=false;
-var URL_KINDS={ threshold:1, mind:1, focus:1, read:1 };
+var URL_KINDS={ threshold:1, mind:1, focus:1, read:1, works:1 };
 var HIDDEN_MIG_LABEL={};
 /* LIVE NOTES, injected from data/notes.json at build time. Declared here rather
    than beside the merge because the merge runs inside an IIFE further down, and
@@ -4020,6 +4020,15 @@ var readingId=null, camMemory=null;
    so the app needs to know only two things about it: that it is open, and who
    to call when its door is used. Everything else lives in src/v02-works.js. */
 var WORKS_OPEN=false, onWorksDoor=null, onWorksSheet=null;
+/* THE MANUAL IS IN ANOTHER FILE AND BOOTS AFTER THIS ONE, so the address
+   machinery cannot reach into it directly. These are filled in by
+   src/v02-works.js when it loads, and every use of them is guarded — the same
+   arrangement onWorksDoor and onWorksSheet above already use.
+
+   Declared HERE, beside those two, and not beside the code that calls them:
+   a var assigned further down the file hoists as undefined, which has broken
+   this project three times (HIDDEN_MIG_LABEL, URL_KINDS, the gesture map). */
+var worksGo=null, worksShut=null;
 
 function openReader(id){
   var n=byId[id]; if(!n || n.vacant) return;
@@ -5790,6 +5799,20 @@ var workCount=NODES.filter(function(n){
    writes a URL, and without a flag the two would chase each other. */
 
 function urlFor(){
+  /* THE MANUAL IS A PLACE, and it is asked about FIRST — before the guard that
+     returns nothing until the mind has been entered, because the manual opens
+     from the THRESHOLD without entering the mind at all. That guard is exactly
+     why the second door had no address: on the threshold urlFor returned '' and
+     there was nothing to push, so Back had nothing of ours to return to.
+
+     With the manual closed this falls through and every line below runs as it
+     always did. */
+  /* 'contents' is a VIEW, not a sheet — wkView is documented as
+     "null = shut · 'contents' · a node id" — so the contents page is plain
+     #works and only a real sheet gets a name after the colon. Written the
+     other way it produced #works:contents, which reads like a work called
+     contents and would break the moment somebody wrote one. */
+  if(WORKS_OPEN) return (wkView && wkView!=='contents') ? '#works:'+wkView : '#works';
   if(!entered) return '';
   if(readingId) return '#read:'+readingId;
   if(state.mode==='universe') return '#mind';
@@ -5832,6 +5855,17 @@ function applyUrl(){
   if(h && !URL_KINDS[kind]) return;
   URL_QUIET=true;
   try{
+    /* Asked before the mind's own kinds, and it shuts the manual on the way
+       past: walking back from #works: to #mind has to close the door as well
+       as move the camera. */
+    /* READS THE ADDRESS DIRECTLY, because 'parts' is declared further down and
+       a var used before its assignment is undefined, not an error you can see:
+       parts[0] threw out of the whole handler, so Back changed the address and
+       then did nothing, and Forward never reopened the manual. The third time
+       this hoisting trap has bitten this file, and the second time I have
+       written the warning about it and then walked into it. */
+    if(kind==='works'){ if(worksGo) worksGo(h.split(':')[1]||null); return; }
+    if(WORKS_OPEN && worksShut) worksShut();
     if(!h || kind==='threshold'){ if(entered) leaveMind(); return; }
     if(!entered) enterMind();
     var parts=h.split(':'); parts.shift();
