@@ -1743,6 +1743,46 @@ var V02_OVERLAY={
     ['presentation','entrepreneurship','sells through','Three years of positioning: the work is not the whole of what gets bought.']
   ]
 };
+/* EVERY REGION EVER DECLARED BEYOND THE LOCKED CORPUS, in the order it was
+   declared, RETIRED ONES INCLUDED. This is the ledger the world claim counts
+   against, and it is why retiring a topic cannot move another topic's sky:
+   an entry is appended and never removed, so an index once handed out stays
+   handed out. Same rule as a retired writing, which is blanked in place rather
+   than spliced away because position in this mind is an index. */
+var DECLARED_REGIONS=[];
+(function(){
+  /* ── REGIONS FROM THE STORE ───────────────────────────────────────────
+     A topic used to be the one thing on this page that could not be added
+     without editing src/. It is declared like anything else now: the editor
+     writes it into data/notes.json and the build folds it in HERE, before the
+     overlay is applied, so a store region goes through exactly the same
+     addOnce guards, the same hide, the same everything as one written by hand.
+     No second path, and therefore no second set of rules to keep in step. */
+  (V02_NOTES.regions||[]).forEach(function(r){
+    V02_OVERLAY.addMIGs.push({ id:r.id, label:r.label, gloss:r.line,
+      empty:true, fromStore:true, added:r.added||null,
+      why:'declared in the live note store rather than by hand — the topic was added from the editor.' });
+  });
+  /* AND RETIRING ONE IS A LINE ADDED, NOT A LINE REMOVED. It joins hideMIGs,
+     which is the mechanism BUILDING and MY WORKS already go through: the room
+     closes, its objects keep their ids and their books, and the relationships
+     that pointed into it are swept rather than left drawing doors onto
+     nothing. Its entry stays in the ledger above, so its world stays its own
+     and nothing else shifts to take it. */
+  (V02_NOTES.retiredRegions||[]).forEach(function(r){
+    V02_OVERLAY.hideMIGs.push({ id:r.id, at:r.at||null, fromStore:true,
+      why:r.why||'retired from the editor.' });
+  });
+  /* THE LOCKED CORPUS IS NOT IN THE QUEUE, and leaving it in was a real
+     mistake for two builds: BUILDING and MY WORKS are corpus regions with no
+     system, so they silently took the first two worlds out of the pool and
+     held them without ever drawing a ring. They are not claimants. The corpus
+     gave every region it means to show a sky of its own; the two it did not
+     are rooms rather than topics, and both are hidden. So the queue is exactly
+     the regions declared BEYOND the corpus, in declaration order. */
+  V02_OVERLAY.addMIGs.forEach(function(a){
+    if(DECLARED_REGIONS.indexOf(a.id)<0) DECLARED_REGIONS.push(a.id); });
+})();
 (function(){
   /* every place an id can appear: the object itself, both ends of every edge,
      and the crosses[] hints. Miss one and the object silently disappears. */
@@ -1782,7 +1822,16 @@ var V02_OVERLAY={
   });
   V02_OVERLAY.addMIGs.forEach(function(a){
     for(var i=0;i<MIGS.length;i++) if(MIGS[i].id===a.id) return;   // never twice
-    MIGS.push({ id:a.id, label:a.label, gloss:a.gloss, v02Added:true, v02Empty:!!a.empty });
+    /* THE SENTENCE GOES IN THE FIELD THE PAGE ACTUALLY READS.
+       This wrote `gloss`, and nothing anywhere reads `gloss` off a region —
+       the corpus calls it `line` and so does every renderer, every form and
+       applyEdits. So BOOKS, THINGS I WAS WRONG ABOUT and ART have each been
+       standing on the live site under a name with no sentence beneath it,
+       while the twelve corpus regions all had one. The overlay keeps its own
+       word for the field, because that is what its three entries are written
+       with; the push is what had to learn the graph's. */
+    MIGS.push({ id:a.id, label:a.label, line:a.gloss, gloss:a.gloss,
+                v02Added:true, v02Empty:!!a.empty });
   });
   /* CONTENTS FOR AN ADDED REGION. Same guard as the MIGs: never twice, and
      never over the top of something the locked corpus already declares. */
@@ -3761,6 +3810,93 @@ function buildConstellation(migId){
 var ORBITS={};                       // migId -> [{id,r,theta,incl}] for checking
 
 var CONST_BG=[];                       // render-only sky, never graph objects
+
+/* ── 1a3. A REGION THAT ARRIVES LATER CLAIMS A WORLD ──────────────────
+   THIS IS THE LINE THAT MADE A NEW TOPIC NEED A PROGRAMMER.
+
+   Everything else about a region already accommodates one nobody wrote code
+   for. The menu takes it, the palette hands it a hue nothing else is using,
+   the emblem falls through to a family, the ownership books make it a key.
+   Only the star was typed — fourteen regions, fourteen names in MIG_SYSTEM —
+   and a region added from the editor could not reach that literal.
+
+   The fourteen above stay typed, and must. Each was CHOSEN: a shape argued
+   in the data file to answer what the topic is, and nine assertions name a
+   region and a system in the same breath. Nothing here may move them. What
+   this adds is what happens to the fifteenth.
+
+   IT TAKES THE NEXT UNCLAIMED SYSTEM FROM THE POOL, in MIGS order. That
+   order is the locked corpus's order followed by the order regions were
+   declared, and declarations are appended rather than reordered — so the
+   same store always produces the same sky, and a region that has claimed a
+   world keeps it when the next one arrives.
+
+   IT IS SHOWN WHOLE. A claimed region is new and therefore empty, which is
+   the exact case FULL_SYSTEM was written for: without it a region with
+   nothing in it is a single light with a name under it rather than a
+   planetary system, and there is nothing to fill.
+
+   AND ITS SCALE IS MEASURED OFF THE WORLDS ALREADY IN SERVICE, not chosen.
+   WORLD_SCALE runs from 1.1 to 52 because a system's span multiplies it:
+   the default 13 would put Kepler-68's 75x span at an outer orbit of 975,
+   and Kepler-444's 1.9x at 25, cramming five rings into twelve units. So a
+   claimed world is scaled to sit at the same geometric centre — sqrt(inner *
+   outer) — as the median world that already has a hand-tuned scale. That
+   constant is computed below rather than written down, so it stays true if a
+   hand-tuned scale is ever revised, and it cannot be a number somebody liked.
+
+   IF THE POOL IS DRY the region gets no world and renders as the plain star
+   it would otherwise have been. That is a shortage to fix by retrieving more
+   systems from the archive, exactly as the last six were, and never by
+   inventing one. */
+var CLAIMED_WORLDS={};       // migId -> {system, scale}, for regions that took one
+var WORLD_CENTRE=0;          // the geometric centre the hand-tuned worlds sit at
+(function(){
+  function spanOf(tpl){
+    var a=(tpl&&tpl.semiMajorAxisAU||[]).filter(function(x){ return typeof x==='number'; });
+    return a.length>1 ? a[a.length-1]/a[0] : null;
+  }
+  /* what the set already does. A circumbinary world is left out: LOVE's scale
+     of 52 exists so that two stars resolve as two, which is a reason no
+     single-star world has. */
+  var centres=[];
+  Object.keys(WORLD_SCALE).forEach(function(id){
+    var tpl=ASTRO[MIG_SYSTEM[id]];
+    if(!tpl || tpl.sourceType==='circumbinary-system') return;
+    var sp=spanOf(tpl); if(!sp) return;
+    centres.push(WORLD_SCALE[id]*Math.sqrt(sp));      // sqrt(inner*outer)
+  });
+  centres.sort(function(a,b){ return a-b; });
+  WORLD_CENTRE=centres.length?centres[Math.floor(centres.length/2)]:ORBIT_R0;
+
+  var spent={}, chosen={};
+  Object.keys(MIG_SYSTEM).forEach(function(id){ chosen[id]=1; spent[MIG_SYSTEM[id]]=1; });
+  var pool=(ASTRO_DATA.systems||[]).filter(function(sy){
+    return sy.reserve && !spent[sy.system]; });
+  var standing={}; MIGS.forEach(function(m){ standing[m.id]=1; });
+
+  /* THE INDEX IS SPENT WHETHER THE REGION IS STILL STANDING OR NOT.
+     Counting only the visible regions would mean that retiring one moved the
+     next one's star, which is the same defect as splicing a retired writing
+     out of its list — a region would rearrange the sky by disappearing. So a
+     retired region keeps its place in the queue and keeps its world with it. */
+  var k=0;
+  DECLARED_REGIONS.forEach(function(id){
+    if(chosen[id]) return;                       // its system was chosen, not claimed
+    if(MIG_CONSTELLATION[id]) return;            // its sky is a constellation
+    var sy=pool[k++];
+    if(!sy) return;                              // the pool is dry; no world
+    if(!standing[id]) return;                    // retired, and holding its index
+    var sp=spanOf(sy);
+    MIG_SYSTEM[id]=sy.system;
+    WORLD_SCALE[id]=sp ? WORLD_CENTRE/Math.sqrt(sp) : ORBIT_R0;
+    FULL_SYSTEM[id]=1;
+    CLAIMED_WORLDS[id]={ system:sy.system, scale:+WORLD_SCALE[id].toFixed(3),
+                         planets:sy.planetCount, span:sp?+sp.toFixed(2):null };
+  });
+  CLAIMED_WORLDS._spent=k;                       // how much of the queue is gone
+  CLAIMED_WORLDS._left=Math.max(0,pool.length-k);
+})();
 
 MIGS.forEach(function(m){
   var mem=owned[m.id]||[], n=Math.max(1,mem.length);
@@ -8007,6 +8143,17 @@ window.__v02={
      written, so a suite has to be able to ask a world how many places it has,
      how many are taken, which are empty, and who is waiting — none of which
      could be seen from the outside before. */
+  /* WHICH REGIONS TOOK A WORLD RATHER THAN BEING GIVEN ONE.
+     Empty while every region still has a chosen system, which is the point:
+     the claim must be provably a no-op for the fourteen that shipped, and the
+     only way to see it work is to add a region and look. */
+  claims:function(){
+    return { centre:+WORLD_CENTRE.toFixed(3),
+             claimed:CLAIMED_WORLDS,
+             pool:(ASTRO_DATA.systems||[]).filter(function(s){ return s.reserve; })
+                   .map(function(s){ return s.system; }),
+             assigned:Object.keys(MIG_SYSTEM).map(function(k){ return MIG_SYSTEM[k]; }) };
+  },
   systems:function(){
     var out={};
     MIGS.forEach(function(m){

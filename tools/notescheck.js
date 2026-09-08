@@ -48,10 +48,15 @@ function lockedGraph() {
 /* ── the overlay, sliced out of the app by matching braces. It is pure data,
       but it is data written in JavaScript, so it is read as JavaScript rather
       than guessed at with a regex. ─────────────────────────────────────────── */
-function overlay() {
+function overlay() { return objectLiteral('var V02_OVERLAY={', 'V02_OVERLAY'); }
+/* the same reader, pointed at the assignment table. MIG_SYSTEM says which
+   regions were GIVEN a system by hand, which is what decides which ones have
+   to claim one — so the gate has to read it rather than assume a count. */
+function migSystem() { return objectLiteral('var MIG_SYSTEM={', 'MIG_SYSTEM'); }
+function objectLiteral(anchor, name) {
   const app = fs.readFileSync('src/v02-app.js', 'utf8');
-  const start = app.indexOf('var V02_OVERLAY={');
-  if (start < 0) throw new Error('V02_OVERLAY not found in src/v02-app.js');
+  const start = app.indexOf(anchor);
+  if (start < 0) throw new Error(name + ' not found in src/v02-app.js');
   let i = app.indexOf('{', start), depth = 0, end = -1, inStr = null, inCmt = null;
   for (; i < app.length; i++) {
     const c = app[i], n = app[i + 1];
@@ -64,7 +69,7 @@ function overlay() {
     if (c === '{') depth++;
     else if (c === '}') { depth--; if (depth === 0) { end = i; break; } }
   }
-  if (end < 0) throw new Error('could not find the end of V02_OVERLAY');
+  if (end < 0) throw new Error('could not find the end of ' + name);
   return new Function('return ' + app.slice(app.indexOf('{', start), end + 1) + ';')();
 }
 
@@ -128,8 +133,8 @@ try { store = JSON.parse(fs.readFileSync(FILE, 'utf8')); }
 catch (e) { console.error('notescheck: ' + FILE + ' is not valid JSON — ' + e.message); process.exit(1); }
 
 if (store.version !== 1) fail('store', 'version must be 1, found ' + JSON.stringify(store.version));
-['notes', 'minors', 'edges', 'retired'].forEach(k => {
-  if (k === 'retired' && store[k] === undefined) return;   // a store may retire nothing
+['notes', 'minors', 'edges', 'retired', 'regions', 'retiredRegions'].forEach(k => {
+  if (k !== 'notes' && k !== 'minors' && k !== 'edges' && store[k] === undefined) return;
   if (!Array.isArray(store[k])) fail('store', k + ' must be an array');
 });
 if (fails.length) { report(); process.exit(1); }
@@ -138,6 +143,101 @@ const notes  = store.notes;
 const minors = store.minors;
 const edges  = store.edges;
 const retired = store.retired || [];
+const regions = store.regions || [];
+const retiredRegions = store.retiredRegions || [];
+
+/* ── TOPICS THE STORE DECLARES ─────────────────────────────────────────────
+   A topic used to be the one thing here that could not be added from the
+   editor, because a topic needs a star and the fourteen stars were typed into
+   src/. They are claimed from a reserve pool now, so the store may declare a
+   region — and this is the gate on it, checked BEFORE the notes, because a
+   note may legitimately be filed into a topic that only exists here. */
+const SLUG = /^[a-z0-9][a-z0-9-]*$/;
+const REGION_FIELDS = new Set(['id', 'label', 'line', 'added']);
+const RETIRE_FIELDS = new Set(['id', 'at', 'why']);
+const regionIds = new Set();
+
+regions.forEach((r, i) => {
+  const where = 'regions[' + i + ']';
+  if (!r || typeof r !== 'object' || Array.isArray(r)) return fail(where, 'must be an object');
+  Object.keys(r).forEach(k => {
+    if (!REGION_FIELDS.has(k))
+      fail(where, 'unknown field ' + JSON.stringify(k) + '; a topic carries id, label, line and added');
+  });
+  if (typeof r.id !== 'string' || !SLUG.test(r.id))
+    fail(where, 'id must be a lowercase slug, found ' + JSON.stringify(r.id));
+  else if (takenIds.has(r.id))
+    fail(where, 'id "' + r.id + '" already exists in the graph; the merge would silently drop this topic');
+  else if (regionIds.has(r.id))
+    fail(where, 'id "' + r.id + '" is declared twice');
+  else regionIds.add(r.id);
+  if (typeof r.label !== 'string' || !r.label.trim())
+    fail(where, 'a topic needs a name');
+  else if (r.label !== r.label.toUpperCase())
+    fail(where, 'the name must be uppercase, found ' + JSON.stringify(r.label));
+  /* THE SENTENCE IS NOT OPTIONAL. It is the first prose a reader meets on
+     arriving, and a topic that says nothing about itself is a door with no
+     sign on it. Every region in the corpus has one. */
+  if (typeof r.line !== 'string' || !r.line.trim())
+    fail(where, 'a topic needs a description — it is the sentence a reader meets on arriving');
+  if (r.added !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(r.added))
+    fail(where, 'added must be an ISO date, found ' + JSON.stringify(r.added));
+});
+
+/* ── AND THE ONES IT RETIRES ────────────────────────────────────────────────
+   Retiring a topic closes the room: it leaves MIGS, its objects keep their
+   ids and their books, and every relationship that pointed into it is swept
+   rather than left drawing a door onto nothing. So it must name a room that
+   is actually open, or it is a statement about nothing. */
+const openRegionIds = new Set([...migIds, ...regionIds]);
+const retiredRegionIds = new Set();
+retiredRegions.forEach((r, i) => {
+  const where = 'retiredRegions[' + i + ']';
+  if (!r || typeof r !== 'object' || Array.isArray(r)) return fail(where, 'must be an object');
+  Object.keys(r).forEach(k => {
+    if (!RETIRE_FIELDS.has(k))
+      fail(where, 'unknown field ' + JSON.stringify(k) + '; a retirement carries id, at and why');
+  });
+  if (typeof r.id !== 'string' || !SLUG.test(r.id))
+    fail(where, 'id must be a lowercase slug, found ' + JSON.stringify(r.id));
+  else if (!openRegionIds.has(r.id))
+    fail(where, '"' + r.id + '" is not a topic that is open — nothing would be retired');
+  else if (retiredRegionIds.has(r.id))
+    fail(where, '"' + r.id + '" is retired twice');
+  else retiredRegionIds.add(r.id);
+  if (r.at !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(r.at))
+    fail(where, 'at must be an ISO date, found ' + JSON.stringify(r.at));
+});
+
+/* THE TOPICS ARE NOW PART OF THE GRAPH, for everything checked after this
+   point: a note may be filed into one the store declared, no note may collide
+   with a topic's id, and no note may be filed into one that has been retired,
+   because a retired room is exactly as invisible as a hidden one. */
+regionIds.forEach(id => { takenIds.add(id); if (!retiredRegionIds.has(id)) migIds.add(id); });
+retiredRegionIds.forEach(id => { migIds.delete(id); hidden.add(id); });
+
+/* ── IS THERE A WORLD LEFT FOR IT? ─────────────────────────────────────────
+   A region with no system renders as a bare star with a name under it — not a
+   planetary system at all. Every topic on this page has a sky, and publishing
+   one that does not would be a visible downgrade nobody asked for. The pool is
+   finite and this project does not invent astronomy, so when it runs out the
+   answer is to retrieve more from the NASA archive, exactly as the last six
+   were. The gate says so here rather than letting it ship. */
+if (regions.length) {
+  const chosen = new Set(Object.values(migSystem()));
+  const pool = (JSON.parse(fs.readFileSync('data/astronomy-systems.json', 'utf8')).systems || [])
+    .filter(s => s.reserve && !chosen.has(s.system));
+  /* the queue is every region declared beyond the corpus that was not given a
+     system by hand, retired ones included — a retired topic keeps its place so
+     that retiring one cannot move another topic's star */
+  const queue = (OV.addMIGs || []).map(m => m.id).filter(id => !chosen.has(id))
+    .concat(regions.map(r => r.id));
+  if (queue.length > pool.length)
+    fail('store', 'there are ' + queue.length + ' topic(s) waiting for a world and only ' +
+                  pool.length + ' unclaimed system(s) in data/astronomy-systems.json. ' +
+                  'Retrieve more from the NASA Exoplanet Archive before adding another; ' +
+                  'a topic without a system draws as a bare star.');
+}
 
 /* ids introduced by this store, checked against each other as well as against
    the graph, because two notes can collide with one another */
@@ -259,6 +359,56 @@ retired.forEach((r, i) => {
   if (typeof r.at !== 'string' || isNaN(Date.parse(r.at)))
     fail(where, 'at must be an ISO date - it is what decides which vacancy is oldest');
   retiredIds.add(r.id);
+});
+
+/* ── EDITS, WHICH THIS GATE HAD NEVER LOOKED AT ────────────────────────────
+   store.edits is folded onto THOUGHTS, MINORS and MIGS by applyEdits and was
+   the one input reaching the graph with nothing standing in front of it. That
+   was survivable while it carried a description and nothing else. It carries a
+   topic's NAME now, so it is checked like everything else.
+
+   THE SILENTLY IGNORED FIELDS ARE THE POINT. applyEdits refuses id, mig and t
+   because all three decide where an object sits and what draws it, and the
+   graph is built from them before an override could be honoured — so it drops
+   them without a word. An editor that offered one would report a success that
+   never happened, which is the exact failure this file exists to stop. */
+const EDIT_FIELDS = new Set(['label', 'line', 'src', 'register', 'state', 'crosses', 'sections']);
+const EDIT_IGNORED = new Set(['id', 'mig', 't']);
+/* a region takes only the two things a region has */
+const REGION_EDIT_FIELDS = new Set(['label', 'line']);
+const allRegionIds = new Set([...migIds, ...hidden, ...regionIds]);
+const edits = store.edits || {};
+if (typeof edits !== 'object' || Array.isArray(edits)) fail('store', 'edits must be an object');
+else Object.keys(edits).forEach(id => {
+  const where = 'edits["' + id + '"]';
+  const e = edits[id];
+  if (!e || typeof e !== 'object' || Array.isArray(e)) return fail(where, 'must be an object');
+  const isRegion = allRegionIds.has(id);
+  if (!isRegion && !takenIds.has(id) && !seen.has(id))
+    return fail(where, 'nothing with the id "' + id + '" exists to correct');
+  if (retiredIds.has(id))
+    fail(where, 'is retired — correcting a blanked object writes text nobody will ever see');
+  const allowed = isRegion ? REGION_EDIT_FIELDS : EDIT_FIELDS;
+  Object.keys(e).forEach(k => {
+    if (EDIT_IGNORED.has(k))
+      return fail(where, k + ' cannot be corrected — the graph is built from it before an ' +
+                         'override could be honoured, so applyEdits drops it without a word');
+    if (!allowed.has(k))
+      return fail(where, 'unknown field ' + JSON.stringify(k) + '; ' +
+                         (isRegion ? 'a topic has a name and a description'
+                                   : 'an override may carry ' + [...EDIT_FIELDS].join(', ')));
+    if (k === 'label') {
+      if (typeof e.label !== 'string' || !e.label.trim()) fail(where, 'label cannot be emptied');
+      else if (e.label !== e.label.toUpperCase())
+        fail(where, 'label must be uppercase, found ' + JSON.stringify(e.label));
+    }
+    if (k === 'line' && (typeof e.line !== 'string' || !e.line.trim()))
+      fail(where, 'line cannot be emptied' + (isRegion
+        ? ' — it is the sentence a reader meets on arriving in the topic' : ''));
+    if (k === 'crosses' && !Array.isArray(e.crosses)) fail(where, 'crosses must be an array');
+    if (k === 'state' && !STATES.includes(e.state))
+      fail(where, 'state must be one of ' + STATES.join('|') + ', found ' + JSON.stringify(e.state));
+  });
 });
 
 /* A CLAIM MUST MATCH THE KIND OF THE STAR IT TAKES. Concepts and writings are

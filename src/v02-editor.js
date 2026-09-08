@@ -157,6 +157,14 @@ var CSS = [
 '  padding:10px 14px;margin:0 0 18px;font:12px/1.7 ui-monospace,monospace;color:#e3b6b6}',
 '.ed-err b{display:block;color:#f0d2d2;font-weight:400;margin-bottom:5px;',
 '  letter-spacing:.08em;text-transform:uppercase;font-size:11px}',
+/* CLOSING A ROOM IS NOT AN EDIT. It sits apart from the fields, below the
+   save, in the colour this editor already uses for delete — so it cannot be
+   reached by tabbing through the form and pressing return. */
+'.ed-danger{margin:26px 0 0;padding:14px;border:1px solid rgba(208,90,90,.35);',
+'  border-radius:3px;background:rgba(208,90,90,.05)}',
+'.ed-danger b{display:block;color:#e3b6b6;font-weight:400;margin-bottom:6px;',
+'  letter-spacing:.08em;text-transform:uppercase;font-size:11px}',
+'.ed-danger .ed-small{margin:0 0 12px}',
 '.ed-ok{border-left:2px solid #5ad07a;background:rgba(90,208,122,.08);',
 '  padding:14px;margin:0 0 18px;font:12px/1.7 ui-monospace,monospace;color:#b6e3c4}',
 '.ed-ok a{color:#8fe0a8}',
@@ -228,7 +236,7 @@ var CSS = [
 ].join('\n').replace('#495june','#495066');
 
 /* ── the bar ───────────────────────────────────────────────────────────── */
-var bar, barText, signBtn, wordsBtn;
+var bar, barText, signBtn, wordsBtn, topicBtn;
 function buildBar(){
   bar = el('div'); bar.id = 'edBar';
   bar.appendChild(el('span','dot'));
@@ -239,6 +247,12 @@ function buildBar(){
   wordsBtn = el('button'); wordsBtn.textContent = 'Words';
   wordsBtn.onclick = function(){ openTextForm(); };
   bar.appendChild(wordsBtn);
+  /* AND NEITHER DOES A NEW TOPIC. Every other control acts on a place you are
+     already standing in; this one makes the place, so it has nowhere to live
+     but the bar. */
+  topicBtn = el('button'); topicBtn.textContent = 'New topic';
+  topicBtn.onclick = function(){ openNewTopicForm(); };
+  bar.appendChild(topicBtn);
   document.body.appendChild(bar);
   paintBar();
 }
@@ -272,6 +286,7 @@ function paintBar(){
     signBtn.onclick = signOut;
   }
   if(wordsBtn) wordsBtn.hidden = !ok;
+  if(topicBtn) topicBtn.hidden = !ok;
   if(window.__v02 && window.__v02.repaint) window.__v02.repaint();
 }
 function esc(s){
@@ -439,6 +454,7 @@ window.__editor = {
 
   worksForm: function(id){ openWorksForm(id); },
   topicForm: function(id){ openTopicForm(id); },
+  newTopicForm: function(){ openNewTopicForm(); },
   textForm: function(){ openTextForm(); },
 
   paintRegion: function(migId, groups){
@@ -1022,16 +1038,27 @@ function commit(message, change){ return commitTo(CFG.path, message, change); }
    apply-to-what-is-there-now behaviour all matter equally to both. */
 function commitTo(file, message, change){
   var path = "/repos/" + CFG.owner + "/" + CFG.repo + "/contents/" + file;
-  return gh(path + "?ref=" + encodeURIComponent(CFG.branch)).then(function(file){
+  /* THE RESPONSE IS NOT THE FILENAME, and calling both of them `file` meant
+     this never once ran. `file === CFG.path` compared a GitHub API response
+     object to a string, so it was false every time and the store went to
+     change() exactly as it came off disk — which for data/notes.json means
+     without `retired` and without `edits`, because the live store has never
+     had either key. Retire, correct-an-original and edit-what-a-topic-is all
+     reach straight into one of those two, so all three threw a TypeError on a
+     real store while every harness passed: the harnesses write the file
+     directly and never come through here. */
+  return gh(path + "?ref=" + encodeURIComponent(CFG.branch)).then(function(res){
     var store;
-    try { store = JSON.parse(unb64(file.content)); }
+    try { store = JSON.parse(unb64(res.content)); }
     catch(e){ throw new Error("The store in the repository is not valid JSON; nothing was changed."); }
     if(file === CFG.path){
-      store.notes   = store.notes   || [];
-      store.minors  = store.minors  || [];
-      store.edges   = store.edges   || [];
-      store.retired = store.retired || [];
-      store.edits   = store.edits   || {};
+      store.notes          = store.notes          || [];
+      store.minors         = store.minors         || [];
+      store.edges          = store.edges          || [];
+      store.retired        = store.retired        || [];
+      store.edits          = store.edits          || {};
+      store.regions        = store.regions        || [];
+      store.retiredRegions = store.retiredRegions || [];
     }
     change(store);
     return gh(path, {
@@ -1039,7 +1066,7 @@ function commitTo(file, message, change){
       body: JSON.stringify({
         message: message,
         content: b64(JSON.stringify(store, null, 2) + "\n"),
-        sha: file.sha,
+        sha: res.sha,
         branch: CFG.branch
       })
     });
@@ -1251,8 +1278,19 @@ function openTopicForm(migId){
   formIn.innerHTML = "";
   formIn.appendChild(el("h2", null, "Editing " + mig.label));
   formIn.appendChild(el("p", "ed-sub",
-    "The sentence a reader meets on arriving in this topic."));
+    "Its name, and the sentence a reader meets on arriving in it."));
   var errBox = el("div"); formIn.appendChild(errBox);
+
+  /* THE NAME IS AN OVERRIDE LIKE THE SENTENCE, and for the same reason: the
+     corpus is locked, so a topic keeps the name it was written with and this
+     is declared beside it. Its ID never changes \u2014 that is what everything
+     filed here is filed under, and renaming a place must not move what is in
+     it. So the door gets a new sign and nothing else happens. */
+  var fLabel = el("input"); fLabel.type = "text";
+  fLabel.value = mig.label || "";
+  fLabel.placeholder = "The name, as it appears on the door";
+  fLabel.oninput = function(){ fLabel.value = fLabel.value.toUpperCase(); };
+  formIn.appendChild(field("Name", "uppercase. The reference it is filed under does not change.", fLabel));
 
   var fLine = el("textarea");
   fLine.value = node.line || "";
@@ -1268,18 +1306,25 @@ function openTopicForm(migId){
   formIn.appendChild(act);
 
   save.onclick = function(){
-    var line = fLine.value.trim();
+    var line = fLine.value.trim(), label = fLabel.value.trim();
     errBox.innerHTML = "";
-    if(!line){
+    var bad = [];
+    if(!line) bad.push("A topic with no description says nothing about itself.");
+    if(!label) bad.push("A topic needs a name.");
+    if(bad.length){
       var e = el("div", "ed-err");
       e.appendChild(el("b", null, "Nothing to save"));
-      e.appendChild(el("div", null, "A topic with no description says nothing about itself."));
+      bad.forEach(function(x){ e.appendChild(el("div", null, "\u00b7 " + x)); });
       errBox.appendChild(e);
       return;
     }
     save.disabled = true; save.textContent = "Saving\u2026";
-    commit("Topic: " + mig.label, function(store){
-      store.edits[migId] = Object.assign(store.edits[migId] || {}, { line: line });
+    commit("Topic: " + label, function(store){
+      var fields = { line: line };
+      /* only recorded when it actually differs, so an untouched form does not
+         leave a correction saying the name is what it already was */
+      if(label !== mig.label) fields.label = label;
+      store.edits[migId] = Object.assign(store.edits[migId] || {}, fields);
     }).then(function(){
       var ok = el("div", "ed-ok");
       ok.appendChild(el("div", null, "Saved. It appears once the build finishes."));
@@ -1294,8 +1339,173 @@ function openTopicForm(migId){
     });
   };
 
+  /* \u2500\u2500 AND CLOSING IT \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+     Retiring a topic closes the room. Its objects keep their ids and their
+     books \u2014 nothing is deleted \u2014 but the door goes, and every relationship
+     that pointed into it is swept rather than left drawing onto nothing.
+     That is a large thing to do by clicking, so it says exactly how much
+     goes with it and asks for the name back. */
+  var holds = M.nodes.filter(function(n){
+    return n.mig === migId && n.t !== 'mig' && !n.vacant; }).length;
+  var danger = el("div", "ed-danger");
+  danger.appendChild(el("b", null, "Retire this topic"));
+  danger.appendChild(el("div", "ed-small",
+    holds ? "It holds " + holds + " object" + (holds > 1 ? "s" : "") + ". They keep their " +
+            "references and their history, and stop appearing anywhere on the page \u2014 along " +
+            "with every relationship that points into them."
+          : "It holds nothing. The door closes and nothing else changes."));
+  var kill = el("button", "del", "Retire " + mig.label); kill.type = "button";
+  kill.onclick = function(){
+    var typed = window.prompt("Type the name of the topic to retire it:\n\n" + mig.label);
+    if(typed === null) return;
+    if(typed.trim().toUpperCase() !== String(mig.label).toUpperCase()){
+      errBox.innerHTML = "";
+      var e2 = el("div", "ed-err");
+      e2.appendChild(el("b", null, "Nothing was retired"));
+      e2.appendChild(el("div", null, "That is not the name of this topic."));
+      errBox.appendChild(e2);
+      return;
+    }
+    kill.disabled = true; kill.textContent = "Retiring\u2026";
+    commit("Retire topic: " + mig.label, function(store){
+      if(store.retiredRegions.some(function(r){ return r.id === migId; })) return;
+      store.retiredRegions.push({ id: migId, at: new Date().toISOString().slice(0,10),
+                                  why: "retired from the editor." });
+    }).then(function(){
+      errBox.innerHTML = "";
+      var ok2 = el("div", "ed-ok");
+      ok2.appendChild(el("div", null, "Retired. It goes once the build finishes."));
+      errBox.appendChild(ok2);
+      kill.textContent = "Retired";
+    }).catch(function(err){
+      kill.disabled = false; kill.textContent = "Retire " + mig.label;
+      var bx2 = el("div", "ed-err");
+      bx2.appendChild(el("b", null, "Nothing was retired"));
+      bx2.appendChild(el("div", null, err.message));
+      errBox.appendChild(bx2);
+    });
+  };
+  danger.appendChild(kill);
+  formIn.appendChild(danger);
+
   form.classList.add("open");
   fLine.focus();
+}
+
+/* \u2500\u2500 A TOPIC THAT DID NOT EXIST BEFORE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   The last thing on this page that needed a programmer. A topic needs a star,
+   and the fourteen stars were typed into src/ where no form could reach them;
+   there is a reserve pool of real systems now and a new topic claims the next
+   one, so this form asks for a name and a sentence and nothing else.
+
+   IT DOES NOT ASK WHICH WORLD. The pool is ordered and the claim is by
+   position, which is what makes it deterministic \u2014 the same store always
+   produces the same sky. Offering a choice would mean storing that choice,
+   and a stored choice is a second source of truth about where a star is. */
+function openNewTopicForm(){
+  var M = getModel();
+  var left = null, pool = null;
+  try {
+    var C = window.__v02 && window.__v02.claims && window.__v02.claims();
+    if(C){ left = C.claimed._left; pool = C.pool; }
+  } catch(e){ /* the count is context, not a gate; the build decides */ }
+
+  formIn.innerHTML = "";
+  formIn.appendChild(el("h2", null, "A new topic"));
+  formIn.appendChild(el("p", "ed-sub",
+    "It becomes a region of the mind with a world of its own, drawn from the " +
+    "reserve of real planetary systems. It arrives empty, showing every orbit " +
+    "its system has, and fills as you write into it."));
+
+  var errBox = el("div"); formIn.appendChild(errBox);
+
+  if(left === 0){
+    var dry = el("div", "ed-err");
+    dry.appendChild(el("b", null, "There are no worlds left"));
+    dry.appendChild(el("div", null,
+      "Every reserve system has been claimed. A topic without one would draw as " +
+      "a bare star, so more have to be retrieved from the NASA Exoplanet Archive " +
+      "before another topic can be added. Nothing here invents a system."));
+    errBox.appendChild(dry);
+  }
+
+  var fLabel = el("input"); fLabel.type = "text";
+  fLabel.placeholder = "The name, as it appears on the door";
+  var fLine = el("textarea");
+  fLine.placeholder = "What this topic is, in your own words. It is the first thing a reader meets.";
+  var fId = el("input"); fId.type = "text"; fId.className = "mono";
+
+  var idTouched = false;
+  fId.oninput = function(){ idTouched = true; };
+  fLabel.oninput = function(){
+    fLabel.value = fLabel.value.toUpperCase();
+    if(!idTouched) fId.value = slug(fLabel.value);
+  };
+
+  formIn.appendChild(field("Name", "uppercase, as every topic here is", fLabel));
+  formIn.appendChild(field("Description", "the sentence under the name", fLine));
+  formIn.appendChild(field("Reference",
+    "the id everything filed here will be filed under. It is permanent: a topic " +
+    "may be renamed, but its reference is what its contents point at.", fId));
+
+  if(left !== null && left > 0)
+    formIn.appendChild(el("p", "ed-small",
+      left + " world" + (left > 1 ? "s" : "") + " left in the reserve" +
+      (pool ? " \u2014 " + pool.slice(pool.length - left).join(", ") : "") +
+      ". The next one is taken in that order."));
+
+  var act = el("div", "ed-act");
+  var save = el("button", null, "Create"); save.id = "edSave"; save.type = "button";
+  var cancel = el("button", null, "Cancel"); cancel.id = "edCancel"; cancel.type = "button";
+  cancel.onclick = closeForm;
+  act.appendChild(save); act.appendChild(cancel);
+  act.appendChild(el("span", "ed-small",
+    "Creating commits to " + CFG.owner + "/" + CFG.repo + "."));
+  formIn.appendChild(act);
+
+  save.onclick = function(){
+    var label = fLabel.value.trim(), line = fLine.value.trim(), id = fId.value.trim();
+    errBox.innerHTML = "";
+    var bad = [];
+    if(!/^[a-z0-9][a-z0-9-]*$/.test(id)) bad.push("The reference must be a lowercase slug.");
+    else if(M.migs.some(function(x){ return x.id === id; }) ||
+            M.nodes.some(function(n){ return n.id === id; }))
+      bad.push("The reference \"" + id + "\" already exists in the mind.");
+    if(!label) bad.push("A topic needs a name.");
+    if(!line) bad.push("A topic with no description says nothing about itself.");
+    if(left === 0) bad.push("There is no world left for it. Retrieve more systems first.");
+    if(bad.length){
+      var e = el("div", "ed-err");
+      e.appendChild(el("b", null, bad.length + " thing" + (bad.length > 1 ? "s" : "") + " to fix"));
+      bad.forEach(function(x){ e.appendChild(el("div", null, "\u00b7 " + x)); });
+      errBox.appendChild(e);
+      return;
+    }
+    save.disabled = true; save.textContent = "Creating\u2026";
+    commit("Topic: " + label, function(store){
+      if(store.regions.some(function(r){ return r.id === id; }))
+        throw new Error("A topic with that reference is already in the store.");
+      store.regions.push({ id: id, label: label, line: line,
+                           added: new Date().toISOString().slice(0,10) });
+    }).then(function(){
+      var ok = el("div", "ed-ok");
+      ok.appendChild(el("div", null, "Created. " + label + " is a topic of the mind."));
+      ok.appendChild(el("div", null,
+        "It appears once the build finishes, with the next world in the reserve."));
+      errBox.appendChild(ok);
+      save.textContent = "Created";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }).catch(function(err){
+      save.disabled = false; save.textContent = "Create";
+      var bx = el("div", "ed-err");
+      bx.appendChild(el("b", null, "Nothing was created"));
+      bx.appendChild(el("div", null, err.message));
+      errBox.appendChild(bx);
+    });
+  };
+
+  form.classList.add("open");
+  fLabel.focus();
 }
 
 /* ── THE MANUAL ────────────────────────────────────────────────────────────

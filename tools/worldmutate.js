@@ -83,8 +83,10 @@ const MUTATIONS = [
     repl: `  relabel:[{ id:'my-works', from:'MY WORKS', to:'ART' }],` },
 
   { n: 'W7', file: APP, name: 'Psychology took no content from anyone',
-    find: `    MIGS.push({ id:a.id, label:a.label, gloss:a.gloss, v02Added:true, v02Empty:!!a.empty });`,
-    repl: `    MIGS.push({ id:a.id, label:a.label, gloss:a.gloss, v02Added:true, v02Empty:!!a.empty });
+    /* the anchor follows the push, which learned to write `line` as well as
+       `gloss` — an added region had been rendering with no sentence at all */
+    find: `                v02Added:true, v02Empty:!!a.empty });`,
+    repl: `                v02Added:true, v02Empty:!!a.empty });
     MINORS.forEach(function(x){ if(x.id==='psychology-behaviour') x.mig=a.id; });   // mutation: steal it` },
 
   { n: 'M1', file: APP, name: 'the layout really has brain proportions',

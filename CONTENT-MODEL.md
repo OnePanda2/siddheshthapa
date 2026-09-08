@@ -141,6 +141,63 @@ carry none. That absence is the honesty signal, and it is machine-checkable.
 
 ---
 
+## Topics the store declares
+
+A topic used to be the one thing on this page that could not be added without
+editing `src/`. Not because of the graph, the menu, the palette or the emblem —
+all four already accommodate a region nobody wrote code for — but because a
+topic needs a **star**, and the fourteen stars were typed into a literal in
+`src/v02-app.js` that no form could reach.
+
+There is a reserve of real planetary systems now, retrieved from the NASA
+Exoplanet Archive alongside the other fourteen and held unassigned. A topic
+declared in `data/notes.json` claims the next one.
+
+```
+regions[]         id      stable slug, unique across the whole graph, permanent
+                  label   the name on the door, uppercase
+                  line    the sentence a reader meets on arriving. Not optional
+                  added   ISO date
+
+retiredRegions[]  id      a topic that is open; the room closes
+                  at     ISO date
+                  why    optional, for the record
+
+edits{}           id -> { label, line }              for a topic
+                  id -> { label, line, src, register, state, crosses, sections }
+                                                     for a writing or a concept
+```
+
+Four rules make this safe to do from a form:
+
+**The claim is by position, and positions are never reused.** A topic takes
+pool entry *n* where *n* is its place in the declaration order. Retiring a topic
+does **not** free its entry: the topic keeps its place in the queue exactly as a
+retired writing is blanked in place rather than spliced out, because in both
+cases position is an index and closing up behind a removal would move something
+nobody touched. Retiring one topic must never change another topic's sky.
+
+**The scale is derived, not chosen.** `WORLD_SCALE` runs from 1.1 to 52 across
+the hand-tuned worlds because a system's span multiplies it. A claimed world is
+scaled so its geometric centre — `sqrt(inner × outer)` — matches the median of
+the worlds already in service, a figure computed at load rather than written
+down, so it stays true if a hand-tuned scale is ever revised.
+
+**A new topic is shown whole.** It arrives empty, which is the case
+`FULL_SYSTEM` exists for: every orbit drawn, a faint planet on each one nobody
+occupies, so the topic is a place that can be filled rather than a light with a
+name under it.
+
+**The pool is finite and nothing invents a system.** When it runs out, the gate
+refuses the commit and says so. The answer is to retrieve more from the archive,
+exactly as the existing ones were.
+
+Renaming changes the sign on the door and nothing behind it: the `id` is what
+everything filed there points at, and `applyEdits` refuses `id`, `mig` and `t`
+for that reason.
+
+---
+
 ## Invariants (enforced)
 
 | Rule | Where |
@@ -156,6 +213,11 @@ carry none. That absence is the honesty signal, and it is machine-checkable.
 | `RevenuePilot` / `FlowMail` never return | accept.js |
 | MUSIC stays empty rather than invented | accept.js |
 | No object or gloss names a political party or a faith | accept.js |
+| A topic's world is claimed by position; retiring one moves no other | regioncheck.js |
+| A claimed world sits at the geometric centre of the worlds in service | regioncheck.js |
+| A renamed topic keeps its id, its world and its contents | regioncheck.js |
+| Reserve systems stay unclaimed and repeat no shape already in use | reservecheck.js |
+| Nothing reaches the graph through `edits` unchecked | notescheck.js |
 
 ---
 

@@ -155,7 +155,77 @@ const MUTATIONS = [
 
   ['the file is not the shape it claims',
    s => { s.notes = 'a string'; return s; },
-   'notes must be an array']
+   'notes must be an array'],
+
+  /* ── TOPICS THE STORE DECLARES ────────────────────────────────────────
+     A topic used to require editing src/. It is a row in this file now, and
+     every rule on it is new and therefore unproven until it is broken here. */
+
+  ['a topic with no description',
+   s => { s.regions = [{ id: 'zz-topic', label: 'A TOPIC', line: '  ', added: '2026-09-08' }]; return s; },
+   'a topic needs a description'],
+
+  ['a topic whose name is not uppercase',
+   s => { s.regions = [{ id: 'zz-topic', label: 'A Topic', line: 'What it is.', added: '2026-09-08' }]; return s; },
+   'the name must be uppercase'],
+
+  ['a topic that takes an id the graph already has',
+   s => { s.regions = [{ id: 'philosophy', label: 'A TOPIC', line: 'What it is.', added: '2026-09-08' }]; return s; },
+   'would silently drop this topic'],
+
+  ['a topic carrying a field a topic does not have',
+   s => { s.regions = [{ id: 'zz-topic', label: 'A TOPIC', line: 'What it is.',
+                         added: '2026-09-08', mig: 'philosophy' }]; return s; },
+   'a topic carries id, label, line and added'],
+
+  /* THE NOTE FOLLOWS THE TOPIC. Filing into a topic this same file declares
+     must WORK — so the mutation is the opposite one: file into a topic that
+     was declared and then retired, which is exactly as invisible as a hidden
+     region and must be refused for the same reason. */
+  ['a note filed into a topic that was retired',
+   s => { s.regions = [{ id: 'zz-topic', label: 'A TOPIC', line: 'What it is.', added: '2026-09-08' }];
+          s.retiredRegions = [{ id: 'zz-topic', at: '2026-09-08' }];
+          s.notes[0].mig = 'zz-topic'; s.notes[0].crosses = [];
+          return s; },
+   'is not a region that exists'],
+
+  ['retiring a topic that is not open',
+   s => { s.retiredRegions = [{ id: 'zz-nothing', at: '2026-09-08' }]; return s; },
+   'is not a topic that is open'],
+
+  /* ── EDITS, WHICH THIS GATE HAD NEVER LOOKED AT ──────────────────────── */
+
+  ['an override of something that does not exist',
+   s => { s.edits = { 'zz-nothing': { line: 'A correction to nothing at all.' } }; return s; },
+   'exists to correct'],
+
+  ['an override that tries to move an object to another region',
+   s => { s.edits = { 'narrative': { mig: 'philosophy' } }; return s; },
+   'applyEdits drops it without a word'],
+
+  ['an override that empties a topic of its description',
+   s => { s.edits = { 'philosophy': { line: '   ' } }; return s; },
+   'the sentence a reader meets'],
+
+  ['a topic given a field only a writing has',
+   s => { s.edits = { 'philosophy': { src: 'Somewhere' } }; return s; },
+   'a topic has a name and a description'],
+
+  ['a topic renamed to nothing',
+   s => { s.edits = { 'philosophy': { label: '' } }; return s; },
+   'label cannot be emptied'],
+
+  /* ── AND THE SHORTAGE THAT WOULD SHIP A BARE STAR ─────────────────────
+     The pool is finite and this project does not invent astronomy, so asking
+     for more topics than there are worlds has to stop at the commit rather
+     than render as a light with a name under it. */
+  ['more topics than there are worlds left',
+   s => { s.regions = []; for (var i = 0; i < 9; i++)
+            s.regions.push({ id: 'zz-topic-' + i, label: 'TOPIC ' + i,
+                             line: 'One of more topics than the archive has given us.',
+                             added: '2026-09-08' });
+          return s; },
+   'waiting for a world and only']
 ];
 
 function run(store) {
