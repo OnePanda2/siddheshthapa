@@ -133,7 +133,7 @@ try { store = JSON.parse(fs.readFileSync(FILE, 'utf8')); }
 catch (e) { console.error('notescheck: ' + FILE + ' is not valid JSON — ' + e.message); process.exit(1); }
 
 if (store.version !== 1) fail('store', 'version must be 1, found ' + JSON.stringify(store.version));
-['notes', 'minors', 'edges', 'retired', 'regions', 'retiredRegions'].forEach(k => {
+['notes', 'minors', 'edges', 'retired', 'regions', 'retiredRegions', 'menuOrder'].forEach(k => {
   if (k !== 'notes' && k !== 'minors' && k !== 'edges' && store[k] === undefined) return;
   if (!Array.isArray(store[k])) fail('store', k + ' must be an array');
 });
@@ -215,6 +215,32 @@ retiredRegions.forEach((r, i) => {
    because a retired room is exactly as invisible as a hidden one. */
 regionIds.forEach(id => { takenIds.add(id); if (!retiredRegionIds.has(id)) migIds.add(id); });
 retiredRegionIds.forEach(id => { migIds.delete(id); hidden.add(id); });
+
+/* ── THE ORDER OF THE DOORS ────────────────────────────────────────────────
+   A list of ids, and nothing else. It says which topics are lifted to the
+   front of the menu and in what order; anything not named keeps its place
+   behind them. It cannot MOVE a region — a region's index in the corpus is
+   where its star stands in space, and the menu is a question about a list.
+
+   An id here that names nothing would be a silent no-op on the page, which is
+   the failure mode this gate exists for, so it is refused at the commit. */
+const menuOrder = store.menuOrder;
+if (menuOrder !== undefined) {
+  if (!Array.isArray(menuOrder)) fail('store', 'menuOrder must be an array of region ids');
+  else {
+    const placed = new Set();
+    menuOrder.forEach((id, i) => {
+      const where = 'menuOrder[' + i + ']';
+      if (typeof id !== 'string') return fail(where, 'must be a region id, found ' + JSON.stringify(id));
+      if (placed.has(id)) return fail(where, '"' + id + '" is listed twice; a door has one place');
+      placed.add(id);
+      if (!migIds.has(id))
+        fail(where, '"' + id + '" is not an open topic' +
+                    (hidden.has(id) ? ' any more — it is retired, and a retired topic has no door'
+                                    : ', so ordering it would move nothing'));
+    });
+  }
+}
 
 /* ── IS THERE A WORLD LEFT FOR IT? ─────────────────────────────────────────
    A region with no system renders as a bare star with a name under it — not a

@@ -157,6 +157,17 @@ var CSS = [
 '  padding:10px 14px;margin:0 0 18px;font:12px/1.7 ui-monospace,monospace;color:#e3b6b6}',
 '.ed-err b{display:block;color:#f0d2d2;font-weight:400;margin-bottom:5px;',
 '  letter-spacing:.08em;text-transform:uppercase;font-size:11px}',
+/* one row per door, numbered, with the two controls that move it */
+'.ed-order{border:1px solid #2a3145;border-radius:3px;overflow:hidden}',
+'.ed-orow{display:flex;align-items:center;gap:10px;padding:7px 10px;',
+'  border-bottom:1px solid #222839}',
+'.ed-orow:last-child{border-bottom:0}',
+'.ed-orow .n{width:22px;color:#5c6478;font:11px ui-monospace,monospace;text-align:right}',
+'.ed-orow .l{flex:1;color:#cfd6e6;font-size:12px;letter-spacing:.06em}',
+'.ed-orow button{width:30px;min-height:26px;padding:0;line-height:1;',
+'  background:none;border:1px solid #2a3145;color:#9aa2b6;border-radius:2px;cursor:pointer}',
+'.ed-orow button:hover:not(:disabled){border-color:#5ad07a;color:#cfe8d6}',
+'.ed-orow button:disabled{opacity:.25;cursor:default}',
 /* CLOSING A ROOM IS NOT AN EDIT. It sits apart from the fields, below the
    save, in the colour this editor already uses for delete — so it cannot be
    reached by tabbing through the form and pressing return. */
@@ -236,7 +247,7 @@ var CSS = [
 ].join('\n').replace('#495june','#495066');
 
 /* ── the bar ───────────────────────────────────────────────────────────── */
-var bar, barText, signBtn, wordsBtn, topicBtn;
+var bar, barText, signBtn, wordsBtn, topicBtn, orderBtn;
 function buildBar(){
   bar = el('div'); bar.id = 'edBar';
   bar.appendChild(el('span','dot'));
@@ -253,6 +264,11 @@ function buildBar(){
   topicBtn = el('button'); topicBtn.textContent = 'New topic';
   topicBtn.onclick = function(){ openNewTopicForm(); };
   bar.appendChild(topicBtn);
+  /* the order of the doors is a question about the whole list, so it belongs
+     beside the other two rather than inside any one room */
+  orderBtn = el('button'); orderBtn.textContent = 'Menu order';
+  orderBtn.onclick = function(){ openMenuOrderForm(); };
+  bar.appendChild(orderBtn);
   document.body.appendChild(bar);
   paintBar();
 }
@@ -287,6 +303,7 @@ function paintBar(){
   }
   if(wordsBtn) wordsBtn.hidden = !ok;
   if(topicBtn) topicBtn.hidden = !ok;
+  if(orderBtn) orderBtn.hidden = !ok;
   if(window.__v02 && window.__v02.repaint) window.__v02.repaint();
 }
 function esc(s){
@@ -455,6 +472,7 @@ window.__editor = {
   worksForm: function(id){ openWorksForm(id); },
   topicForm: function(id){ openTopicForm(id); },
   newTopicForm: function(){ openNewTopicForm(); },
+  menuOrderForm: function(){ openMenuOrderForm(); },
   textForm: function(){ openTextForm(); },
 
   paintRegion: function(migId, groups){
@@ -1059,6 +1077,7 @@ function commitTo(file, message, change){
       store.edits          = store.edits          || {};
       store.regions        = store.regions        || [];
       store.retiredRegions = store.retiredRegions || [];
+      store.menuOrder      = store.menuOrder      || [];
     }
     change(store);
     return gh(path, {
@@ -1390,6 +1409,100 @@ function openTopicForm(migId){
 
   form.classList.add("open");
   fLine.focus();
+}
+
+/* \u2500\u2500 THE ORDER OF THE DOORS \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+   The menu is a list of doors, and which door is listed first is a question
+   about the list. It is NOT a question about the mind: a region's index in the
+   corpus is where its star stands in space, so this saves a separate ordering
+   and never touches the graph.
+
+   UP AND DOWN RATHER THAN DRAG. A drag needs a pointer, a drop target and a
+   sense of where you are \u2014 three things to get wrong, and none of them
+   available to a keyboard. Two buttons per row say exactly what they do, work
+   on a phone, and can be driven by a check that presses them. */
+function openMenuOrderForm(){
+  var M = getModel();
+  var live = null;
+  try { live = window.__v02 && window.__v02.menu && window.__v02.menu(); } catch(e){}
+  var labels = {};
+  M.migs.forEach(function(m){ labels[m.id] = m.label; });
+
+  /* start from what the page is ACTUALLY showing, so the list you rearrange is
+     the list you were just looking at rather than an idea of it */
+  var order = (live && live.order ? live.order : M.migs.map(function(m){ return m.id; }))
+                .filter(function(id){ return labels[id]; });
+
+  formIn.innerHTML = "";
+  formIn.appendChild(el("h2", null, "The order of the menu"));
+  formIn.appendChild(el("p", "ed-sub",
+    "The order the topics are listed in when someone enters the mind. It changes " +
+    "the list and nothing else \u2014 every star stays exactly where it is."));
+
+  var errBox = el("div"); formIn.appendChild(errBox);
+  var list = el("div", "ed-order");
+
+  function paint(){
+    list.innerHTML = "";
+    order.forEach(function(id, i){
+      var row = el("div", "ed-orow");
+      row.appendChild(el("span", "n", String(i + 1)));
+      row.appendChild(el("span", "l", labels[id] || id));
+      var up = el("button", null, "\u2191"); up.type = "button";
+      var dn = el("button", null, "\u2193"); dn.type = "button";
+      up.disabled = (i === 0); dn.disabled = (i === order.length - 1);
+      up.title = "Move up"; dn.title = "Move down";
+      up.setAttribute("data-up", id); dn.setAttribute("data-down", id);
+      up.onclick = function(){ order.splice(i - 1, 0, order.splice(i, 1)[0]); paint(); };
+      dn.onclick = function(){ order.splice(i + 1, 0, order.splice(i, 1)[0]); paint(); };
+      row.appendChild(up); row.appendChild(dn);
+      list.appendChild(row);
+    });
+  }
+  paint();
+  formIn.appendChild(field("Topics", "first in the list is first through the door", list));
+
+  var act = el("div", "ed-act");
+  var save = el("button", null, "Save order"); save.id = "edSave"; save.type = "button";
+  var cancel = el("button", null, "Cancel"); cancel.id = "edCancel"; cancel.type = "button";
+  cancel.onclick = closeForm;
+  act.appendChild(save); act.appendChild(cancel);
+  act.appendChild(el("span", "ed-small", "Saving commits to " + CFG.owner + "/" + CFG.repo + "."));
+  formIn.appendChild(act);
+
+  /* RESTORING IS NOT REORDERING BACK BY HAND. Emptying the list is what "no
+     opinion about the order" looks like in the store, and the menu falls back
+     to the mind's own order \u2014 which is also what a fresh store does. */
+  var reset = el("button", "ed-add", "Clear the ordering and use the mind\u2019s own order");
+  reset.type = "button";
+  reset.onclick = function(){ order = []; save.click(); };
+  formIn.appendChild(reset);
+
+  save.onclick = function(){
+    save.disabled = true; save.textContent = "Saving\u2026";
+    var keep = order.slice();
+    commit(keep.length ? "Menu order: " + keep.length + " topics"
+                       : "Menu order: back to the mind\u2019s own order",
+      function(store){ store.menuOrder = keep; }
+    ).then(function(){
+      errBox.innerHTML = "";
+      var ok = el("div", "ed-ok");
+      ok.appendChild(el("div", null, keep.length
+        ? "Saved. The menu is in that order once the build finishes."
+        : "Cleared. The menu goes back to the mind\u2019s own order."));
+      errBox.appendChild(ok);
+      save.textContent = "Saved";
+    }).catch(function(err){
+      save.disabled = false; save.textContent = "Save order";
+      errBox.innerHTML = "";
+      var bx = el("div", "ed-err");
+      bx.appendChild(el("b", null, "Nothing was saved"));
+      bx.appendChild(el("div", null, err.message));
+      errBox.appendChild(bx);
+    });
+  };
+
+  form.classList.add("open");
 }
 
 /* \u2500\u2500 A TOPIC THAT DID NOT EXIST BEFORE \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500

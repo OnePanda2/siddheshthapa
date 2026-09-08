@@ -175,12 +175,27 @@ ck('W4', r.arch.migCount === OV.migCount && r.arch.reparented.length === 0,
    both stronger and immune to renaming. */
 const declaredIds = (OV.added || []).map(x => x.id);
 const missingFromMenu = declaredIds.filter(id => !r.closed.menu.some(x => x.id === id));
-ck('W5', r.closed.menu.length === OV.migCount &&
+/* AGAINST A COUNT THE PAGE CANNOT SHRINK. This compared the menu only against
+   OV.migCount, which is MIGS.length read off the same running page — so a
+   defect that drops regions from MIGS drops both sides of the comparison and
+   the assertion is satisfied by the wreckage. worldmutate W5 demonstrated it:
+   MIGS fell from 15 to 11, W4 said so out loud, and W5 reported that the menu
+   exposed every region.
+
+   MIG_TOTAL is derived from preview.html and the overlay by .p3/expect.js —
+   counted in the SOURCE, where the running page cannot reach it. The live
+   count is still compared as well, because the two disagreeing is its own
+   defect worth naming. */
+const MIG_TOTAL = require('../.p3/expect.js').expectedMigs().total;
+ck('W5', r.closed.menu.length === MIG_TOTAL &&
+         r.closed.menu.length === OV.migCount &&
          missingFromMenu.length === 0 &&
          !r.closed.menu.some(x => x.id === 'my-works'),
-   'the Main Mind Menu exposes all ' + r.closed.menu.length +
-   ' regions and nothing else — every one the overlay declares (' +
+   'the Main Mind Menu exposes all ' + r.closed.menu.length + ' regions the SOURCE ' +
+   'declares (' + MIG_TOTAL + ') and nothing else — every one the overlay adds (' +
    (declaredIds.join(', ') || 'none') + ') is present, the works are not' +
+   (r.closed.menu.length !== MIG_TOTAL
+     ? ' — the page shows ' + r.closed.menu.length + ' of ' + MIG_TOTAL : '') +
    (missingFromMenu.length ? ' — MISSING: ' + missingFromMenu.join(', ') : ''));
 
 /* W6 — ART IS A REGION NOW, AND MY WORKS HAS ITS NAME BACK.

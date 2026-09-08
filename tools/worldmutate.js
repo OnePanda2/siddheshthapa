@@ -61,10 +61,22 @@ const MUTATIONS = [
      What it wants to break is the menu missing a region, so it now drops
      whichever region is FIRST in the mind's own order — true whatever the
      regions are called and however the list is later rearranged. */
+  /* AND IT MOVED AGAIN, for the third time and the same reason. The tail
+     logic it anchored on was lifted out of paintDOM into menuOrdered() when
+     the menu learned to take an order from the store, and the anchor went with
+     it. The note above had already diagnosed this exactly — "the mutation
+     named things instead of describing what it wanted to break" — and then
+     named another line.
+
+     It is anchored on the FUNCTION now. What it wants to break is a region
+     never reaching the menu, and the function whose whole job is to decide
+     which regions reach the menu is the most stable thing that can be said
+     about that. A rename would break it loudly; a refactor inside it will
+     not. */
   { n: 'W5', file: APP, name: 'the menu exposes every MIG',
-    find: `    var tail=(V02_OVERLAY.menuLast||[]).map(function(x){return x.id;});`,
-    repl: `    var tail=(V02_OVERLAY.menuLast||[]).map(function(x){return x.id;});
-    MIGS=MIGS.slice(1);                       // mutation: one region never reaches the menu` },
+    find: `function menuOrdered(){`,
+    repl: `function menuOrdered(){
+  MIGS=MIGS.slice(1);                         // mutation: one region never reaches the menu` },
 
   /* THE SUBJECT OF THIS MUTATION CEASED TO EXIST. It edited the relabel that
      turned MY WORKS into ART, and there is no such relabel any more: ART was

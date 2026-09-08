@@ -4035,6 +4035,50 @@ function group(title, rows){
 function put(el){ if(el) elGroups.appendChild(el); }
 function esc(s){ return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
 
+/* ── THE ORDER OF THE DOORS ────────────────────────────────────────────
+   ORDER IN THE MENU IS NOT ORDER IN THE MIND, and that is the whole reason
+   this is a separate list rather than a rearrangement of MIGS. A region's
+   INDEX in MIGS decides where its star stands in space — owned[] is filled in
+   NODES order and the brain layout walks the same array — so reordering MIGS
+   to tidy a menu would pick up fourteen stars and move them. The two are
+   allowed to differ, in one declared place.
+
+   THREE RULES, APPLIED IN THIS ORDER:
+
+     1. the mind's own order, which is MIGS
+     2. then any region named in the store's menuOrder is lifted to the front,
+        in the order named. A region NOT named keeps its place behind them, so
+        a topic added after an ordering was saved appears without disturbing
+        what was arranged — it does not silently jump to the top, and it does
+        not vanish because nobody has re-saved the list
+     3. then menuLast still pulls its named regions to the foot, unchanged.
+        It is the older mechanism and the narrower statement — "this topic
+        addresses a narrower reader than the rest" — so it wins the tail
+
+   A retired region is not here at all: it left MIGS, so it cannot be ordered,
+   and an id in menuOrder that no longer names a region is simply skipped
+   rather than being an error. The gate refuses one at the commit; this refuses
+   to break over one that got past it. */
+function menuOrdered(){
+  var want=(V02_NOTES.menuOrder||[]).filter(function(id){
+    for(var i=0;i<MIGS.length;i++) if(MIGS[i].id===id) return true;
+    return false;                                  // retired, or never existed
+  });
+  var head=want.map(function(id){
+    for(var i=0;i<MIGS.length;i++) if(MIGS[i].id===id) return MIGS[i];
+    return null;
+  }).filter(Boolean);
+  var rest=MIGS.filter(function(m){ return want.indexOf(m.id)<0; });
+  var ordered=head.concat(rest);
+  var tail=(V02_OVERLAY.menuLast||[]).map(function(x){return x.id;});
+  if(!tail.length) return ordered;
+  return ordered.filter(function(m){ return tail.indexOf(m.id)<0; })
+    .concat(tail.map(function(id){
+      for(var i=0;i<ordered.length;i++) if(ordered[i].id===id) return ordered[i];
+      return null;
+    }).filter(Boolean));
+}
+
 function paintDOM(){
   elGroups.innerHTML='';
   backBtn.hidden=(state.mode==='universe');
@@ -4056,13 +4100,7 @@ function paintDOM(){
     /* the menu used to lift MY WORKS to the top, because the works were the
        thing a visitor was meant to find first and they were a region. They are
        a door of their own now, so the list is simply the mind's own order. */
-    /* the declared tail, lifted out of the mind's order and put at the foot */
-    var tail=(V02_OVERLAY.menuLast||[]).map(function(x){return x.id;});
-    var ordered=MIGS.filter(function(m){ return tail.indexOf(m.id)<0; })
-      .concat(tail.map(function(id){
-        for(var i=0;i<MIGS.length;i++) if(MIGS[i].id===id) return MIGS[i];
-        return null;
-      }).filter(Boolean));
+    var ordered=menuOrdered();
     /* A TOPIC IS NAMED, NOT MEASURED. Each row carried "4 concepts · 7
        writings" underneath it, which invited the menu to be read as a
        leaderboard: MUSIC with nothing in it announced that it had nothing, and
@@ -5470,6 +5508,26 @@ window.__v02={
      Empty while every region still has a chosen system, which is the point:
      the claim must be provably a no-op for the fourteen that shipped, and the
      only way to see it work is to add a region and look. */
+  /* the doors in the order they are listed, against the order they stand in
+     space — so a check can prove the menu moved and the sky did not.
+
+     STARS ARE PART OF THE ANSWER, NOT CONTEXT. The claim this accessor exists
+     to support is that reordering the list moves nothing, and model() carries
+     no positions at all — so a check written against model() compared two
+     empty objects and reported that all zero stars had held still. The
+     positions belong here, beside the order they are being compared against. */
+  menu:function(){
+    var stars={};
+    MIGS.forEach(function(m){
+      if(!m.pos) return;
+      stars[m.id]=[+m.pos.x.toFixed(3), +m.pos.y.toFixed(3), +m.pos.z.toFixed(3)];
+    });
+    return { order:menuOrdered().map(function(m){ return m.id; }),
+             mind:MIGS.map(function(m){ return m.id; }),
+             declared:(V02_NOTES.menuOrder||[]).slice(),
+             last:(V02_OVERLAY.menuLast||[]).map(function(x){ return x.id; }),
+             stars:stars };
+  },
   claims:function(){
     return { centre:+WORLD_CENTRE.toFixed(3),
              claimed:CLAIMED_WORLDS,

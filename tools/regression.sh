@@ -58,15 +58,15 @@ done
 
 echo "" >> "$LOG"
 echo "===== MUTATION HARNESSES =====" >> "$LOG"
-# systemfill, sectioncheck, projectcheck and regioncheck sit here rather than
-# among the checks above: like the mutation harnesses they WRITE to
+# systemfill, sectioncheck, projectcheck, regioncheck and menucheck sit here
+# rather than among the checks above: like the mutation harnesses they WRITE to
 # data/notes.json and put it back, so they need the contamination guard
 # standing between them and whatever runs next. regioncheck is also the longest
 # single run in the suite — it rebuilds five times and calls smoke at the end.
-for t in notesmutate systemfill sectioncheck projectcheck regioncheck worksmutate \
-         brainmutate glmutate emblemmutate highlightmutate lovemutate reservemutate \
-         regionmutate travelmutate worldmutate worldframemutate constellationmutate \
-         astromutate; do
+for t in notesmutate systemfill sectioncheck projectcheck regioncheck menucheck \
+         worksmutate brainmutate glmutate emblemmutate highlightmutate lovemutate \
+         reservemutate regionmutate menumutate travelmutate worldmutate \
+         worldframemutate constellationmutate astromutate; do
   run "$t" node "tools/$t.js"
 done
 

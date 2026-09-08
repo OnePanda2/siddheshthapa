@@ -166,6 +166,10 @@ retiredRegions[]  id      a topic that is open; the room closes
 edits{}           id -> { label, line }              for a topic
                   id -> { label, line, src, register, state, crosses, sections }
                                                      for a writing or a concept
+
+menuOrder[]       region ids. Those named are lifted to the front of the menu
+                  in that order; anything unnamed keeps its place behind them.
+                  An empty list means "no opinion", not "show nothing"
 ```
 
 Four rules make this safe to do from a form:
@@ -196,6 +200,15 @@ Renaming changes the sign on the door and nothing behind it: the `id` is what
 everything filed there points at, and `applyEdits` refuses `id`, `mig` and `t`
 for that reason.
 
+**Order in the menu is not order in the mind.** A region's *index* in `MIGS` is
+where its star stands in space — `owned[]` is filled in `NODES` order and the
+brain layout walks the same array — so rearranging `MIGS` to tidy a list would
+pick up fifteen stars and move them. `menuOrder` is therefore a second,
+declared list that changes what a visitor reads and nothing else. `menucheck`
+M4 measures every world and every star before and after a reorder and requires
+them identical; `menumutate` M4 restores the tempting version, sorting `MIGS`
+itself, and catches it.
+
 ---
 
 ## Invariants (enforced)
@@ -218,6 +231,7 @@ for that reason.
 | A renamed topic keeps its id, its world and its contents | regioncheck.js |
 | Reserve systems stay unclaimed and repeat no shape already in use | reservecheck.js |
 | Nothing reaches the graph through `edits` unchecked | notescheck.js |
+| Reordering the menu moves no world and no star | menucheck.js |
 
 ---
 
