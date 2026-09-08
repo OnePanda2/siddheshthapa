@@ -334,7 +334,19 @@ function signIn(){
     if(t && t.trim()){ setToken(t.trim()); identify(); }
     return;
   }
-  var st = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  /* A NONCE FROM THE CSPRNG, NOT FROM Math.random().
+     This was Math.random() plus Date.now(): V8's generator is xorshift128+,
+     whose state is recoverable from a handful of consecutive outputs, and the
+     timestamp half is simply guessable. Nothing reachable today turns that
+     into an attack — a correctly guessed state still meets the owner check in
+     worker/index.js and gets a 403 — but this value's only job is to be
+     unguessable, and getRandomValues costs the same as not doing it. */
+  var st = (function(){
+    var b = new Uint8Array(16);
+    crypto.getRandomValues(b);
+    return Array.prototype.map.call(b, function(x){
+      return (x + 0x100).toString(16).slice(1); }).join('');
+  })();
   try{ sessionStorage.setItem(STATEKEY, st); }catch(_){}
   /* NO SCOPE FOR A GITHUB APP. An OAuth App is granted breadth by the scope it
      asks for, and the narrowest one that can write to a public repository is
@@ -407,6 +419,13 @@ function completeOAuth(){
   if(!code) return false;
   var want = null;
   try{ want = sessionStorage.getItem(STATEKEY); }catch(_){}
+  /* SPENT ON READING, WHETHER IT MATCHED OR NOT. It was left in place, so one
+     nonce stayed valid for the whole tab session and could be presented again.
+     A nonce that outlives the exchange it authorises is not a nonce. Removed
+     before the comparison so that BOTH branches spend it — clearing it only on
+     success would leave a failed attempt able to retry against the same
+     value. */
+  try{ sessionStorage.removeItem(STATEKEY); }catch(_){}
   history.replaceState({}, '', redirectUri());
   if(!want || st !== want){
     alert('Sign-in was not completed here, so it was refused. Try again.');

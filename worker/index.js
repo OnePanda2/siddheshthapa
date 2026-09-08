@@ -16,17 +16,36 @@
  *
  * WHAT IT NEVER DOES: log the code, log the token, store either, or accept a
  * redirect_uri of its own choosing. The redirect is echoed back to GitHub,
- * which checks it against the app's registered list — so a stolen client id
- * pointed at someone else's page receives nothing.
+ * which checks it against the app's registered list, so a code cannot be
+ * DELIVERED to someone else's page.
+ *
+ * AND THE LINE BELOW IS THE ONLY THING HOLDING THE DOOR. This file used to
+ * claim the registered redirect URI meant "a stolen client id receives
+ * nothing", and the config file said the same. It is half true and the wrong
+ * half to rely on. A client id is public by construction — ours is sitting in
+ * data/editor-config.json — and anyone may take it to GitHub, authorise the
+ * app against their OWN account, land on the registered callback in their own
+ * browser and read a perfectly valid code out of the address bar. Registration
+ * controls where a code is delivered. It does not control who can obtain one.
+ *
+ * So the owner check further down is not a convenience that saves someone five
+ * screens. It is the whole security boundary of this project: it is what makes
+ * a code anybody can mint worth nothing. Weaken it — to "any authenticated
+ * user", or to a path that returns a token when the /user call fails — and the
+ * editor starts handing out tokens for a repository it does not own.
  *
  * deploy: see worker/README.md
  */
 
 const OWNER = 'OnePanda2';
 
-/* Only these origins may call it. Registered redirect URIs already stop a code
- * from being issued to anyone else; this stops the exchange from being used as
- * an open proxy on top of that. */
+/* WHICH ORIGINS MAY CALL IT — AND THIS IS NOT A SECURITY CONTROL.
+ * Origin is a header, and a header is whatever the client says it is: curl
+ * sends any value it likes. What this actually does is stop a BROWSER on
+ * another page from reading the response, which is worth having and is all
+ * CORS was ever for. It is not what stops the exchange being used as an open
+ * proxy — the owner check is. Said plainly here because the previous note
+ * credited this list with work it does not do. */
 const ALLOWED = [
   'https://onepanda2.github.io',
   'https://siddheshthapa.com',
@@ -79,7 +98,13 @@ export default {
       return json({ error: data.error || 'exchange failed',
                     error_description: data.error_description || null }, 400, origin);
 
-    /* and the refusal. Ask GitHub whose token this is before handing it back. */
+    /* THE REFUSAL, AND THE SECURITY BOUNDARY OF THIS PROJECT.
+       Ask GitHub whose token this is before handing it back. Anyone can obtain
+       a valid code for this client id — see the note at the top of the file —
+       so this is what makes one worthless. It fails closed by construction: if
+       the /user call errors, user.login is undefined, String() makes it the
+       text "undefined", and the comparison refuses. Do not replace String()
+       with an optional chain that yields undefined on both sides. */
     const who = await fetch('https://api.github.com/user', {
       headers: {
         'Authorization': 'Bearer ' + data.access_token,
