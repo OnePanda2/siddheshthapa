@@ -89,12 +89,24 @@ const hidden = new Set((OV.hideMIGs || []).map(h => h.id));
 
    So the rule is not "no hidden regions" but "no region a note would vanish
    into", which is the same distinction the edge sweep draws when it decides
-   whose relationships die with the room. */
-const WITH_A_DESTINATION = new Set(['my-works']);
+   whose relationships die with the room.
+
+   AND THE EXEMPTION IS NARROWER THAN THE REGION. Written as "my-works is
+   allowed" it let a THOUGHT be filed into the manual, which notesmutate caught
+   by surviving: a thought there is not lost, but it stops being a thought —
+   isWork takes anything in my-works that is not the region or a concept, so it
+   would be rendered as a numbered sheet with parts and known failures, and
+   nothing would say so. A destination that changes what a note IS is not a
+   destination for that note. So the exemption records what the place actually
+   holds, and only that kind may go there. */
+const WITH_A_DESTINATION = {
+  'my-works': { takes: 'project', called: 'the manual' }
+};
 const migIds = new Set(
   G.MIGS.map(m => m.id)
    .concat((OV.addMIGs || []).map(m => m.id))
-   .filter(id => !hidden.has(id) || WITH_A_DESTINATION.has(id)));
+   .filter(id => !hidden.has(id) ||
+                 Object.prototype.hasOwnProperty.call(WITH_A_DESTINATION, id)));
 
 /* every id the graph already knows. addOnce SILENTLY skips a duplicate, so a
    colliding note would simply never appear — the worst failure mode there is,
@@ -143,6 +155,14 @@ function checkRegion(row, where) {
   if (!migIds.has(row.mig))
     fail(where, 'mig "' + row.mig + '" is not a region that exists' +
                 (hidden.has(row.mig) ? ' any more (it is hidden)' : ''));
+  /* a hidden region with a destination takes only what that destination holds;
+     crosses is deliberately not restricted this way, because reaching INTO the
+     manual from the mind is a relationship, not a change of address */
+  const dest = WITH_A_DESTINATION[row.mig];
+  if (dest && row.t !== dest.takes)
+    fail(where, 'mig "' + row.mig + '" is hidden and ' + dest.called + ' holds only ' +
+                dest.takes + 's — a ' + JSON.stringify(row.t) + ' filed there would be ' +
+                'rendered as a sheet and stop being a ' + row.t);
   if (!Array.isArray(row.crosses)) return fail(where, 'crosses must be an array');
   row.crosses.forEach(c => {
     if (!migIds.has(c)) fail(where, 'crosses "' + c + '" is not a region that exists');

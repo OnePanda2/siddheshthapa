@@ -499,13 +499,203 @@
    "visualCharacter": "open and unhurried, each body further from its neighbour than the last",
    "confidence": "high",
    "notes": "Lettered b, c, d, f, g: the archive returns no e for this host. All five returned both a period and a semi-major axis."
+  },
+  {
+   "system": "Kepler-167",
+   "sourceType": "exoplanet-system",
+   "planetCount": 4,
+   "semiMajorAxisAU": [
+    0.04825,
+    0.0684,
+    0.1404,
+    1.883
+   ],
+   "orbitalPeriodDays": [
+    4.3931539,
+    7.406106,
+    21.80379,
+    1071.23205
+   ],
+   "letters": [
+    "b",
+    "c",
+    "d",
+    "e"
+   ],
+   "geometryBasis": "Three small planets inside 0.15 AU, then Kepler-167 e alone at 1.883 AU — a cold giant beyond the snow line, 13.4x further out than the planet before it. The final gap is wider than the whole inner system.",
+   "visualCharacter": "a tight inner cluster and one body far outside it, with nothing at all in between",
+   "confidence": "high",
+   "reserve": true,
+   "notes": "All four axes agree with Kepler’s third law to within 0.06% under the archive’s stellar mass, so the geometry is internally consistent rather than a mix of sources. Two stars in the system (sy_snum 2); the planets orbit the primary, so this is NOT a circumbinary case like Kepler-16."
+  },
+  {
+   "system": "Kepler-68",
+   "sourceType": "exoplanet-system",
+   "planetCount": 4,
+   "semiMajorAxisAU": [
+    0.06135,
+    0.09008,
+    1.469,
+    4.6
+   ],
+   "orbitalPeriodDays": [
+    5.39875259,
+    9.605027,
+    632.62,
+    3455
+   ],
+   "letters": [
+    "b",
+    "c",
+    "d",
+    "e"
+   ],
+   "geometryBasis": "Two close planets, then a jump of 16.3x to Kepler-68 d and a further 3.1x to e at 4.6 AU. The system is cut in half by a gap in its MIDDLE rather than at its edge.",
+   "visualCharacter": "two bodies near the star and two far from it, divided by an empty band that dominates the system",
+   "confidence": "high",
+   "reserve": true,
+   "notes": "The outermost planet was announced in 2023 and its axis sits 0.96% off the law under the composite stellar mass; the inner three agree to within 0.01%. Two stars (sy_snum 2); the planets orbit the primary."
+  },
+  {
+   "system": "HD 164922",
+   "sourceType": "exoplanet-system",
+   "planetCount": 4,
+   "semiMajorAxisAU": [
+    0.103,
+    0.2292,
+    0.341,
+    2.16
+   ],
+   "orbitalPeriodDays": [
+    12.458,
+    41.763,
+    75.74,
+    1207
+   ],
+   "letters": [
+    "d",
+    "e",
+    "c",
+    "b"
+   ],
+   "geometryBasis": "Three modest planets already spread across 0.10 to 0.34 AU, then a 6.3x step out to a giant at 2.16 AU. The same family as Kepler-167 and half as extreme: its inner bodies are apart from each other before the outer gap opens.",
+   "visualCharacter": "an unhurried inner group and a distant giant, around a nearby sun-like star",
+   "confidence": "high",
+   "reserve": true,
+   "notes": "A G9 V star 22 pc away — the nearest of the six added here, though five systems already in this file are nearer still. All four axes agree with Kepler’s third law to within 0.5%. Discovery spans 2005 to 2021, so the four figures come from four different papers and cohere anyway."
+  },
+  {
+   "system": "Kepler-90",
+   "sourceType": "exoplanet-system",
+   "planetCount": 8,
+   "semiMajorAxisAU": [
+    0.074,
+    0.089,
+    0.1201380843,
+    0.32,
+    0.42,
+    0.48,
+    0.71704,
+    0.97062
+   ],
+   "orbitalPeriodDays": [
+    7.008151,
+    8.719375,
+    14.44912,
+    59.73667,
+    91.93913,
+    124.9144,
+    210.73514,
+    331.60296
+   ],
+   "letters": [
+    "b",
+    "c",
+    "i",
+    "d",
+    "e",
+    "f",
+    "g",
+    "h"
+   ],
+   "geometryBasis": "Eight planets, as many as the Solar System, and no system in the archive has more. Three crowd inside 0.13 AU, one 2.66x step opens a gap, and five more are graded outward to 0.97 AU — the entire system fits inside Earth’s orbit.",
+   "visualCharacter": "the fullest system there is: a crowded core, one clear break, and a long ordered outer run",
+   "confidence": "medium",
+   "reserve": true,
+   "notes": "THIS CLOSES A GAP RECORDED IN THIS FILE. The earlier attempt queried hostname ‘Kepler-90’ and got nothing back; the archive files the system under KOI-351, and only the planet found in 2017 carries the Kepler-90 name. Confidence is medium because five of the eight axes are quoted to two significant figures and disagree with Kepler’s law by up to 7.6% under the composite stellar mass — the ratios are measured, but coarser than every other system here.",
+   "_archiveHostname": "KOI-351"
+  },
+  {
+   "system": "Kepler-444",
+   "sourceType": "exoplanet-system",
+   "planetCount": 5,
+   "semiMajorAxisAU": [
+    0.04178,
+    0.04881,
+    0.06,
+    0.0696,
+    0.0811
+   ],
+   "orbitalPeriodDays": [
+    3.6001053,
+    4.5458841,
+    6.189392,
+    7.743493,
+    9.740486
+   ],
+   "letters": [
+    "b",
+    "c",
+    "d",
+    "e",
+    "f"
+   ],
+   "geometryBasis": "Five planets between 0.0418 and 0.0811 AU. The total range is 1.9x and every gap falls between 1.16 and 1.23 — the narrowest and most even system in this file by a wide margin.",
+   "visualCharacter": "five bodies almost sharing a single ring; a world with no outside",
+   "confidence": "high",
+   "reserve": true,
+   "notes": "The archive gives the star an age of 11.23 Gyr (+0.91/-0.99), older than any other host here and roughly four fifths the age of the universe. Three stars in the system (sy_snum 3): the planets orbit the primary, with a close pair of small stars further out, so this is not circumbinary either."
+  },
+  {
+   "system": "HD 191939",
+   "sourceType": "exoplanet-system",
+   "planetCount": 6,
+   "semiMajorAxisAU": [
+    0.0804,
+    0.1752,
+    0.2132,
+    0.407,
+    0.812,
+    3.71
+   ],
+   "orbitalPeriodDays": [
+    8.8803256,
+    28.579743,
+    38.353037,
+    101.12,
+    284,
+    2898
+   ],
+   "letters": [
+    "b",
+    "c",
+    "d",
+    "e",
+    "g",
+    "f"
+   ],
+   "geometryBasis": "Six planets whose spacing widens as it goes: 2.18, then 1.22, 1.91, 2.00, and finally 4.57 out to 3.71 AU. Reach accelerates rather than growing steadily.",
+   "visualCharacter": "six bodies leaving the star at an increasing pace, ordered but never regular",
+   "confidence": "high",
+   "reserve": true,
+   "notes": "The inner five axes sit a uniform 2.74–3.02% above the value Kepler’s law gives under the archive’s composite stellar mass, which means axes and mass were taken from different papers. A uniform offset cancels exactly in a ratio, and ratios are all this project renders — but the figures are not one self-consistent solution, and that is why it is recorded here rather than left to be noticed."
   }
  ],
  "gaps": [
   {
-   "issue": "Kepler-90 returned no rows",
+   "issue": "Kepler-90 returned no rows — CLOSED 2026-09-08",
    "detail": "Queried by hostname 'Kepler-90' against pscomppars and got nothing back. It is an 8-planet system and would have been a strong candidate, but it is NOT verified and must not be used until it is.",
-   "action": "re-query with correct hostname spelling before use"
+   "action": "DONE. The archive files the system under hostname KOI-351; only the planet found in 2017 carries the Kepler-90 name. Re-queried under KOI-351, eight planets with complete geometry, now in systems[] as Kepler-90 with its archive hostname recorded. The spelling was the whole of the problem."
   },
   {
    "issue": "HD 158259 has no semi-major axes",
@@ -513,9 +703,9 @@
    "action": "either derive from Kepler's third law with a sourced stellar mass, or do not use"
   },
   {
-   "issue": "Only 12 systems verified, 14 MIGs",
+   "issue": "Only 12 systems verified, 14 MIGs — CLOSED 2026-09-08",
    "detail": "Two MIGs have no exoplanet template yet. Per the brief the fallback is REAL constellation geometry, never an invented system.",
-   "action": "source two documented constellation star patterns, or verify two more exoplanet systems"
+   "action": "DONE, and then some. All 14 regions have a verified exoplanet template and no constellation fallback was needed. Six further systems are now held unassigned so that the NEXT region does not reopen this gap."
   },
   {
    "issue": "55 Cnc count mismatch",
@@ -544,5 +734,6 @@
   }
  ],
  "_retrieved_kepler16": "2026-08-20",
- "_retrieved_2026_09_04": "Kepler-80, Kepler-62 and HD 40307 retrieved from the same TAP service and table as the rest, on 2026-09-04."
+ "_retrieved_2026_09_04": "Kepler-80, Kepler-62 and HD 40307 retrieved from the same TAP service and table as the rest, on 2026-09-04.",
+ "_retrieved_2026_09_08": "SIX RESERVE SYSTEMS, held for regions that do not exist yet. Kepler-167, Kepler-68, HD 164922, Kepler-90 (archive hostname KOI-351), Kepler-444 and HD 191939, retrieved from the same TAP service and the same table as every other system here. They carry reserve:true and are deliberately absent from MIG_SYSTEM. WHY SIX AND WHY THESE: a world is chosen for a spacing regime the others do not occupy, so the candidates were ranked by distance from the nearest system already spoken for, in a shape space of mean gap, evenness, whether the gaps open or close, the largest single gap and the total reach. Choosing the top six would have taken five near-copies of one shape, so they were picked farthest-point: each is the most unlike everything already chosen, including the ones chosen just before it. Their total reach comes out 1.9x, 13.1x, 21.0x, 39.0x, 46.1x and 75.0x, and they offer 4, 4, 4, 5, 6 and 8 orbits, because a template’s planet count IS the number of rings a region gets and a pool that only offers four can only dress one size of region."
 }

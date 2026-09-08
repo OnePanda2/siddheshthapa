@@ -132,6 +132,24 @@ try {
                'refused — the exemption is one region wide, not "hidden regions are fine"'
              : 'the gate ACCEPTED a note that would have been invisible');
 
+  /* P6 — and exactly one KIND wide, which is the other axis and the one that
+     got away. Written as "my-works is allowed" the rule let a THOUGHT into the
+     manual: not lost, but silently turned into a numbered sheet with parts and
+     known failures, because isWork takes anything filed there that is not the
+     region or a concept. notesmutate found it by surviving. A destination that
+     changes what a note IS is not a destination for that note. */
+  const D3 = JSON.parse(ORIGINAL);
+  D3.notes = D3.notes.concat([Object.assign({}, PROJECT,
+    { id: 'zz-proj-3', t: 'thought', register: 'observation' })]);
+  fs.writeFileSync(STORE, JSON.stringify(D3, null, 2) + '\n', 'utf8');
+  let refusedKind = false, whyKind = '';
+  try { execSync('node tools/notescheck.js', { stdio: 'pipe' }); }
+  catch (e) { refusedKind = true; whyKind = ((e.stdout || '') + (e.stderr || '')).toString(); }
+  ck('P6', refusedKind && /holds only projects/.test(whyKind),
+     refusedKind ? 'and a THOUGHT filed into my-works is refused too — the manual takes ' +
+                   'projects, and anything else sent there would stop being what it was'
+                 : 'the gate ACCEPTED a thought into the manual, where it would render as a sheet');
+
 } catch (e) {
   bad++;
   console.log('  FAIL  ---  the harness threw: ' + ((e && e.message) || e));

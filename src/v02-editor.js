@@ -964,10 +964,13 @@ function validate(n, rels, M, editingId){
   var ids = {}; M.nodes.forEach(function(x){ ids[x.id] = true; });
   var migs = {}; M.migs.forEach(function(x){ migs[x.id] = true; });
   /* MY WORKS is not in M.migs — it is hidden from the mind — but it is a real
-     home for a project, which appears in the manual rather than in the sky.
-     See tools/notescheck.js for why the general rule refuses hidden regions
-     and why this one is the exception. */
-  migs["my-works"] = true;
+     home for a PROJECT, which appears in the manual rather than in the sky.
+     Only a project: the manual renders anything filed there as a numbered
+     sheet, so a thought sent there would silently stop being a thought.
+     See tools/notescheck.js, which refuses the same thing for the same
+     reason — the two gates have to agree or the editor reports a success the
+     build will not honour. */
+  if(n.t === "project") migs["my-works"] = true;
 
   if(!/^[a-z0-9][a-z0-9-]*$/.test(n.id)) p.push('The reference must be a lowercase slug.');
   else if(ids[n.id] && n.id !== editingId) p.push('The reference "' + n.id + '" already exists in the mind — it would be silently dropped.');
