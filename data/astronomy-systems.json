@@ -689,6 +689,186 @@
    "confidence": "high",
    "reserve": true,
    "notes": "The inner five axes sit a uniform 2.74–3.02% above the value Kepler’s law gives under the archive’s composite stellar mass, which means axes and mass were taken from different papers. A uniform offset cancels exactly in a ratio, and ratios are all this project renders — but the figures are not one self-consistent solution, and that is why it is recorded here rather than left to be noticed."
+  },
+  {
+   "system": "HD 3167",
+   "sourceType": "exoplanet-system",
+   "planetCount": 4,
+   "semiMajorAxisAU": [
+    0.01814,
+    0.077,
+    0.1794,
+    0.3797
+   ],
+   "orbitalPeriodDays": [
+    0.95965451,
+    8.3967,
+    29.846511,
+    91.9
+   ],
+   "letters": [
+    "b",
+    "d",
+    "c",
+    "e"
+   ],
+   "geometryBasis": "Gaps that CLOSE from a wide start — 4.24, then 2.33, then 2.12 — beginning with a body at 0.018 AU that circles its star in under a day.",
+   "visualCharacter": "a body almost touching the star, then three settling into an increasingly even rhythm outward",
+   "confidence": "high",
+   "reserve": true,
+   "notes": "The only system here whose spacing tightens monotonically from a first step above 4x. A K0 V star at 47 pc."
+  },
+  {
+   "system": "GJ 676 A",
+   "sourceType": "exoplanet-system",
+   "planetCount": 4,
+   "semiMajorAxisAU": [
+    0.039,
+    0.181,
+    1.735,
+    9.726
+   ],
+   "orbitalPeriodDays": [
+    3.60076,
+    35.47358,
+    1051.44521,
+    13921.42302
+   ],
+   "letters": [
+    "d",
+    "e",
+    "b",
+    "c"
+   ],
+   "geometryBasis": "Four planets spread across 249x, from 0.039 AU to 9.726 AU, with every gap enormous: 4.64, 9.59, 5.61. Nothing in it is near anything else.",
+   "visualCharacter": "four bodies with no neighbours, each one a journey from the last",
+   "confidence": "high",
+   "reserve": true,
+   "notes": "An M0 star 16 pc away with a second star in the system (sy_snum 2); the planets orbit the primary, so this is not circumbinary like Kepler-16."
+  },
+  {
+   "system": "TOI-5789",
+   "sourceType": "exoplanet-system",
+   "planetCount": 4,
+   "semiMajorAxisAU": [
+    0.03608,
+    0.1009,
+    0.1756,
+    0.2901
+   ],
+   "orbitalPeriodDays": [
+    2.76369,
+    12.927748,
+    29.65,
+    62.98
+   ],
+   "letters": [
+    "b",
+    "c",
+    "d",
+    "e"
+   ],
+   "geometryBasis": "A wide first step of 2.80 and then steadily tightening — 1.74, then 1.65 — across a modest total reach of 8x. The same family as HD 3167 and half its scale, which is what separates them: HD 3167 opens at 4.24 from a body that circles its star in under a day, this one is spread and unhurried from the start.",
+   "visualCharacter": "four bodies settling into an even rhythm after one wide opening step",
+   "confidence": "high",
+   "reserve": true,
+   "notes": "A K1 V star 20 pc away, among the nearest hosts in this file, and at 9.4 Gyr one of the oldest."
+  },
+  {
+   "system": "HD 134606",
+   "sourceType": "exoplanet-system",
+   "planetCount": 5,
+   "semiMajorAxisAU": [
+    0.0527,
+    0.1046,
+    0.1784,
+    0.3007,
+    1.941
+   ],
+   "orbitalPeriodDays": [
+    4.3203,
+    12.089,
+    26.915,
+    58.883,
+    966.5
+   ],
+   "letters": [
+    "e",
+    "b",
+    "f",
+    "c",
+    "d"
+   ],
+   "geometryBasis": "Four evenly graded steps — 1.98, 1.71, 1.69 — and then a fifth of 6.45 out to 1.941 AU. An orderly system with one body that left.",
+   "visualCharacter": "a regular inner sequence and a single far outlier, with nothing between them",
+   "confidence": "high",
+   "reserve": true,
+   "notes": "A G5 IV star 27 pc away, aged 7.3 Gyr."
+  },
+  {
+   "system": "HD 34445",
+   "sourceType": "exoplanet-system",
+   "planetCount": 6,
+   "semiMajorAxisAU": [
+    0.2687,
+    0.4817,
+    0.7181,
+    1.543,
+    2.07,
+    6.36
+   ],
+   "orbitalPeriodDays": [
+    49.175,
+    117.87,
+    214.67,
+    676.8,
+    1049,
+    5700
+   ],
+   "letters": [
+    "e",
+    "d",
+    "c",
+    "f",
+    "b",
+    "g"
+   ],
+   "geometryBasis": "Six planets that begin FAR OUT, at 0.269 AU, where most systems here begin inside 0.06, and reach to 6.36 AU. The gaps wander rather than progress: 1.79, 1.49, 2.15, 1.34, 3.07.",
+   "visualCharacter": "a system with no crowded centre — it starts where others have already finished",
+   "confidence": "high",
+   "reserve": true,
+   "notes": "A G0 V star 46 pc away, aged 8.5 Gyr. Its innermost orbit is the widest starting radius of any planetary system in this file except HR 8799, which is a directly imaged system on another scale entirely."
+  },
+  {
+   "system": "Kepler-48",
+   "sourceType": "exoplanet-system",
+   "planetCount": 5,
+   "semiMajorAxisAU": [
+    0.05394,
+    0.08633,
+    0.23302,
+    1.898274748,
+    5.719187877
+   ],
+   "orbitalPeriodDays": [
+    4.778,
+    9.67395,
+    42.8961,
+    982,
+    5219.681854
+   ],
+   "letters": [
+    "b",
+    "c",
+    "d",
+    "e",
+    "f"
+   ],
+   "geometryBasis": "Three close planets, then 8.15x out to a fourth and 3.01x again to a fifth at 5.72 AU. A tight inner system with a giant far beyond it.",
+   "visualCharacter": "a compact group and a distant heavy body, the group unaware of it",
+   "confidence": "high",
+   "reserve": true,
+   "notes": "At 307 pc the furthest of the six. The outer planet is a radial-velocity detection and the inner three are Kepler transits, so the figures come from two methods and still cohere."
   }
  ],
  "gaps": [
@@ -735,5 +915,6 @@
  ],
  "_retrieved_kepler16": "2026-08-20",
  "_retrieved_2026_09_04": "Kepler-80, Kepler-62 and HD 40307 retrieved from the same TAP service and table as the rest, on 2026-09-04.",
- "_retrieved_2026_09_08": "SIX RESERVE SYSTEMS, held for regions that do not exist yet. Kepler-167, Kepler-68, HD 164922, Kepler-90 (archive hostname KOI-351), Kepler-444 and HD 191939, retrieved from the same TAP service and the same table as every other system here. They carry reserve:true and are deliberately absent from MIG_SYSTEM. WHY SIX AND WHY THESE: a world is chosen for a spacing regime the others do not occupy, so the candidates were ranked by distance from the nearest system already spoken for, in a shape space of mean gap, evenness, whether the gaps open or close, the largest single gap and the total reach. Choosing the top six would have taken five near-copies of one shape, so they were picked farthest-point: each is the most unlike everything already chosen, including the ones chosen just before it. Their total reach comes out 1.9x, 13.1x, 21.0x, 39.0x, 46.1x and 75.0x, and they offer 4, 4, 4, 5, 6 and 8 orbits, because a template’s planet count IS the number of rings a region gets and a pool that only offers four can only dress one size of region."
+ "_retrieved_2026_09_08": "SIX RESERVE SYSTEMS, held for regions that do not exist yet. Kepler-167, Kepler-68, HD 164922, Kepler-90 (archive hostname KOI-351), Kepler-444 and HD 191939, retrieved from the same TAP service and the same table as every other system here. They carry reserve:true and are deliberately absent from MIG_SYSTEM. WHY SIX AND WHY THESE: a world is chosen for a spacing regime the others do not occupy, so the candidates were ranked by distance from the nearest system already spoken for, in a shape space of mean gap, evenness, whether the gaps open or close, the largest single gap and the total reach. Choosing the top six would have taken five near-copies of one shape, so they were picked farthest-point: each is the most unlike everything already chosen, including the ones chosen just before it. Their total reach comes out 1.9x, 13.1x, 21.0x, 39.0x, 46.1x and 75.0x, and they offer 4, 4, 4, 5, 6 and 8 orbits, because a template’s planet count IS the number of rings a region gets and a pool that only offers four can only dress one size of region.",
+ "_retrieved_2026_09_09": "SIX MORE RESERVE SYSTEMS. HD 3167, GJ 676 A, TOI-5789, HD 134606, HD 34445 and Kepler-48, from the same TAP service and the same table as the twenty before them. Four unclaimed worlds were left, each new topic spends one, and a retired topic does not give its back — so this was the one remaining thing on the site that needed somebody who could write code. Ten are held now. CHOSEN THE SAME WAY AS THE LAST SIX: ranked by distance from the nearest system already here in a shape space of mean gap, evenness, whether the gaps open or close, the largest single gap and the total reach, then picked farthest-point rather than top-six, because the top of that ranking is always several near-copies of one shape. AND ONE BAR THE LAST BATCH DID NOT APPLY: a candidate whose axes and periods are not one physical solution is now excluded during SELECTION rather than found afterwards. HD 160691 led the ranking at 15.31% off Kepler’s third law — a composite row mixing a stellar mass from one paper with axes from several — and would have been written in and then refused by reservecheck R3. Six candidates fell to that bar; all six taken sit under 1%."
 }

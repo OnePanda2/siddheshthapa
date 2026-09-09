@@ -71,7 +71,7 @@ echo "" >> "$LOG"
 echo "===== V02 CHECKS (target v02.html) =====" >> "$LOG"
 for t in archcheck astronomycheck braincheck constellationcheck emblemcheck \
          glcheck highlightcheck lovecheck migvischeck navcheck reservecheck systemcheck \
-         travelcheck workscheck worldcheck worldframecheck; do
+         travelcheck workscheck worldcheck worldframecheck editorcheck; do
   run "$t" node "tools/$t.js"
 done
 
@@ -85,7 +85,7 @@ echo "===== MUTATION HARNESSES =====" >> "$LOG"
 for t in notesmutate systemfill sectioncheck projectcheck regioncheck menucheck \
          worksmutate brainmutate glmutate emblemmutate highlightmutate lovemutate \
          reservemutate regionmutate menumutate travelmutate worldmutate \
-         worldframemutate constellationmutate astromutate; do
+         worldframemutate constellationmutate astromutate editormutate; do
   run "$t" node "tools/$t.js"
 done
 

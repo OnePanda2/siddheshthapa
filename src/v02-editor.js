@@ -929,7 +929,8 @@ function openForm(migId, editing, asConcept){
            would appear to work and then undo itself on the next build. */
         : { label: note2.label, line: note2.line, register: note2.register,
             crosses: note2.crosses, src: note2.src, sections: sections },
-        function(err){
+        rels,
+        function(err, added){
         errBox.innerHTML = "";
         if(err){
           save.disabled = false; save.textContent = "Save changes";
@@ -941,6 +942,14 @@ function openForm(migId, editing, asConcept){
         }
         var ok2 = el("div","ed-ok");
         ok2.appendChild(el("div", null, "Saved. " + note2.label + " is updated in the repository."));
+        /* SAID OUT LOUD, because these used to be discarded in silence. If a
+           row was skipped as a pair that already exists, the count says so
+           rather than letting you assume all of them landed. */
+        if(rels.length)
+          ok2.appendChild(el("div", null, added === rels.length
+            ? (added === 1 ? "Its new relationship was added too."
+                           : "Its " + added + " new relationships were added too.")
+            : added + " of " + rels.length + " relationships were added; the rest already existed."));
         ok2.appendChild(el("div", null, "It appears on the site once the build finishes."));
         errBox.appendChild(ok2);
         save.textContent = "Saved";
@@ -1134,19 +1143,45 @@ function retire(node, done){
    documents is DECLARED beside it rather than performed on it - the original
    text stays where it was and the page renders it with the correction laid
    over. Same principle as V02_OVERLAY, for the same reason. */
-function saveEdit(node, fields, done){
+/* AND THE RELATIONSHIPS TYPED WHILE EDITING, WHICH USED TO BE THROWN AWAY.
+
+   The form offers "add a relationship" whether you are writing something new
+   or correcting something old, validates whatever you type there, and then —
+   on the edit path only — called this function with the fields and not the
+   relationships. They were dropped on the floor. The editor said "Saved", the
+   commit landed, the build ran, and the relationship simply never existed.
+
+   That is the worst failure this project recognises: a success reported over
+   something that did not happen. It is also why the fix is to make the control
+   WORK rather than to hide it — an edge from an existing writing is a perfectly
+   ordinary thing to want, and the overlay's own addEdges does exactly that.
+
+   The rows are appended, never replaced, because relWrap starts empty on an
+   edit: anything in it is something you just typed, not a copy of what is
+   already there. A pair that already exists is skipped rather than duplicated,
+   and notescheck refuses inverted duplicates at the commit. */
+function saveEdit(node, fields, rels, done){
   var live = !!liveNoteIds()[node.id];
+  var added = 0;
   commit((live ? "Edit: " : "Correct: ") + (fields.label || node.label), function(store){
     if(live){
+      var found = false;
       for(var i=0;i<store.notes.length;i++)
         if(store.notes[i].id === node.id){
           Object.keys(fields).forEach(function(k){ store.notes[i][k] = fields[k]; });
-          return;
+          found = true; break;
         }
-      throw new Error("That note is not in the store any more.");
+      if(!found) throw new Error("That note is not in the store any more.");
+    } else {
+      store.edits[node.id] = Object.assign(store.edits[node.id] || {}, fields);
     }
-    store.edits[node.id] = Object.assign(store.edits[node.id] || {}, fields);
-  }).then(function(){ done(null); reloadSoon(); })
+    added = 0;
+    (rels || []).forEach(function(r){
+      if(store.edges.some(function(e){ return e[0] === node.id && e[1] === r.to; })) return;
+      store.edges.push([node.id, r.to, r.verb, r.gloss]);
+      added++;
+    });
+  }).then(function(){ done(null, added); reloadSoon(); })
     .catch(function(e){ done(e.message); });
 }
 
