@@ -109,8 +109,15 @@ const M = [
      framed by its own size and not by a constant — and it is now verified
      against a world that actually exists while the mutation runs. */
   { id:'WF12', why:'frame a latent world from a constant instead of from its own size',
-    also:{ find:"'music':'Kepler-80', 'books':'Kepler-62', 'art':'HD 40307',",
-           repl:"'music':'Kepler-80', 'books':'Kepler-62'," },
+    /* AND THE PRECONDITION WENT STALE IN TURN. Removing ART's system used to
+       leave it latent; a region without a typed system now CLAIMS one from the
+       reserve pool, so ART arrived planetary with Kepler-167 and the mutation
+       landed on a branch that never ran. What really makes a latent world now
+       is the reserve being DRY while a region has no assignment — the state a
+       topic added after the pool empties will genuinely be in. One edit does
+       both: the claim reads chosen[] before this line. See braincheck B19. */
+    also:{ find:"  var pool=(ASTRO_DATA.systems||[]).filter(function(sy){\n    return sy.reserve && !spent[sy.system]; });",
+           repl:"  var pool=[]; delete MIG_SYSTEM['art'];   // precondition: the reserve is dry and ART has no world" },
     find:'    out.normalize().multiplyScalar(fwG.d);\n    dOut=fwG.d;',
     repl:'    out.normalize().multiplyScalar(dOut);' },
 

@@ -75,7 +75,17 @@ const MUTATIONS = [
     expect: 'zero draw calls' }
 ];
 
-const ONLY = (process.argv[2] || '').split(',').filter(Boolean);
+/* --dry, ADDED AFTER THIS FILE COULD NOT BE ASKED THE QUESTION.
+   Anchors go stale when a refactor moves the line they name, and the two ways
+   that surfaces are both expensive: a hard STOP twenty minutes into a run, or
+   a mutation that silently tests nothing. tools/anchorcheck.js audits every
+   harness in about ten seconds — but only the ones that have this flag, and
+   this file was one of five it had to list as NOT CHECKED. glmutate anchors
+   into src/v02-app.js, the file that actually moves, so it was a real gap
+   rather than a formality. */
+const DRY = process.argv.indexOf('--dry') >= 0;
+const ONLY = (process.argv[2] === '--dry' ? '' : (process.argv[2] || ''))
+  .split(',').filter(Boolean);
 const SEL = ONLY.length ? MUTATIONS.filter(m => ONLY.indexOf(m.n) >= 0) : MUTATIONS;
 /* A NAME THAT MATCHES NOTHING IS A TYPO, NOT AN EMPTY TEST RUN. Without this,
    ONLY filters the table to nothing, the loop has no work, and the summary
@@ -87,6 +97,20 @@ if (ONLY.length && SEL.length !== ONLY.length) {
   console.error('no mutation named ' + missing.join(', ') +
                 ' — refusing to report a result for a set that was never tested');
   process.exit(1);
+}
+
+if (DRY) {
+  let bad = 0;
+  MUTATIONS.forEach(m => {
+    /* m.file is a PATH, and two of these point at the shell rather than the
+       app — resolved the same way the real loop resolves it, so the dry run
+       cannot audit a different file from the one that gets mutated */
+    const hits = fs.readFileSync(m.file || APP, 'utf8').split(m.find).length - 1;
+    if (hits !== 1) { bad++; console.log('  x' + hits + '  ' + m.n + '  "' + m.find.slice(0, 58) + '"'); }
+  });
+  console.log(bad ? bad + ' BAD ANCHOR(S) of ' + MUTATIONS.length
+                  : 'all ' + MUTATIONS.length + ' anchors match exactly once');
+  process.exit(bad ? 1 : 0);
 }
 
 function build(){ execSync('node tools/build-v02.js', { stdio: 'pipe' }); }

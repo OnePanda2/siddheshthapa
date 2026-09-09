@@ -23,8 +23,16 @@ const MUTATIONS = [
      See W9 below for the same shape and the same remedy: make a world that
      falls through, then break what is supposed to catch it. */
   { n: 'W2', file: APP, name: 'an unbuilt world is DECLARED latent, not a silent fallback',
-    also: { find: `'music':'Kepler-80', 'books':'Kepler-62', 'art':'HD 40307',`,
-            repl: `'music':'Kepler-80', 'books':'Kepler-62',` },
+    /* AND THE PRECONDITION ITSELF WENT STALE. Taking ART's system away used to
+       leave ART with none. A region without a typed system now CLAIMS one from
+       the reserve pool — that is what lets a topic be added from the editor —
+       so this quietly handed ART Kepler-167 and the mutation went back to
+       landing on a branch that cannot run. The precondition is now the state
+       that really produces an unassigned world, and one this project will
+       actually reach: the reserve is DRY and the region has no assignment. One
+       edit does both, because the claim reads chosen[] before this line. */
+    also: { find: `  var pool=(ASTRO_DATA.systems||[]).filter(function(sy){\n    return sy.reserve && !spent[sy.system]; });`,
+            repl: `  var pool=[]; delete MIG_SYSTEM['art'];   // precondition: the reserve is dry and ART has no world` },
     find: `             : tpl ? 'planetary'
              : 'latent';`,
     repl: `             : tpl ? 'planetary'
@@ -208,8 +216,16 @@ const MUTATIONS = [
      dead code and the pass meant nothing. ART is stripped first, so there IS an
      unassigned world, and only then is a heritage invented for it. */
   { n: 'W9', file: APP, name: 'an unassigned MIG never invents a source',
-    also: { find: `'music':'Kepler-80', 'books':'Kepler-62', 'art':'HD 40307',`,
-            repl: `'music':'Kepler-80', 'books':'Kepler-62',` },
+    /* AND THE PRECONDITION ITSELF WENT STALE. Taking ART's system away used to
+       leave ART with none. A region without a typed system now CLAIMS one from
+       the reserve pool — that is what lets a topic be added from the editor —
+       so this quietly handed ART Kepler-167 and the mutation went back to
+       landing on a branch that cannot run. The precondition is now the state
+       that really produces an unassigned world, and one this project will
+       actually reach: the reserve is DRY and the region has no assignment. One
+       edit does both, because the claim reads chosen[] before this line. */
+    also: { find: `  var pool=(ASTRO_DATA.systems||[]).filter(function(sy){\n    return sy.reserve && !spent[sy.system]; });`,
+            repl: `  var pool=[]; delete MIG_SYSTEM['art'];   // precondition: the reserve is dry and ART has no world` },
     find: `  if(p.worldType==='latent' || !p.astronomyTemplate) return 'not yet charted';`,
     repl: `  if(p.worldType==='latent' || !p.astronomyTemplate) return 'TRAPPIST-1';` },
 

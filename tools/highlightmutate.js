@@ -41,7 +41,15 @@ const MUTATIONS = [
     expect: 'orbital paths answer the hover' }
 ];
 
-const ONLY = (process.argv[2] || '').split(',').filter(Boolean);
+/* --dry, ADDED AFTER THIS FILE COULD NOT BE ASKED THE QUESTION.
+   See tools/anchorcheck.js: a stale anchor surfaces either as a hard STOP deep
+   into a run or as a mutation that silently tests nothing, and both cost hours
+   that ten seconds of auditing would have saved. This harness anchors into
+   src/v02-app.js, the file that actually moves, so its absence from that audit
+   was a real gap. */
+const DRY = process.argv.indexOf('--dry') >= 0;
+const ONLY = (process.argv[2] === '--dry' ? '' : (process.argv[2] || ''))
+  .split(',').filter(Boolean);
 const SEL = ONLY.length ? MUTATIONS.filter(m => ONLY.indexOf(m.n) >= 0) : MUTATIONS;
 /* A NAME THAT MATCHES NOTHING IS A TYPO, NOT AN EMPTY TEST RUN. Without this,
    ONLY filters the table to nothing, the loop has no work, and the summary
@@ -53,6 +61,17 @@ if (ONLY.length && SEL.length !== ONLY.length) {
   console.error('no mutation named ' + missing.join(', ') +
                 ' — refusing to report a result for a set that was never tested');
   process.exit(1);
+}
+
+if (DRY) {
+  let bad = 0;
+  MUTATIONS.forEach(m => {
+    const hits = fs.readFileSync(m.file || APP, 'utf8').split(m.find).length - 1;
+    if (hits !== 1) { bad++; console.log('  x' + hits + '  ' + m.n + '  "' + m.find.slice(0, 58) + '"'); }
+  });
+  console.log(bad ? bad + ' BAD ANCHOR(S) of ' + MUTATIONS.length
+                  : 'all ' + MUTATIONS.length + ' anchors match exactly once');
+  process.exit(bad ? 1 : 0);
 }
 
 function build(){ execSync('node tools/build-v02.js', { stdio: 'pipe' }); }

@@ -84,10 +84,23 @@ const MUTATIONS = [
      claim is unchanged — the menu keeps every region — so the mutation drops
      one, and drops it by POSITION rather than by name: naming 'observation'
      was how the same mutation in worldmutate went stale twice over. */
-  { n: 'CST-14', file: APP, name: 'the Main Mind Menu keeps all 14 MIGs',
-    find: `    var tail=(V02_OVERLAY.menuLast||[]).map(function(x){return x.id;});`,
-    repl: `    var tail=(V02_OVERLAY.menuLast||[]).map(function(x){return x.id;});
-    MIGS=MIGS.slice(0,-1);                    // mutation: one region never reaches the menu` },
+  /* AND IT MOVED AGAIN, when the menu learned to take an order from the store
+     and the tail logic was lifted into menuOrdered(). The anchor matched
+     nothing, which this runner correctly treats as a hard STOP rather than a
+     pass — the whole harness refused rather than reporting a green it had not
+     earned. worldmutate's W5 broke on the identical line in the identical
+     commit and was fixed; this one was missed, because only the harnesses that
+     looked affected were dry-run. tools/anchorcheck.js now dry-runs all of
+     them, which is the actual remedy.
+
+     Anchored on the FUNCTION now, for the reason W5 already learned twice: the
+     function whose whole job is deciding which regions reach the menu is the
+     most stable thing that can be said about a mutation that wants one not
+     to. */
+  { n: 'CST-14', file: APP, name: 'the Main Mind Menu keeps every MIG',
+    find: `function menuOrdered(){`,
+    repl: `function menuOrdered(){
+  MIGS=MIGS.slice(0,-1);                      // mutation: one region never reaches the menu` },
 
   { n: 'CST-15', file: APP, name: 'the highlight is reversible',
     find: `function highlightMIG(migId){

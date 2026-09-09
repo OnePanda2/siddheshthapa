@@ -89,8 +89,17 @@ const M = [
      establishes the precondition, the second is the mutation proper. */
   { id:'T11', why:'stop lifting the generic worlds on a phone, putting them under the sheet',
     steps:[
-      { find:"'music':'Kepler-80', 'books':'Kepler-62', 'art':'HD 40307',",
-        repl:"'music':'Kepler-80', 'books':'Kepler-62'," },
+      /* AND THE PRECONDITION WENT STALE FOR A THIRD REASON, after being fixed
+         twice already. Stripping ART's system used to make it generic. A region
+         without a typed system now CLAIMS one from the reserve pool — the
+         mechanism that lets a topic be added from the editor — so ART arrived
+         with Kepler-167 and the lift being broken was never reached. The state
+         that actually produces a generic world is the reserve being DRY while a
+         region has no assignment, which is what a topic added after the pool
+         empties will be. One edit does both: the claim reads chosen[] before
+         this line runs. See braincheck B19 for the same story. */
+      { find:"  var pool=(ASTRO_DATA.systems||[]).filter(function(sy){\n    return sy.reserve && !spent[sy.system]; });",
+        repl:"  var pool=[]; delete MIG_SYSTEM['art'];   // precondition: the reserve is dry and ART has no world" },
       { find:'    if(upS.lengthSq()>1e-6) aimN.addScaledVector(upS.normalize(), -dOut*0.22);',
         repl:'    if(upS.lengthSq()>1e-6) aimN.addScaledVector(upS.normalize(), 0.0);' }
     ] },
