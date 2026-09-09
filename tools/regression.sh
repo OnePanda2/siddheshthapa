@@ -82,10 +82,10 @@ echo "===== MUTATION HARNESSES =====" >> "$LOG"
 # data/notes.json and put it back, so they need the contamination guard
 # standing between them and whatever runs next. regioncheck is also the longest
 # single run in the suite — it rebuilds five times and calls smoke at the end.
-for t in notesmutate systemfill sectioncheck projectcheck regioncheck menucheck \
+for t in notesmutate systemfill sectioncheck projectcheck regioncheck menucheck edgecheck \
          worksmutate brainmutate glmutate emblemmutate highlightmutate lovemutate \
          reservemutate regionmutate menumutate travelmutate worldmutate \
-         worldframemutate constellationmutate astromutate editormutate; do
+         worldframemutate constellationmutate astromutate editormutate edgemutate; do
   run "$t" node "tools/$t.js"
 done
 

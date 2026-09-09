@@ -2082,6 +2082,40 @@ var DECLARED_REGIONS=[];
       if(vanish[EDGES[vi][0]] || vanish[EDGES[vi][1]]){ EDGES.splice(vi,1); cut++; }
     V02_OVERLAY._edgesDroppedWithHiddenRooms=cut;
   })();
+
+  /* ── A RELATIONSHIP RETIRED ON PURPOSE ────────────────────────────────
+     A writing is listed under a concept because it is CONNECTED to it — the
+     concept page is the adjacency, nothing more — so a writing that reaches
+     into six concepts appears under all six, and one of those six may simply
+     be wrong. There was no way to say so: relationships could be added from
+     the editor and never taken away.
+
+     They cannot be spliced out either. Most of them live in preview.html,
+     which is the locked senior document, and the rest arrive through the
+     overlay — so this follows the rule the retired writings already follow: a
+     deletion is A LINE ADDED, not a line removed. The claim stays in the
+     corpus, recoverable and legible, and the store declares that it no longer
+     holds.
+
+     MATCHED UNORDERED, because a relationship is one claim however it is
+     written down, and the gate already refuses a pair that appears in both
+     directions. Retiring a->b therefore cannot leave b->a standing.
+
+     LAST, after everything that adds an edge — the corpus, the overlay, the
+     live notes and the hidden-room sweep — for the same reason the sweep is
+     last: a retirement that ran before an addition would be undone by it. */
+  (function(){
+    var gone={};
+    (V02_NOTES.retiredEdges||[]).forEach(function(r){
+      if(!r || !r.a || !r.b) return;
+      gone[r.a+' '+r.b]=1; gone[r.b+' '+r.a]=1;
+    });
+    if(!Object.keys(gone).length) return;
+    var cut=0;
+    for(var ri=EDGES.length-1;ri>=0;ri--)
+      if(gone[EDGES[ri][0]+' '+EDGES[ri][1]]){ EDGES.splice(ri,1); cut++; }
+    V02_NOTES._edgesRetired=cut;
+  })();
 })();
 MIGS.forEach(function(m){ m.t='mig'; m.mig=m.id; NODES.push(m); owned[m.id]=[]; });
 /* a hidden region keeps its ownership books. Its objects still belong to it —
@@ -7070,6 +7104,14 @@ function paintDOM(){
   })));
   if(n.src) put(group('This writing',[ row(n,'Read it',
     function(){ openReader(n.id); }) ]));
+  /* THE EDITOR HAD NO WAY IN HERE AT ALL. A region's page gets paintRegion and
+     every object in it can be edited or retired from the row it stands on;
+     this page — the one that lists what a thing CONNECTS to — had no hook, so
+     a relationship could be added from the form and never taken away from the
+     place it is actually wrong. Same shape as paintRegion: the rows are
+     already painted, and the controls are appended to them. */
+  if(window.__editor && window.__editor.paintConnections)
+    window.__editor.paintConnections(n.id, elGroups);
   say(n.label+'. '+adj[n.id].length+' connections.');
 }
 function say(t){ elStatus.textContent=t; }

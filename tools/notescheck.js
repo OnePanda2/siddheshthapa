@@ -133,7 +133,8 @@ try { store = JSON.parse(fs.readFileSync(FILE, 'utf8')); }
 catch (e) { console.error('notescheck: ' + FILE + ' is not valid JSON — ' + e.message); process.exit(1); }
 
 if (store.version !== 1) fail('store', 'version must be 1, found ' + JSON.stringify(store.version));
-['notes', 'minors', 'edges', 'retired', 'regions', 'retiredRegions', 'menuOrder'].forEach(k => {
+['notes', 'minors', 'edges', 'retired', 'regions', 'retiredRegions', 'menuOrder',
+ 'retiredEdges'].forEach(k => {
   if (k !== 'notes' && k !== 'minors' && k !== 'edges' && store[k] === undefined) return;
   if (!Array.isArray(store[k])) fail('store', k + ' must be an array');
 });
@@ -224,6 +225,48 @@ retiredRegionIds.forEach(id => { migIds.delete(id); hidden.add(id); });
 
    An id here that names nothing would be a silent no-op on the page, which is
    the failure mode this gate exists for, so it is refused at the commit. */
+/* ── A RELATIONSHIP RETIRED ON PURPOSE ─────────────────────────────────────
+   A writing is listed under a concept because it CONNECTS to it, so one that
+   reaches into six concepts appears under all six — and one of those six can
+   be plainly wrong. Most relationships live in preview.html, which is locked,
+   so a removal is a line ADDED here rather than a line taken out there.
+
+   IT MUST NAME A RELATIONSHIP THAT EXISTS. A retirement of something that was
+   never there removes nothing and reads, forever after, as though it did — the
+   same silent no-op that made worldmutate W7 test nothing for months. Checked
+   against the corpus, the overlay and this file's own new edges together,
+   because a note may retire an edge it published last week.
+
+   MATCHED UNORDERED, the way the app matches it and the way the duplicate rule
+   below already thinks about pairs: a relationship is one claim however it
+   happens to be written down. */
+const retiredEdges = store.retiredEdges || [];
+const RETIRE_EDGE_FIELDS = new Set(['a', 'b', 'at', 'why']);
+const pairsThatExist = new Set();
+existingEdges.concat(Array.isArray(edges) ? edges : [])
+  .forEach(e => { if (Array.isArray(e) && e.length >= 2) {
+    pairsThatExist.add(e[0] + ' ' + e[1]); pairsThatExist.add(e[1] + ' ' + e[0]); } });
+const retiredPairs = new Set();
+retiredEdges.forEach((r, i) => {
+  const where = 'retiredEdges[' + i + ']';
+  if (!r || typeof r !== 'object' || Array.isArray(r)) return fail(where, 'must be an object');
+  Object.keys(r).forEach(k => {
+    if (!RETIRE_EDGE_FIELDS.has(k))
+      fail(where, 'unknown field ' + JSON.stringify(k) + '; a retired relationship carries a, b, at and why');
+  });
+  if (typeof r.a !== 'string' || !SLUG.test(r.a) || typeof r.b !== 'string' || !SLUG.test(r.b))
+    return fail(where, 'a and b must both be lowercase slugs, found ' +
+                       JSON.stringify(r.a) + ' and ' + JSON.stringify(r.b));
+  if (r.a === r.b) return fail(where, 'a and b are the same object; there was never such a relationship');
+  if (!pairsThatExist.has(r.a + ' ' + r.b))
+    fail(where, 'there is no relationship between "' + r.a + '" and "' + r.b +
+                '" to retire — this line would remove nothing and go on looking as though it had');
+  if (retiredPairs.has(r.a + ' ' + r.b)) fail(where, 'that relationship is retired twice');
+  retiredPairs.add(r.a + ' ' + r.b); retiredPairs.add(r.b + ' ' + r.a);
+  if (r.at !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(r.at))
+    fail(where, 'at must be an ISO date, found ' + JSON.stringify(r.at));
+});
+
 const menuOrder = store.menuOrder;
 if (menuOrder !== undefined) {
   if (!Array.isArray(menuOrder)) fail('store', 'menuOrder must be an array of region ids');
@@ -482,7 +525,7 @@ allClaims.forEach((t, i) => {
 
 const knownId = id => takenIds.has(id) || seen.has(id);
 const pairSeen = new Map();
-existingEdges.forEach(e => pairSeen.set(e[0] + ' ' + e[1], 'the graph'));
+existingEdges.forEach(e => pairSeen.set(e[0] + ' ' + e[1], 'the graph'));
 
 edges.forEach((e, i) => {
   const where = 'edges[' + i + ']';
@@ -500,7 +543,7 @@ edges.forEach((e, i) => {
   /* DIRECTION IS LOAD-BEARING. An inverted duplicate does not merely repeat an
      edge, it asserts the opposite claim — V0.2 shipped exactly that bug and
      rendered "VALUE INTERROGATES PHILOSOPHY". */
-  const key = from + ' ' + to, inv = to + ' ' + from;
+  const key = from + ' ' + to, inv = to + ' ' + from;
   if (pairSeen.has(key)) fail(where, 'duplicate of an edge already in ' + pairSeen.get(key));
   else if (pairSeen.has(inv)) fail(where, 'inverts an edge already in ' + pairSeen.get(inv) + ' — direction is load-bearing');
   else pairSeen.set(key, 'this file');

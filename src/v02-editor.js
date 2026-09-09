@@ -488,6 +488,41 @@ window.__editor = {
     (list.parentNode || list).appendChild(add);
   },
 
+  /* THE PAGE THAT LISTS WHAT A THING CONNECTS TO had no editor hook at all,
+     while a region's page has had one since the beginning. Same shape as
+     paintRegion: the app has already painted the rows, and the control is
+     appended to the row it acts on so there is no name to match against a
+     name. */
+  paintConnections: function(focusId, groups){
+    if(!authorised()) return;
+    var M = getModel();
+    var byId = {}; M.nodes.forEach(function(n){ byId[n.id] = n; });
+    var self = byId[focusId] || { id: focusId, label: focusId };
+    var verbs = {};
+    try {
+      (window.__v02.verbs() || []).forEach(function(v){
+        if(v && v.id) verbs[v.id] = v.verb || v.v || null; });
+    } catch(e){ /* the verb is context on the sheet, never a condition */ }
+    [].forEach.call(groups.querySelectorAll("[data-nav]"), function(btn){
+      var otherId = btn.getAttribute("data-nav");
+      /* the "This writing" group repeats the focus as a row of its own, and a
+         thing is not connected to itself */
+      if(otherId === focusId) return;
+      var other = byId[otherId];
+      if(!other || other.vacant) return;
+      var bar = el("div", "ed-row");
+      var rm = el("button", "del", "unlink"); rm.type = "button";
+      rm.onclick = function(e){
+        e.stopPropagation();
+        confirmUnlink(self, other, verbs[otherId], function(done){
+          retireEdge(focusId, otherId, done);
+        });
+      };
+      bar.appendChild(rm);
+      (btn.parentNode || btn).appendChild(bar);
+    });
+  },
+
   worksForm: function(id){ openWorksForm(id); },
   topicForm: function(id){ openTopicForm(id); },
   newTopicForm: function(){ openNewTopicForm(); },
@@ -640,6 +675,72 @@ function confirmDelete(node, onYes){
   askIn.appendChild(box);
   ask.classList.add("open");
   no.focus();
+}
+
+/* ── UNLINKING TWO THINGS ──────────────────────────────────────────────────
+   A writing is listed under a concept because it CONNECTS to it — the page you
+   are standing on is the adjacency and nothing else — so a writing that
+   reaches into six concepts appears under all six, and one of those six can be
+   plainly wrong. Until now a relationship could be added from the form and
+   never taken away from the place it did not belong.
+
+   IT IS NOT A DELETION AND THE SHEET SAYS SO. Both objects stay exactly where
+   they are with everything else they hold; one claim between them stops being
+   made. Most relationships live in preview.html, which is locked, so this is a
+   line ADDED to the store rather than a line removed from the corpus — the
+   same rule a retired writing follows, and the reason it is reversible by
+   deleting that line. */
+function confirmUnlink(self, other, verb, onYes){
+  askIn.innerHTML = "";
+  var box = el("div", "ed-ask");
+  box.appendChild(el("h3", null, "Unlink " + self.label + " and " + other.label + "?"));
+  box.appendChild(el("p", null, verb
+    ? "The claim being withdrawn is “" + self.label + " " + verb + " " + other.label + "”."
+    : "The claim between them is withdrawn."));
+  var keeps = el("div", "keeps");
+  keeps.appendChild(el("div", null, "Both keep their star, their place and everything else they hold."));
+  keeps.appendChild(el("div", null, other.label + " stops appearing under " + self.label + ", and the other way round."));
+  keeps.appendChild(el("div", null, "Nothing is written over — the original claim stays in the corpus."));
+  keeps.appendChild(el("div", null, "Reversible: it is one line in the store."));
+  box.appendChild(keeps);
+
+  var btns = el("div", "btns");
+  var go = el("button", "go", "Unlink them"); go.type = "button";
+  var no = el("button", "no", "Leave it");   no.type = "button";
+  no.onclick = function(){ ask.classList.remove("open"); };
+  go.onclick = function(){
+    go.disabled = true; go.textContent = "Unlinking…";
+    onYes(function(err){
+      if(err){ go.disabled = false; go.textContent = "Unlink them";
+               box.appendChild(el("p", "warn", err)); return; }
+      ask.classList.remove("open");
+    });
+  };
+  btns.appendChild(go); btns.appendChild(no);
+  box.appendChild(btns);
+  askIn.appendChild(box);
+  ask.classList.add("open");
+  no.focus();
+}
+
+function retireEdge(aId, bId, done){
+  commit("Unlink: " + aId + " and " + bId, function(store){
+    /* IF THE STORE ITSELF PUBLISHED IT, TAKE THE ROW OUT. Retiring an edge
+       this file added would leave both the claim and its withdrawal sitting in
+       one document, saying opposite things — and notescheck would refuse a
+       retirement of a pair that no longer exists once the row was gone. A
+       corpus edge cannot be removed that way and gets the declared line. */
+    var before = store.edges.length;
+    store.edges = store.edges.filter(function(e){
+      return !((e[0] === aId && e[1] === bId) || (e[0] === bId && e[1] === aId));
+    });
+    if(store.edges.length < before) return;
+    if(store.retiredEdges.some(function(r){
+      return (r.a === aId && r.b === bId) || (r.a === bId && r.b === aId); })) return;
+    store.retiredEdges.push({ a: aId, b: bId,
+      at: new Date().toISOString().slice(0, 10), why: "unlinked from the editor." });
+  }).then(function(){ done(null); reloadSoon(); })
+    .catch(function(e){ done(e.message); });
 }
 
 /* WHICH IDS THIS STORE WROTE, as opposed to inherited from the corpus. The
@@ -1106,6 +1207,7 @@ function commitTo(file, message, change){
       store.regions        = store.regions        || [];
       store.retiredRegions = store.retiredRegions || [];
       store.menuOrder      = store.menuOrder      || [];
+      store.retiredEdges   = store.retiredEdges   || [];
     }
     change(store);
     return gh(path, {
