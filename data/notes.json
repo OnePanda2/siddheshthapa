@@ -95,5 +95,18 @@
     }
   ],
   "minors": [],
-  "edges": []
+  "edges": [],
+  "retired": [],
+  "edits": {},
+  "regions": [],
+  "retiredRegions": [],
+  "menuOrder": [],
+  "retiredEdges": [
+    {
+      "a": "ritual",
+      "b": "t-biryani",
+      "at": "2026-09-09",
+      "why": "unlinked from the editor."
+    }
+  ]
 }
