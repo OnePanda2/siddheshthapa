@@ -22,6 +22,10 @@
  *       one document never holds a claim and its withdrawal at once
  *   D5  and the gate refuses a retirement of something that was never there,
  *       which would remove nothing and read ever after as though it had
+ *   D6  and .p3/expect.js knows one went. It did not, and it could not fail
+ *       while this file was the only thing retiring anything — this file puts
+ *       the store back. The first REAL unlink, committed from the editor,
+ *       broke all four glcheck states at once.
  *
  * usage: node tools/edgecheck.js
  */
@@ -76,6 +80,7 @@ const SEEN = w => '(function(){' +
   'var out={ fromWriting:rowsAt("concept","' + w.writing + '"), atConcept:{} };' +
   JSON.stringify(w.concepts) + '.forEach(function(c){ out.atConcept[c]=rowsAt("concept",c); });' +
   'var mdl=M.model(); out.present=mdl.nodes.some(function(n){ return n.id==="' + w.writing + '" && !n.vacant; });' +
+  'out.links=(M.graph()||{}).links||null;' +
   'return out; })()';
 
 function measure(tag, probe) {
@@ -163,6 +168,27 @@ try {
        ? 'and the relationship retired was one preview.html declares — the locked ' +
          'document is untouched, and the withdrawal is a line in the store beside it'
        : 'the pair retired was not a corpus relationship, so the case that matters is untested');
+
+  /* ---- D6 — the link expectation knows a relationship went -----------
+     THIS HARNESS COULD NOT HAVE CAUGHT IT, and that is the point of adding
+     it here. .p3/expect.js derives the number of relationships the graph
+     should render, and glcheck, constellationcheck and braincheck all assert
+     against it. It did not know about retirements — and it could not fail
+     while this file was the only thing retiring anything, because this file
+     puts the store back. The first REAL unlink, committed from the editor,
+     broke all four glcheck states at once: "expected 127, model has 126".
+     So the expectation is now checked while a retirement is actually in
+     place, which is the only moment it can be wrong. */
+  const expected = require('../.p3/expect.js').expectedLinks();
+  ck('D6', expected.total === after.links && expected.retiredEdges === 1,
+     expected.total === after.links
+       ? 'and .p3/expect.js knows one went: it expects ' + expected.total +
+         ' relationships (' + expected.inSource + ' in the corpus + ' + expected.declared +
+         ' declared + ' + expected.written + ' written − ' + expected.orphaned +
+         ' orphaned − ' + expected.retiredEdges + ' retired) and the model renders ' +
+         after.links + ' — so glcheck, constellationcheck and braincheck stay true'
+       : 'the expectation says ' + expected.total + ' and the model renders ' + after.links +
+         ' — every check that counts relationships would fail on a real unlink');
 
   /* ---- D4 — a store-published edge is removed at source --------------- */
   const D2s = JSON.parse(ORIGINAL);

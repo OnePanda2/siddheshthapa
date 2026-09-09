@@ -22,11 +22,14 @@ function liveNotes() {
     const j = JSON.parse(fs.readFileSync(file, 'utf8'));
     return { notes: (j.notes || []).length,
              minors: (j.minors || []).length,
-             edges: (j.edges || []).length };
+             edges: (j.edges || []).length,
+             /* the ROWS, not a count: whether a retirement reduces the rendered
+                total depends on which pair it names — see expectedLinks */
+             retiredEdges: (j.retiredEdges || []) };
   } catch (e) {
     /* no store is not an error — this file predates live notes and the P4.x
        suites still run against a tree that may not have one */
-    return { notes: 0, minors: 0, edges: 0 };
+    return { notes: 0, minors: 0, edges: 0, retiredEdges: [] };
   }
 }
 module.exports = module.exports || {};
@@ -158,9 +161,11 @@ function expectedLinks() {
     });
   }
   let orphaned = 0;
+  /* HOISTED, because the retirement count below needs the same set: an edge
+     already dropped with its hidden room must not be subtracted twice. */
+  const gone = {};
   if (hiddenIds.length) {
     /* every object the corpus files under a hidden region */
-    const gone = {};
     const objRe = /\{id:'([a-z0-9-]+)'[^}]*?mig:'([a-z-]+)'/g;
     let om;
     while ((om = objRe.exec(src))) if (hiddenIds.includes(om[2])) gone[om[1]] = 1;
@@ -180,7 +185,27 @@ function expectedLinks() {
     }
   }
 
-  return { inSource, declared, written, orphaned,
-           total: inSource + declared + written - orphaned };
+  /* ── AND A RELATIONSHIP WITHDRAWN ON PURPOSE ─────────────────────────────
+     A writing is listed under a concept because it connects to it, so one that
+     reaches into six concepts appears under all six — and the editor can now
+     say that one of those six is wrong. The withdrawal is a line in the store,
+     because almost every relationship lives in preview.html and that file is
+     locked, and the app drops the pair AFTER everything that adds an edge.
+
+     This file has to learn it, exactly as it already learns that a hidden room
+     takes its relationships with it. It did not, and glcheck failed on all
+     four states the first time a real unlink reached the store: "expected 127
+     relationships, model has 126".
+
+     COUNTED, NOT ASSUMED. A retirement naming a pair that was already dropped
+     with its hidden room would be subtracted twice, so those are skipped. The
+     gate refuses a retirement of a pair that does not exist at all, and the
+     editor removes a store-published edge at source rather than retiring it,
+     so nothing else here can double-count. */
+  const retiredEdges = liveNotes().retiredEdges.filter(r =>
+    r && r.a && r.b && !gone[r.a] && !gone[r.b]).length;
+
+  return { inSource, declared, written, orphaned, retiredEdges,
+           total: inSource + declared + written - orphaned - retiredEdges };
 }
 module.exports.expectedLinks = expectedLinks;
