@@ -30,8 +30,15 @@ ck(channels.length === (h.match(/^\| `(relabel|menuLast|reline|reedge|hideMIGs|r
 
 ck(/36\.653/.test(h), 'the derived world centre is stated');
 ck(/2bb2ddc/.test(h), 'the commit it was written at is stated');
+/* THE COMMIT COUNT IS NOT ASSERTED, deliberately. It was, and it failed on the
+   very commit that fixed it — every commit invalidates it, including this one,
+   so the check demanded an edit to the document on every push and would have
+   been wrong far more often than right. An assertion that cannot hold still is
+   not an assertion, it is a chore. The document states the figure as a
+   snapshot instead, which is a true sentence that stays true. */
 const commits = execSync('git rev-list --count HEAD', { encoding: 'utf8' }).trim();
-ck(h.indexOf(commits + ' commits') >= 0, commits + ' commits');
+ck(/at the time of writing/.test(h),
+   'the commit count is framed as a snapshot rather than a live claim (now ' + commits + ')');
 
 ['preview.html', 'CONTENT-MODEL.md', 'tools/regression.sh', 'tools/anchorcheck.js',
  'tools/scratch.js', 'worker/index.js', 'data/editor-config.json', 'tools/build-v02.js',

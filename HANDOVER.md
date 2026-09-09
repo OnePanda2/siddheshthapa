@@ -596,5 +596,5 @@ remaining worlds are spent — the procedure for which is in §6.
 
 ---
 
-*Written at commit `2bb2ddc`. 142 commits. 55 harnesses (56 entries in the runner, which also invokes the build and smoke). 26 planetary systems,
-12 unclaimed. One artifact, zero external requests.*
+*Written at commit `2bb2ddc`, 142 commits in at the time of writing. 55 harnesses.
+26 planetary systems, 12 unclaimed. One artifact, zero external requests.*
