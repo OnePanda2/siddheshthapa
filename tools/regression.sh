@@ -6,7 +6,7 @@
 # suite with it, and there was nowhere durable to add a new one. The checks
 # are this project’s memory of its own defects; they belong inside it.
 #
-# Full regression.
+# Full regression. Strictly serial: two Chrome-heavy tools at once have raced
 # in this project before.
 #
 # AND IT CHECKS THE TREE BETWEEN HARNESSES. A mutation harness that dies partway
@@ -62,6 +62,11 @@ run build      node tools/build-v02.js
 # three hours into a regression, on a line worldmutate had already been fixed
 # for in the same commit.
 run anchorcheck node tools/anchorcheck.js
+# and the handover, which is the only document a future reader is promised
+# is true. Every checkable claim in it -- harness count, store keys, overlay
+# channels, world counts, the files it names -- is asserted against the
+# repository, because a handover that is confidently wrong is worse than none.
+run handovercheck node tools/handovercheck.js
 run datacheck  node tools/datacheck.js
 run notescheck node tools/notescheck.js
 run textcheck  node tools/textcheck.js
