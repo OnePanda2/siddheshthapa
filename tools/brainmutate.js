@@ -108,9 +108,24 @@ const M = [
      a topic added tomorrow would have none — and only then invents a heritage
      for it. That is the real claim: not "this line is correct" but "a world
      with nothing behind it never claims something". */
+  /* AND THE PRECONDITION ITSELF WENT STALE, for a second and better reason.
+     It used to take ART's system away, which left ART with none. A region
+     without a typed system now CLAIMS one from the reserve pool — that is the
+     whole point of the pool, and it is what lets a topic be added from the
+     editor — so removing ART's line quietly handed it Kepler-167 instead, the
+     condition never existed, and the mutation went back to corrupting an
+     unreachable branch. The count said 20/21 and nothing said why.
+
+     The precondition is now the state that actually produces a worldless
+     region, and it is a state this project will really reach: THE RESERVE IS
+     DRY and a region has no assignment. One edit does both, because the claim
+     reads chosen[] before this line runs, so deleting the assignment here
+     leaves ART skipped by the claim as well as unassigned. */
   { id: 'B19', why: 'invent a source for a world that has none',
-    also: { find: "'music':'Kepler-80', 'books':'Kepler-62', 'art':'HD 40307',",
-            repl: "'music':'Kepler-80', 'books':'Kepler-62'," },
+    also: { find: "  var pool=(ASTRO_DATA.systems||[]).filter(function(sy){\n" +
+                  "    return sy.reserve && !spent[sy.system]; });",
+            repl: "  var pool=[]; delete MIG_SYSTEM['art'];" +
+                  "   // precondition: the reserve is dry and ART has no world" },
     find: "  if(p.worldType==='latent' || !p.astronomyTemplate) return 'not yet charted';",
     repl: "  if(p.worldType==='latent' || !p.astronomyTemplate) return 'HR 8799';" },
 
