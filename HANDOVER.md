@@ -364,6 +364,22 @@ from one cut-off probe. Those burn CPU through everything that follows.
 `scratch.js` exposes `reap()`, matching only on `--user-data-dir` inside this
 project's scratch root, and the runner calls it after every harness.
 
+### The last full run
+
+`.checkpoints/regression-2026-09-09.log` is the record of it, kept because a
+claim that the suite passed is worth less than the log that says so. **55 of 57
+at commit `ec8f352`**, both failures stale census and both fixed in the commit
+that carries the log. Every expensive harness green: `worldmutate` 30/30,
+`astromutate` 19/19, `regionmutate` 7/7, `menumutate` 6/6, `glmutate` 7/7,
+`margmutate` 12/12, `brainmutate` 21/21, `constellationmutate` 15/15,
+`widecheck` 5/5 with no timeout. The tree stayed clean throughout — no
+contamination line, no browsers reaped.
+
+The deployed page was separately confirmed **byte-identical to the local
+build**, with the zero-request assertion holding on the live file. The
+regression proves the repository is consistent; it does not prove the site is
+up, and those are different questions.
+
 ### Known flakiness
 
 `widecheck` runs at 2560×1080 in software raster — 2.76M pixels a frame. One

@@ -29,12 +29,19 @@ const MUTATIONS = [
     repl: "      gone[r.a+' '+r.b]=1;   // mutation: one direction only",
     expect: 'FAIL  D1' },
 
+  /* BOTH ENDS, which it did not do and needed to. It dropped every edge
+     touching `r.a` only — and since edgecheck now retires deliberately against
+     the corpus order, `r.a` is the CONCEPT rather than the writing. D2 asks
+     what the WRITING still reaches, so it never saw the damage; D6 caught the
+     missing edge instead and D2 passed while proving nothing. Taking both ends
+     is what "take the lot" was always meant to mean. */
   { n: 'D2', name: 'only the one relationship goes',
     file: APP,
     find: "      if(gone[EDGES[ri][0]+' '+EDGES[ri][1]]){ EDGES.splice(ri,1); cut++; }",
     repl: "      if(gone[EDGES[ri][0]+' '+EDGES[ri][1]] ||\n" +
-          "         (V02_NOTES.retiredEdges||[]).some(function(r){\n" +
-          "           return r.a===EDGES[ri][0]||r.a===EDGES[ri][1]; })){   // mutation: take the lot\n" +
+          "         (V02_NOTES.retiredEdges||[]).some(function(r){   // mutation: take the lot\n" +
+          "           return r.a===EDGES[ri][0]||r.a===EDGES[ri][1]||\n" +
+          "                  r.b===EDGES[ri][0]||r.b===EDGES[ri][1]; })){\n" +
           "        EDGES.splice(ri,1); cut++; }",
     expect: 'FAIL  D2' },
 

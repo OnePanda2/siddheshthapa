@@ -219,8 +219,18 @@ const MUTATIONS = [
      The pool is finite and this project does not invent astronomy, so asking
      for more topics than there are worlds has to stop at the commit rather
      than render as a light with a name under it. */
+  /* COUNTED FROM THE POOL, NOT TYPED. This asked for nine topics, which was
+     more than there were worlds on the day it was written and stopped being so
+     the moment the reserve grew from six to twelve — at which point the gate
+     correctly accepted all nine and the mutation tested nothing. It survived
+     the next full regression and said so, which is the system working. But a
+     number that must be revised whenever the data changes is a number that one
+     day will not be, so it reads the pool and asks for one more than exists. */
   ['more topics than there are worlds left',
-   s => { s.regions = []; for (var i = 0; i < 9; i++)
+   s => { const A = JSON.parse(require('fs').readFileSync('data/astronomy-systems.json', 'utf8'));
+          const spare = (A.systems || []).filter(x => x.reserve).length;
+          s.regions = [];
+          for (let i = 0; i <= spare; i++)
             s.regions.push({ id: 'zz-topic-' + i, label: 'TOPIC ' + i,
                              line: 'One of more topics than the archive has given us.',
                              added: '2026-09-08' });
