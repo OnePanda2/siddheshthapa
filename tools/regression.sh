@@ -39,10 +39,29 @@ run(){
     git checkout -- src/ data/ preview.html 2>/dev/null
     node tools/build-v02.js >/dev/null 2>&1
   fi
+  # AND THE BROWSERS IT LEFT RUNNING. A harness that times out or is killed
+  # takes its node child with it and not the Chrome that child launched:
+  # measured at twelve surviving processes from one cut-off probe. Those go on
+  # burning CPU while the next harness runs, which is how a suite starts
+  # failing at the far end for reasons that have nothing to do with the code
+  # being tested. Safe here because the suite is strictly serial — nothing of
+  # ours is meant to be running between two harnesses.
+  reaped=$(node -e "process.stdout.write(String(require('./tools/scratch.js').reap()))" 2>/dev/null)
+  if [ -n "$reaped" ] && [ "$reaped" -gt 0 ] 2>/dev/null; then
+    printf '      !! %s LEFT %s BROWSER PROCESS(ES) RUNNING — reaped\n' "$name" "$reaped" >> "$LOG"
+  fi
 }
 
 echo "===== BUILD =====" >> "$LOG"
 run build      node tools/build-v02.js
+# FIRST, BECAUSE IT COSTS TEN SECONDS AND SAVES HOURS. Every mutation harness
+# works by finding an exact string in the source; when a refactor moves that
+# string the anchor matches nothing, and that surfaces either as a hard STOP
+# deep into the run or as a mutation that silently tests nothing and reports a
+# green. constellationmutate hard-stopped 650 seconds in for exactly this,
+# three hours into a regression, on a line worldmutate had already been fixed
+# for in the same commit.
+run anchorcheck node tools/anchorcheck.js
 run datacheck  node tools/datacheck.js
 run notescheck node tools/notescheck.js
 run textcheck  node tools/textcheck.js

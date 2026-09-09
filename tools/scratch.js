@@ -54,6 +54,47 @@ function mine() {
   }
 }
 
+/* AND THE BROWSERS THE DIRECTORIES BELONGED TO.
+
+   A killed process runs no exit handler — the reason the sweep above exists —
+   and on Windows it takes its grandchildren with it even less reliably than
+   its files. execSync's timeout kills the node child it spawned; the Chrome
+   that child had launched keeps running.
+
+   MEASURED, not assumed: a viewport probe cut off at 12s left TWELVE chrome
+   processes still running immediately afterwards. That is what made
+   widecheck's retry useless — a state that timed out was retried against a
+   machine still carrying the entire load of the attempt that had just beaten
+   it, and at 2560x1080 in software raster that load is the whole problem. Both
+   retries it has ever fired failed for this reason.
+
+   It matches on --user-data-dir pointing inside this project's own scratch
+   root, so it can only ever reach browsers this tooling started. A real
+   browser has no such profile and is never touched.
+
+   CALL IT ONLY WHEN NONE OF YOUR OWN PROBES IS RUNNING. It cannot tell a
+   hung browser from a working one, and the suite is serial by design. */
+function reap() {
+  if (process.platform !== 'win32') return 0;   // the only place this has bitten
+  const ps = path.join(ROOT, 'reap-' + process.pid + '.ps1');
+  try {
+    fs.mkdirSync(ROOT, { recursive: true });
+    fs.writeFileSync(ps,
+      '$p = @(Get-CimInstance Win32_Process -Filter "Name=\'chrome.exe\'" |\n' +
+      "  Where-Object { $_.CommandLine -like '*--user-data-dir=*.scratch*' })\n" +
+      '$p | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }\n' +
+      '$p.Count\n', 'utf8');
+    const out = require('child_process').execSync(
+      'powershell -NoProfile -ExecutionPolicy Bypass -File "' + ps + '"',
+      { encoding: 'utf8', timeout: 60000, stdio: ['ignore', 'pipe', 'ignore'] });
+    return parseInt(String(out).trim(), 10) || 0;
+  } catch (e) {
+    return 0;                                   // reaping is best effort, never fatal
+  } finally {
+    try { fs.unlinkSync(ps); } catch (e) {}
+  }
+}
+
 /* Drop-in for os.tmpdir(). Forward slashes, because every caller builds a
    file:/// URL and a Chrome command line out of it. */
 function root() {
@@ -72,4 +113,4 @@ function root() {
   return ROOT.split(String.fromCharCode(92)).join('/');
 }
 
-module.exports = { root, sweep, ROOT };
+module.exports = { root, sweep, reap, ROOT };

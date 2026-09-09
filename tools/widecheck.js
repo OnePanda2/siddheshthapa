@@ -134,9 +134,20 @@ STATES.forEach(id => {
            slowly — and retrying a real failure is how a suite talks itself
            into a pass. */
         if (e1.signal !== 'SIGTERM' && !/ETIMEDOUT/.test(String(e1.message))) throw e1;
+        /* AND THE BROWSER THE TIMEOUT DID NOT KILL.
+           execSync's timeout kills the node child; the Chrome that child had
+           launched keeps running. Measured: a probe cut off at 12s left twelve
+           chrome processes alive immediately afterwards. So the retry was
+           running against a machine still carrying the whole load of the
+           attempt that had just beaten it — which is why both retries this
+           check has ever fired went on to fail as well. Reaped between
+           attempts, so the second one gets the machine the first one had. */
+        const reaped = require('./scratch.js').reap();
         if (attempt < ATTEMPTS)
           console.log('  ..    ' + id.padEnd(12) + ' timed out at ' + (TIMEOUT / 1000) +
-                      's, one more attempt');
+                      's, one more attempt' +
+                      (reaped ? ' (reaped ' + reaped + ' orphaned browser process' +
+                                (reaped > 1 ? 'es' : '') + ' first)' : ''));
       }
     }
     if (raw === null) throw lastErr;

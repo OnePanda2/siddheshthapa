@@ -102,12 +102,35 @@ const MUTATIONS = [
     find: `  relabel:[],`,
     repl: `  relabel:[{ id:'my-works', from:'MY WORKS', to:'ART' }],` },
 
-  { n: 'W7', file: APP, name: 'Psychology took no content from anyone',
+  /* IT NAMED A THING THAT NO LONGER EXISTS, and so did nothing at all.
+
+     The mutation moved the concept 'psychology-behaviour' into an added
+     region. That id was a temporary re-keying, invented when PSYCHOLOGY was
+     briefly promoted to a topic and needed its own name out of the way. The
+     promotion was undone, the workaround was removed with it, and the concept
+     went back to being called 'psychology' — at which point this forEach
+     matched nothing on every run, changed nothing, and the check passed
+     because there was nothing to catch.
+
+     A mutation that can quietly match nothing is worse than no mutation: it
+     reports a green and looks exactly like one that worked. This is the third
+     shape of that fault in this file alone, after W5's anchor moving twice and
+     W2/W9's precondition being defeated by the reserve pool.
+
+     SO IT DESCRIBES THE THEFT INSTEAD OF NAMING THE VICTIM. It takes whichever
+     concept it finds living somewhere else and files it into a region the
+     overlay DECLARED EMPTY — which is the half of W7 the comment beside it
+     says was doing the work, since declaring a region empty and then quietly
+     filling it is the fabrication the content rule forbids. MINORS is never
+     empty and there is always a declared-empty region, so this cannot no-op
+     however anything is renamed. */
+  { n: 'W7', file: APP, name: 'a region declared empty is actually empty',
     /* the anchor follows the push, which learned to write `line` as well as
        `gloss` — an added region had been rendering with no sentence at all */
     find: `                v02Added:true, v02Empty:!!a.empty });`,
     repl: `                v02Added:true, v02Empty:!!a.empty });
-    MINORS.forEach(function(x){ if(x.id==='psychology-behaviour') x.mig=a.id; });   // mutation: steal it` },
+    if(a.empty) MINORS.some(function(x){                      // mutation: fill a region
+      if(x.mig!==a.id){ x.mig=a.id; return true; } return false; });   // declared empty` },
 
   { n: 'M1', file: APP, name: 'the layout really has brain proportions',
     find: `  var p=new THREE.Vector3(x*brainWidth(y,z), y*r*0.74, z*r);`,
