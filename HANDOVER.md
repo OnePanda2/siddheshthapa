@@ -5,6 +5,11 @@ reader knows nothing: no prior conversation, no context, no access to whoever
 built it. Everything needed to understand, run, change and verify this site is
 here or is named here.
 
+**Last updated 2026-09-16.** This is the **public technical record**. The owner
+also keeps a private project report — status, decisions, accounts, working
+preferences and a change log — outside this repository; where the two disagree
+on a technical fact, this file and the committed logs win.
+
 If you are an AI agent picking this up, **read the whole of this file before
 touching anything.** The final section is a prompt written for you.
 
@@ -543,6 +548,24 @@ controls threw on a real store, and the edit path discarding relationships.
 `editorcheck` closes it by driving the real form and reading the real PUT.
 
 **The regression's contamination guard will revert your uncommitted work.**
+
+**An expectation file must learn every new way the graph can shrink.**
+`.p3/expect.js` derives how many relationships should render, and `glcheck`,
+`constellationcheck` and `braincheck` assert against it. It knew a hidden room
+takes its edges with it; it did not know an edge could be withdrawn on purpose.
+The first real unlink broke all four `glcheck` states: *expected 127, model has
+126*. Any new mechanism that removes nodes or edges must be taught to it.
+
+**A harness that restores its fixture cannot catch a bug that only exists in
+committed data.** `edgecheck` writes a retirement, measures, and puts the store
+back — so the link expectation was never wrong at a moment anything looked. It
+took a retirement committed from the editor. `edgecheck` D6 now checks the
+expectation while its own retirement is in place.
+
+**Derive a mutation's size from the data; never type it.** `notesmutate` made
+nine topics to exhaust the reserve. The reserve grew from six to twelve, nine
+fitted, and the mutation tested nothing. It now reads the pool and asks for one
+more than exists.
 
 ---
 
