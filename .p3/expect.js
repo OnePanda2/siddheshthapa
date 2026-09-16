@@ -160,9 +160,7 @@ function expectedLinks() {
       if (id !== 'my-works') hiddenIds.push(id);
     });
   }
-  let orphaned = 0;
-  /* HOISTED, because the retirement count below needs the same set: an edge
-     already dropped with its hidden room must not be subtracted twice. */
+  /* every object in a hidden room, which the survivor set below needs */
   const gone = {};
   if (hiddenIds.length) {
     /* every object the corpus files under a hidden region */
@@ -174,15 +172,8 @@ function expectedLinks() {
     let am;
     while ((am = addRe.exec(app))) if (hiddenIds.includes(am[2])) gone[am[1]] = 1;
 
-    const countIn = text => {
-      const rows = [...text.matchAll(/\['([^']+)','([^']+)'/g)];
-      return rows.filter(r => gone[r[1]] || gone[r[2]]).length;
-    };
-    orphaned = countIn(src.slice(edgesFrom, edgesTo > edgesFrom ? edgesTo : undefined));
-    if (at >= 0) {
-      const end2 = app.indexOf(String.fromCharCode(10) + '  ]', at);
-      orphaned += countIn(app.slice(at, end2 > 0 ? end2 : at + 6000));
-    }
+    /* the count of edges lost to these rooms is taken below, from the survivor
+       set, rather than here — see "A RETIRED WRITING TAKES ITS RELATIONSHIPS" */
   }
 
   /* ── AND A RELATIONSHIP WITHDRAWN ON PURPOSE ─────────────────────────────
@@ -202,10 +193,63 @@ function expectedLinks() {
      gate refuses a retirement of a pair that does not exist at all, and the
      editor removes a store-published edge at source rather than retiring it,
      so nothing else here can double-count. */
-  const retiredEdges = liveNotes().retiredEdges.filter(r =>
-    r && r.a && r.b && !gone[r.a] && !gone[r.b]).length;
+  /* ── AND A RETIRED WRITING TAKES ITS RELATIONSHIPS WITH IT ──────────────────
+     This is the SECOND time in a week this file did not know a way the graph
+     can shrink, and the second time it was found only by data that was actually
+     committed. A retired writing is blanked in place and the app sweeps every
+     edge touching it — "a relationship to a vacancy is a line drawn to nothing".
+     That mechanism has existed since writings became deletable, and this file
+     never modelled it, because until PRETEND YOU MISS HER was retired from the
+     editor no corpus writing with a relationship had ever been retired. glcheck:
+     "expected 126 relationships, model has 125".
 
-  return { inSource, declared, written, orphaned, retiredEdges,
-           total: inSource + declared + written - orphaned - retiredEdges };
+     So the count is no longer a chain of subtractions, each written the day a
+     removal was noticed. It is the SET the app ends with, and that set does not
+     depend on order, because every removal in the app runs after every
+     addition: the retired sweep runs again after the live edges go in, and the
+     hidden-room sweep and the retired-pair pass run last. An edge survives
+     exactly when it is present in the corpus, the overlay or the store, neither
+     end is retired, neither end lives in a hidden room, and its pair has not
+     been withdrawn. Counting survivors cannot subtract an overlap twice.
+
+     Each removed edge is attributed to the FIRST rule that takes it, in the
+     app's order — retired end, then hidden room, then withdrawn pair — so the
+     breakdown still reads as the app would explain it. The breakdown is for
+     people; the total is what the checks assert. */
+  const pairs = text => [...text.matchAll(/\['([^']+)','([^']+)'/g)].map(r => [r[1], r[2]]);
+  const store = (() => {
+    try { return JSON.parse(fs4.readFileSync(process.env.NOTES_FILE || 'data/notes.json', 'utf8')); }
+    catch (e) { return {}; }
+  })();
+  const endAt = at >= 0 ? app.indexOf(String.fromCharCode(10) + '  ]', at) : -1;
+  const all = [];
+  const seen = {};
+  const addOnce = rows => rows.forEach(e => {        // the app's addEdgesOnce: exact ordered pair
+    const k = e[0] + ' ' + e[1];
+    if (seen[k]) return;
+    seen[k] = 1; all.push(e);
+  });
+  addOnce(pairs(src.slice(edgesFrom, edgesTo > edgesFrom ? edgesTo : undefined)));
+  if (at >= 0) addOnce(pairs(app.slice(at, endAt > 0 ? endAt : at + 6000)));
+  addOnce((store.edges || []).filter(e => Array.isArray(e) && e.length >= 2).map(e => [e[0], e[1]]));
+
+  const retiredIds = {};
+  (store.retired || []).forEach(r => { if (r && r.id) retiredIds[r.id] = 1; });
+  const withdrawn = {};
+  (store.retiredEdges || []).forEach(r => {
+    if (r && r.a && r.b) { withdrawn[r.a + ' ' + r.b] = 1; withdrawn[r.b + ' ' + r.a] = 1; } });
+
+  let retiredWritings = 0, hiddenRooms = 0, retiredEdges = 0, total = 0;
+  all.forEach(([a, b]) => {
+    if (retiredIds[a] || retiredIds[b]) retiredWritings++;
+    else if (gone[a] || gone[b]) hiddenRooms++;
+    else if (withdrawn[a + ' ' + b]) retiredEdges++;
+    else total++;
+  });
+
+  return { inSource, declared, written,
+           /* `orphaned` keeps its old name and meaning — edges lost to a hidden
+              room — because edgecheck's D6 message prints it */
+           orphaned: hiddenRooms, retiredWritings, retiredEdges, total };
 }
 module.exports.expectedLinks = expectedLinks;

@@ -45,6 +45,19 @@ const MUTATIONS = [
           "        EDGES.splice(ri,1); cut++; }",
     expect: 'FAIL  D2' },
 
+  /* D7 — a retired writing KEEPS its relationships, which is exactly the state
+     the link oracle was in until 2026-09-16: it had never been told a retired
+     writing takes its edges with it. The app sweeps those edges twice — once
+     before the live edges go in, once after — so both sweeps are switched off,
+     the first as a precondition, or the second would still remove them. */
+  { n: 'D7', name: 'a retired writing takes its relationships with it',
+    file: APP,
+    also: { find: "    if(RETIRED.hasOwnProperty(EDGES[ei][0]) || RETIRED.hasOwnProperty(EDGES[ei][1]))",
+            repl: "    if(false)   // mutation: a retired writing keeps its relationships" },
+    find: "    if(RETIRED.hasOwnProperty(EDGES[ej][0]) || RETIRED.hasOwnProperty(EDGES[ej][1]))",
+    repl: "    if(false)   // mutation: ...on both sweeps",
+    expect: 'FAIL  D7' },
+
   { n: 'D5', name: 'retiring nothing is refused at the commit',
     file: GATE,
     find: "  if (!pairsThatExist.has(r.a + ' ' + r.b))",
@@ -65,6 +78,13 @@ if (ONLY.length && SEL.length !== ONLY.length) {
 if (DRY) {
   let bad = 0;
   MUTATIONS.forEach(m => {
+    /* the precondition is audited as strictly as the mutation: an `also` that
+       matched nothing would hand back a mutation landing on a line that still
+       runs, which is the silent pass this whole flag exists to catch */
+    if (m.also) {
+      const h2 = ORIG[m.file].split(m.also.find).length - 1;
+      if (h2 !== 1) { bad++; console.log('  x' + h2 + '  ' + m.n + ' (precondition)  "' + m.also.find.slice(0, 50) + '"'); }
+    }
     const hits = ORIG[m.file].split(m.find).length - 1;
     if (hits !== 1) { bad++; console.log('  x' + hits + '  ' + m.n + '  "' + m.find.slice(0, 58) + '"'); }
   });
@@ -98,7 +118,16 @@ for (const m of SEL) {
     console.error('STOP: anchor for ' + m.n + ' matched ' + hits + ' times: ' + m.find.slice(0, 56));
     restoreAll(); process.exit(3);
   }
-  fs.writeFileSync(m.file, orig.replace(m.find, m.repl), 'utf8');
+  let pre = orig;
+  if (m.also) {
+    const h2 = orig.split(m.also.find).length - 1;
+    if (h2 !== 1) {
+      console.error('STOP: precondition anchor for ' + m.n + ' matched ' + h2 + ' times');
+      restoreAll(); process.exit(3);
+    }
+    pre = orig.replace(m.also.find, m.also.repl);
+  }
+  fs.writeFileSync(m.file, pre.replace(m.find, m.repl), 'utf8');
   const applied = fs.readFileSync(m.file, 'utf8') !== orig;
   build();
   const r = run();

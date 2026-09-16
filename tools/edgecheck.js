@@ -26,6 +26,9 @@
  *       while this file was the only thing retiring anything — this file puts
  *       the store back. The first REAL unlink, committed from the editor,
  *       broke all four glcheck states at once.
+ *   D7  and a retired WRITING's relationships are expected gone as well. The
+ *       same blind spot, one mechanism over, exposed a week later by retiring
+ *       PRETEND YOU MISS HER from the editor.
  *
  * usage: node tools/edgecheck.js
  */
@@ -185,10 +188,39 @@ try {
        ? 'and .p3/expect.js knows one went: it expects ' + expected.total +
          ' relationships (' + expected.inSource + ' in the corpus + ' + expected.declared +
          ' declared + ' + expected.written + ' written − ' + expected.orphaned +
-         ' orphaned − ' + expected.retiredEdges + ' retired) and the model renders ' +
+         ' in hidden rooms − ' + (expected.retiredWritings || 0) + ' on retired writings − ' +
+         expected.retiredEdges + ' withdrawn) and the model renders ' +
          after.links + ' — so glcheck, constellationcheck and braincheck stay true'
        : 'the expectation says ' + expected.total + ' and the model renders ' + after.links +
          ' — every check that counts relationships would fail on a real unlink');
+
+  /* ---- D7 — a retired WRITING's relationships are expected gone too ----
+     The same blind spot as D6, one mechanism over, found the same way: by data
+     that was actually committed. Retiring PRETEND YOU MISS HER from the editor
+     dropped its relationship, and the link oracle — which knew about hidden
+     rooms and withdrawn pairs — had never been told that a retired writing
+     takes its edges with it. glcheck, all four states: "expected 126, model has
+     125". The live store happens to exercise that case today; un-retire that
+     writing and the accidental coverage is gone. So the harness retires a
+     writing with relationships of its own and checks the oracle while the
+     retirement is in place — the only moment it can be wrong. */
+  const LINKS = '(function(){ var M=window.__v02; if(!M) return {ERROR:"no __v02"};' +
+                ' M.enter(); M.settle(40); return { links:(M.graph()||{}).links||null }; })()';
+  const D7s = JSON.parse(ORIGINAL);
+  D7s.retired = (D7s.retired || []).concat([{ id: w.writing, at: '2026-09-16' }]);
+  write(D7s);
+  const refused7 = gate();
+  if (refused7) throw new Error('the gate refused retiring the subject writing:\n' + refused7);
+  build();
+  const retiredView = measure('retired-writing', LINKS);
+  const exp7 = require('../.p3/expect.js').expectedLinks();
+  ck('D7', exp7.total === retiredView.links && exp7.retiredWritings >= w.concepts.length,
+     exp7.total === retiredView.links
+       ? 'and a RETIRED WRITING takes its relationships with it, in the oracle as on the page: ' +
+         w.label + ' retired, ' + exp7.retiredWritings + ' relationship(s) expected gone, and the ' +
+         'model renders the ' + retiredView.links + ' the oracle expects'
+       : 'the oracle expects ' + exp7.total + ' and the model renders ' + retiredView.links +
+         ' with a writing retired — the next real deletion would fail every link-count check');
 
   /* ---- D4 — a store-published edge is removed at source --------------- */
   const D2s = JSON.parse(ORIGINAL);
