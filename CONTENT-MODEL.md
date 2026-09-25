@@ -50,7 +50,9 @@ fails on any violation.
   state,     // where it is in its life
   register,  // what KIND of statement it is
   src,       // which document it came from
-  line       // the material itself
+  line       // the material itself — in the shape it was typed: line
+             // breaks, blank lines and indentation are content, never
+             // normalised (HANDOVER.md §3)
 }
 ```
 

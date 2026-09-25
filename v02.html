@@ -65,8 +65,10 @@ html,body{margin:0;padding:0;height:100%;background:#05070f;color:var(--ink);
   margin:0 0 2px;color:var(--ink-muted)}
 #where{font-family:var(--serif);font-size:clamp(30px,3.4vw,52px);line-height:1.05;
   letter-spacing:-.03em;font-weight:400;margin:0 0 6px}
+/* pre-wrap for the reason written at .docbody: this is where a focused writing
+   shows its material, and it was folding a poem into one paragraph here too */
 #gloss{font-family:var(--serif);font-size:16px;line-height:1.5;color:var(--ink-muted);
-  margin:0 0 18px;max-width:34ch}
+  margin:0 0 18px;max-width:34ch;white-space:pre-wrap}
 #status{position:absolute;left:-9999px}
 .grp{margin:0 0 16px}
 .grp h2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
@@ -319,8 +321,23 @@ body.th-hover-mind  .th-world--mind  .th-meta{opacity:.55}
 .doc{max-width:34rem;margin:0 auto;padding:14vh 24px 18vh}
 .dochead{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
   color:var(--ink-subtle);margin:0 0 26px;display:flex;justify-content:space-between}
+/* THE STATEMENT KEEPS THE SHAPE IT WAS TYPED IN.
+
+   It was set with the browser's default white-space, which folds every line
+   break and every run of spaces into a single space. A poem typed with a blank
+   line between its stanzas and an indent on a line arrived here as one
+   paragraph — while data/notes.json held the shape the whole time: HAPPINESS
+   and STAGE OF GRIEF were committed with their newlines in them, and only this
+   rule threw them away. pre-wrap keeps line breaks, blank lines and leading
+   spaces, and still wraps a long line at the edge of the column.
+
+   When this changed, nothing in the locked corpus, the overlay, the manual or
+   the site's own words carried a newline, a tab, a double space or whitespace
+   at either end, so the only writings it altered were the ones being flattened.
+   The edges of a writing are trimmed by asTyped() in src/v02-app.js, which
+   keeps the indent on a first line that trim() used to take. */
 .docbody{font-family:var(--serif);font-size:clamp(24px,2.6vw,34px);line-height:1.32;
-  letter-spacing:-.02em;margin:0 0 30px}
+  letter-spacing:-.02em;margin:0 0 30px;white-space:pre-wrap}
 /* SECTIONS ARE COMMENTARY, AND THEY READ LIKE IT.
 
    The statement at the top of a reading is set large because it IS the thing —
@@ -6991,6 +7008,20 @@ function group(title, rows){
 function put(el){ if(el) elGroups.appendChild(el); }
 function esc(s){ return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
 
+/* WHAT WAS TYPED, MINUS WHAT NOBODY MEANT. A writing is drawn with its line
+   breaks, blank lines and indentation kept (white-space:pre-wrap — see .docbody
+   in the shell), so its edges show now: an Enter pressed after the last word
+   would draw an empty line under the statement. Blank lines before the first
+   word and whitespace after the last are dropped, and nothing else is. This
+   replaced trim(), which also took the indent off a first line — a poem that
+   opens indented is exactly the writing this exists for.
+
+   A function declaration on purpose: it hoists whole, where a var assigned
+   here would be undefined to anything above it that ran first. */
+function asTyped(s){
+  return String(s==null?'':s).replace(/^(?:[ \t]*\r?\n)+/,'').replace(/\s+$/,'');
+}
+
 /* ── THE ORDER OF THE DOORS ────────────────────────────────────────────
    ORDER IN THE MENU IS NOT ORDER IN THE MIND, and that is the whole reason
    this is a separate list rather than a rearrangement of MIGS. A region's
@@ -7075,7 +7106,7 @@ function paintDOM(){
     var m=byId[state.region];
     elTier.textContent=T('topic.tier');
     elWhere.textContent=m.label;
-    elGloss.textContent=m.line||'';
+    elGloss.textContent=asTyped(m.line);
     var mem=owned[m.id]||[];
     /* WRITINGS FIRST. What a person came here to read is the writing; the
        concepts are the scaffolding that holds the writings apart from each
@@ -7117,7 +7148,7 @@ function paintDOM(){
   var n=byId[state.focus];
   elTier.textContent=esc(n.t);
   elWhere.textContent=n.label;
-  elGloss.textContent=n.line||'';
+  elGloss.textContent=asTyped(n.line);
   put(group('Connects to', adj[n.id].map(function(k){
     var o=byId[k.o];
     var meta=(k.dir>0? '<span class="verb">'+esc(k.v)+'</span> '+esc(o.label)
@@ -7172,7 +7203,7 @@ function openReader(id){
   var n=byId[id]; if(!n || n.vacant) return;
   readingId=id;
   camMemory={p:wantPos.clone(), a:wantAim.clone(), mode:state.mode, focus:state.focus, region:state.region};
-  readTitle.textContent=n.line||n.label;
+  readTitle.textContent=asTyped(n.line)||n.label;
   readRunning.textContent=byId[n.mig]?byId[n.mig].label:'';
   readFolio.textContent=esc(n.t).toUpperCase();
   /* THE SECTIONS UNDER THE STATEMENT.
@@ -7187,7 +7218,12 @@ function openReader(id){
      a section, and drawing an empty block would put a hole in the page that
      looked like a rendering fault. Text, never markup — esc() everywhere, and
      the line breaks a person typed are kept by white-space in the stylesheet
-     rather than by turning newlines into tags. */
+     rather than by turning newlines into tags.
+
+     The body went through trim(), which took the indent off its first line
+     while the stylesheet kept every other line's. asTyped() trims only what
+     nobody meant: blank lines before the first word, whitespace after the
+     last. sectioncheck X7 reads the result as drawn, not as stored. */
   readSections.innerHTML='';
   (n.sections||[]).forEach(function(sec){
     if(!sec || !String(sec.body||'').trim()) return;
@@ -7198,12 +7234,24 @@ function openReader(id){
       wrap.appendChild(h);
     }
     var b2=document.createElement('p'); b2.className='docsec-b';
-    b2.textContent=String(sec.body).trim();
+    b2.textContent=asTyped(sec.body);
     wrap.appendChild(b2);
     readSections.appendChild(wrap);
   });
   reader.classList.add('on'); reader.setAttribute('aria-hidden','false');
-  readClose.focus();
+  /* A READING OPENS AT ITS FIRST LINE. Focus goes to the close button — a
+     dialog needs it somewhere inside — and focus() scrolls whatever it lands on
+     into view. The button sits under the writing, so every reading taller than
+     the window opened scrolled to its END. Measured at 1440×900: STAGE OF GRIEF
+     opened with its first line 46px above the top of the window, and once its
+     blank lines were kept (.docbody) that grew to 181px — four lines of a poem
+     gone before a word of it was read. preventScroll keeps the focus where it
+     was going and the page where it starts. The reset after it covers a
+     browser that ignores the option, and the reader being one element reused
+     for every writing: without it a reading would open wherever the last one
+     was left. sectioncheck X9 measures it with a writing too tall to fit. */
+  readClose.focus({preventScroll:true});
+  reader.scrollTop=0;
   pushUrl();
   say('Reading '+n.label+'.');
 }

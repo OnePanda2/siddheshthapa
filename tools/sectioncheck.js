@@ -18,6 +18,18 @@
  *   X4  a section is TEXT: markup in a body is shown, never interpreted
  *   X5  the gate refuses a section with a heading and no body, which would
  *       render as a title over nothing
+ *   X6  the statement is DRAWN in the shape it was typed — line breaks, blank
+ *       lines and indentation, the first line's included
+ *   X7  and so is a section's body
+ *   X8  and the panel beside the mind, where a focused writing shows its
+ *       material before anything is opened
+ *   X9  a reading taller than the window opens at its first line, not its last
+ *
+ * X6–X8 READ innerText, NOT textContent. textContent is the characters that
+ * were stored, and it keeps every newline whatever the stylesheet does with
+ * them — which is how a poem folded into one paragraph on the page while every
+ * check here read it back intact. innerText is the text as it was drawn. The
+ * mutations that prove these can fail are in tools/sectionmutate.js.
  *
  * usage: node tools/sectioncheck.js
  */
@@ -33,17 +45,44 @@ const ck = (id, ok, msg) => { TOTAL++; if (ok) console.log('  PASS  ' + id.padEn
                               else { bad++; console.log('  FAIL  ' + id.padEnd(4) + msg); } };
 
 const MARKUP = '<b>not bold</b> & kept as typed';
+/* TYPED THE WAY A POEM IS: an indented first line (the one trim() used to
+   take), blank lines between stanzas, a deeper indent inside one — and long
+   enough that the reading is taller than the window, which X9 needs and says
+   so if it ever stops being true. */
+const SHAPE = [
+  '    The statement this writing is built around,',
+  'typed the way a poem is typed:',
+  '        an indented line inside the stanza,',
+  'and a blank line after it.',
+  '',
+  'A second stanza, with its own lines,',
+  'which nothing may fold together',
+  '    into the paragraph before it.',
+  '',
+  'And a third, only so the reading',
+  'is taller than the window it opens in,',
+  'which is when it used to open',
+  'at its last line instead of its first.'
+].join('\n');
 const NOTE = {
   id: 'zz-sec-1', t: 'thought', label: 'SECTION TEST', mig: 'music',
   crosses: [], state: 'seed', register: 'harness fixture',
   src: 'tools/sectioncheck.js — synthetic, never committed',
-  line: 'The statement this writing is built around.',
+  line: SHAPE,
   added: '2026-09-05',
   sections: [
-    { heading: 'WHAT IT MEANS', body: 'The first section, which carries a heading.' },
+    { heading: 'WHAT IT MEANS',
+      body: '    The first section, which carries a heading,\nopens indented, as a quote set off may,' +
+            '\n\nand keeps the blank line under it.' },
     { heading: '', body: 'The second section, which carries none. ' + MARKUP }
   ]
 };
+/* how a shape is reported, so a pass says what was actually drawn */
+function shapeOf(s) {
+  const ls = String(s).split('\n');
+  return ls.length + ' lines, ' + ls.filter(l => !l.trim()).length + ' blank, ' +
+         ls.filter(l => /^\s+\S/.test(l)).length + ' indented';
+}
 
 function build() { execSync('node tools/build-v02.js', { stdio: 'pipe' }); }
 
@@ -55,13 +94,28 @@ function measure(tag, id) {
   try{
     var M=window.__v02;
     M.enter(); M.settle(60); M.setOpen(1); M.settle(40);
+    /* THE PANEL FIRST: a focused writing shows its material there before it
+       is opened. An element that is not rendered answers innerText with its
+       textContent — newlines and all, whatever the stylesheet says — so the
+       panel is asked whether it was drawn at all, or X8 would pass on nothing. */
+    M.go('concept','${id}'); M.settle(40);
+    var g=document.getElementById('gloss'), gs=g?getComputedStyle(g):null;
+    var gloss={ shape:g?g.innerText:null,
+                drawn:!!g && g.getClientRects().length>0 && gs.visibility==='visible' };
     M.read('${id}'); M.settle(40);
-    var box=document.getElementById('readSections');
-    r={ statement:(document.getElementById('readTitle')||{}).textContent||'',
+    var box=document.getElementById('readSections'), t=document.getElementById('readTitle'),
+        R=document.getElementById('reader');
+    r={ statement:(t||{}).textContent||'',
+        statementShape:t?t.innerText:null,
+        gloss:gloss,
+        scroll:{ top:R?R.scrollTop:-1, height:R?R.scrollHeight:-1, view:R?R.clientHeight:-1,
+                 firstLine:t?Math.round(t.getBoundingClientRect().top):null,
+                 focused:document.activeElement?document.activeElement.id:null },
         secs:[].slice.call(box?box.children:[]).map(function(d){
           var h=d.querySelector('.docsec-h'), b=d.querySelector('.docsec-b');
           return { heading:h?h.textContent:null,
                    body:b?b.textContent:null,
+                   shape:b?b.innerText:null,
                    /* COUNTED IN THE PAGE, NOT COMPARED AS HTML AFTERWARDS.
                       This returned innerHTML and the assertion looked for an
                       escaped "&lt;b&gt;" in it — but the result travels home
@@ -129,6 +183,44 @@ try {
      'paragraph holds ' + ((r.secs[1] || {}).kids) + ' element children, so nothing ' +
      'in the body was parsed as markup');
 
+  /* ── the shape it was typed in, read as drawn ─────────────────────────── */
+  const drew = (s, want) => s === want ? shapeOf(want)
+    : 'drawn as ' + JSON.stringify(String(s).slice(0, 80)) + ' — ' + shapeOf(want) + ' were typed';
+  ck('X6', r.statementShape === NOTE.line,
+     r.statementShape === NOTE.line
+       ? 'the statement is drawn as typed — ' + drew(r.statementShape, NOTE.line) +
+         ', the first line among them'
+       : 'the statement lost its shape on the page: ' + drew(r.statementShape, NOTE.line));
+
+  const s0 = r.secs[0] || {}, want0 = NOTE.sections[0].body;
+  ck('X7', s0.shape === want0,
+     s0.shape === want0
+       ? 'a section is drawn as typed too — ' + drew(s0.shape, want0) +
+         ', its first line still indented'
+       : 'the section lost its shape on the page: ' + drew(s0.shape, want0));
+
+  ck('X8', r.gloss.drawn && r.gloss.shape === NOTE.line,
+     !r.gloss.drawn
+       ? 'the panel was not drawn, so its text proves nothing either way'
+       : r.gloss.shape === NOTE.line
+         ? 'the panel shows a focused writing as typed — ' + drew(r.gloss.shape, NOTE.line)
+         : 'the panel lost the shape: ' + drew(r.gloss.shape, NOTE.line));
+
+  /* A READING THAT FITS THE WINDOW CANNOT BE SCROLLED TO ITS END, so a pass on
+     one would be a stale census. The fixture is made tall enough and this says
+     so if that ever stops being true, rather than passing on nothing. */
+  const sc = r.scroll;
+  const tall = sc.height > sc.view, atTop = sc.top === 0 && sc.firstLine >= 0;
+  ck('X9', tall && atTop && sc.focused === 'readClose',
+     !tall
+       ? 'the fixture fits the window (' + sc.height + 'px in ' + sc.view + 'px), so where a ' +
+         'reading opens was not tested — make the fixture longer'
+       : atTop && sc.focused === 'readClose'
+         ? 'a reading ' + sc.height + 'px tall in a ' + sc.view + 'px window opens at its first ' +
+           'line (' + sc.firstLine + 'px from the top), with focus inside it on the close button'
+         : 'the reading opened scrolled ' + sc.top + 'px, its first line at ' + sc.firstLine +
+           'px, focus on ' + sc.focused);
+
   /* ── and the gate refuses a section that would draw nothing ───────────── */
   const broken = JSON.parse(JSON.stringify(NOTE));
   broken.id = 'zz-sec-2';
@@ -156,5 +248,6 @@ try {
 console.log('\n' + (TOTAL - bad) + '/' + TOTAL + ' section invariants hold');
 console.log(bad ? bad + ' PROBLEM(S)'
                 : 'a writing can carry sections, the reader draws them in order, and a ' +
-                  'section that would draw nothing never gets published');
+                  'section that would draw nothing never gets published; a writing is drawn ' +
+                  'in the shape it was typed and opens at its first line');
 process.exit(bad ? 1 : 0);

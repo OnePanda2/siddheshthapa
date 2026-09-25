@@ -30,6 +30,11 @@
  *   E5  a store with no `retired` and no `edits` keys, which is exactly what
  *       the live file is, survives the round trip rather than throwing
  *   E6  and nothing is ever sent anywhere but api.github.com
+ *   E7  a writing is committed in the shape it was typed — line breaks, blank
+ *       lines, and the indent on its first line, which trim() used to take
+ *       before the page ever had a chance to keep it
+ *   E8  and so is a section's body, through the same row control the manual
+ *       uses, where everything that is not a writing is still trimmed
  *
  * usage: node tools/editorcheck.js [editor.html]
  */
@@ -99,6 +104,15 @@ const PRELUDE = `<script>(function(){
 })();</script>
 `;
 
+/* TYPED AS A POEM IS: the first line indented, blank lines between the parts.
+   Each is injected into the page as a JSON string literal, so the newlines and
+   spaces arrive in the textarea exactly as a person would have typed them. */
+const SHAPED_LINE = '    Written by the harness, indented, to prove a new writing\n' +
+                    'keeps the shape it was typed in and carries its relationships,\n\n' +
+                    '    then removed.';
+const SHAPED_SECTION = '  A section typed with an indent on its first line,\n\n' +
+                       'and a blank line before this one.';
+
 /* the prelude must run BEFORE the editor's own script, so it is inserted at
    the top of <body> rather than appended like every other probe in this suite */
 const page = tmp + '/e.html';
@@ -163,7 +177,15 @@ const PROBE = `(function(){
   if(!title || !body) return { ERROR: 'the new-writing form is not the shape expected' };
   title.value = 'ZZ EDITORCHECK WRITING';
   if(title.oninput) title.oninput();          /* the id derives from the title */
-  body.value = 'Written by the harness to prove a new writing carries its relationships, then removed.';
+  body.value = ${JSON.stringify(SHAPED_LINE)};
+  /* ---- E8: a section, through the row control the manual shares ------- */
+  var addSec = [].slice.call(document.querySelectorAll('#edForm button'))
+    .filter(function(b){ return /\\+\\s*section/i.test(b.textContent); })[0];
+  if(!addSec) return { ERROR: 'no + section button' };
+  addSec.click();
+  var secBody = [].slice.call(document.querySelectorAll('#edForm .wf-body')).pop();
+  if(!secBody) return { ERROR: 'the section row did not appear' };
+  secBody.value = ${JSON.stringify(SHAPED_SECTION)};
   var reg = document.querySelector('#edForm input[list=edRegisters]');
   if(reg) reg.value = 'fixture — written by the harness, not by anyone';
   var srcF = [].slice.call(document.querySelectorAll('#edForm input[type=text]'))
@@ -233,6 +255,21 @@ ck('E2', !!fresh && !!freshEdge && freshEdge[2] === 'argues with',
        ' ' + freshEdge[2] + ' ' + freshEdge[1]
      : 'a new writing did not commit ' + (fresh ? 'its relationship' : 'at all'));
 
+/* ---- E7/E8 — the shape it was typed in, as it leaves the form ---------- */
+const shown = s => JSON.stringify(String(s).slice(0, 70));
+ck('E7', !!fresh && fresh.line === SHAPED_LINE,
+   !fresh ? 'no new writing was committed to look at'
+     : fresh.line === SHAPED_LINE
+       ? 'a writing is committed as typed — ' + SHAPED_LINE.split('\n').length + ' lines, a blank ' +
+         'one among them, and the indent on the first line is still there'
+       : 'a writing was committed as ' + shown(fresh.line) + ' — typed as ' + shown(SHAPED_LINE));
+const sec = fresh && (fresh.sections || [])[0];
+ck('E8', !!sec && sec.body === SHAPED_SECTION,
+   !sec ? 'the new writing committed no section'
+     : sec.body === SHAPED_SECTION
+       ? "a section's body is committed as typed, its first line still indented"
+       : 'a section was committed as ' + shown(sec.body) + ' — typed as ' + shown(SHAPED_SECTION));
+
 /* ---- E5 ---------------------------------------------------------------- */
 ck('E5', puts.length >= 2 && !!store,
    puts.length >= 2
@@ -268,5 +305,6 @@ ck('E6', (r.urls || []).length > 0 && offsite.length === 0,
 
 console.log('\n' + (TOTAL - bad) + '/' + TOTAL + ' editor invariants hold');
 console.log(bad ? bad + ' PROBLEM(S)'
-                : 'the editor commits what it says it commits, relationships included');
+                : 'the editor commits what it says it commits, relationships included, ' +
+                  'in the shape it was typed');
 process.exit(bad ? 1 : 0);

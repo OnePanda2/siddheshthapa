@@ -311,6 +311,16 @@ function esc(s){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
   });
 }
+/* A WRITING IS SAVED IN THE SHAPE IT WAS TYPED. Its material went through
+   trim(), which took the indent off a poem's first line before it was ever
+   committed — the page could keep every other line's indent and had nothing
+   left to keep on that one. Only what nobody meant is dropped: blank lines
+   before the first word and whitespace after the last. The page applies the
+   same rule when it draws (asTyped in src/v02-app.js); editorcheck E7 and E8
+   read the commit body to prove the shape leaves this form intact. */
+function asTyped(s){
+  return String(s == null ? "" : s).replace(/^(?:[ \t]*\r?\n)+/, "").replace(/\s+$/, "");
+}
 function authorised(){
   return !!(token && me && canPush && me.login.toLowerCase() === CFG.owner.toLowerCase());
 }
@@ -879,7 +889,7 @@ function openForm(migId, editing, asConcept){
      list in this editor rather than two. */
   var secs = rowsField(editing && editing.sections,
     [{ key:'heading', placeholder:'Heading — optional' },
-     { key:'body', big:true, placeholder:'What this section says. Leave the heading blank for a plain paragraph.' }],
+     { key:'body', big:true, keep:true, placeholder:'What this section says. Leave the heading blank for a plain paragraph.' }],
     '+ section', false);
 
   if(!isConcept){
@@ -970,7 +980,7 @@ function openForm(migId, editing, asConcept){
       id: editing ? editing.id : fId.value.trim(), t: fType.value, label: fLabel.value.trim(),
       mig: migId, crosses: crosses,
       register: fRegister.value.trim(), src: fSrc.value.trim(),
-      line: fLine.value.trim(), added: new Date().toISOString().slice(0,10)
+      line: asTyped(fLine.value), added: new Date().toISOString().slice(0,10)
     };
     /* omitted entirely when there are none, so a store full of notes without
        sections does not fill up with empty arrays */
@@ -1875,7 +1885,13 @@ function rowsField(items, fields, addLabel, numbered){
     read: function(){
       return [].slice.call(wrap.children).map(function(r){
         var o = {};
-        fields.forEach(function(f){ o[f.key] = r.querySelector(".wf-" + f.key).value.trim(); });
+        /* `keep` marks a field that holds a writing — a section's body — and
+           keeps the shape it was typed in (see asTyped). Everything else here
+           is a manual's name, note or step, and is trimmed as it always was. */
+        fields.forEach(function(f){
+          var v = r.querySelector(".wf-" + f.key).value;
+          o[f.key] = f.keep ? asTyped(v) : v.trim();
+        });
         return o;
       }).filter(function(o){ return fields.some(function(f){ return o[f.key]; }); });
     } };

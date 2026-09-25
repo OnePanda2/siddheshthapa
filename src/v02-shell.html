@@ -65,8 +65,10 @@ html,body{margin:0;padding:0;height:100%;background:#05070f;color:var(--ink);
   margin:0 0 2px;color:var(--ink-muted)}
 #where{font-family:var(--serif);font-size:clamp(30px,3.4vw,52px);line-height:1.05;
   letter-spacing:-.03em;font-weight:400;margin:0 0 6px}
+/* pre-wrap for the reason written at .docbody: this is where a focused writing
+   shows its material, and it was folding a poem into one paragraph here too */
 #gloss{font-family:var(--serif);font-size:16px;line-height:1.5;color:var(--ink-muted);
-  margin:0 0 18px;max-width:34ch}
+  margin:0 0 18px;max-width:34ch;white-space:pre-wrap}
 #status{position:absolute;left:-9999px}
 .grp{margin:0 0 16px}
 .grp h2{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
@@ -319,8 +321,23 @@ body.th-hover-mind  .th-world--mind  .th-meta{opacity:.55}
 .doc{max-width:34rem;margin:0 auto;padding:14vh 24px 18vh}
 .dochead{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
   color:var(--ink-subtle);margin:0 0 26px;display:flex;justify-content:space-between}
+/* THE STATEMENT KEEPS THE SHAPE IT WAS TYPED IN.
+
+   It was set with the browser's default white-space, which folds every line
+   break and every run of spaces into a single space. A poem typed with a blank
+   line between its stanzas and an indent on a line arrived here as one
+   paragraph — while data/notes.json held the shape the whole time: HAPPINESS
+   and STAGE OF GRIEF were committed with their newlines in them, and only this
+   rule threw them away. pre-wrap keeps line breaks, blank lines and leading
+   spaces, and still wraps a long line at the edge of the column.
+
+   When this changed, nothing in the locked corpus, the overlay, the manual or
+   the site's own words carried a newline, a tab, a double space or whitespace
+   at either end, so the only writings it altered were the ones being flattened.
+   The edges of a writing are trimmed by asTyped() in src/v02-app.js, which
+   keeps the indent on a first line that trim() used to take. */
 .docbody{font-family:var(--serif);font-size:clamp(24px,2.6vw,34px);line-height:1.32;
-  letter-spacing:-.02em;margin:0 0 30px}
+  letter-spacing:-.02em;margin:0 0 30px;white-space:pre-wrap}
 /* SECTIONS ARE COMMENTARY, AND THEY READ LIKE IT.
 
    The statement at the top of a reading is set large because it IS the thing —

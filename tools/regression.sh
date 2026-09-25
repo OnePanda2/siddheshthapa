@@ -90,7 +90,8 @@ echo "===== MUTATION HARNESSES =====" >> "$LOG"
 for t in notesmutate systemfill sectioncheck projectcheck regioncheck menucheck edgecheck \
          worksmutate brainmutate glmutate emblemmutate highlightmutate lovemutate \
          reservemutate regionmutate menumutate travelmutate worldmutate \
-         worldframemutate constellationmutate astromutate editormutate edgemutate; do
+         worldframemutate constellationmutate astromutate editormutate edgemutate \
+         sectionmutate; do
   run "$t" node "tools/$t.js"
 done
 

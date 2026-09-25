@@ -6,8 +6,8 @@ let bad = 0;
 const ck = (ok, msg) => { if (!ok) bad++; console.log((ok ? '  ok    ' : '  WRONG ') + msg); };
 
 const harnessFiles = fs.readdirSync('tools').filter(f => /(check|mutate|fill)\.js$/.test(f));
-ck(/55 test harnesses/.test(h) && /\*\*55 harnesses\*\*/.test(h) && harnessFiles.length === 55,
-   '55 harnesses (tools/ has ' + harnessFiles.length + ')');
+ck(/56 test harnesses/.test(h) && /\*\*56 harnesses\*\*/.test(h) && harnessFiles.length === 56,
+   '56 harnesses (tools/ has ' + harnessFiles.length + ')');
 
 const D = JSON.parse(fs.readFileSync('data/astronomy-systems.json', 'utf8'));
 ck(/\*\*26 systems\*\*/.test(h) && D.systems.length === 26, '26 systems');
@@ -49,7 +49,7 @@ ck(/at the time of writing/.test(h),
 /* the runner really does invoke everything the handover lists in its groups */
 const rs = fs.readFileSync('tools/regression.sh', 'utf8');
 ['anchorcheck', 'editorcheck', 'edgecheck', 'edgemutate', 'editormutate', 'menucheck',
- 'regioncheck', 'reservecheck'].forEach(t => {
+ 'regioncheck', 'reservecheck', 'sectioncheck', 'sectionmutate'].forEach(t => {
   ck(rs.indexOf(t) >= 0 && h.indexOf(t) >= 0, 'registered and documented: ' + t);
 });
 

@@ -10,6 +10,9 @@
  * passed — because every other harness writes the store to disk and never
  * comes through commitTo at all.
  *
+ * E7 and E8 restore trim() on a writing and on a section's body, which took
+ * the indent off a poem's first line before the page could keep it.
+ *
  * usage: node tools/editormutate.js [ids] [--dry]
  */
 const fs = require('fs'), { execSync } = require('child_process');
@@ -50,7 +53,23 @@ const MUTATIONS = [
     file: APP,
     find: "var API = 'https://api.github.com';",
     repl: "var API = 'https://api.github.example';   // mutation: somewhere else entirely",
-    expect: 'FAIL  E6' }
+    expect: 'FAIL  E6' },
+
+  /* THE SHAPE, AS IT SHIPPED. trim() took the indent off a writing's first
+     line before it was committed, so no stylesheet could ever show it. */
+  { n: 'E7', name: 'a writing is committed in the shape it was typed',
+    file: APP,
+    find: "      line: asTyped(fLine.value), added: new Date().toISOString().slice(0,10)",
+    repl: "      line: fLine.value.trim(), added: new Date().toISOString().slice(0,10)   // mutation: trim() again",
+    expect: 'FAIL  E7' },
+
+  /* the row control trims everything it reads, which is right for a manual's
+     names and steps and wrong for the one field in it that holds a writing */
+  { n: 'E8', name: "a section's body is committed in the shape it was typed",
+    file: APP,
+    find: "          o[f.key] = f.keep ? asTyped(v) : v.trim();",
+    repl: "          o[f.key] = v.trim();   // mutation: every field trimmed, the writing too",
+    expect: 'FAIL  E8' }
 ];
 
 const DRY = process.argv.indexOf('--dry') >= 0;

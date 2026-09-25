@@ -4069,6 +4069,20 @@ function group(title, rows){
 function put(el){ if(el) elGroups.appendChild(el); }
 function esc(s){ return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
 
+/* WHAT WAS TYPED, MINUS WHAT NOBODY MEANT. A writing is drawn with its line
+   breaks, blank lines and indentation kept (white-space:pre-wrap — see .docbody
+   in the shell), so its edges show now: an Enter pressed after the last word
+   would draw an empty line under the statement. Blank lines before the first
+   word and whitespace after the last are dropped, and nothing else is. This
+   replaced trim(), which also took the indent off a first line — a poem that
+   opens indented is exactly the writing this exists for.
+
+   A function declaration on purpose: it hoists whole, where a var assigned
+   here would be undefined to anything above it that ran first. */
+function asTyped(s){
+  return String(s==null?'':s).replace(/^(?:[ \t]*\r?\n)+/,'').replace(/\s+$/,'');
+}
+
 /* ── THE ORDER OF THE DOORS ────────────────────────────────────────────
    ORDER IN THE MENU IS NOT ORDER IN THE MIND, and that is the whole reason
    this is a separate list rather than a rearrangement of MIGS. A region's
@@ -4153,7 +4167,7 @@ function paintDOM(){
     var m=byId[state.region];
     elTier.textContent=T('topic.tier');
     elWhere.textContent=m.label;
-    elGloss.textContent=m.line||'';
+    elGloss.textContent=asTyped(m.line);
     var mem=owned[m.id]||[];
     /* WRITINGS FIRST. What a person came here to read is the writing; the
        concepts are the scaffolding that holds the writings apart from each
@@ -4195,7 +4209,7 @@ function paintDOM(){
   var n=byId[state.focus];
   elTier.textContent=esc(n.t);
   elWhere.textContent=n.label;
-  elGloss.textContent=n.line||'';
+  elGloss.textContent=asTyped(n.line);
   put(group('Connects to', adj[n.id].map(function(k){
     var o=byId[k.o];
     var meta=(k.dir>0? '<span class="verb">'+esc(k.v)+'</span> '+esc(o.label)
@@ -4250,7 +4264,7 @@ function openReader(id){
   var n=byId[id]; if(!n || n.vacant) return;
   readingId=id;
   camMemory={p:wantPos.clone(), a:wantAim.clone(), mode:state.mode, focus:state.focus, region:state.region};
-  readTitle.textContent=n.line||n.label;
+  readTitle.textContent=asTyped(n.line)||n.label;
   readRunning.textContent=byId[n.mig]?byId[n.mig].label:'';
   readFolio.textContent=esc(n.t).toUpperCase();
   /* THE SECTIONS UNDER THE STATEMENT.
@@ -4265,7 +4279,12 @@ function openReader(id){
      a section, and drawing an empty block would put a hole in the page that
      looked like a rendering fault. Text, never markup — esc() everywhere, and
      the line breaks a person typed are kept by white-space in the stylesheet
-     rather than by turning newlines into tags. */
+     rather than by turning newlines into tags.
+
+     The body went through trim(), which took the indent off its first line
+     while the stylesheet kept every other line's. asTyped() trims only what
+     nobody meant: blank lines before the first word, whitespace after the
+     last. sectioncheck X7 reads the result as drawn, not as stored. */
   readSections.innerHTML='';
   (n.sections||[]).forEach(function(sec){
     if(!sec || !String(sec.body||'').trim()) return;
@@ -4276,12 +4295,24 @@ function openReader(id){
       wrap.appendChild(h);
     }
     var b2=document.createElement('p'); b2.className='docsec-b';
-    b2.textContent=String(sec.body).trim();
+    b2.textContent=asTyped(sec.body);
     wrap.appendChild(b2);
     readSections.appendChild(wrap);
   });
   reader.classList.add('on'); reader.setAttribute('aria-hidden','false');
-  readClose.focus();
+  /* A READING OPENS AT ITS FIRST LINE. Focus goes to the close button — a
+     dialog needs it somewhere inside — and focus() scrolls whatever it lands on
+     into view. The button sits under the writing, so every reading taller than
+     the window opened scrolled to its END. Measured at 1440×900: STAGE OF GRIEF
+     opened with its first line 46px above the top of the window, and once its
+     blank lines were kept (.docbody) that grew to 181px — four lines of a poem
+     gone before a word of it was read. preventScroll keeps the focus where it
+     was going and the page where it starts. The reset after it covers a
+     browser that ignores the option, and the reader being one element reused
+     for every writing: without it a reading would open wherever the last one
+     was left. sectioncheck X9 measures it with a writing too tall to fit. */
+  readClose.focus({preventScroll:true});
+  reader.scrollTop=0;
   pushUrl();
   say('Reading '+n.label+'.');
 }

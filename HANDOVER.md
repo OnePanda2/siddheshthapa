@@ -5,7 +5,7 @@ reader knows nothing: no prior conversation, no context, no access to whoever
 built it. Everything needed to understand, run, change and verify this site is
 here or is named here.
 
-**Last updated 2026-09-16.** This is the **public technical record**. The owner
+**Last updated 2026-09-25.** This is the **public technical record**. The owner
 also keeps a private project report — status, decisions, accounts, working
 preferences and a change log — outside this repository; where the two disagree
 on a technical fact, this file and the committed logs win.
@@ -24,7 +24,7 @@ via GitHub Pages. The published page is a **single self-contained HTML file
 that makes zero external network requests**. Content is added not by editing
 code but through an editor page that commits JSON to the repository; a GitHub
 Actions workflow validates that JSON and rebuilds the site. The project is
-guarded by **55 test harnesses**, roughly half of which are mutation harnesses
+guarded by **56 test harnesses**, roughly half of which are mutation harnesses
 that break the code on purpose to prove the other half actually test something.
 
 ---
@@ -126,6 +126,14 @@ id, its region and its index, and loses only what made it a writing. Its star
 goes on burning, empty, and a later note may claim it.
 
 That single rule explains `retired`, `retiredRegions` and `retiredEdges` alike.
+
+**A writing keeps the shape it was typed in.** Line breaks, blank lines and
+indentation in a writing's `line` and a section's `body` are content: the editor
+commits them untouched and the reader, the sections and the panel draw them
+with `white-space: pre-wrap`. Only blank lines before the first word and
+whitespace after the last are dropped (`asTyped()`, in both `src/v02-app.js`
+and `src/v02-editor.js`). Never normalise whitespace in a writing — that is how
+a poem became one paragraph.
 
 ---
 
@@ -301,7 +309,7 @@ worker/index.js       122 lines, most of them comment. The only server.
 worker/README.md      deploy instructions
 worker/wrangler.toml  name, compat date, public client id
 
-tools/                69 files: the build, 55 harnesses, shared utilities
+tools/                71 files: the build, 56 harnesses, shared utilities
 tools/build-v02.js    the build
 tools/regression.sh   the whole suite, in order
 tools/scratch.js      where checks put working files, and who deletes them
@@ -316,7 +324,7 @@ tools/viewport.js     drives headless Chrome at a given viewport
 
 ## 8. The test suite
 
-**55 harnesses**, run by `sh tools/regression.sh <logfile>`. Roughly
+**56 harnesses**, run by `sh tools/regression.sh <logfile>`. Roughly
 **4¾ hours** on the machine it was developed on. `tools/smoke.js` is the
 20-second version for use while working.
 
@@ -351,7 +359,8 @@ Four rules, learned the hard way:
   `regioncheck`, `menucheck`, `edgecheck`, `worksmutate`, `brainmutate`,
   `glmutate`, `emblemmutate`, `highlightmutate`, `lovemutate`, `reservemutate`,
   `regionmutate`, `menumutate`, `editormutate`, `edgemutate`, `travelmutate`,
-  `worldmutate`, `worldframemutate`, `constellationmutate`, `astromutate`
+  `worldmutate`, `worldframemutate`, `constellationmutate`, `astromutate`,
+  `sectionmutate`
 - **P4.x suite** (target `preview.html`): `contradictioncheck`, `gridcheck`,
   `marginaliacheck`, `mobilecheck`, `overlapcheck`, `tokencheck`, `widecheck`,
   `acceptmutate`, `gridmutate`, `margmutate`
@@ -501,6 +510,11 @@ sh tools/regression.sh /tmp/reg.log    # everything, ~4¾ hours
    was that content capable of damaging a career should not be online behind
    any paywall, and screenshot prevention that looks like protection and is not
    would have been worse than nothing.
+6. **MY WORKS still folds line breaks.** A project's line and a sheet's fields
+   are drawn with the default `white-space`, so text typed there on several
+   lines reads as one paragraph. Nothing in the manual carries a line break
+   today, and the fix of 2026-09-25 was asked for writings; the same rule
+   (`pre-wrap`, and `asTyped()` in the forms) would extend it.
 
 ---
 
@@ -566,6 +580,23 @@ expectation while its own retirement is in place.
 nine topics to exhaust the reserve. The reserve grew from six to twelve, nine
 fitted, and the mutation tested nothing. It now reads the pool and asks for one
 more than exists.
+
+**`textContent` is what was stored; `innerText` is what was drawn.** A poem
+typed with blank lines between its stanzas appeared on the page as one
+paragraph, and every check read it back intact — `sectioncheck` read the reader
+with `textContent`, which keeps each newline whatever the stylesheet does with
+it. The live notes carried their line breaks in `data/notes.json` all along;
+the page's default `white-space` folded them. `sectioncheck` X6–X8 read
+`innerText` now, and ask the panel whether it was drawn at all, because an
+element that is not rendered answers `innerText` with its `textContent`.
+
+**`focus()` scrolls.** The reader moved focus to its close button, which sits
+under the writing, and focus scrolls what it lands on into view — so a reading
+taller than the window opened at its end. Measured before it was fixed: the two
+live notes opened with their first lines 46px and 91px above a 1440×900 window.
+Nothing had measured where a reading opens; `sectioncheck` X9 does, with a
+fixture made tall enough to scroll and a precondition that says so if it ever
+stops being.
 
 ---
 
