@@ -307,6 +307,69 @@
         }
       ],
       "figure": "one-pipeline-three-depths"
+    },
+    {
+      "node": "p-taxcal",
+      "authority": [
+        "taxcal.siddheshthapa.com — the live site: the calculator, “You could keep up to”, “Legal ways to keep more” and the FAQ, read 2026-09-29",
+        "github.com/OnePanda2/Tax.cal — README.md and the source in assets/, read 2026-09-29",
+        "github.com/OnePanda2/Tax.cal — commits eb2ea20, 0ef56dc, ad09630 and 4133c00: the three known failures and their fixes"
+      ],
+      "purpose": "To help you keep more of what you earn, legally. It starts by showing the tax you really pay: the tax taken from your salary, plus the tax hidden in your shopping and your fuel. Then it shows how much someone on your salary could keep by making full use of your country's legal tax breaks. It's free, it's not tax advice, and your figures never leave your device.",
+      "parts": [
+        {
+          "n": 1,
+          "name": "the calculator",
+          "note": "Choose one of ten countries: the UK, the USA (every state), Canada (every province), Australia, Ireland, Germany, France, the Netherlands, Spain or Italy. Then type your salary and roughly what you spend each month. Typical amounts are filled in to start, and the answer changes as you type."
+        },
+        {
+          "n": 2,
+          "name": "the real rate",
+          "note": "Everything you pay as one number, next to the rate on your payslip. The tax on your salary uses real 2026 rates. The tax in your spending is an estimate, and it says how sure it is."
+        },
+        {
+          "n": 3,
+          "name": "you could keep up to",
+          "note": "An upper estimate of how much someone on your salary could keep each year by making full use of your country's legal tax breaks, like paying into a pension. Tax.cal doesn't know what you already use, so some or none of it may apply to you."
+        },
+        {
+          "n": 4,
+          "name": "legal ways to keep more",
+          "note": "Tax breaks worth checking in your country, as general information, not personal advice."
+        },
+        {
+          "n": 5,
+          "name": "Tax.cal Plus",
+          "note": "A few questions, different for each country. You get back a list of legal ways you might pay less, written as things to check. Free while it's still being built."
+        },
+        {
+          "n": 6,
+          "name": "Tax Wrapped",
+          "note": "Your result, turned into a picture you can share."
+        }
+      ],
+      "procedure": [
+        "Open taxcal.siddheshthapa.com. There's nothing to sign up for.",
+        "Choose your country, and your state or province if you live in the USA or Canada.",
+        "Type what you earn in a year, before tax.",
+        "Change the monthly spending to roughly match yours.",
+        "Read your real tax rate, then “You could keep up to”.",
+        "Scroll to “Legal ways to keep more”, and check anything there with a qualified adviser before acting on it."
+      ],
+      "knownFailures": [
+        {
+          "name": "Germany became Delaware",
+          "note": "Inside the code, “DE” meant both Germany and the US state of Delaware. Four live country pages compared themselves with “the USA (Delaware)” when they meant Germany. It's fixed: US states are now written differently from countries, and an unknown code stops the page from being built instead of guessing."
+        },
+        {
+          "name": "No state tax for anyone in the USA",
+          "note": "A missing piece of setup meant every US visitor saw only federal taxes, with no state income tax and no sales tax. Nothing broke to warn anyone; the number looked right and wasn't. It's fixed: a missing region now falls back to a real one."
+        },
+        {
+          "name": "A 0% tax rate after updates",
+          "note": "After an update, a returning visitor could get the new page running the old code, which showed empty boxes and a 0% tax rate. Saved copies in two places were to blame. It's fixed: the newest code is now always fetched first, and the code files carry a version number."
+        }
+      ]
     }
   ]
 }

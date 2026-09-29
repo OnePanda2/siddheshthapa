@@ -107,10 +107,32 @@
       "src": "Live note",
       "line": "The second-to-last stage of grief is not depression, but depression accompanied by the urge to consume every piece of media associated with that one person.\n\nTheir favorite songs. Their favorite movies. The movies they mentioned loving. Their favorite sitcoms, series, dramas, and everything else in the world that reminds you of them.\n\nAll the things you couldn't bring yourself to watch when you still had them.",
       "added": "2026-09-13"
+    },
+    {
+      "id": "p-taxcal",
+      "t": "project",
+      "label": "TAX.CAL",
+      "mig": "my-works",
+      "crosses": [
+        "technology",
+        "business"
+      ],
+      "state": "growing",
+      "register": "project",
+      "src": "taxcal.siddheshthapa.com",
+      "line": "Most people never use all the legal tax breaks they're allowed. Tax.cal shows how much of your salary you could keep, free, in ten countries.",
+      "added": "2026-09-29"
     }
   ],
   "minors": [],
-  "edges": [],
+  "edges": [
+    [
+      "running",
+      "p-taxcal",
+      "holds",
+      "Live, free, and working on its own: every figure is worked out in the visitor's own browser."
+    ]
+  ],
   "retired": [
     {
       "id": "j-ex",
