@@ -122,6 +122,20 @@
       "src": "taxcal.siddheshthapa.com",
       "line": "Most people never use all the legal tax breaks they're allowed. Tax.cal shows how much of your salary you could keep, free, in ten countries.",
       "added": "2026-09-29"
+    },
+    {
+      "id": "p-meanchess",
+      "t": "project",
+      "label": "MEAN CHESS",
+      "mig": "my-works",
+      "crosses": [
+        "technology"
+      ],
+      "state": "growing",
+      "register": "project",
+      "src": "meanchess.siddheshthapa.com",
+      "line": "How Mean and Selfish can Chess get?",
+      "added": "2026-10-08"
     }
   ],
   "minors": [],
@@ -131,6 +145,12 @@
       "p-taxcal",
       "holds",
       "Live, free, and working on its own: every figure is worked out in the visitor's own browser."
+    ],
+    [
+      "running",
+      "p-meanchess",
+      "holds",
+      "Live and free, and it runs on its own: the whole game, computer included, plays in the visitor's own browser."
     ]
   ],
   "retired": [

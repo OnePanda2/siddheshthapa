@@ -1630,6 +1630,20 @@ var V02_NOTES={
       "src": "taxcal.siddheshthapa.com",
       "line": "Most people never use all the legal tax breaks they're allowed. Tax.cal shows how much of your salary you could keep, free, in ten countries.",
       "added": "2026-09-29"
+    },
+    {
+      "id": "p-meanchess",
+      "t": "project",
+      "label": "MEAN CHESS",
+      "mig": "my-works",
+      "crosses": [
+        "technology"
+      ],
+      "state": "growing",
+      "register": "project",
+      "src": "meanchess.siddheshthapa.com",
+      "line": "How Mean and Selfish can Chess get?",
+      "added": "2026-10-08"
     }
   ],
   "minors": [],
@@ -1639,6 +1653,12 @@ var V02_NOTES={
       "p-taxcal",
       "holds",
       "Live, free, and working on its own: every figure is worked out in the visitor's own browser."
+    ],
+    [
+      "running",
+      "p-meanchess",
+      "holds",
+      "Live and free, and it runs on its own: the whole game, computer included, plays in the visitor's own browser."
     ]
   ],
   "retired": [
@@ -9617,6 +9637,69 @@ var WORKS_DATA = {
         {
           "name": "A 0% tax rate after updates",
           "note": "After an update, a returning visitor could get the new page running the old code, which showed empty boxes and a 0% tax rate. Saved copies in two places were to blame. It's fixed: the newest code is now always fetched first, and the code files carry a version number."
+        }
+      ]
+    },
+    {
+      "node": "p-meanchess",
+      "authority": [
+        "meanchess.siddheshthapa.com — the live game and its rules page, checked 2026-10-08",
+        "github.com/OnePanda2/Mean.Chess — README.md and docs/RULES.md, read 2026-10-08",
+        "github.com/OnePanda2/Mean.Chess — docs/DECISIONS.md D-39 and D-46, and commits a234c22 and 1b5408b: the three known failures"
+      ],
+      "purpose": "Chess where kings hunt each other. Everything in normal chess still applies, but a king can capture the enemy king from two squares away in a straight line and win on the spot. A king trapped in check can eat one of its own pieces to survive. Nothing on the board warns you when the enemy king can reach yours: spotting it is the game.",
+      "parts": [
+        {
+          "n": 1,
+          "name": "the mean rules",
+          "note": "Royal Capture: a king takes the other king from two squares away in a straight line, and wins at once. Royal Slaughter: if one of your own pieces stands between the kings, your king eats it and wins in the same move. Royal Cannibalism: a king in check with no other way out may eat one of its own pieces beside it."
+        },
+        {
+          "n": 2,
+          "name": "the pecking order",
+          "note": "A king may only eat its cheapest pieces. Pawns go first, then knights and bishops, then rooks, then promoted queens. The original queen can never be eaten."
+        },
+        {
+          "n": 3,
+          "name": "the computer",
+          "note": "Three levels: Nice, Mean and Ruthless. It thinks in the background so the page never freezes, and it takes your king the moment you step into reach."
+        },
+        {
+          "n": 4,
+          "name": "two players",
+          "note": "Or play a friend on the same phone or computer."
+        },
+        {
+          "n": 5,
+          "name": "four themes",
+          "note": "Original pieces drawn for this game, in four looks: Mean (dark), Sugar (pink), Arcade (8-bit) and Picnic (gingham)."
+        },
+        {
+          "n": 6,
+          "name": "Scenario Lab",
+          "note": "Ready-made positions that show every rule in action, and a way to save and share positions and whole games."
+        }
+      ],
+      "procedure": [
+        "Open meanchess.siddheshthapa.com. There's nothing to install and no account.",
+        "Press New game, then choose a friend on the same device, or the computer at Nice, Mean or Ruthless.",
+        "Tap a piece to see where it can go, then tap a square to move it.",
+        "Never leave your king two squares from the enemy king in a straight line with an empty square between them. The board won't warn you.",
+        "If your king is trapped in check, look at your pieces beside it: eating one may be the way out.",
+        "Stuck on a rule? The Rules page and the Scenario Lab show every one in action."
+      ],
+      "knownFailures": [
+        {
+          "name": "It warned you too well",
+          "note": "The first version flagged every move into danger and lit up every winning king capture. With the board doing the spotting, nobody ever stepped into danger, and the rule that makes the game mean stopped mattering. Both hints are gone: spotting them is the game now."
+        },
+        {
+          "name": "Arcade players were stuck on phones",
+          "note": "On narrow phones the top bar ran off the screen. In the Arcade theme the Theme button vanished completely, so a phone player who chose Arcade couldn't switch back. Fixed: the bar now wraps instead of running off the edge."
+        },
+        {
+          "name": "Castling fooled a shortcut",
+          "note": "To save time, the rules engine skipped the danger check when the kings were far apart. But castling moves a king two squares at once, so a king could castle into danger from further away than the shortcut allowed for. It was caught and fixed before it shipped, and a test now guards it."
         }
       ]
     }
