@@ -30,9 +30,14 @@ const M = [
     find:'      "node": "p-cotsi",',
     repl:'      "node": "p-cotsi",\n      "label": "COTSI",' },
 
+  /* A TYPED COUNT THAT DISAGREES WITH THE GRAPH — by one, always. This typed
+     the literal 09, and the day Mean Chess made the manual nine works long
+     the "wrong" number became the right one: the mutated page was identical
+     and W3 had nothing to catch. A mutation whose size is typed goes stale
+     the moment the data reaches it, so the disagreement is derived instead. */
   { id:'W3', why:'type the sheet count instead of deriving it from the graph', file:WORKS,
     find:"  plate.appendChild(el('span', null, 'Sheet ' + pad(idx + 1) + ' of ' + pad(SHEETS.length)));",
-    repl:"  plate.appendChild(el('span', null, 'Sheet ' + pad(idx + 1) + ' of 09'));" },
+    repl:"  plate.appendChild(el('span', null, 'Sheet ' + pad(idx + 1) + ' of ' + pad(SHEETS.length + 1)));   // mutation" },
 
   /* the band of night is the only route back into the mind, and the only
      part of a sheet nobody authored. Inventing one entry is the failure it
