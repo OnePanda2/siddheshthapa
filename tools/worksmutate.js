@@ -73,7 +73,25 @@ const M = [
   { id:'W10', why:'let the drawing push the whole page sideways instead of scrolling itself',
     file:SHELL,
     find:".wk-figscroll{overflow-x:auto}",
-    repl:".wk-figscroll{overflow-x:visible}" }
+    repl:".wk-figscroll{overflow-x:visible}" },
+
+  /* THE WAY OUT TO A WORK'S OWN ADDRESS, three ways to get it wrong. Never
+     drawn, so a reader retypes the address; drawn for every src, so a
+     repository path and a citation like "CV · handover §12" come back as
+     links — the caption cb04540 took off every page, returning by the side
+     door; and opened without noopener, so the new tab can reach back into a
+     page that shares an origin with the editor. */
+  { id:'W12', why:'never draw the link to where a work lives', file:WORKS,
+    find:"  var site = siteOf(n);\n  if(site){",
+    repl:"  var site = null;   // mutation: the link is never drawn\n  if(site){" },
+
+  { id:'W12', why:'turn every src into a link, repositories and citations included', file:WORKS,
+    find:"  return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i.test(s)\n    ? s.toLowerCase() : null;",
+    repl:"  return s ? s.toLowerCase() : null;   // mutation: every src becomes a link" },
+
+  { id:'W12', why:'open the new tab with a way back into this page', file:WORKS,
+    find:"    go.setAttribute('rel', 'noopener noreferrer');",
+    repl:"    go.setAttribute('rel', 'external');   // mutation: no noopener" }
 ];
 
 const list = ONLY ? M.filter(m => m.id === ONLY) : M;

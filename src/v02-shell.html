@@ -434,6 +434,12 @@ body.works-open .ctl{display:none}
 .wk-stamp{border:1.5px solid var(--paper-spot);color:var(--paper-spot);font-size:10px;
   letter-spacing:.16em;padding:5px 9px;text-transform:uppercase;transform:rotate(-3deg)}
 .wk-line{font-size:13px;line-height:1.68;max-width:56ch;margin:18px 0 0}
+/* the way to a work that lives at its own address. Ink, not the spot red,
+   which the manual rations to numbers, stamps and failure headings; the
+   address may be long, so it breaks rather than pushing a phone sideways */
+.wk-visit{font-size:13px;line-height:1.68;margin:10px 0 0;overflow-wrap:anywhere}
+.wk-visit a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+.wk-visit a:focus-visible{outline:2px solid var(--paper-spot);outline-offset:2px}
 .wk-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:6px}
 @media (max-width:760px){ .wk-grid{grid-template-columns:1fr} }
 .wk-col{padding:18px 22px 18px 0;border-right:1px solid var(--paper-rule)}

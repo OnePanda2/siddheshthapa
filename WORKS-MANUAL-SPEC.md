@@ -221,9 +221,16 @@ and steps into the mind at that node. Nothing is authored, nothing can be
 fabricated, and the sentence shown is the one the graph already holds.
 
 Clicking a strip entry **closes the manual, enters the mind, and travels to
-that node.** That is the section's only outbound route, and it is the sentence
-the whole site is built to earn: *the works are where the thinking landed, and
-this is the way back up.*
+that node.** That is the section's only route back into the mind, and it is the
+sentence the whole site is built to earn: *the works are where the thinking
+landed, and this is the way back up.*
+
+**Since 2026-10-08 there is one route out as well.** A work whose `src` — the
+graph's "where it lives" — is a website address (a host name: no scheme, no
+path, no spaces) prints *Visit <address> ↗* under its line, opening a new tab
+with `noopener`. It is derived, never typed into `works.json`, and a repository
+path or a citation gets nothing: the source caption taken off every page on
+2026-09-04 does not come back as a link. `workscheck` W12 holds both halves.
 
 Carried over from the mind, and nothing else: the monospace label voice, the
 hairline weight, provenance discipline, and this strip.

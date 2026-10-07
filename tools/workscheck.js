@@ -16,6 +16,9 @@
    columns collapse and the figure starts to scroll inside itself — so one
    width proves nothing about the other.
 
+   W12 holds the one way out of the manual that is not into the mind: a work
+   that lives at a website links to it from its sheet, and nothing else does.
+
    usage: node tools/workscheck.js [v02.html]
 */
 const fs = require('fs'), { execSync } = require('child_process');
@@ -166,7 +169,15 @@ setTimeout(function(){
         steps:document.querySelectorAll('.wk-steps li').length,
         hasLine:!!document.querySelector('.wk-line'),
         plateCount:document.querySelectorAll('.wk-plate span').length,
-        seeCount:document.querySelectorAll('[data-see]').length
+        seeCount:document.querySelectorAll('[data-see]').length,
+        /* W12, per sheet: every link the sheet drew — not just the one the
+           code means to draw, so a link that turns up anywhere else on a sheet
+           is seen too — beside the graph's own address for the work */
+        src:(W.node(id)||{}).src||null,
+        links:[].map.call(document.querySelectorAll('#works a'), function(a){
+          return { href:a.getAttribute('href'), target:a.getAttribute('target'),
+                   rel:a.getAttribute('rel')||'', text:a.textContent };
+        })
       };
     });
     /* W5 — the reserved path, made reachable. Every work is written now, so
@@ -228,8 +239,12 @@ const r  = run(1280, 900, 'desk');
 const rp = run(390, 844, 'phone');
 
 let bad = 0;
-const TOTAL = 10;
+/* COUNTED, NOT TYPED. This was the literal 10 while eleven assertions ran, so
+   a clean run printed "10/10" over eleven passes — a census that went stale
+   the moment W11 was added beside it. */
+let TOTAL = 0;
 function ck(id, ok, msg){
+  TOTAL++;
   if(!ok) bad++;
   console.log('  ' + (ok ? 'PASS' : 'FAIL') + '  ' + id.padEnd(4) + '  ' + msg);
 }
@@ -408,6 +423,44 @@ ck('W10', wide.length === 0 &&
    ' — all ' + Object.keys(r.perSheet).length + ' sheets, contents included' +
    (wide.length ? ' — WIDE: ' + wide.join(', ') : '') +
    ' — and only the drawing scrolls, inside itself');
+
+/* W12 — A WORK THAT LIVES AT A WEBSITE CAN BE VISITED FROM ITS SHEET, AND
+   NOTHING ELSE GROWS A LINK. "A website" is said here in this file's own
+   words, not borrowed from the manual's: no spaces, no slash, at least one
+   dot. A repository path has a slash and a citation has spaces, so neither
+   counts — and the source caption that was taken off every page (cb04540)
+   cannot come back dressed as a link.
+
+   AN ASSERTION OVER ONE KIND IS NOT AN ASSERTION. If every work were a
+   website, or none were, "links exactly where they should be" could pass
+   while the rule that tells them apart did nothing. So both kinds must exist. */
+const isSite = s => !!s && !/\s/.test(s) && s.indexOf('/') < 0 && s.indexOf('.') > 0;
+const siteIds = r.sheets.filter(id => isSite((r.perSheet[id] || {}).src));
+const otherIds = r.sheets.filter(id => siteIds.indexOf(id) < 0);
+const linkWrong = [];
+siteIds.forEach(id => {
+  const p = r.perSheet[id], want = 'https://' + p.src.toLowerCase(), L = p.links || [];
+  if(L.length !== 1) { linkWrong.push(id + ' drew ' + L.length + ' link(s)'); return; }
+  const a = L[0];
+  if(a.href !== want) linkWrong.push(id + ' links to ' + a.href + ', not ' + want);
+  if(a.target !== '_blank') linkWrong.push(id + ' opens in the same tab');
+  if(!/\bnoopener\b/.test(a.rel) || !/\bnoreferrer\b/.test(a.rel))
+    linkWrong.push(id + ' opens without noopener noreferrer (rel="' + a.rel + '")');
+  if(a.text.indexOf(p.src.toLowerCase()) < 0) linkWrong.push(id + ' hides its address: "' + a.text + '"');
+});
+otherIds.forEach(id => {
+  const L = (r.perSheet[id] || {}).links || [];
+  if(L.length) linkWrong.push(id + ' (src "' + (r.perSheet[id] || {}).src + '") grew ' + L.length +
+                              ' link(s): ' + L.map(a => a.href).join(', '));
+});
+ck('W12', siteIds.length > 0 && otherIds.length > 0 && linkWrong.length === 0,
+   siteIds.length && otherIds.length
+     ? siteIds.length + ' work(s) that live at a website link to it — ' + siteIds.join(', ') +
+       ' — opening a new tab that cannot reach back into this page; the other ' +
+       otherIds.length + ', repositories and citations, grow no link' +
+       (linkWrong.length ? ' — WRONG: ' + linkWrong.join('; ') : '')
+     : 'nothing to tell apart (' + siteIds.length + ' website work(s), ' + otherIds.length +
+       ' other) — the rule is untested, not proven');
 
 console.log('\n  ' + (TOTAL - bad) + '/' + TOTAL + ' manual invariants hold');
 console.log(bad ? '  ' + bad + ' PROBLEM(S)'

@@ -450,6 +450,16 @@ function renderContents(){
 
 function pad(n){ return (n < 10 ? '0' : '') + n; }
 
+/* the address a work can be visited at, or null. A bare host name and nothing
+   else: no scheme, no path, no spaces, so "github.com/OnePanda2/statelab"
+   (a repository) and "Master Context §16" (a citation) both answer null, and
+   nothing a store edit could put in src becomes anything but https://<host>. */
+function siteOf(n){
+  var s = String((n && n.src) || '');
+  return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i.test(s)
+    ? s.toLowerCase() : null;
+}
+
 /* ── a sheet ───────────────────────────────────────────────────────────── */
 function renderSheet(id){
   var n = byId[id];
@@ -481,6 +491,31 @@ function renderSheet(id){
 
   /* the graph's own sentence about this work — derived, never retyped */
   if(n.line) wkBody.appendChild(el('p', 'wk-line', n.line));
+
+  /* A WORK THAT LIVES AT A WEBSITE CAN BE VISITED FROM ITS SHEET. Tax.cal's
+     address sat in its procedure as plain text, and a reader who wanted to use
+     the thing had to retype it. The address is read from the graph's own
+     "where it lives" (src) — never typed into works.json, which would be a
+     second copy of it — and only when it IS a website: a repository path or a
+     citation like "CV · handover §12" gets no link, because the source caption
+     was taken off every page on purpose (cb04540) and this is not it coming
+     back. Built as an element with its attribute set here, so the published
+     file holds no hard-coded external link for the zero-request guard to
+     object to (an earlier draft of this very comment quoted the pattern the
+     guard looks for, and the build flagged it); a link fetches nothing until
+     somebody chooses to follow it. It opens a new tab with noopener, because
+     this page and the editor share an origin. */
+  var site = siteOf(n);
+  if(site){
+    var visit = el('p', 'wk-visit'), go = document.createElement('a');
+    go.setAttribute('href', 'https://' + site);
+    go.setAttribute('target', '_blank');
+    go.setAttribute('rel', 'noopener noreferrer');
+    go.setAttribute('aria-label', 'Visit ' + site + ' (opens in a new tab)');
+    go.textContent = 'Visit ' + site + ' ↗';
+    visit.appendChild(go);
+    wkBody.appendChild(visit);
+  }
 
   if(sh)          renderWritten(sh, n, idx);
   else if(!n.brief) renderReserved(n);

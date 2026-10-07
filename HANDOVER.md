@@ -5,7 +5,7 @@ reader knows nothing: no prior conversation, no context, no access to whoever
 built it. Everything needed to understand, run, change and verify this site is
 here or is named here.
 
-**Last updated 2026-09-25.** This is the **public technical record**. The owner
+**Last updated 2026-10-08.** This is the **public technical record**. The owner
 also keeps a private project report — status, decisions, accounts, working
 preferences and a change log — outside this repository; where the two disagree
 on a technical fact, this file and the committed logs win.
@@ -199,7 +199,7 @@ This was the project's final goal and it is met for content and organisation.
 | Sections in a writing | inside the writing form; heading optional, body required |
 | Add a relationship | `+ relationship` in the form — **works when editing too** |
 | **Remove a relationship** | `unlink` on any row of a "Connects to" list |
-| Add a project | `+ Add a project` under the MY WORKS contents |
+| Add a project | `+ Add a project` under the MY WORKS contents — put a website's address (e.g. `taxcal.siddheshthapa.com`, no `https://`, no path) in **Where it lives** and its sheet shows a **Visit** link to it |
 | Write a project's sheet | `write sheet` on the contents page |
 | The site's own words | **Words** on the editor bar |
 | A topic's name + description | `✎ Edit what X is` inside the region |
