@@ -136,6 +136,21 @@
       "src": "meanchess.siddheshthapa.com",
       "line": "How Mean and Selfish can Chess get?",
       "added": "2026-10-08"
+    },
+    {
+      "id": "p-carryall",
+      "t": "project",
+      "label": "CARRYALL",
+      "mig": "my-works",
+      "crosses": [
+        "technology",
+        "business"
+      ],
+      "state": "growing",
+      "register": "project",
+      "src": "https://chromewebstore.google.com/detail/cfgjpdpemgojclmdnhbajaedgchlddhd",
+      "line": "Your best thinking is stuck inside a chatbot.",
+      "added": "2026-10-28"
     }
   ],
   "minors": [],
@@ -151,6 +166,12 @@
       "p-meanchess",
       "holds",
       "Live and free, and it runs on its own: the whole game, computer included, plays in the visitor's own browser."
+    ],
+    [
+      "shipped",
+      "p-carryall",
+      "holds",
+      "Approved by Google and published on the Chrome Web Store, where people who owe it nothing install it."
     ]
   ],
   "retired": [

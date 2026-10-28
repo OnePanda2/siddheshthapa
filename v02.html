@@ -1644,6 +1644,21 @@ var V02_NOTES={
       "src": "meanchess.siddheshthapa.com",
       "line": "How Mean and Selfish can Chess get?",
       "added": "2026-10-08"
+    },
+    {
+      "id": "p-carryall",
+      "t": "project",
+      "label": "CARRYALL",
+      "mig": "my-works",
+      "crosses": [
+        "technology",
+        "business"
+      ],
+      "state": "growing",
+      "register": "project",
+      "src": "https://chromewebstore.google.com/detail/cfgjpdpemgojclmdnhbajaedgchlddhd",
+      "line": "Your best thinking is stuck inside a chatbot.",
+      "added": "2026-10-28"
     }
   ],
   "minors": [],
@@ -1659,6 +1674,12 @@ var V02_NOTES={
       "p-meanchess",
       "holds",
       "Live and free, and it runs on its own: the whole game, computer included, plays in the visitor's own browser."
+    ],
+    [
+      "shipped",
+      "p-carryall",
+      "holds",
+      "Approved by Google and published on the Chrome Web Store, where people who owe it nothing install it."
     ]
   ],
   "retired": [
@@ -9702,6 +9723,64 @@ var WORKS_DATA = {
           "note": "To save time, the rules engine skipped the danger check when the kings were far apart. But castling moves a king two squares at once, so a king could castle into danger from further away than the shortcut allowed for. It was caught and fixed before it shipped, and a test now guards it."
         }
       ]
+    },
+    {
+      "node": "p-carryall",
+      "authority": [
+        "chromewebstore.google.com/detail/cfgjpdpemgojclmdnhbajaedgchlddhd — the live listing, read 2026-10-28",
+        "carryall.siddheshthapa.com — the product site, checked 2026-10-28",
+        "CarryAll project handover and store-listing sheet (private repository OnePanda2/CarryAll), read 2026-10-28: the features, and the three known failures with their fixes"
+      ],
+      "purpose": "To get your conversations out of ChatGPT, Claude and Gemini and into files you keep: PDF, Word, Markdown, text or JSON. One chat at a time is free, with no daily limit and no sign-in. Your chats never leave your browser: the file is made on your own computer.",
+      "parts": [
+        {
+          "n": 1,
+          "name": "the Export button",
+          "note": "Sits next to Share on ChatGPT, Claude and Gemini. One click opens the export window."
+        },
+        {
+          "n": 2,
+          "name": "five formats",
+          "note": "PDF with maths, tables and code drawn properly, plus a clickable contents list. Word with real equations. Markdown, plain text and JSON. Or copy it formatted, to paste into Google Docs or Notion."
+        },
+        {
+          "n": 3,
+          "name": "pick what to export",
+          "note": "Only the AI's answers, only your prompts, or a range of messages. Sources and citations are kept as numbered links."
+        },
+        {
+          "n": 4,
+          "name": "Pro",
+          "note": "Export many chats at once into one ZIP file, with no footer on your files. Paid, monthly or yearly."
+        },
+        {
+          "n": 5,
+          "name": "34 languages",
+          "note": "The buttons, windows and the words inside your files follow your Chrome's language."
+        }
+      ],
+      "procedure": [
+        "Add it to Chrome from the Chrome Web Store.",
+        "Open a chat on ChatGPT, Claude or Gemini.",
+        "Click Export, next to Share.",
+        "Choose a format and what to include.",
+        "Download the file, or copy it straight into a document.",
+        "To save many chats at once, use Export many chats (Pro)."
+      ],
+      "knownFailures": [
+        {
+          "name": "One invisible character broke everything",
+          "note": "The very first build never ran. A maths library left one invisible, invalid character in the code, Chrome refused to load the file, and every click on Export said the extension had “just been updated”. Fixed: the build now writes only plain characters, and a test loads the real extension in Chrome before every build goes out."
+        },
+        {
+          "name": "ChatGPT's maths came out as code",
+          "note": "ChatGPT writes formulas differently from Claude, so the first PDFs and Word files of ChatGPT chats showed raw formula code instead of maths. Found by looking at real chats, and fixed in version 0.1.1."
+        },
+        {
+          "name": "Chrome printed its own header",
+          "note": "Early PDFs carried Chrome's own date and title at the top of every page when a print setting was ticked. The page now fills those margins itself."
+        }
+      ]
     }
   ]
 }
@@ -10137,14 +10216,21 @@ function renderContents(){
 
 function pad(n){ return (n < 10 ? '0' : '') + n; }
 
-/* the address a work can be visited at, or null. A bare host name and nothing
-   else: no scheme, no path, no spaces, so "github.com/OnePanda2/statelab"
-   (a repository) and "Master Context §16" (a citation) both answer null, and
-   nothing a store edit could put in src becomes anything but https://<host>. */
+/* where a work can be visited — { href, host } — or null. Two shapes count:
+   a bare host name ("meanchess.siddheshthapa.com"), visited at https://<host>;
+   or an address written out in full with https:// — CarryAll lives on a store
+   page with a path, which a host alone cannot reach — visited exactly as
+   written, letters, digits and . _ ~ - / only: no query, no quotes, no spaces.
+   A repository is written without the scheme ("github.com/OnePanda2/statelab")
+   and a citation has spaces ("Master Context §16"), so both still answer null,
+   and nothing a store edit could put in src becomes anything but an https
+   address. */
 function siteOf(n){
   var s = String((n && n.src) || '');
-  return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i.test(s)
-    ? s.toLowerCase() : null;
+  if(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i.test(s))
+    return { href: 'https://' + s.toLowerCase(), host: s.toLowerCase() };
+  var full = /^https:\/\/([a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+)(\/[a-z0-9._~\/-]*)?$/i.exec(s);
+  return full ? { href: s, host: full[1].toLowerCase() } : null;
 }
 
 /* ── a sheet ───────────────────────────────────────────────────────────── */
@@ -10195,11 +10281,11 @@ function renderSheet(id){
   var site = siteOf(n);
   if(site){
     var visit = el('p', 'wk-visit'), go = document.createElement('a');
-    go.setAttribute('href', 'https://' + site);
+    go.setAttribute('href', site.href);
     go.setAttribute('target', '_blank');
     go.setAttribute('rel', 'noopener noreferrer');
-    go.setAttribute('aria-label', 'Visit ' + site + ' (opens in a new tab)');
-    go.textContent = 'Visit ' + site + ' ↗';
+    go.setAttribute('aria-label', 'Visit ' + site.host + ' (opens in a new tab)');
+    go.textContent = 'Visit ' + site.host + ' ↗';
     visit.appendChild(go);
     wkBody.appendChild(visit);
   }
