@@ -91,8 +91,15 @@ const M = [
     repl:"  var site = null;   // mutation: the link is never drawn\n  if(site){" },
 
   { id:'W12', why:'turn every src into a link, repositories and citations included', file:WORKS,
-    find:"  return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i.test(s)\n    ? s.toLowerCase() : null;",
-    repl:"  return s ? s.toLowerCase() : null;   // mutation: every src becomes a link" },
+    find:"  var s = String((n && n.src) || '');\n",
+    repl:"  var s = String((n && n.src) || '');\n  if(s) return { href: 'https://' + s, host: s };   // mutation: every src becomes a link\n" },
+
+  /* a full address followed only as far as its host: the store's front page
+     instead of the listing, which LOOKS like a working link. Only measurable
+     while some work lives at a full address (CarryAll, since 2026-10-28). */
+  { id:'W12', why:'follow a full address only as far as its host, dropping the path', file:WORKS,
+    find:"  return full ? { href: s, host: full[1].toLowerCase() } : null;",
+    repl:"  return full ? { href: 'https://' + full[1].toLowerCase(), host: full[1].toLowerCase() } : null;   // mutation: the path is dropped" },
 
   { id:'W12', why:'open the new tab with a way back into this page', file:WORKS,
     find:"    go.setAttribute('rel', 'noopener noreferrer');",

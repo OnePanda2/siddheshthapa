@@ -433,20 +433,33 @@ ck('W10', wide.length === 0 &&
 
    AN ASSERTION OVER ONE KIND IS NOT AN ASSERTION. If every work were a
    website, or none were, "links exactly where they should be" could pass
-   while the rule that tells them apart did nothing. So both kinds must exist. */
+   while the rule that tells them apart did nothing. So both kinds must exist.
+
+   A SECOND SHAPE, since CarryAll (2026-10-28): an address written out in full
+   with https:// — a store page has a path, which a bare host cannot reach. It
+   must be followed EXACTLY as written, path and all; a link that dropped the
+   path would land on the store's front page and look like it worked. A
+   repository is still written without the scheme, so it still counts as
+   neither. */
 const isSite = s => !!s && !/\s/.test(s) && s.indexOf('/') < 0 && s.indexOf('.') > 0;
-const siteIds = r.sheets.filter(id => isSite((r.perSheet[id] || {}).src));
+const isFull = s => !!s && /^https:\/\/[^\s\/"'<>?#]+\.[^\s\/"'<>?#]+(\/[^\s"'<>?#]*)?$/.test(s);
+const siteIds = r.sheets.filter(id => { const s = (r.perSheet[id] || {}).src;
+                                       return isSite(s) || isFull(s); });
+const fullIds = siteIds.filter(id => isFull(r.perSheet[id].src));
 const otherIds = r.sheets.filter(id => siteIds.indexOf(id) < 0);
 const linkWrong = [];
 siteIds.forEach(id => {
-  const p = r.perSheet[id], want = 'https://' + p.src.toLowerCase(), L = p.links || [];
+  const p = r.perSheet[id], L = p.links || [];
+  const full = isFull(p.src);
+  const want = full ? p.src : 'https://' + p.src.toLowerCase();
+  const host = full ? p.src.split('/')[2].toLowerCase() : p.src.toLowerCase();
   if(L.length !== 1) { linkWrong.push(id + ' drew ' + L.length + ' link(s)'); return; }
   const a = L[0];
   if(a.href !== want) linkWrong.push(id + ' links to ' + a.href + ', not ' + want);
   if(a.target !== '_blank') linkWrong.push(id + ' opens in the same tab');
   if(!/\bnoopener\b/.test(a.rel) || !/\bnoreferrer\b/.test(a.rel))
     linkWrong.push(id + ' opens without noopener noreferrer (rel="' + a.rel + '")');
-  if(a.text.indexOf(p.src.toLowerCase()) < 0) linkWrong.push(id + ' hides its address: "' + a.text + '"');
+  if(a.text.indexOf(host) < 0) linkWrong.push(id + ' hides where it goes: "' + a.text + '"');
 });
 otherIds.forEach(id => {
   const L = (r.perSheet[id] || {}).links || [];
@@ -456,6 +469,7 @@ otherIds.forEach(id => {
 ck('W12', siteIds.length > 0 && otherIds.length > 0 && linkWrong.length === 0,
    siteIds.length && otherIds.length
      ? siteIds.length + ' work(s) that live at a website link to it — ' + siteIds.join(', ') +
+       (fullIds.length ? ' (' + fullIds.length + ' by a full address, followed exactly)' : '') +
        ' — opening a new tab that cannot reach back into this page; the other ' +
        otherIds.length + ', repositories and citations, grow no link' +
        (linkWrong.length ? ' — WRONG: ' + linkWrong.join('; ') : '')

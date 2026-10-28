@@ -450,14 +450,21 @@ function renderContents(){
 
 function pad(n){ return (n < 10 ? '0' : '') + n; }
 
-/* the address a work can be visited at, or null. A bare host name and nothing
-   else: no scheme, no path, no spaces, so "github.com/OnePanda2/statelab"
-   (a repository) and "Master Context §16" (a citation) both answer null, and
-   nothing a store edit could put in src becomes anything but https://<host>. */
+/* where a work can be visited — { href, host } — or null. Two shapes count:
+   a bare host name ("meanchess.siddheshthapa.com"), visited at https://<host>;
+   or an address written out in full with https:// — CarryAll lives on a store
+   page with a path, which a host alone cannot reach — visited exactly as
+   written, letters, digits and . _ ~ - / only: no query, no quotes, no spaces.
+   A repository is written without the scheme ("github.com/OnePanda2/statelab")
+   and a citation has spaces ("Master Context §16"), so both still answer null,
+   and nothing a store edit could put in src becomes anything but an https
+   address. */
 function siteOf(n){
   var s = String((n && n.src) || '');
-  return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i.test(s)
-    ? s.toLowerCase() : null;
+  if(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/i.test(s))
+    return { href: 'https://' + s.toLowerCase(), host: s.toLowerCase() };
+  var full = /^https:\/\/([a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+)(\/[a-z0-9._~\/-]*)?$/i.exec(s);
+  return full ? { href: s, host: full[1].toLowerCase() } : null;
 }
 
 /* ── a sheet ───────────────────────────────────────────────────────────── */
@@ -508,11 +515,11 @@ function renderSheet(id){
   var site = siteOf(n);
   if(site){
     var visit = el('p', 'wk-visit'), go = document.createElement('a');
-    go.setAttribute('href', 'https://' + site);
+    go.setAttribute('href', site.href);
     go.setAttribute('target', '_blank');
     go.setAttribute('rel', 'noopener noreferrer');
-    go.setAttribute('aria-label', 'Visit ' + site + ' (opens in a new tab)');
-    go.textContent = 'Visit ' + site + ' ↗';
+    go.setAttribute('aria-label', 'Visit ' + site.host + ' (opens in a new tab)');
+    go.textContent = 'Visit ' + site.host + ' ↗';
     visit.appendChild(go);
     wkBody.appendChild(visit);
   }

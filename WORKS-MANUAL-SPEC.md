@@ -228,7 +228,9 @@ landed, and this is the way back up.*
 **Since 2026-10-08 there is one route out as well.** A work whose `src` — the
 graph's "where it lives" — is a website address (a host name: no scheme, no
 path, no spaces) prints *Visit <address> ↗* under its line, opening a new tab
-with `noopener`. It is derived, never typed into `works.json`, and a repository
+with `noopener`. Since 2026-10-28 a `src` written in full with `https://` and a
+path (CarryAll's store listing) is followed exactly as written; the link text
+names only its host. It is derived, never typed into `works.json`, and a repository
 path or a citation gets nothing: the source caption taken off every page on
 2026-09-04 does not come back as a link. `workscheck` W12 holds both halves.
 
