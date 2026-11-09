@@ -1,0 +1,7 @@
+# Every search engine and AI search crawler is welcome
+# (Googlebot, Bingbot, OAI-SearchBot, ChatGPT-User, Google-Extended, ClaudeBot and others).
+User-agent: *
+Allow: /
+Disallow: /editor.html
+
+Sitemap: https://siddheshthapa.com/sitemap.xml

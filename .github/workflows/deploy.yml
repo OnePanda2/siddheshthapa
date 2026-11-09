@@ -70,6 +70,9 @@ jobs:
           # set" would be answered by reading a build script. It is answered by
           # a file called CNAME, which is where anyone would look first.
           cp CNAME _site/CNAME
+          # plain pages that sit beside the mind: /about/, the consultant page, the
+          # photo, robots.txt and sitemap.xml. Static files, copied as they are.
+          cp -r public/. _site/
 
       - name: Prove what is about to be served
         run: |
