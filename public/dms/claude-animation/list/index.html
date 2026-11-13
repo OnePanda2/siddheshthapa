@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>66 Claude Animation Styles | Siddhesh Thapa</title>
+<meta name="description" content="All 66 animation styles you can make with Claude: the 10 from the reel first, then every style by family, with how to make them in 3 steps.">
+<link rel="canonical" href="https://siddheshthapa.com/dms/claude-animation/list/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="66 Claude Animation Styles">
+<meta property="og:description" content="All 66 animation styles you can make with Claude: the 10 from the reel first, then every style by family, with how to make them in 3 steps.">
+<meta property="og:image" content="https://siddheshthapa.com/dms/claude-animation/list/og.jpg">
+<meta property="og:url" content="https://siddheshthapa.com/dms/claude-animation/list/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#101118">
+</head>
+<body>
+<style>
+@font-face { font-family: "Rajdhani"; src: url("/dms/assets/rajdhani-bold.woff") format("woff"); font-weight: 600 700; font-display: swap; }
+* { box-sizing: border-box; } body { margin: 0; } img { max-width: 100%; } [hidden] { display: none !important; }
+/* Layout: one dark column like the reel itself: the ten reel cards as a strip, then how-to, then the full filterable list. Single deliberate dark theme. */
+:root {
+  --bg: #101118; --panel: #191B25; --panel2: #20232F; --line: #2B2E3D;
+  --fg: #F2EFE7; --muted: #9DA1B8; --accent: #7C84FF; --ink: #14151B;
+  --display: "Rajdhani", "Arial Narrow", system-ui, sans-serif; --body: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif; --mono: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font: 16px/1.55 var(--body); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 56px; display: grid; gap: 56px; }
+header { display: grid; gap: 10px; }
+.eyebrow { font: 600 13px/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 700 clamp(44px, 9vw, 92px)/.95 var(--display); margin: 0; text-wrap: balance; }
+h1 b { color: var(--accent); font-weight: 700; }
+.lede { color: var(--muted); max-width: 60ch; margin: 4px 0 0; font-size: 17px; }
+h2 { font: 700 clamp(28px, 4.4vw, 40px)/1 var(--display); margin: 0 0 18px; text-wrap: balance; }
+h2 small { font: 500 15px/1 var(--body); color: var(--muted); margin-left: 10px; }
+.reel { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+.rc { margin: 0; display: grid; gap: 8px; }
+.rc img { width: 100%; height: auto; border-radius: 14px; border: 3px solid var(--accent); display: block; background: var(--panel); }
+.rc figcaption { font: 600 15px/1.25 var(--body); display: flex; gap: 8px; align-items: baseline; }
+.num { font: 700 15px/1 var(--display); color: var(--accent); font-variant-numeric: tabular-nums; }
+.how { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.step { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.step h3 { margin: 0; font: 700 22px/1.1 var(--display); }
+.step p { margin: 0; color: var(--muted); font-size: 15px; }
+.step a { color: var(--accent); }
+.cmd { display: flex; gap: 8px; align-items: center; background: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 8px 12px; min-width: 0; }
+.cmd code { font: 500 13px/1.4 var(--mono); color: var(--fg); overflow-x: auto; white-space: nowrap; flex: 1; min-width: 0; }
+.cmd button { font: 600 12px/1 var(--body); color: var(--ink); background: var(--accent); border: 0; border-radius: 8px; padding: 8px 10px; cursor: pointer; flex: none; }
+.cmd button:focus-visible, .chip:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.note { font-size: 13px; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.chip { font: 500 14px/1 var(--body); color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 9px 13px; cursor: pointer; }
+.chip span { color: var(--muted); margin-left: 4px; font-variant-numeric: tabular-nums; }
+.chip.on { background: var(--accent); color: var(--ink); border-color: var(--accent); }
+.chip.on span { color: var(--ink); opacity: .7; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.sc { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+.sc img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: var(--panel2); }
+.sb { padding: 14px 16px 16px; display: grid; gap: 4px; align-content: start; }
+.st { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.sc h3 { margin: 0; font: 700 23px/1.05 var(--display); }
+.tag { font: 600 11px/1 var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--ink); background: var(--accent); border-radius: 999px; padding: 5px 8px; white-space: nowrap; }
+.cat { margin: 0; font: 600 12px/1.3 var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.ln { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+.cotsi { background: var(--accent); color: var(--ink); border-radius: 20px; padding: 26px 24px; display: grid; gap: 8px; }
+.cotsi h2 { margin: 0; }
+.cotsi p { margin: 0; max-width: 62ch; font-size: 16px; }
+.cotsi .when { font: 700 20px/1 var(--display); letter-spacing: .02em; }
+footer { color: var(--muted); font-size: 13px; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 20px; }
+footer a { color: var(--fg); }
+@media (max-width: 900px) { .reel { grid-template-columns: repeat(3, minmax(0, 1fr)); } .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .how { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .reel { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid { grid-template-columns: 1fr; } .wrap { gap: 44px; padding-block: 28px 44px; } }
+@media (prefers-reduced-motion: no-preference) { .chip, .cmd button { transition: background .15s, color .15s; } }
+</style>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">The whole list</p>
+    <h1>66 <b>Claude</b> Animation Styles</h1>
+    <p class="lede">Every style you can make a film in with Claude and a free style library. The 10 from the reel come first, then all 66, grouped by family.</p>
+  </header>
+
+  <section aria-labelledby="h-reel">
+    <h2 id="h-reel">From the reel <small>made with Claude</small></h2>
+    <div class="reel"><figure class="rc"><img src="img/reel-01.jpg" alt="Ukiyo-e preview from the reel" width="300" height="533" loading="lazy"><figcaption><span class="num">01</span>Ukiyo-e</figcaption></figure>
+<figure class="rc"><img src="img/reel-02.jpg" alt="Watercolor preview from the reel" width="300" height="533" loading="lazy"><figcaption><span class="num">02</span>Watercolor</figcaption></figure>
+<figure class="rc"><img src="img/reel-03.jpg" alt="80s Anime preview from the reel" width="300" height="533" loading="lazy"><figcaption><span class="num">03</span>80s Anime</figcaption></figure>
+<figure class="rc"><img src="img/reel-04.jpg" alt="Shadow Puppet preview from the reel" width="300" height="533" loading="lazy"><figcaption><span class="num">04</span>Shadow Puppet</figcaption></figure>
+<figure class="rc"><img src="img/reel-05.jpg" alt="Stained Glass preview from the reel" width="300" height="533" loading="lazy"><figcaption><span class="num">05</span>Stained Glass</figcaption></figure>
+<figure class="rc"><img src="img/reel-06.jpg" alt="1920s Silent Film preview from the reel" width="300" height="533" loading="lazy"><figcaption><span class="num">06</span>1920s Silent Film</figcaption></figure>
+<figure class="rc"><img src="img/reel-07.jpg" alt="Rubber Hose Cartoon preview from the reel" width="300" height="533" loading="lazy"><figcaption><span class="num">07</span>Rubber Hose Cartoon</figcaption></figure>
+<figure class="rc"><img src="img/reel-08.jpg" alt="Sci-fi Hologram preview from the reel" width="300" height="533" loading="lazy"><figcaption><span class="num">08</span>Sci-fi Hologram</figcaption></figure>
+<figure class="rc"><img src="img/reel-09.jpg" alt="Paper Pop-up Book preview from the reel" width="300" height="533" loading="lazy"><figcaption><span class="num">09</span>Paper Pop-up Book</figcaption></figure>
+<figure class="rc"><img src="img/reel-10.jpg" alt="Oil Painting preview from the reel" width="300" height="533" loading="lazy"><figcaption><span class="num">10</span>Oil Painting</figcaption></figure></div>
+  </section>
+
+  <section aria-labelledby="h-how">
+    <h2 id="h-how">How to make them</h2>
+    <div class="how">
+      <div class="step"><h3>1. Get Claude Code</h3><p>Install it from <a href="https://claude.com/claude-code" target="_blank" rel="noopener">claude.com/claude-code</a>. You also need Node 20+, ffmpeg 7+ and Python 3.11+.</p></div>
+      <div class="step"><h3>2. Add the style library</h3><p>Lemo-Opuscar is free and open source. Run these two lines:</p>
+        <div class="cmd"><code id="c1">claude plugin marketplace add lemomo-ai/lemo-opuscar</code><button type="button" data-copy="c1">Copy</button></div>
+        <div class="cmd"><code id="c2">claude plugin install lemo-opuscar@lemolab</code><button type="button" data-copy="c2">Copy</button></div></div>
+      <div class="step"><h3>3. Ask for a film</h3><p>Name your topic and a style from this page:</p>
+        <div class="cmd"><code id="c3">Make a 30-second film about my morning chai in the Ukiyo-e style</code><button type="button" data-copy="c3">Copy</button></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-all">
+    <h2 id="h-all">All 66 styles</h2>
+    <div class="chips" role="group" aria-label="Filter by family"><button class="chip on" type="button" data-cat="all" aria-pressed="true">All <span>66</span></button><button class="chip" type="button" data-cat="east-asian-traditions" aria-pressed="false">East Asian Traditions <span>4</span></button><button class="chip" type="button" data-cat="hand-drawn-painting" aria-pressed="false">Hand-drawn &amp; Painting <span>8</span></button><button class="chip" type="button" data-cat="print-printmaking" aria-pressed="false">Print &amp; Printmaking <span>6</span></button><button class="chip" type="button" data-cat="cartoon-anime" aria-pressed="false">Cartoon &amp; Anime <span>4</span></button><button class="chip" type="button" data-cat="games" aria-pressed="false">Games <span>4</span></button><button class="chip" type="button" data-cat="graphic-type" aria-pressed="false">Graphic &amp; Type <span>7</span></button><button class="chip" type="button" data-cat="materials-3d" aria-pressed="false">Materials &amp; 3D <span>7</span></button><button class="chip" type="button" data-cat="information-keynote" aria-pressed="false">Information &amp; Keynote <span>8</span></button><button class="chip" type="button" data-cat="evidence-films" aria-pressed="false">Evidence Films <span>8</span></button><button class="chip" type="button" data-cat="edit-documentary" aria-pressed="false">Edit &amp; Documentary <span>8</span></button><button class="chip" type="button" data-cat="cinema-eras" aria-pressed="false">Cinema &amp; Eras <span>2</span></button></div>
+    <div class="grid" id="grid"><article class="sc" data-cat="east-asian-traditions">
+  <img src="img/paper-lantern.jpg" alt="Still from the Paper-cut Lightbox demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Paper-cut Lightbox</h3></div>
+  <p class="cat">East Asian Traditions</p><p class="ln">An old night train makes its last run, from a snowy mountain halt through a long tunnel to the sea, its lit windows going out one by one at the end of the line.</p></div>
+</article>
+<article class="sc" data-cat="east-asian-traditions">
+  <img src="img/papercut-red.jpg" alt="Still from the Red Paper-cut demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Red Paper-cut</h3></div>
+  <p class="cat">East Asian Traditions</p><p class="ln">On New Year&#x27;s Eve the beast Nian comes to town, and one girl&#x27;s giant paper-cut lights up the village to scare it off.</p></div>
+</article>
+<article class="sc" data-cat="east-asian-traditions">
+  <img src="img/shadow-puppet.jpg" alt="Still from the Shadow Puppetry demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Shadow Puppetry</h3><span class="tag">In the reel · 04</span></div>
+  <p class="cat">East Asian Traditions</p><p class="ln">Ten suns scorch the earth until the archer Hou Yi draws his bow, told with leather puppets on a lit screen.</p></div>
+</article>
+<article class="sc" data-cat="east-asian-traditions">
+  <img src="img/ukiyoe.jpg" alt="Still from the Ukiyo-e demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Ukiyo-e</h3><span class="tag">In the reel · 01</span></div>
+  <p class="cat">East Asian Traditions</p><p class="ln">A traveller walks toward a distant mountain; every shot is a woodblock print, a great wave at the climax, the mountain and the whole scroll at the end.</p></div>
+</article>
+<article class="sc" data-cat="hand-drawn-painting">
+  <img src="img/chalkboard.jpg" alt="Still from the Chalkboard demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Chalkboard</h3></div>
+  <p class="cat">Hand-drawn &amp; Painting</p><p class="ln">Chalk writes a popular claim about two characters, wipes it, and traces 射 back three thousand years.</p></div>
+</article>
+<article class="sc" data-cat="hand-drawn-painting">
+  <img src="img/ink-wash.jpg" alt="Still from the Chinese Ink Wash demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Chinese Ink Wash</h3></div>
+  <p class="cat">Hand-drawn &amp; Painting</p><p class="ln">A swordsman crosses the river on the water and splits the current with a single stroke.</p></div>
+</article>
+<article class="sc" data-cat="hand-drawn-painting">
+  <img src="img/crayon-book.jpg" alt="Still from the Crayon Picture Book demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Crayon Picture Book</h3></div>
+  <p class="cat">Hand-drawn &amp; Painting</p><p class="ln">The moon can&#x27;t sleep, so a little girl climbs onto the roof to sing it a lullaby.</p></div>
+</article>
+<article class="sc" data-cat="hand-drawn-painting">
+  <img src="img/impasto.jpg" alt="Still from the Impasto Oil Painting demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Impasto Oil Painting</h3><span class="tag">In the reel · 10</span></div>
+  <p class="cat">Hand-drawn &amp; Painting</p><p class="ln">In a grey, rainy square one red umbrella opens, and a waltz paints the whole plaza in colour.</p></div>
+</article>
+<article class="sc" data-cat="hand-drawn-painting">
+  <img src="img/one-line.jpg" alt="Still from the One-line Drawing demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>One-line Drawing</h3></div>
+  <p class="cat">Hand-drawn &amp; Painting</p><p class="ln">One unbroken line draws a whole life, then the pen passes to a child.</p></div>
+</article>
+<article class="sc" data-cat="hand-drawn-painting">
+  <img src="img/urban-sketch.jpg" alt="Still from the Urban Sketch · Pen &amp; Wash demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Urban Sketch · Pen &amp; Wash</h3></div>
+  <p class="cat">Hand-drawn &amp; Painting</p><p class="ln">A park that is only a pen sketch; wherever the wind carries her straw hat, colour follows.</p></div>
+</article>
+<article class="sc" data-cat="hand-drawn-painting">
+  <img src="img/watercolor.jpg" alt="Still from the Watercolor Brush demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Watercolor Brush</h3><span class="tag">In the reel · 02</span></div>
+  <p class="cat">Hand-drawn &amp; Painting</p><p class="ln">Follow the rain from Australia&#x27;s red desert heart to its green coast in one unbroken painted walk.</p></div>
+</article>
+<article class="sc" data-cat="hand-drawn-painting">
+  <img src="img/whiteboard.jpg" alt="Still from the Whiteboard Explainer demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Whiteboard Explainer</h3></div>
+  <p class="cat">Hand-drawn &amp; Painting</p><p class="ln">How your phone knows where you are: GPS, atomic clocks, and the 38 microseconds relativity adds every day.</p></div>
+</article>
+<article class="sc" data-cat="print-printmaking">
+  <img src="img/engraving.jpg" alt="Still from the Copperplate Engraving demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Copperplate Engraving</h3></div>
+  <p class="cat">Print &amp; Printmaking</p><p class="ln">A natural-history plate engraves itself: the burin cuts the copper, the bee builds up line by line, and a watercolour wash brings it to life.</p></div>
+</article>
+<article class="sc" data-cat="print-printmaking">
+  <img src="img/halftone-dossier.jpg" alt="Still from the Halftone Dossier demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Halftone Dossier</h3></div>
+  <p class="cat">Print &amp; Printmaking</p><p class="ln">A chubby orange cat stands trial for testing gravity and 4 a.m. parkour, and walks free.</p></div>
+</article>
+<article class="sc" data-cat="print-printmaking">
+  <img src="img/printed-long-take.jpg" alt="Still from the Printed Long Take demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Printed Long Take</h3></div>
+  <p class="cat">Print &amp; Printmaking</p><p class="ln">Red-crowned cranes in a Hokkaido valley, one scratchboard take, counted back from 33 to 1,927.</p></div>
+</article>
+<article class="sc" data-cat="print-printmaking">
+  <img src="img/risograph.jpg" alt="Still from the Risograph Print demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Risograph Print</h3></div>
+  <p class="cat">Print &amp; Printmaking</p><p class="ln">A Sunday-morning bike ride through the city — bakery, park, riverside — each stop adding an ink until three misregistered plates overprint.</p></div>
+</article>
+<article class="sc" data-cat="print-printmaking">
+  <img src="img/silkscreen-poster.jpg" alt="Still from the Silkscreen Travel Poster demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Silkscreen Travel Poster</h3></div>
+  <p class="cat">Print &amp; Printmaking</p><p class="ln">A traveller crosses the world one full-bleed screen print at a time, a ticket stub counting the distance from home, until the far side turns into the way back.</p></div>
+</article>
+<article class="sc" data-cat="print-printmaking">
+  <img src="img/woodcut.jpg" alt="Still from the Woodcut Print demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Woodcut Print</h3></div>
+  <p class="cat">Print &amp; Printmaking</p><p class="ln">A village spends a whole winter casting one bell; the first time it rings, the snow stops.</p></div>
+</article>
+<article class="sc" data-cat="cartoon-anime">
+  <img src="img/rubber-hose.jpg" alt="Still from the 1930s Rubber Hose Cartoon demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>1930s Rubber Hose Cartoon</h3><span class="tag">In the reel · 07</span></div>
+  <p class="cat">Cartoon &amp; Anime</p><p class="ln">A coffee cup chases a runaway sugar cube around the kitchen, 1930s-cartoon style.</p></div>
+</article>
+<article class="sc" data-cat="cartoon-anime">
+  <img src="img/cel-anime-80s.jpg" alt="Still from the 80s Cel Anime demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>80s Cel Anime</h3><span class="tag">In the reel · 03</span></div>
+  <p class="cat">Cartoon &amp; Anime</p><p class="ln">A courier girl rides through a rain-soaked neon city to deliver a tape before the dawn launch.</p></div>
+</article>
+<article class="sc" data-cat="cartoon-anime">
+  <img src="img/midcentury-toon.jpg" alt="Still from the Mid-century Cartoon demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Mid-century Cartoon</h3></div>
+  <p class="cat">Cartoon &amp; Anime</p><p class="ln">A robot vacuum set up in three steps, told like a 1950s classroom film.</p></div>
+</article>
+<article class="sc" data-cat="cartoon-anime">
+  <img src="img/scifi-toon.jpg" alt="Still from the Sci-Fi Sitcom Toon demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Sci-Fi Sitcom Toon</h3></div>
+  <p class="cat">Cartoon &amp; Anime</p><p class="ln">A jaded genius opens a portal just to buy coffee and tumbles through ever-stranger universes.</p></div>
+</article>
+<article class="sc" data-cat="games">
+  <img src="img/pixel-rpg.jpg" alt="Still from the 16-bit Pixel RPG demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>16-bit Pixel RPG</h3></div>
+  <p class="cat">Games</p><p class="ln">At the final boss door a hero saves the game, and the save screen replays the whole journey.</p></div>
+</article>
+<article class="sc" data-cat="games">
+  <img src="img/game-show.jpg" alt="Still from the Game Show Flat demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Game Show Flat</h3></div>
+  <p class="cat">Games</p><p class="ln">The history of AI as a rhythm game: models take the stage on the beat, and a report card closes the show.</p></div>
+</article>
+<article class="sc" data-cat="games">
+  <img src="img/hd-2d.jpg" alt="Still from the HD-2D demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>HD-2D</h3></div>
+  <p class="cat">Games</p><p class="ln">The lighthouse goes dark; a girl carries the last flame through a night forest and up the storm cliffs.</p></div>
+</article>
+<article class="sc" data-cat="games">
+  <img src="img/microgame.jpg" alt="Still from the Microgame Frenzy demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Microgame Frenzy</h3></div>
+  <p class="cat">Games</p><p class="ln">A clumsy cadet survives a five-second boot camp, faster and faster, until the boss: landing home.</p></div>
+</article>
+<article class="sc" data-cat="graphic-type">
+  <img src="img/spy-titles.jpg" alt="Still from the 60s Spy Title Sequence demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>60s Spy Title Sequence</h3></div>
+  <p class="cat">Graphic &amp; Type</p><p class="ln">Opening titles for an imaginary 1964 spy film: a chase for a stolen key until the shapes lock into the title.</p></div>
+</article>
+<article class="sc" data-cat="graphic-type">
+  <img src="img/ascii-crt.jpg" alt="Still from the ASCII / CRT Terminal demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>ASCII / CRT Terminal</h3></div>
+  <p class="cat">Graphic &amp; Type</p><p class="ln">A moon-base AI wakes after forty years to a signal from Earth, and replies by drawing “home” in characters.</p></div>
+</article>
+<article class="sc" data-cat="graphic-type">
+  <img src="img/art-deco.jpg" alt="Still from the Art Deco demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Art Deco</h3></div>
+  <p class="cat">Graphic &amp; Type</p><p class="ln">A grand hotel, 1930: a bellboy races lifts and revolving doors to deliver one letter before midnight.</p></div>
+</article>
+<article class="sc" data-cat="graphic-type">
+  <img src="img/blueprint.jpg" alt="Still from the Blueprint demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Blueprint</h3></div>
+  <p class="cat">Graphic &amp; Type</p><p class="ln">An inventor&#x27;s blueprint draws, explodes and assembles a cloud-catching machine, and its revision cloud starts to rain.</p></div>
+</article>
+<article class="sc" data-cat="graphic-type">
+  <img src="img/pictogram-motion.jpg" alt="Still from the Pictogram Motion demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Pictogram Motion</h3></div>
+  <p class="cat">Graphic &amp; Type</p><p class="ln">A yellow umbrella left on a bus waits out a sunny day on the lost-property shelf, then opens with 312 others when the storm comes back: objects, vehicles, weather and signs as beat-locked geometric pictograms.</p></div>
+</article>
+<article class="sc" data-cat="graphic-type">
+  <img src="img/stained-glass.jpg" alt="Still from the Stained Glass demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Stained Glass</h3><span class="tag">In the reel · 05</span></div>
+  <p class="cat">Graphic &amp; Type</p><p class="ln">Sunlight crosses a cathedral window from dawn to dusk, waking each pane of a knight-and-dragon tale.</p></div>
+</article>
+<article class="sc" data-cat="graphic-type">
+  <img src="img/swiss-motion.jpg" alt="Still from the Swiss Motion Graphics demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Swiss Motion Graphics</h3></div>
+  <p class="cat">Graphic &amp; Type</p><p class="ln">A concert poster lays itself out by five Swiss design rules; the fifth is to break just one.</p></div>
+</article>
+<article class="sc" data-cat="materials-3d">
+  <img src="img/brick-toy.jpg" alt="Still from the Brick Toy demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Brick Toy</h3></div>
+  <p class="cat">Materials &amp; 3D</p><p class="ln">A brick astronaut builds a rocket from spare parts and flies to a brick moon.</p></div>
+</article>
+<article class="sc" data-cat="materials-3d">
+  <img src="img/desktop-flythrough.jpg" alt="Still from the Desktop Flythrough demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Desktop Flythrough</h3></div>
+  <p class="cat">Materials &amp; 3D</p><p class="ln">A cat photo hops across app cards on a sunlit desk, from one phone to a friend&#x27;s.</p></div>
+</article>
+<article class="sc" data-cat="materials-3d">
+  <img src="img/glass-product.jpg" alt="Still from the Glass Product Render demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Glass Product Render</h3></div>
+  <p class="cat">Materials &amp; 3D</p><p class="ln">Unboxing and close-ups of Aura, fictional glass earbuds, in strip-light sweeps and caustics.</p></div>
+</article>
+<article class="sc" data-cat="materials-3d">
+  <img src="img/lowpoly-island.jpg" alt="Still from the Low-poly Isometric Island demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Low-poly Isometric Island</h3></div>
+  <p class="cat">Materials &amp; 3D</p><p class="ln">An island and its village grow tile by tile from an empty sea, each tile a note, into a starry night.</p></div>
+</article>
+<article class="sc" data-cat="materials-3d">
+  <img src="img/memphis-diorama.jpg" alt="Still from the Memphis Diorama demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Memphis Diorama</h3></div>
+  <p class="cat">Materials &amp; 3D</p><p class="ln">One river bend, four seasons, one take; each turns when the big tree squats and springs back.</p></div>
+</article>
+<article class="sc" data-cat="materials-3d">
+  <img src="img/paper-popup.jpg" alt="Still from the Paper Pop-up Book demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Paper Pop-up Book</h3><span class="tag">In the reel · 09</span></div>
+  <p class="cat">Materials &amp; 3D</p><p class="ln">A pop-up book opens on a desk; a sprite named Pip adventures through paper worlds and jumps out into ours.</p></div>
+</article>
+<article class="sc" data-cat="materials-3d">
+  <img src="img/tilt-shift.jpg" alt="Still from the Tilt-Shift Miniature demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Tilt-Shift Miniature</h3></div>
+  <p class="cat">Materials &amp; 3D</p><p class="ln">Morning rush hour in a town that looks like a model: traffic, trains and tiny people.</p></div>
+</article>
+<article class="sc" data-cat="information-keynote">
+  <img src="img/circuit-board.jpg" alt="Still from the Circuit Board demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Circuit Board</h3></div>
+  <p class="cat">Information &amp; Keynote</p><p class="ln">Rivers become copper traces as current runs 2,080 km from a dam to a phone charger.</p></div>
+</article>
+<article class="sc" data-cat="information-keynote">
+  <img src="img/dark-keynote.jpg" alt="Still from the Dark Tech Keynote demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Dark Tech Keynote</h3></div>
+  <p class="cat">Information &amp; Keynote</p><p class="ln">Launch film for Tidy, a fictional app: one buried cursor snaps hundreds of windows back into place.</p></div>
+</article>
+<article class="sc" data-cat="information-keynote">
+  <img src="img/dataviz.jpg" alt="Still from the Data Storytelling demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Data Storytelling</h3></div>
+  <p class="cat">Information &amp; Keynote</p><p class="ln">A hundred years of summer temperatures, where the chart itself tells the story.</p></div>
+</article>
+<article class="sc" data-cat="information-keynote">
+  <img src="img/iso-infographic.jpg" alt="Still from the Isometric Infographic demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Isometric Infographic</h3></div>
+  <p class="cat">Information &amp; Keynote</p><p class="ln">A coffee&#x27;s journey from the plantation to your hands, across one isometric world.</p></div>
+</article>
+<article class="sc" data-cat="information-keynote">
+  <img src="img/isometric-picture-book.jpg" alt="Still from the Isometric Picture Book demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Isometric Picture Book</h3></div>
+  <p class="cat">Information &amp; Keynote</p><p class="ln">Travellers board an isometric plane, and the order shows why one way is nearly twice as fast.</p></div>
+</article>
+<article class="sc" data-cat="information-keynote">
+  <img src="img/living-screencast.jpg" alt="Still from the Living Screencast demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Living Screencast</h3></div>
+  <p class="cat">Information &amp; Keynote</p><p class="ln">Clawd hops out of the terminal into the Claude app and acts out plan mode and self-checks in one take.</p></div>
+</article>
+<article class="sc" data-cat="information-keynote">
+  <img src="img/hologram-hud.jpg" alt="Still from the Sci-fi Hologram HUD demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Sci-fi Hologram HUD</h3><span class="tag">In the reel · 08</span></div>
+  <p class="cat">Information &amp; Keynote</p><p class="ln">An e-bike is scanned into a hologram; target boxes lock onto the battery, motor and brakes.</p></div>
+</article>
+<article class="sc" data-cat="information-keynote">
+  <img src="img/transit-map.jpg" alt="Still from the Transit Map demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Transit Map</h3></div>
+  <p class="cat">Information &amp; Keynote</p><p class="ln">A printed metro map grows from one 6 km line in 1993 to 21 lines and 906 km.</p></div>
+</article>
+<article class="sc" data-cat="evidence-films">
+  <img src="img/archive-lighttable.jpg" alt="Still from the Archive Light Table demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Archive Light Table</h3></div>
+  <p class="cat">Evidence Films</p><p class="ln">The telegram said 57 seconds; under a loupe, the Wrights&#x27; glass negatives and the archive say 59.</p></div>
+</article>
+<article class="sc" data-cat="evidence-films">
+  <img src="img/data-physical.jpg" alt="Still from the Data Physicalization demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Data Physicalization</h3></div>
+  <p class="cat">Evidence Films</p><p class="ln">Twelve years of wind and solar stacked as real plates, spiralling round a walnut dial until solar overtakes.</p></div>
+</article>
+<article class="sc" data-cat="evidence-films">
+  <img src="img/briefing-board.jpg" alt="Still from the Engineering Briefing Board demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Engineering Briefing Board</h3></div>
+  <p class="cat">Evidence Films</p><p class="ln">Four bridge types are tested on one briefing wall, and the ship that must pass under picks the winner.</p></div>
+</article>
+<article class="sc" data-cat="evidence-films">
+  <img src="img/teardown.jpg" alt="Still from the Exploded Teardown demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Exploded Teardown</h3></div>
+  <p class="cat">Evidence Films</p><p class="ln">Half an open-source keyboard comes apart in one orbit, down to the chip, then closes with its real dimensions.</p></div>
+</article>
+<article class="sc" data-cat="evidence-films">
+  <img src="img/lidar-survey.jpg" alt="Still from the LiDAR Survey demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>LiDAR Survey</h3></div>
+  <p class="cat">Evidence Films</p><p class="ln">A laser survey strips the canopy off a Connecticut forest and finds 3.4 km of old farm walls.</p></div>
+</article>
+<article class="sc" data-cat="evidence-films">
+  <img src="img/microscope.jpg" alt="Still from the Microscope Story demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Microscope Story</h3></div>
+  <p class="cat">Evidence Films</p><p class="ln">One continuous move from a liver slide to a single nucleus; two circles, counted pixel by pixel, differ 2.4 times in blue.</p></div>
+</article>
+<article class="sc" data-cat="evidence-films">
+  <img src="img/white-model.jpg" alt="Still from the Projection on White Model demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Projection on White Model</h3></div>
+  <p class="cat">Evidence Films</p><p class="ln">A projector paints Rotterdam&#x27;s white model layer by layer, from the 1940 gap to today&#x27;s towers.</p></div>
+</article>
+<article class="sc" data-cat="evidence-films">
+  <img src="img/satellite-briefing.jpg" alt="Still from the Satellite Briefing demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Satellite Briefing</h3></div>
+  <p class="cat">Evidence Films</p><p class="ln">A satellite follows the map to the Aral Sea and finds a desert; only the part someone dammed came back.</p></div>
+</article>
+<article class="sc" data-cat="edit-documentary">
+  <img src="img/newsreel.jpg" alt="Still from the 1920s Newsreel demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>1920s Newsreel</h3></div>
+  <p class="cat">Edit &amp; Documentary</p><p class="ln">1926: the papers say the Charleston will ruin America&#x27;s knees; at Ford&#x27;s own picnic the kids dance it anyway.</p></div>
+</article>
+<article class="sc" data-cat="edit-documentary">
+  <img src="img/news-package.jpg" alt="Still from the Broadcast News Package demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Broadcast News Package</h3></div>
+  <p class="cat">Edit &amp; Documentary</p><p class="ln">Four AI stories from one week in a full on-air package: rundown, headline strap, price board, spec card.</p></div>
+</article>
+<article class="sc" data-cat="edit-documentary">
+  <img src="img/caption-news.jpg" alt="Still from the Caption News demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Caption News</h3></div>
+  <p class="cat">Edit &amp; Documentary</p><p class="ln">America lost 1.3 million bee colonies, yet the count rose 6 %: a news short that works with the sound off.</p></div>
+</article>
+<article class="sc" data-cat="edit-documentary">
+  <img src="img/kino-montage.jpg" alt="Still from the Constructivist Montage demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Constructivist Montage</h3></div>
+  <p class="cat">Edit &amp; Documentary</p><p class="ln">The Empire State&#x27;s 1931 brochure credits its builders; the site film and Hine&#x27;s photos answer: 2,500 a day.</p></div>
+</article>
+<article class="sc" data-cat="edit-documentary">
+  <img src="img/countdown.jpg" alt="Still from the Live Countdown Split-screen demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Live Countdown Split-screen</h3></div>
+  <p class="cat">Edit &amp; Documentary</p><p class="ln">The last minute of the Artemis II launch, uncut: one cell opens to nine, and they merge into one at ignition.</p></div>
+</article>
+<article class="sc" data-cat="edit-documentary">
+  <img src="img/telestrator.jpg" alt="Still from the Sports Telestrator demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Sports Telestrator</h3></div>
+  <p class="cat">Edit &amp; Documentary</p><p class="ln">Down 3–0 at half-time, Fenerbahçe scored three in 12 minutes: freeze, draw, split screen, shot map.</p></div>
+</article>
+<article class="sc" data-cat="edit-documentary">
+  <img src="img/city-symphony.jpg" alt="Still from the Time-lapse Symphony demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Time-lapse Symphony</h3></div>
+  <p class="cat">Edit &amp; Documentary</p><p class="ln">One day in New York in time-lapse: rivers of light, a grid on the sixteenths, 1899 beside today.</p></div>
+</article>
+<article class="sc" data-cat="edit-documentary">
+  <img src="img/visual-investigation.jpg" alt="Still from the Visual Investigation demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Visual Investigation</h3></div>
+  <p class="cat">Edit &amp; Documentary</p><p class="ln">Newsreel, photos, testimony and the 1937 inquiry on one clock: five sources point to the same spot.</p></div>
+</article>
+<article class="sc" data-cat="cinema-eras">
+  <img src="img/silent-film.jpg" alt="Still from the 1920s Silent Film demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>1920s Silent Film</h3><span class="tag">In the reel · 06</span></div>
+  <p class="cat">Cinema &amp; Eras</p><p class="ln">A baker&#x27;s boy chases a runaway loaf downhill, then breaks it in half for a hungry girl.</p></div>
+</article>
+<article class="sc" data-cat="cinema-eras">
+  <img src="img/backrooms.jpg" alt="Still from the Liminal Found Footage demo film" width="560" height="315" loading="lazy">
+  <div class="sb"><div class="st"><h3>Liminal Found Footage</h3></div>
+  <p class="cat">Cinema &amp; Eras</p><p class="ln">A new night-shift hire films their first night in an endless yellow office, following the rules on the wall.</p></div>
+</article></div>
+  </section>
+
+  <section class="cotsi" aria-labelledby="h-cotsi">
+    <p class="when">Launching 16 November</p>
+    <h2 id="h-cotsi">Cotsi: learn anything in the least time</h2>
+    <p>Cotsi is our Claude skill that teaches any topic, book or exam syllabus fast: the 20% of ideas that unlock the other 80%, taught by the characters you love, with quick checks so it sticks.</p>
+  </section>
+
+  <footer>
+    <p>Style library and the stills on the style cards: <a href="https://github.com/lemomo-ai/lemo-opuscar" target="_blank" rel="noopener">Lemo-Opuscar</a> by LemoLab. Stills are CC BY 4.0, resized for this page.</p>
+    <p>The 10 reel previews were made by us with Claude.</p>
+  </footer>
+</div>
+<script>
+(() => {
+  const chips = [...document.querySelectorAll('.chip')], cards = [...document.querySelectorAll('.sc')];
+  chips.forEach((c) => c.addEventListener('click', () => {
+    chips.forEach((x) => { const on = x === c; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+    const cat = c.dataset.cat; cards.forEach((k) => { k.hidden = !(cat === 'all' || k.dataset.cat === cat); });
+  }));
+  document.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', () => {
+    const el = document.getElementById(b.dataset.copy), txt = el.textContent;
+    const done = () => { b.textContent = 'Copied'; setTimeout(() => { b.textContent = 'Copy'; }, 1400); };
+    const pick = () => { const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; setTimeout(() => { b.textContent = 'Copy'; }, 1400); };
+    try { navigator.clipboard.writeText(txt).then(done, pick); } catch (err) { pick(); }
+  }));
+})();
+</script>
+
+</body>
+</html>
