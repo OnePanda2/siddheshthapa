@@ -180,7 +180,11 @@
       "at": "2026-09-13"
     }
   ],
-  "edits": {},
+  "edits": {
+    "p-cotsi": {
+      "src": "cotsi.siddheshthapa.com"
+    }
+  },
   "regions": [],
   "retiredRegions": [],
   "menuOrder": [],
