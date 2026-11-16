@@ -52,37 +52,70 @@ var SHEETS = WORK_NODES.slice().sort(function(a, b){
    is asserted rather than trusted, because a drawing that has drifted from its
    parts list is a defect and not a variation. */
 var FIGURES = {
-  'diagnostic-before-generation': {
-    caption: 'the diagnostic stands before the generator',
-    parts: [1, 2, 3, 4],
+  /* THE VITAL FEW FIRST. Drawn 16 Nov 2026 for Cotsi 6.1 and its website,
+     replacing the drawing of the old skill (request, closed diagnostic, level,
+     course), which the new sheet would have contradicted. Read left to right:
+     three ways in all lead to the Leverage Map; each idea is taught and then
+     asked about, and a wrong answer goes back for a new angle rather than on;
+     then the part never taught is solved with the part that was, and review
+     brings it all back at growing gaps. Numbers match the sheet's six parts —
+     W6 asserts that, and worksmutate W6 breaks part 04 to prove it. */
+  'the-vital-few-first': {
+    caption: 'the vital few first, then a question for each',
+    parts: [1, 2, 3, 4, 5, 6],
     svg: [
-      '<svg class="wk-svg" viewBox="0 0 660 200" role="img" aria-label="Assembly drawing: trigger, diagnostic, level estimate, course. The diagnostic sits between the request and anything being generated.">',
+      '<svg class="wk-svg" viewBox="0 0 660 226" role="img" aria-label="Assembly drawing: a topic, a book or your CV leads into the Leverage Map of the 3 to 7 ideas that matter. Each idea is taught, then tested with a question; a wrong answer loops back for a new angle, a right one moves to the next idea. Then the Unlock Test solves the untaught 80% with the vital 20%, and review brings it back on days 1, 3, 7, 21 and 60.">',
+      '<g class="part p6">',
+      '<rect x="14" y="38" width="104" height="26" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="66" y="55" text-anchor="middle" font-size="9" fill="#1a1d1f">A TOPIC</text>',
+      '<rect x="14" y="71" width="104" height="26" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="66" y="88" text-anchor="middle" font-size="9" fill="#1a1d1f">A BOOK</text>',
+      '<rect x="14" y="104" width="104" height="26" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="66" y="121" text-anchor="middle" font-size="9" fill="#1a1d1f">YOUR CV</text>',
+      '<text x="14" y="30" font-size="9" fill="#9a2a1f">06</text></g>',
+      '<path d="M118 51 L136 51 L136 84" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<path d="M118 84 L156 84" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<path d="M118 117 L136 117 L136 84" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
       '<g class="part p1">',
-      '<rect x="14" y="78" width="118" height="44" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
-      '<text x="73" y="98" text-anchor="middle" font-size="10" fill="#1a1d1f">TRIGGER</text>',
-      '<text x="73" y="112" text-anchor="middle" font-size="8.5" fill="#5e6367">+ topic</text>',
-      '<text x="14" y="70" font-size="9" fill="#9a2a1f">01</text></g>',
-      '<path class="lead" d="M132 100 L172 100" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3"></path>',
+      '<rect x="156" y="56" width="106" height="56" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="209" y="78" text-anchor="middle" font-size="10" fill="#1a1d1f">LEVERAGE MAP</text>',
+      '<text x="209" y="93" text-anchor="middle" font-size="8.5" fill="#5e6367">3–7 trunk ideas</text>',
+      '<text x="209" y="105" text-anchor="middle" font-size="8.5" fill="#5e6367">and what to skip</text>',
+      '<text x="156" y="48" font-size="9" fill="#9a2a1f">01</text></g>',
+      '<path d="M262 84 L292 84" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
       '<g class="part p2">',
-      '<rect x="172" y="66" width="140" height="68" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
-      '<text x="242" y="88" text-anchor="middle" font-size="10" fill="#1a1d1f">DIAGNOSTIC</text>',
-      '<text x="242" y="103" text-anchor="middle" font-size="8.5" fill="#5e6367">closed questions</text>',
-      '<text x="242" y="117" text-anchor="middle" font-size="8.5" fill="#5e6367">only</text>',
-      '<text x="172" y="58" font-size="9" fill="#9a2a1f">02</text></g>',
-      '<path class="lead" d="M312 100 L352 100" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3"></path>',
+      '<rect x="292" y="56" width="104" height="56" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="344" y="78" text-anchor="middle" font-size="10" fill="#1a1d1f">ONE IDEA</text>',
+      '<text x="344" y="93" text-anchor="middle" font-size="8.5" fill="#5e6367">a scene, the real</text>',
+      '<text x="344" y="105" text-anchor="middle" font-size="8.5" fill="#5e6367">version, one line</text>',
+      '<text x="292" y="48" font-size="9" fill="#9a2a1f">02</text></g>',
+      '<path d="M396 84 L420 84" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
       '<g class="part p3">',
-      '<rect x="352" y="72" width="126" height="56" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
-      '<text x="415" y="92" text-anchor="middle" font-size="10" fill="#1a1d1f">LEVEL</text>',
-      '<text x="415" y="107" text-anchor="middle" font-size="8.5" fill="#5e6367">1 of 5 bands</text>',
-      '<text x="352" y="64" font-size="9" fill="#9a2a1f">03</text></g>',
-      '<path class="lead" d="M478 100 L518 100" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3"></path>',
+      '<rect x="420" y="56" width="92" height="56" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="466" y="78" text-anchor="middle" font-size="10" fill="#1a1d1f">YOUR TURN</text>',
+      '<text x="466" y="93" text-anchor="middle" font-size="8.5" fill="#5e6367">a question</text>',
+      '<text x="466" y="105" text-anchor="middle" font-size="8.5" fill="#5e6367">for each idea</text>',
+      '<text x="420" y="48" font-size="9" fill="#9a2a1f">03</text></g>',
+      '<path d="M466 56 L466 34 L344 34 L344 56" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<text x="405" y="28" text-anchor="middle" font-size="8" fill="#5e6367">right: next idea</text>',
+      '<path d="M466 112 L466 136 L344 136 L344 112" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<text x="405" y="150" text-anchor="middle" font-size="8" fill="#5e6367">wrong: a new angle, again</text>',
+      '<path d="M512 84 L532 84" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
       '<g class="part p4">',
-      '<rect x="518" y="66" width="128" height="68" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
-      '<text x="582" y="88" text-anchor="middle" font-size="10" fill="#1a1d1f">COURSE</text>',
-      '<text x="582" y="103" text-anchor="middle" font-size="8.5" fill="#5e6367">starts at the band,</text>',
-      '<text x="582" y="116" text-anchor="middle" font-size="8.5" fill="#5e6367">not at zero</text>',
-      '<text x="518" y="58" font-size="9" fill="#9a2a1f">04</text></g>',
-      '<line x1="14" y1="168" x2="646" y2="168" stroke="#b9bcb6" stroke-width="1"></line>',
+      '<rect x="532" y="56" width="114" height="56" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="589" y="78" text-anchor="middle" font-size="10" fill="#1a1d1f">UNLOCK TEST</text>',
+      '<text x="589" y="93" text-anchor="middle" font-size="8.5" fill="#5e6367">the untaught 80%,</text>',
+      '<text x="589" y="105" text-anchor="middle" font-size="8.5" fill="#5e6367">solved with the 20%</text>',
+      '<text x="532" y="48" font-size="9" fill="#9a2a1f">04</text></g>',
+      '<path d="M589 112 L589 160" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<g class="part p5">',
+      '<rect x="532" y="160" width="114" height="40" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="589" y="177" text-anchor="middle" font-size="10" fill="#1a1d1f">REVIEW</text>',
+      '<text x="589" y="191" text-anchor="middle" font-size="8.5" fill="#5e6367">days 1·3·7·21·60</text>',
+      '<text x="532" y="154" font-size="9" fill="#9a2a1f">05</text></g>',
+            '<polyline points="340,50 344,56 348,50" fill="none" stroke="#1a1d1f" stroke-width="1.2"></polyline>',
+      '<polyline points="340,118 344,112 348,118" fill="none" stroke="#1a1d1f" stroke-width="1.2"></polyline>',
+      '<line x1="14" y1="214" x2="646" y2="214" stroke="#b9bcb6" stroke-width="1"></line>',
       '</svg>'
     ].join('')
   },
@@ -338,28 +371,6 @@ var FIGURES = {
   }
 };
 
-/* ── the operable part ─────────────────────────────────────────────────────
-   COTSI's argument is that a course should start where the student is, and
-   the cheapest way to make that argument is to let it happen to the visitor.
-   Three closed questions, and the milestones they already hold are struck
-   through rather than taught. The questions are about the skill's own
-   subject, so answering them is not a quiz about Siddhesh. */
-var DIAGNOSTIC = {
-  questions: [
-    'Have you written a prompt that changes its own behaviour based on the answer to an earlier question?',
-    'Do you know what happens when a set of instructions contradicts the request it was given?',
-    'Have you published something other people use without you being there to explain it?'
-  ],
-  bands: ['beginner', 'familiar', 'intermediate', 'advanced'],
-  course: [
-    'What a skill is, and why a prompt is not one',
-    'Triggering — when the instruction should be reached for',
-    'Branching on what the person already knows',
-    'Failure modes, and writing the rules that prevent them',
-    'Publishing something a stranger can run'
-  ]
-};
-
 /* ── DOM ──────────────────────────────────────────────────────────────── */
 var wkLayer   = document.getElementById('works');
 var wkBody    = document.getElementById('wkBody');
@@ -611,7 +622,6 @@ function renderWritten(sh, n, idx){
   wkBody.appendChild(fw);
 
   if(sh.figure && FIGURES[sh.figure]) renderFigure(FIGURES[sh.figure], idx);
-  if(sh.operable) renderDiagnostic();
 }
 
 /* A reserved sheet carries its whole derived tier and nothing invented. It is
@@ -653,61 +663,6 @@ function renderFigure(fig, idx){
   scroll.innerHTML = fig.svg;
   wrap.appendChild(scroll);
   wkBody.appendChild(wrap);
-}
-
-function renderDiagnostic(){
-  var wrap = el('div', 'wk-run');
-  wrap.appendChild(el('p', 'wk-h', 'Run the diagnostic'));
-  var prog = el('p', 'wk-prog');
-  var q = el('p', 'wk-q');
-  var btns = el('div', 'wk-btns');
-  var out = el('div');
-  wrap.appendChild(prog); wrap.appendChild(q); wrap.appendChild(btns); wrap.appendChild(out);
-  wkBody.appendChild(wrap);
-
-  var i = 0, score = 0;
-
-  function ask(){
-    out.innerHTML = '';
-    prog.hidden = false; q.hidden = false; btns.hidden = false;
-    prog.textContent = 'Question ' + (i + 1) + ' of ' + DIAGNOSTIC.questions.length;
-    q.textContent = DIAGNOSTIC.questions[i];
-    btns.innerHTML = '';
-    [['Yes', 1], ['No', 0]].forEach(function(pair){
-      var b = el('button', 'wk-btn', pair[0]);
-      b.type = 'button';
-      b.addEventListener('click', function(){
-        score += pair[1]; i++;
-        if(i >= DIAGNOSTIC.questions.length) finish(); else ask();
-      });
-      btns.appendChild(b);
-    });
-  }
-
-  function finish(){
-    prog.hidden = true; q.hidden = true; btns.hidden = true;
-    out.innerHTML = '';
-    var band = DIAGNOSTIC.bands[Math.min(score, DIAGNOSTIC.bands.length - 1)];
-    out.appendChild(el('p', 'wk-h', 'Level estimate — ' + band));
-    var ul = el('ul', 'wk-course');
-    DIAGNOSTIC.course.forEach(function(t, k){
-      var li = el('li', k < score ? 'skipped' : null, t);
-      if(k < score) li.title = 'skipped — you already hold this';
-      ul.appendChild(li);
-    });
-    out.appendChild(ul);
-    out.appendChild(el('p', 'wk-none',
-      'That is the argument of the work, and it just happened to you rather ' +
-      'than being described. Different answers strike out different milestones.'));
-    var again = el('button', 'wk-btn', 'Run again');
-    again.type = 'button';
-    again.addEventListener('click', function(){ i = 0; score = 0; ask(); });
-    out.appendChild(again);
-    say('Level estimate: ' + band + '. ' + score + ' of ' +
-        DIAGNOSTIC.course.length + ' milestones skipped.');
-  }
-
-  ask();
 }
 
 /* ── the band of night, and the way back ───────────────────────────────────

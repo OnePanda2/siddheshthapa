@@ -200,6 +200,12 @@ change which milestones the generated course strikes through. It is the single
 most convincing thing the section can contain, and it costs one small
 state machine.
 
+**Superseded 2026-11-16.** COTSI became Cotsi 6.1 and a website, and its sheet was
+rewritten for it. The old drawing and its operable diagnostic described the old
+skill, so both were removed; the new drawing (`the-vital-few-first`) is a plain
+assembly with no interaction. Its connectors are ordinary paths, not `.lead`:
+leaders are hidden unless a figure is exploded, and the explode control is gone.
+
 ---
 
 ## 6. The night strip, and the way back

@@ -104,18 +104,10 @@ setTimeout(function(){
                       .filter(function(s){ return /^0[0-9]$/.test(s); })
                       .map(function(s){ return parseInt(s,10); });
 
-    /* W4 — every strip entry is a real edge, in the graph's own verb */
-    out.see=[].map.call(document.querySelectorAll('[data-see]'), function(b){
-      return { id:b.getAttribute('data-see'),
-               sibling:b.hasAttribute('data-sheet-link'),
-               verb:(b.querySelector('.wk-see-v')||{}).textContent||'' };
-    });
-    /* TRUTH COMES FROM THE GRAPH, NOT FROM THE MANUAL. Read from W.seeAlso()
-       first, which is the helper the strip is built with — so a mutation that
-       fabricated an entry fabricated it on both sides and W4 passed. */
-    out.seeTruth=M.edgesOf('p-cotsi').map(function(e){
-      return { id: e.a === 'p-cotsi' ? e.b : e.a, verb: e.verb };
-    });
+    /* W4 is measured on EVERY sheet now (below, per sheet). It read COTSI's
+       strip alone, and on 16 Nov 2026 both of COTSI's relationships were
+       withdrawn — the strip went empty and W4 would have had nothing to look
+       at. A witness picked by name goes quiet the day its data changes. */
 
     /* W10 — EVERY SHEET, not whichever one happened to be open. Measured on a
        single sheet this said "clean" while another one scrolled sideways: a
@@ -170,6 +162,16 @@ setTimeout(function(){
         hasLine:!!document.querySelector('.wk-line'),
         plateCount:document.querySelectorAll('.wk-plate span').length,
         seeCount:document.querySelectorAll('[data-see]').length,
+        /* W4, per sheet: what the strip printed, and the graph's own edges for
+           this work — read from the app, never from the manual's helper, so a
+           fabricated entry cannot be fabricated on both sides */
+        see:[].map.call(document.querySelectorAll('[data-see]'), function(b){
+          return { id:b.getAttribute('data-see'),
+                   verb:(b.querySelector('.wk-see-v')||{}).textContent||'' };
+        }),
+        truth:M.edgesOf(id).map(function(e){
+          return { id: e.a === id ? e.b : e.a, verb: e.verb };
+        }),
         /* W12, per sheet: every link the sheet drew — not just the one the
            code means to draw, so a link that turns up anywhere else on a sheet
            is seen too — beside the graph's own address for the work */
@@ -185,7 +187,13 @@ setTimeout(function(){
        sheet through the real renderSheet with its record suppressed, which is
        exactly the state a seventh work would arrive in. */
     out.reservedProbe={};
-    W.sheets().slice(0, 2).forEach(function(id){
+    /* THE FIRST TWO SHEETS THAT HAVE RELATIONSHIPS, not the first two. The probe
+       requires a reserved sheet to keep printing its relationships, and
+       COTSI — sheet 01 — had both of its withdrawn on 16 Nov 2026, so "the
+       first two" began failing a sheet for having nothing to print. Chosen
+       from the data, so it cannot go stale the same way twice. */
+    W.sheets().filter(function(id){ return out.perSheet[id].seeCount > 0; })
+     .slice(0, 2).forEach(function(id){
       W.asReserved(id);
       out.reservedProbe[id]={
         stamp:(document.querySelector('.wk-stamp')||{}).textContent||'',
@@ -295,16 +303,24 @@ ck('W3', plateOk && capMismatch.length === 0,
 
 /* W4 — every entry in the band of night is a relationship the graph holds.
    Checked against the graph's own edge list, not against the rendered text,
-   so a hand-written "see also" could not pass. */
-const truth = {};
-(r.seeTruth || []).forEach(t => { truth[t.id] = t.verb; });
-const invented = r.see.filter(s => !truth[s.id]);
-const wrongVerb = r.see.filter(s => truth[s.id] && s.verb.indexOf(truth[s.id]) < 0);
-ck('W4', r.see.length > 0 && invented.length === 0 && wrongVerb.length === 0,
+   so a hand-written "see also" could not pass. ON EVERY SHEET: one named sheet
+   was the witness until its relationships were withdrawn. And there must be
+   entries somewhere, or this proves nothing. */
+const seeAll = [], invented = [], wrongVerb = [];
+r.sheets.forEach(id => {
+  const p = r.perSheet[id] || {}, truth = {};
+  (p.truth || []).forEach(t => { truth[t.id] = t.verb; });
+  (p.see || []).forEach(e => {
+    seeAll.push(id);
+    if(!truth[e.id]) invented.push(id + '→' + e.id);
+    else if(e.verb.indexOf(truth[e.id]) < 0) wrongVerb.push(id + '→' + e.id);
+  });
+});
+ck('W4', seeAll.length > 0 && invented.length === 0 && wrongVerb.length === 0,
    'every entry in the night band is a real edge, printed with its own verb — ' +
-   r.see.length + ' of them' +
-   (invented.length ? ' — INVENTED: ' + invented.map(s => s.id).join(', ') : '') +
-   (wrongVerb.length ? ' — WRONG VERB: ' + wrongVerb.map(s => s.id).join(', ') : ''));
+   seeAll.length + ' entries across ' + new Set(seeAll).size + ' sheet(s)' +
+   (invented.length ? ' — INVENTED: ' + invented.join(', ') : '') +
+   (wrongVerb.length ? ' — WRONG VERB: ' + wrongVerb.join(', ') : ''));
 
 /* W5 — EVERY undocumented work is reserved: stamped, not hidden, not padded,
    and still carrying the tier the graph declares. */

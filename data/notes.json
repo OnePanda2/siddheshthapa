@@ -182,7 +182,9 @@
   ],
   "edits": {
     "p-cotsi": {
-      "src": "cotsi.siddheshthapa.com"
+      "src": "cotsi.siddheshthapa.com",
+      "line": "Learn anything faster through 5 different Psychological Learning Methods.",
+      "state": "growing"
     }
   },
   "regions": [],
@@ -194,6 +196,18 @@
       "b": "t-biryani",
       "at": "2026-09-09",
       "why": "unlinked from the editor."
+    },
+    {
+      "a": "b-tutor",
+      "b": "p-cotsi",
+      "at": "2026-11-16",
+      "why": "withdrawn by the owner when COTSI's sheet was rewritten for Cotsi 6.1 and its website."
+    },
+    {
+      "a": "p-skills",
+      "b": "p-cotsi",
+      "at": "2026-11-16",
+      "why": "withdrawn by the owner when COTSI's sheet was rewritten for Cotsi 6.1 and its website."
     }
   ]
 }

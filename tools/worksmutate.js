@@ -51,8 +51,13 @@ const M = [
     repl:"function renderReserved(n){\n  if(n) return;\n  var box = el('div', 'wk-col');" },
 
   { id:'W6', why:'let the drawing drift from its own parts list', file:WORKS,
-    find:"'<text x=\"518\" y=\"58\" font-size=\"9\" fill=\"#9a2a1f\">04</text></g>',",
-    repl:"'<text x=\"518\" y=\"58\" font-size=\"9\" fill=\"#9a2a1f\">07</text></g>'," },
+    /* part 04 of COTSI's drawing, renumbered 07. The anchor moved on 16 Nov 2026
+       when COTSI's old drawing (request, diagnostic, level, course) was
+       replaced by one for the new Cotsi; it pointed into the old drawing, which
+       no sheet declares any more, so it would have broken a figure nothing
+       checks and reported W6 as proving nothing. */
+    find:"'<text x=\"532\" y=\"48\" font-size=\"9\" fill=\"#9a2a1f\">04</text></g>',",
+    repl:"'<text x=\"532\" y=\"48\" font-size=\"9\" fill=\"#9a2a1f\">07</text></g>'," },
 
   { id:'W7', why:'keep the scene running behind the manual', file:APP,
     find:"function scenePaused(){ return !!readingId || WORKS_OPEN; }",

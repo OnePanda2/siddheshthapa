@@ -521,18 +521,6 @@ body.works-open .ctl{display:none}
 .wk-svg--stack.exploded .p5{transform:translate(-16px,12px)}
 .wk-svg.exploded .lead{opacity:1}
 
-/* the operable diagnostic — COTSI only, and it earns it */
-.wk-run{border-top:1px solid var(--paper-rule);margin-top:20px;padding-top:16px}
-.wk-q{font-size:14px;line-height:1.55;max-width:48ch;margin:0 0 14px}
-.wk-prog{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--paper-dim);margin:0 0 10px}
-.wk-course{list-style:none;margin:12px 0 0;padding:0;counter-reset:c}
-.wk-course li{counter-increment:c;position:relative;padding:8px 0 8px 34px;font-size:13px;
-  border-bottom:1px solid var(--paper-rule);line-height:1.5}
-.wk-course li:last-child{border-bottom:0}
-.wk-course li::before{content:"M" counter(c);position:absolute;left:0;top:8px;font-size:10.5px;
-  color:var(--paper-dim)}
-.wk-course li.skipped{color:#8d918c;text-decoration:line-through}
-
 /* the title block, and the band of night that is the way back */
 .wk-plate{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;
   border-top:1px solid var(--paper-rule);margin-top:22px;padding-top:12px;
@@ -1725,7 +1713,9 @@ var V02_NOTES={
   ],
   "edits": {
     "p-cotsi": {
-      "src": "cotsi.siddheshthapa.com"
+      "src": "cotsi.siddheshthapa.com",
+      "line": "Learn anything faster through 5 different Psychological Learning Methods.",
+      "state": "growing"
     }
   },
   "regions": [],
@@ -1737,6 +1727,18 @@ var V02_NOTES={
       "b": "t-biryani",
       "at": "2026-09-09",
       "why": "unlinked from the editor."
+    },
+    {
+      "a": "b-tutor",
+      "b": "p-cotsi",
+      "at": "2026-11-16",
+      "why": "withdrawn by the owner when COTSI's sheet was rewritten for Cotsi 6.1 and its website."
+    },
+    {
+      "a": "p-skills",
+      "b": "p-cotsi",
+      "at": "2026-11-16",
+      "why": "withdrawn by the owner when COTSI's sheet was rewritten for Cotsi 6.1 and its website."
     }
   ]
 }
@@ -9334,51 +9336,65 @@ var WORKS_DATA = {
     {
       "node": "p-cotsi",
       "authority": [
-        "source-text/Siddhesh Thapa (rtf).txt §12 — COTSI COURSE-PERSONALISATION IDEA",
-        "source-text/Siddhesh Thapa (pdf).txt lines 30-31"
+        "github.com/OnePanda2/Cotsi — README.md, CHANGELOG.md (6.0 and 6.1) and LAUNCH.md, read 2026-11-16",
+        "cotsi.siddheshthapa.com — the website, checked 2026-11-16 (not launched: its health check reports the AI switched off)"
       ],
-      "purpose": "To stop a teacher — human or machine — from explaining what the student already knows. The skill refuses to generate a course until it has established what the person in front of it can already do.",
+      "purpose": "To help you learn anything in the least time, and keep it. Cotsi finds the few ideas most of a subject depends on and teaches those first. It makes you use each one straight away, then brings them back over the next few days so they stick. The website adds a third way in: start from your CV, and it finds the roles likely to be in demand in your industry, then teaches only what you're missing.",
       "parts": [
         {
           "n": 1,
-          "name": "trigger",
-          "note": "The request and a topic. Nothing is generated at this point, which is the whole departure from a normal prompt."
+          "name": "the Leverage Map",
+          "note": "Before teaching anything, Cotsi picks the 3 to 7 ideas most of the subject depends on. It shows what each one unlocks, and what you can safely ignore."
         },
         {
           "n": 2,
-          "name": "diagnostic",
-          "note": "Closed questions only. This is the single load-bearing part; remove it and what remains is a generic course generator."
+          "name": "one idea at a time",
+          "note": "Each idea gets a short scene where one character voices the usual mistake and another fixes it. Then comes the precise version and one line to remember. Prefer no characters? Plain style does the same without them."
         },
         {
           "n": 3,
-          "name": "level estimate",
-          "note": "One of five bands: beginner, familiar, intermediate, advanced, highly advanced."
+          "name": "your turn",
+          "note": "Every idea ends with a quick question. Get it wrong and you get a new angle and another try."
         },
         {
           "n": 4,
-          "name": "course",
-          "note": "Assembled upward from the estimate, so the starting point moves with the student rather than sitting at zero."
+          "name": "the Unlock Test",
+          "note": "Questions from the part you were never taught, solved with the ideas you were. It's the moment the rest turns out to be easy."
+        },
+        {
+          "n": 5,
+          "name": "review",
+          "note": "A schedule that brings each topic back tomorrow, then at growing gaps, with cards ready for Anki."
+        },
+        {
+          "n": 6,
+          "name": "three ways in",
+          "note": "On the website: Learn a topic, Understand a book, or Get job-ready. Get job-ready starts from your CV, finds the roles rising in your industry, builds a syllabus of only what you're missing, then finds live openings and the edge you have."
         }
       ],
       "procedure": [
-        "Receive the trigger and a topic. Do not generate a course yet.",
-        "Ask diagnostic questions relevant to the topic — yes/no and multiple choice only. Never open-ended, never a question the person answers by typing.",
-        "Establish current knowledge, prior exposure, practical experience, familiarity with foundational concepts, and where relevant the goal.",
-        "Place the answers on one of five bands: beginner, familiar, intermediate, advanced, highly advanced.",
-        "Build the course from that band upward. Do not assume the person knows nothing, and skip what they already hold."
+        "Open cotsi.siddheshthapa.com and sign in with Google.",
+        "Choose Learn a topic, Understand a book, or Get job-ready.",
+        "Read the map first: it tells you what matters and what to skip.",
+        "Answer each question before moving on. Type skip if you must.",
+        "Finish with the Unlock Test, then come back when the review is due.",
+        "For a job: upload your CV, pick one of the three roles it finds, and work through the milestones."
       ],
       "knownFailures": [
         {
-          "name": "Assumed ignorance",
-          "note": "The failure this exists to prevent: teaching chapter one to someone who came for chapter nine. It is the default behaviour of every course generator that skips step 2."
+          "name": "Four Cotsis fought over every request",
+          "note": "There were separate versions for topics, books, plain style and coding problems. Installed together, they competed to answer the same request. Version 6.0 merged them into one."
         },
         {
-          "name": "The open question",
-          "note": "Asking someone to state their own level returns a guess rather than a measurement — people under-state and over-state. The questions have to be answerable without self-assessment, which is why the constraint on question type is a rule and not a preference."
+          "name": "It failed its own test",
+          "note": "On 14 realistic test prompts, version 5.2 did only 41% of what a good answer should. The 6.0 rewrite scored 96% on the same tests."
+        },
+        {
+          "name": "The rulebook broke its own rule",
+          "note": "One rule banned jargon in the simple explanation, and the worked example right next to it used that very jargon."
         }
       ],
-      "figure": "diagnostic-before-generation",
-      "operable": true
+      "figure": "the-vital-few-first"
     },
     {
       "node": "p-website",
@@ -9857,37 +9873,70 @@ var SHEETS = WORK_NODES.slice().sort(function(a, b){
    is asserted rather than trusted, because a drawing that has drifted from its
    parts list is a defect and not a variation. */
 var FIGURES = {
-  'diagnostic-before-generation': {
-    caption: 'the diagnostic stands before the generator',
-    parts: [1, 2, 3, 4],
+  /* THE VITAL FEW FIRST. Drawn 16 Nov 2026 for Cotsi 6.1 and its website,
+     replacing the drawing of the old skill (request, closed diagnostic, level,
+     course), which the new sheet would have contradicted. Read left to right:
+     three ways in all lead to the Leverage Map; each idea is taught and then
+     asked about, and a wrong answer goes back for a new angle rather than on;
+     then the part never taught is solved with the part that was, and review
+     brings it all back at growing gaps. Numbers match the sheet's six parts —
+     W6 asserts that, and worksmutate W6 breaks part 04 to prove it. */
+  'the-vital-few-first': {
+    caption: 'the vital few first, then a question for each',
+    parts: [1, 2, 3, 4, 5, 6],
     svg: [
-      '<svg class="wk-svg" viewBox="0 0 660 200" role="img" aria-label="Assembly drawing: trigger, diagnostic, level estimate, course. The diagnostic sits between the request and anything being generated.">',
+      '<svg class="wk-svg" viewBox="0 0 660 226" role="img" aria-label="Assembly drawing: a topic, a book or your CV leads into the Leverage Map of the 3 to 7 ideas that matter. Each idea is taught, then tested with a question; a wrong answer loops back for a new angle, a right one moves to the next idea. Then the Unlock Test solves the untaught 80% with the vital 20%, and review brings it back on days 1, 3, 7, 21 and 60.">',
+      '<g class="part p6">',
+      '<rect x="14" y="38" width="104" height="26" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="66" y="55" text-anchor="middle" font-size="9" fill="#1a1d1f">A TOPIC</text>',
+      '<rect x="14" y="71" width="104" height="26" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="66" y="88" text-anchor="middle" font-size="9" fill="#1a1d1f">A BOOK</text>',
+      '<rect x="14" y="104" width="104" height="26" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="66" y="121" text-anchor="middle" font-size="9" fill="#1a1d1f">YOUR CV</text>',
+      '<text x="14" y="30" font-size="9" fill="#9a2a1f">06</text></g>',
+      '<path d="M118 51 L136 51 L136 84" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<path d="M118 84 L156 84" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<path d="M118 117 L136 117 L136 84" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
       '<g class="part p1">',
-      '<rect x="14" y="78" width="118" height="44" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
-      '<text x="73" y="98" text-anchor="middle" font-size="10" fill="#1a1d1f">TRIGGER</text>',
-      '<text x="73" y="112" text-anchor="middle" font-size="8.5" fill="#5e6367">+ topic</text>',
-      '<text x="14" y="70" font-size="9" fill="#9a2a1f">01</text></g>',
-      '<path class="lead" d="M132 100 L172 100" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3"></path>',
+      '<rect x="156" y="56" width="106" height="56" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="209" y="78" text-anchor="middle" font-size="10" fill="#1a1d1f">LEVERAGE MAP</text>',
+      '<text x="209" y="93" text-anchor="middle" font-size="8.5" fill="#5e6367">3–7 trunk ideas</text>',
+      '<text x="209" y="105" text-anchor="middle" font-size="8.5" fill="#5e6367">and what to skip</text>',
+      '<text x="156" y="48" font-size="9" fill="#9a2a1f">01</text></g>',
+      '<path d="M262 84 L292 84" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
       '<g class="part p2">',
-      '<rect x="172" y="66" width="140" height="68" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
-      '<text x="242" y="88" text-anchor="middle" font-size="10" fill="#1a1d1f">DIAGNOSTIC</text>',
-      '<text x="242" y="103" text-anchor="middle" font-size="8.5" fill="#5e6367">closed questions</text>',
-      '<text x="242" y="117" text-anchor="middle" font-size="8.5" fill="#5e6367">only</text>',
-      '<text x="172" y="58" font-size="9" fill="#9a2a1f">02</text></g>',
-      '<path class="lead" d="M312 100 L352 100" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3"></path>',
+      '<rect x="292" y="56" width="104" height="56" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="344" y="78" text-anchor="middle" font-size="10" fill="#1a1d1f">ONE IDEA</text>',
+      '<text x="344" y="93" text-anchor="middle" font-size="8.5" fill="#5e6367">a scene, the real</text>',
+      '<text x="344" y="105" text-anchor="middle" font-size="8.5" fill="#5e6367">version, one line</text>',
+      '<text x="292" y="48" font-size="9" fill="#9a2a1f">02</text></g>',
+      '<path d="M396 84 L420 84" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
       '<g class="part p3">',
-      '<rect x="352" y="72" width="126" height="56" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
-      '<text x="415" y="92" text-anchor="middle" font-size="10" fill="#1a1d1f">LEVEL</text>',
-      '<text x="415" y="107" text-anchor="middle" font-size="8.5" fill="#5e6367">1 of 5 bands</text>',
-      '<text x="352" y="64" font-size="9" fill="#9a2a1f">03</text></g>',
-      '<path class="lead" d="M478 100 L518 100" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3"></path>',
+      '<rect x="420" y="56" width="92" height="56" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="466" y="78" text-anchor="middle" font-size="10" fill="#1a1d1f">YOUR TURN</text>',
+      '<text x="466" y="93" text-anchor="middle" font-size="8.5" fill="#5e6367">a question</text>',
+      '<text x="466" y="105" text-anchor="middle" font-size="8.5" fill="#5e6367">for each idea</text>',
+      '<text x="420" y="48" font-size="9" fill="#9a2a1f">03</text></g>',
+      '<path d="M466 56 L466 34 L344 34 L344 56" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<text x="405" y="28" text-anchor="middle" font-size="8" fill="#5e6367">right: next idea</text>',
+      '<path d="M466 112 L466 136 L344 136 L344 112" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<text x="405" y="150" text-anchor="middle" font-size="8" fill="#5e6367">wrong: a new angle, again</text>',
+      '<path d="M512 84 L532 84" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
       '<g class="part p4">',
-      '<rect x="518" y="66" width="128" height="68" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
-      '<text x="582" y="88" text-anchor="middle" font-size="10" fill="#1a1d1f">COURSE</text>',
-      '<text x="582" y="103" text-anchor="middle" font-size="8.5" fill="#5e6367">starts at the band,</text>',
-      '<text x="582" y="116" text-anchor="middle" font-size="8.5" fill="#5e6367">not at zero</text>',
-      '<text x="518" y="58" font-size="9" fill="#9a2a1f">04</text></g>',
-      '<line x1="14" y1="168" x2="646" y2="168" stroke="#b9bcb6" stroke-width="1"></line>',
+      '<rect x="532" y="56" width="114" height="56" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="589" y="78" text-anchor="middle" font-size="10" fill="#1a1d1f">UNLOCK TEST</text>',
+      '<text x="589" y="93" text-anchor="middle" font-size="8.5" fill="#5e6367">the untaught 80%,</text>',
+      '<text x="589" y="105" text-anchor="middle" font-size="8.5" fill="#5e6367">solved with the 20%</text>',
+      '<text x="532" y="48" font-size="9" fill="#9a2a1f">04</text></g>',
+      '<path d="M589 112 L589 160" stroke="#1a1d1f" stroke-width="1" stroke-dasharray="3 3" fill="none"></path>',
+      '<g class="part p5">',
+      '<rect x="532" y="160" width="114" height="40" fill="none" stroke="#1a1d1f" stroke-width="1.2"></rect>',
+      '<text x="589" y="177" text-anchor="middle" font-size="10" fill="#1a1d1f">REVIEW</text>',
+      '<text x="589" y="191" text-anchor="middle" font-size="8.5" fill="#5e6367">days 1·3·7·21·60</text>',
+      '<text x="532" y="154" font-size="9" fill="#9a2a1f">05</text></g>',
+            '<polyline points="340,50 344,56 348,50" fill="none" stroke="#1a1d1f" stroke-width="1.2"></polyline>',
+      '<polyline points="340,118 344,112 348,118" fill="none" stroke="#1a1d1f" stroke-width="1.2"></polyline>',
+      '<line x1="14" y1="214" x2="646" y2="214" stroke="#b9bcb6" stroke-width="1"></line>',
       '</svg>'
     ].join('')
   },
@@ -10143,28 +10192,6 @@ var FIGURES = {
   }
 };
 
-/* ── the operable part ─────────────────────────────────────────────────────
-   COTSI's argument is that a course should start where the student is, and
-   the cheapest way to make that argument is to let it happen to the visitor.
-   Three closed questions, and the milestones they already hold are struck
-   through rather than taught. The questions are about the skill's own
-   subject, so answering them is not a quiz about Siddhesh. */
-var DIAGNOSTIC = {
-  questions: [
-    'Have you written a prompt that changes its own behaviour based on the answer to an earlier question?',
-    'Do you know what happens when a set of instructions contradicts the request it was given?',
-    'Have you published something other people use without you being there to explain it?'
-  ],
-  bands: ['beginner', 'familiar', 'intermediate', 'advanced'],
-  course: [
-    'What a skill is, and why a prompt is not one',
-    'Triggering — when the instruction should be reached for',
-    'Branching on what the person already knows',
-    'Failure modes, and writing the rules that prevent them',
-    'Publishing something a stranger can run'
-  ]
-};
-
 /* ── DOM ──────────────────────────────────────────────────────────────── */
 var wkLayer   = document.getElementById('works');
 var wkBody    = document.getElementById('wkBody');
@@ -10416,7 +10443,6 @@ function renderWritten(sh, n, idx){
   wkBody.appendChild(fw);
 
   if(sh.figure && FIGURES[sh.figure]) renderFigure(FIGURES[sh.figure], idx);
-  if(sh.operable) renderDiagnostic();
 }
 
 /* A reserved sheet carries its whole derived tier and nothing invented. It is
@@ -10458,61 +10484,6 @@ function renderFigure(fig, idx){
   scroll.innerHTML = fig.svg;
   wrap.appendChild(scroll);
   wkBody.appendChild(wrap);
-}
-
-function renderDiagnostic(){
-  var wrap = el('div', 'wk-run');
-  wrap.appendChild(el('p', 'wk-h', 'Run the diagnostic'));
-  var prog = el('p', 'wk-prog');
-  var q = el('p', 'wk-q');
-  var btns = el('div', 'wk-btns');
-  var out = el('div');
-  wrap.appendChild(prog); wrap.appendChild(q); wrap.appendChild(btns); wrap.appendChild(out);
-  wkBody.appendChild(wrap);
-
-  var i = 0, score = 0;
-
-  function ask(){
-    out.innerHTML = '';
-    prog.hidden = false; q.hidden = false; btns.hidden = false;
-    prog.textContent = 'Question ' + (i + 1) + ' of ' + DIAGNOSTIC.questions.length;
-    q.textContent = DIAGNOSTIC.questions[i];
-    btns.innerHTML = '';
-    [['Yes', 1], ['No', 0]].forEach(function(pair){
-      var b = el('button', 'wk-btn', pair[0]);
-      b.type = 'button';
-      b.addEventListener('click', function(){
-        score += pair[1]; i++;
-        if(i >= DIAGNOSTIC.questions.length) finish(); else ask();
-      });
-      btns.appendChild(b);
-    });
-  }
-
-  function finish(){
-    prog.hidden = true; q.hidden = true; btns.hidden = true;
-    out.innerHTML = '';
-    var band = DIAGNOSTIC.bands[Math.min(score, DIAGNOSTIC.bands.length - 1)];
-    out.appendChild(el('p', 'wk-h', 'Level estimate — ' + band));
-    var ul = el('ul', 'wk-course');
-    DIAGNOSTIC.course.forEach(function(t, k){
-      var li = el('li', k < score ? 'skipped' : null, t);
-      if(k < score) li.title = 'skipped — you already hold this';
-      ul.appendChild(li);
-    });
-    out.appendChild(ul);
-    out.appendChild(el('p', 'wk-none',
-      'That is the argument of the work, and it just happened to you rather ' +
-      'than being described. Different answers strike out different milestones.'));
-    var again = el('button', 'wk-btn', 'Run again');
-    again.type = 'button';
-    again.addEventListener('click', function(){ i = 0; score = 0; ask(); });
-    out.appendChild(again);
-    say('Level estimate: ' + band + '. ' + score + ' of ' +
-        DIAGNOSTIC.course.length + ' milestones skipped.');
-  }
-
-  ask();
 }
 
 /* ── the band of night, and the way back ───────────────────────────────────
