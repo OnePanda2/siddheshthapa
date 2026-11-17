@@ -5,7 +5,7 @@ reader knows nothing: no prior conversation, no context, no access to whoever
 built it. Everything needed to understand, run, change and verify this site is
 here or is named here.
 
-**Last updated 2026-10-28.** This is the **public technical record**. The owner
+**Last updated 2026-11-17** (§1, §7: `public/` and the link-in-bio page). This is the **public technical record**. The owner
 also keeps a private project report — status, decisions, accounts, working
 preferences and a change log — outside this repository; where the two disagree
 on a technical fact, this file and the committed logs win.
@@ -41,8 +41,24 @@ that break the code on purpose to prove the other half actually test something.
 | Token exchange | https://siddheshthapa-auth.onepanda2.workers.dev (Cloudflare Worker) |
 | Owner account | GitHub `OnePanda2` |
 
-Two files are published: `_site/index.html` (the mind) and `_site/editor.html`
-(the editor). They share an origin, which matters — see §9.
+Two files are built and published: `_site/index.html` (the mind) and
+`_site/editor.html` (the editor). They share an origin, which matters — see §9.
+
+Beside them, everything in `public/` is copied into `_site/` as it is (see
+`deploy.yml`): /about/, the consultant pages, /dms/, robots.txt, sitemap.xml.
+None of it goes through the build, and the zero-request assertion scans only
+`_site/index.html`.
+
+**`public/bio-link/` is built elsewhere — do not edit it by hand.** It is the
+link-in-bio page, https://siddheshthapa.com/bio-link/, the link in every social
+bio (added 2026-11-17). It is the output of a separate project, the Instagram
+Landing Page project on the owner's machine (not in this repository): its build
+turns that project's `links.json` into `index.html` (one self-contained file)
+and `og.png` (the share picture), which are copied here unchanged. A hand edit
+here is lost at the next copy, and the page's `og:image` carries a `?v=` tag
+that must match the picture it ships with. To change the page, change that
+project, rebuild and copy both files again; that project's own HANDOVER.md has
+the steps. `public/sitemap.xml` lists the page.
 
 ---
 
@@ -308,6 +324,10 @@ data/editor-config.json         public config: client id, owner, repo, branch,
 worker/index.js       122 lines, most of them comment. The only server.
 worker/README.md      deploy instructions
 worker/wrangler.toml  name, compat date, public client id
+
+public/               plain pages copied into _site/ as they are (§1)
+public/bio-link/      BUILT ELSEWHERE, do not edit by hand: the link-in-bio
+                      page and its share picture (§1)
 
 tools/                71 files: the build, 56 harnesses, shared utilities
 tools/build-v02.js    the build
