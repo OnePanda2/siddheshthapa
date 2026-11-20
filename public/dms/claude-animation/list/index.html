@@ -34,6 +34,11 @@ h1 b { color: var(--accent); font-weight: 700; }
 .lede { color: var(--muted); max-width: 60ch; margin: 4px 0 0; font-size: 17px; }
 h2 { font: 700 clamp(28px, 4.4vw, 40px)/1 var(--display); margin: 0 0 18px; text-wrap: balance; }
 h2 small { font: 500 15px/1 var(--body); color: var(--muted); margin-left: 10px; }
+.car { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.cc { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: grid; min-width: 0; }
+.cc img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; display: block; }
+.cc .cmd code { white-space: normal; overflow: visible; }
+.cb { padding: 16px; display: grid; gap: 10px; min-width: 0; } .cb h3 { margin: 0; font: 700 26px/1.1 var(--display); display: flex; gap: 10px; align-items: baseline; } .cb .num { color: var(--accent); font-size: 18px; } .cb .ln { margin: 0; color: var(--muted); font-size: 15px; }
 .reel { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
 .rc { margin: 0; display: grid; gap: 8px; }
 .rc img { width: 100%; height: auto; border-radius: 14px; border: 3px solid var(--accent); display: block; background: var(--panel); }
@@ -44,6 +49,7 @@ h2 small { font: 500 15px/1 var(--body); color: var(--muted); margin-left: 10px;
 .step h3 { margin: 0; font: 700 22px/1.1 var(--display); }
 .step p { margin: 0; color: var(--muted); font-size: 15px; }
 .step a { color: var(--accent); }
+.step.quick { border-color: var(--accent); margin-bottom: 14px; } .sub { margin: 0 0 10px; color: var(--muted); }
 .cmd { display: flex; gap: 8px; align-items: center; background: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 8px 8px 8px 12px; min-width: 0; }
 .cmd code { font: 500 13px/1.4 var(--mono); color: var(--fg); overflow-x: auto; white-space: nowrap; flex: 1; min-width: 0; }
 .cmd button { font: 600 12px/1 var(--body); color: var(--ink); background: var(--accent); border: 0; border-radius: 8px; padding: 8px 10px; cursor: pointer; flex: none; }
@@ -70,15 +76,47 @@ h2 small { font: 500 15px/1 var(--body); color: var(--muted); margin-left: 10px;
 footer { color: var(--muted); font-size: 13px; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 20px; }
 footer a { color: var(--fg); }
 @media (max-width: 900px) { .reel { grid-template-columns: repeat(3, minmax(0, 1fr)); } .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .how { grid-template-columns: 1fr; } }
-@media (max-width: 560px) { .reel { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid { grid-template-columns: 1fr; } .wrap { gap: 44px; padding-block: 28px 44px; } }
+@media (max-width: 560px) { .car { grid-template-columns: 1fr; } .reel { grid-template-columns: repeat(2, minmax(0, 1fr)); } .grid { grid-template-columns: 1fr; } .wrap { gap: 44px; padding-block: 28px 44px; } }
 @media (prefers-reduced-motion: no-preference) { .chip, .cmd button { transition: background .15s, color .15s; } }
 </style>
 <div class="wrap">
   <header>
     <p class="eyebrow">The whole list</p>
     <h1>66 <b>Claude</b> Animation Styles</h1>
-    <p class="lede">Every style you can make a film in with Claude and a free style library. The 10 from the reel come first, then all 66, grouped by family.</p>
+    <p class="lede">Every style you can make with Claude. The 7 from the carousel and the 10 from the reel come first, with prompts to copy, then all 66 library styles, grouped by family.</p>
   </header>
+
+  <section aria-labelledby="h-car">
+    <h2 id="h-car">From the carousel <small>7 styles, each one prompt away</small></h2>
+    <div class="car"><article class="cc"><img src="img/car-madhubani.jpg" alt="Madhubani artwork from the carousel" width="640" height="640" loading="lazy">
+  <div class="cb"><h3><span class="num">01</span>Madhubani</h3><p class="ln">Indian folk art from Mithila, Bihar. Double outlines, bold natural colours, and not one empty space.</p>
+  <div class="cmd"><code id="p0">Make a 20-second animation of a peacock opening its tail, in Madhubani style, as one HTML file I can play in the browser.</code><button type="button" data-copy="p0">Copy</button></div></div>
+</article>
+<article class="cc"><img src="img/car-inkwash.jpg" alt="Ink Wash artwork from the carousel" width="640" height="640" loading="lazy">
+  <div class="cb"><h3><span class="num">02</span>Ink Wash</h3><p class="ln">East Asian brush painting. Black ink, soft mist, and empty space that breathes.</p>
+  <div class="cmd"><code id="p1">Make a 20-second animation of a boat crossing misty mountains, in ink wash style, as one HTML file I can play in the browser.</code><button type="button" data-copy="p1">Copy</button></div></div>
+</article>
+<article class="cc"><img src="img/car-bauhaus.jpg" alt="Bauhaus artwork from the carousel" width="640" height="640" loading="lazy">
+  <div class="cb"><h3><span class="num">03</span>Bauhaus</h3><p class="ln">The 1920s German design school. Circles, squares and triangles in red, yellow and blue.</p>
+  <div class="cmd"><code id="p2">Make a 20-second animation of shapes snapping together into a city, in Bauhaus style, as one HTML file I can play in the browser.</code><button type="button" data-copy="p2">Copy</button></div></div>
+</article>
+<article class="cc"><img src="img/car-neon.jpg" alt="Neon Sign artwork from the carousel" width="640" height="640" loading="lazy">
+  <div class="cb"><h3><span class="num">04</span>Neon Sign</h3><p class="ln">Glowing glass tubes on a dark brick wall. Pure night-city mood.</p>
+  <div class="cmd"><code id="p3">Make a 20-second animation of a neon chai cup flickering on at night, as one HTML file I can play in the browser.</code><button type="button" data-copy="p3">Copy</button></div></div>
+</article>
+<article class="cc"><img src="img/car-woodcut.jpg" alt="Woodcut artwork from the carousel" width="640" height="640" loading="lazy">
+  <div class="cb"><h3><span class="num">05</span>Woodcut</h3><p class="ln">Carved wood and black ink. Every line is a cut, like an old storybook print.</p>
+  <div class="cmd"><code id="p4">Make a 20-second animation of snow falling on a moonlit forest, in woodcut style, as one HTML file I can play in the browser.</code><button type="button" data-copy="p4">Copy</button></div></div>
+</article>
+<article class="cc"><img src="img/car-cyanotype.jpg" alt="Cyanotype artwork from the carousel" width="640" height="640" loading="lazy">
+  <div class="cb"><h3><span class="num">06</span>Cyanotype</h3><p class="ln">An 1840s sun-print process: white plants on deep Prussian blue.</p>
+  <div class="cmd"><code id="p5">Make a 20-second animation of ferns slowly appearing on blue paper, in cyanotype style, as one HTML file I can play in the browser.</code><button type="button" data-copy="p5">Copy</button></div></div>
+</article>
+<article class="cc"><img src="img/car-ascii.jpg" alt="ASCII Terminal artwork from the carousel" width="640" height="640" loading="lazy">
+  <div class="cb"><h3><span class="num">07</span>ASCII Terminal</h3><p class="ln">Pictures made only of text characters, glowing on an old green screen.</p>
+  <div class="cmd"><code id="p6">Make a 20-second animation of a planet spinning, drawn in ASCII characters, as one HTML file I can play in the browser.</code><button type="button" data-copy="p6">Copy</button></div></div>
+</article></div>
+  </section>
 
   <section aria-labelledby="h-reel">
     <h2 id="h-reel">From the reel <small>made with Claude</small></h2>
@@ -96,6 +134,8 @@ footer a { color: var(--fg); }
 
   <section aria-labelledby="h-how">
     <h2 id="h-how">How to make them</h2>
+    <div class="step quick"><h3>Fastest: in the Claude app, no install</h3><p>Open <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a> or the Claude app, paste any prompt from this page, and Claude builds the animation and plays it right in the chat. Ask for changes in plain words: "slower", "add rain", "make it 10 seconds". Any style works, even one that isn't listed: just describe it.</p></div>
+    <p class="sub">For full films with music and sound, in any of the 66 library styles:</p>
     <div class="how">
       <div class="step"><h3>1. Get Claude Code</h3><p>Install it from <a href="https://claude.com/claude-code" target="_blank" rel="noopener">claude.com/claude-code</a>. You also need Node 20+, ffmpeg 7+ and Python 3.11+.</p></div>
       <div class="step"><h3>2. Add the style library</h3><p>Lemo-Opuscar is free and open source. Run these two lines:</p>
@@ -442,9 +482,8 @@ footer a { color: var(--fg); }
   </section>
 
   <section class="cotsi" aria-labelledby="h-cotsi">
-    <p class="when">Launching 16 November</p>
     <h2 id="h-cotsi">Cotsi: learn anything in the least time</h2>
-    <p>Cotsi is our Claude skill that teaches any topic, book or exam syllabus fast: the 20% of ideas that unlock the other 80%, taught by the characters you love, with quick checks so it sticks.</p>
+    <p>Cotsi is a tutor I built. It teaches the few ideas a topic depends on first, asks you a question after each one, and brings it back for review so it sticks. <a href="https://cotsi.siddheshthapa.com" target="_blank" rel="noopener">cotsi.siddheshthapa.com</a></p>
   </section>
 
   <footer>
