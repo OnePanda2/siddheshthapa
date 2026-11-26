@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Free AI Visibility Check for Clinics in the UK and Canada | Siddhesh Thapa</title>
+<meta name="description" content="When a patient asks ChatGPT or Gemini for a clinic near them, is yours named? Free 15-minute AI visibility check for private clinics in the UK and Canada, by Siddhesh Thapa, AI Visibility Specialist.">
+<link rel="canonical" href="https://siddheshthapa.com/ai-visibility-check/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Is your clinic named when patients ask ChatGPT?">
+<meta property="og:description" content="Free 15-minute AI visibility check for private clinics in the UK and Canada.">
+<meta property="og:url" content="https://siddheshthapa.com/ai-visibility-check/">
+<meta property="og:image" content="https://siddheshthapa.com/siddhesh-thapa.jpg">
+<link rel="preload" href="/ai-visibility-check/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/ai-visibility-check/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "@id": "https://siddheshthapa.com/ai-visibility-check/#service",
+      "name": "AI Visibility Check and Setup for clinics",
+      "serviceType": "AI visibility (generative engine optimisation) for private clinics",
+      "description": "A free 15-minute check of what ChatGPT, Gemini and Google AI say about a clinic's area, followed by an optional setup that fixes the listings, directory profiles and website details AI assistants rely on.",
+      "url": "https://siddheshthapa.com/ai-visibility-check/",
+      "areaServed": [{"@type": "Country", "name": "United Kingdom"}, {"@type": "Country", "name": "Canada"}],
+      "provider": {"@id": "https://siddheshthapa.com/#siddhesh-thapa"},
+      "offers": [
+        {"@type": "Offer", "name": "AI visibility check", "price": "0", "priceCurrency": "GBP"},
+        {"@type": "Offer", "name": "AI Visibility Setup (UK)", "price": "399", "priceCurrency": "GBP"},
+        {"@type": "Offer", "name": "AI Visibility Setup (Canada)", "price": "499", "priceCurrency": "CAD"}
+      ]
+    },
+    {
+      "@type": "Person",
+      "@id": "https://siddheshthapa.com/#siddhesh-thapa",
+      "name": "Siddhesh Thapa",
+      "jobTitle": "AI Visibility Specialist",
+      "url": "https://siddheshthapa.com/about/",
+      "image": "https://siddheshthapa.com/siddhesh-thapa.jpg"
+    }
+  ]
+}
+</script>
+<style>
+@font-face { font-family: "Fraunces"; src: url("/ai-visibility-check/fonts/fraunces.woff2") format("woff2"); font-weight: 300 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Instrument Sans"; src: url("/ai-visibility-check/fonts/instrument-sans.woff2") format("woff2"); font-weight: 400 700; font-style: normal; font-display: swap; }
+
+:root {
+  --paper: #f5f0e6;
+  --paper-2: #ece5d6;
+  --card: #fffdf8;
+  --ink: #15212a;
+  --ink-2: #44525c;
+  --ink-3: #7a8690;
+  --line: #d9d0bf;
+  --teal: #0b5d56;
+  --teal-2: #0f766d;
+  --teal-soft: #d8ebe6;
+  --signal: #d9472b;
+  --signal-soft: #fbe3dc;
+  --serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --sans: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --r: 14px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; color: var(--ink); font: 17px/1.6 var(--sans); background: var(--paper);
+  background-image:
+    radial-gradient(900px 500px at 85% -10%, rgba(11,93,86,.10), transparent 60%),
+    radial-gradient(700px 420px at -10% 30%, rgba(217,71,43,.06), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+a { color: var(--teal); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 22px; }
+
+/* top bar */
+.bar { position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px); background: rgba(245,240,230,.82); border-bottom: 1px solid rgba(217,208,191,.7); }
+.bar .wrap { display: flex; align-items: center; justify-content: space-between; height: 62px; gap: 16px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+.brand img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
+.brand b { font-family: var(--serif); font-weight: 600; font-size: 1.02rem; letter-spacing: .01em; }
+.brand span { display: block; font-size: .72rem; color: var(--ink-3); letter-spacing: .08em; text-transform: uppercase; line-height: 1.2; }
+.btn { display: inline-flex; align-items: center; gap: 8px; border: 0; cursor: pointer; text-decoration: none; font: 600 .98rem/1 var(--sans);
+  padding: 14px 20px; border-radius: 999px; background: var(--ink); color: var(--paper); transition: transform .15s ease, background .15s ease; }
+.btn:hover { transform: translateY(-1px); background: var(--teal); }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.btn.ghost:hover { background: var(--ink); color: var(--paper); }
+.btn.small { padding: 10px 16px; font-size: .9rem; }
+
+/* hero */
+.hero { padding: 64px 0 40px; }
+.hero .wrap { display: grid; grid-template-columns: 1.08fr .92fr; gap: 56px; align-items: center; }
+.kicker { display: inline-flex; gap: 8px; align-items: center; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); font-weight: 600; }
+.kicker::before { content: ""; width: 22px; height: 1.5px; background: var(--teal); }
+h1 { font-family: var(--serif); font-weight: 560; font-variation-settings: "opsz" 120; font-size: clamp(2.2rem, 4.6vw, 3.7rem); line-height: 1.04; letter-spacing: -.02em; margin: 16px 0 18px; }
+h1 em { font-style: italic; color: var(--teal); font-weight: 480; }
+.lede { font-size: 1.14rem; color: var(--ink-2); max-width: 36rem; margin: 0 0 28px; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.fine { font-size: .86rem; color: var(--ink-3); margin-top: 14px; }
+
+/* AI answer card */
+.answer { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 22px 22px 18px;
+  box-shadow: 0 30px 60px -30px rgba(21,33,42,.35), 0 2px 0 rgba(255,255,255,.8) inset; transform: rotate(.6deg); }
+.answer::after { content: ""; position: absolute; inset: 10px -10px -10px 10px; border-radius: 22px; border: 1.5px dashed rgba(11,93,86,.25); z-index: -1; }
+.q { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+.q p { margin: 0; background: var(--ink); color: var(--paper); padding: 10px 14px; border-radius: 16px 16px 4px 16px; font-size: .95rem; max-width: 85%; }
+.a-head { display: flex; align-items: center; gap: 8px; font-size: .78rem; color: var(--ink-3); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
+.dot { width: 18px; height: 18px; border-radius: 50%; background: conic-gradient(from 90deg, var(--teal), #6fb3a9, var(--teal)); }
+.a-intro { font-size: .95rem; color: var(--ink-2); margin: 0 0 10px; }
+.pick { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid #efe8da; opacity: 0; transform: translateY(6px); animation: rise .5s ease forwards; }
+.pick .n { font-family: var(--serif); color: var(--ink-3); font-size: .9rem; }
+.bar-name { height: 11px; border-radius: 6px; background: linear-gradient(90deg, #d9d0bf, #e8e1d3); }
+.chip { font-size: .7rem; color: var(--teal); background: var(--teal-soft); padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+.missing { margin-top: 10px; padding: 12px 14px; border: 1.5px dashed var(--signal); border-radius: 12px; background: var(--signal-soft); display: flex; gap: 10px; align-items: center; opacity: 0; animation: rise .6s ease forwards; animation-delay: 1.9s; }
+.missing b { color: var(--signal); font-weight: 700; }
+.missing small { display: block; color: var(--ink-2); font-size: .84rem; }
+.sources { margin-top: 12px; font-size: .78rem; color: var(--ink-3); }
+@keyframes rise { to { opacity: 1; transform: none; } }
+
+/* sections */
+section { padding: 64px 0; }
+.label { font-size: .78rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; margin: 0 0 10px; }
+h2 { font-family: var(--serif); font-weight: 560; font-variation-settings: "opsz" 90; font-size: clamp(1.8rem, 3.2vw, 2.6rem); line-height: 1.1; letter-spacing: -.015em; margin: 0 0 14px; max-width: 26ch; }
+.sub { color: var(--ink-2); max-width: 44rem; margin: 0 0 30px; }
+
+/* evidence */
+.ev { background: var(--ink); color: #e9efe9; border-radius: 28px; padding: 40px; position: relative; overflow: hidden; }
+.ev h2 { color: #fff; }
+.ev .sub { color: #b9c6c2; }
+.ev::before { content: ""; position: absolute; right: -120px; top: -120px; width: 360px; height: 360px; border-radius: 50%; border: 1.5px solid rgba(111,179,169,.25); box-shadow: 0 0 0 40px rgba(111,179,169,.05), 0 0 0 80px rgba(111,179,169,.03); }
+.toggle { display: inline-flex; background: rgba(255,255,255,.08); border-radius: 999px; padding: 4px; margin-bottom: 24px; }
+.toggle button { border: 0; background: transparent; color: #cfd8d4; font: 600 .9rem var(--sans); padding: 8px 16px; border-radius: 999px; cursor: pointer; }
+.toggle button[aria-pressed="true"] { background: #f5f0e6; color: var(--ink); }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.stat { border-top: 1px solid rgba(255,255,255,.18); padding-top: 16px; }
+.stat .big { font-family: var(--serif); font-size: clamp(2.2rem, 4vw, 3.2rem); font-weight: 520; line-height: 1; color: #fff; }
+.stat .big small { font-size: .45em; color: #9fc9c1; margin-left: 4px; }
+.stat p { margin: 8px 0 0; color: #b9c6c2; font-size: .95rem; }
+.ev .quote { margin-top: 26px; padding: 16px 18px; border-left: 3px solid #6fb3a9; background: rgba(255,255,255,.05); border-radius: 0 12px 12px 0; color: #dfe7e3; font-size: .98rem; }
+.ev .quote b { color: #fff; }
+.toggle.light { background: var(--paper-2); }
+.toggle.light button { color: var(--ink-2); }
+.toggle.light button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+[data-region] { display: none; }
+[data-region].on { display: block; }
+
+/* reasons */
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 24px; }
+.card .num { font-family: var(--serif); font-size: 2rem; color: var(--teal); line-height: 1; }
+.card h3 { font-family: var(--serif); font-weight: 600; font-size: 1.22rem; margin: 12px 0 8px; line-height: 1.2; }
+.card p { margin: 0; color: var(--ink-2); font-size: .98rem; }
+
+/* steps */
+.steps { counter-reset: s; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 1px solid var(--line); border-radius: var(--r); background: var(--card); overflow: hidden; }
+.step { padding: 24px; border-right: 1px solid var(--line); position: relative; }
+.step:last-child { border-right: 0; }
+.step::before { counter-increment: s; content: "0" counter(s); font-family: var(--serif); color: var(--ink-3); font-size: .95rem; }
+.step h3 { font-family: var(--serif); font-size: 1.12rem; margin: 10px 0 6px; font-weight: 600; }
+.step p { margin: 0; color: var(--ink-2); font-size: .95rem; }
+.step .when { display: inline-block; margin-top: 10px; font-size: .78rem; color: var(--teal); background: var(--teal-soft); padding: 3px 9px; border-radius: 999px; }
+
+/* pricing */
+.prices { display: grid; grid-template-columns: .9fr 1.2fr .9fr; gap: 18px; align-items: stretch; }
+.price { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 26px; display: flex; flex-direction: column; }
+.price.feature { background: var(--ink); color: #eef2ee; border-color: var(--ink); transform: translateY(-8px); box-shadow: 0 30px 60px -35px rgba(21,33,42,.6); }
+.price .tag { font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; color: var(--ink-3); }
+.price.feature .tag { color: #9fc9c1; }
+.price .amt { font-family: var(--serif); font-size: 2.6rem; font-weight: 540; line-height: 1; margin: 14px 0 4px; }
+.price .amt s { font-size: .45em; color: var(--ink-3); margin-left: 8px; font-weight: 400; }
+.price.feature .amt s { color: #8da29c; }
+.price .per { font-size: .88rem; color: var(--ink-3); }
+.price.feature .per { color: #a9bab5; }
+.price ul { padding: 0; margin: 18px 0 0; list-style: none; font-size: .95rem; }
+.price li { padding: 7px 0 7px 24px; position: relative; border-top: 1px solid rgba(127,127,127,.18); }
+.price li::before { content: "✓"; position: absolute; left: 0; color: var(--teal-2); font-weight: 700; }
+.price.feature li::before { color: #6fb3a9; }
+.guarantee { margin-top: 22px; display: flex; gap: 14px; align-items: flex-start; background: var(--teal-soft); border-radius: 14px; padding: 16px 18px; color: #0b3f3a; font-size: .97rem; }
+.guarantee b { font-family: var(--serif); font-size: 1.05rem; }
+
+/* rules */
+.rules { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+.rules ul { margin: 0; padding: 0; list-style: none; }
+.rules li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 14px 0; border-top: 1px solid var(--line); }
+.rules li .x { width: 22px; height: 22px; border-radius: 50%; background: var(--signal-soft); color: var(--signal); display: grid; place-items: center; font-weight: 700; font-size: .85rem; }
+.rules li .ok { width: 22px; height: 22px; border-radius: 50%; background: var(--teal-soft); color: var(--teal); display: grid; place-items: center; font-weight: 700; font-size: .85rem; }
+
+/* about */
+.about { display: grid; grid-template-columns: 220px 1fr; gap: 36px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 30px; }
+.about img { width: 220px; height: 220px; object-fit: cover; border-radius: 18px; filter: saturate(.92); }
+.about h3 { font-family: var(--serif); font-size: 1.6rem; margin: 0 0 4px; font-weight: 600; }
+.about .role { color: var(--teal); font-weight: 600; margin: 0 0 12px; }
+.about p { color: var(--ink-2); margin: 0 0 10px; }
+
+/* form */
+.form-wrap { display: grid; grid-template-columns: .9fr 1.1fr; gap: 40px; align-items: start; }
+form { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 28px; box-shadow: 0 30px 60px -40px rgba(21,33,42,.4); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+label { display: block; font-size: .86rem; font-weight: 600; margin: 14px 0 6px; }
+label span { font-weight: 400; color: var(--ink-3); }
+input, select, textarea { width: 100%; font: 16px var(--sans); color: var(--ink); padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 4px rgba(11,93,86,.12); }
+textarea { min-height: 92px; resize: vertical; }
+.consent { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; font-weight: 400; font-size: .86rem; color: var(--ink-2); margin-top: 18px; }
+.consent input { width: 18px; height: 18px; margin-top: 3px; }
+form .btn { width: 100%; justify-content: center; margin-top: 20px; padding: 16px; font-size: 1rem; }
+.hp { position: absolute; left: -9999px; }
+.contact-alt { margin-top: 16px; font-size: .9rem; color: var(--ink-3); text-align: center; }
+
+/* faq */
+details { border-top: 1px solid var(--line); padding: 18px 0; }
+details:last-child { border-bottom: 1px solid var(--line); }
+summary { cursor: pointer; list-style: none; font-family: var(--serif); font-size: 1.15rem; font-weight: 560; display: flex; justify-content: space-between; gap: 16px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; color: var(--teal); font-family: var(--sans); font-weight: 600; }
+details[open] summary::after { content: "–"; }
+details p { color: var(--ink-2); margin: 10px 0 0; max-width: 48rem; }
+
+footer { padding: 40px 0 60px; color: var(--ink-3); font-size: .88rem; border-top: 1px solid var(--line); margin-top: 20px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space-between; }
+
+/* reveal */
+.reveal { opacity: 0; transform: translateY(14px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .pick, .missing { opacity: 1 !important; transform: none !important; animation: none !important; transition: none !important; }
+  html { scroll-behavior: auto; }
+}
+
+@media (max-width: 920px) {
+  .hero .wrap, .form-wrap, .rules { grid-template-columns: 1fr; }
+  .answer { transform: none; }
+  .prices, .grid3, .stats { grid-template-columns: 1fr; }
+  .price.feature { transform: none; }
+  .steps { grid-template-columns: 1fr 1fr; }
+  .step:nth-child(2) { border-right: 0; }
+  .step:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+  .about { grid-template-columns: 1fr; }
+  .about img { width: 160px; height: 160px; }
+}
+@media (max-width: 560px) {
+  body { font-size: 16px; }
+  .bar .brand span { display: none; }
+  .brand b { white-space: nowrap; font-size: .95rem; }
+  .bar .btn.small { white-space: nowrap; padding: 9px 13px; font-size: .84rem; }
+  .hero { padding-top: 36px; }
+  .ev { padding: 28px 20px; border-radius: 20px; }
+  .steps { grid-template-columns: 1fr; }
+  .step { border-right: 0; border-bottom: 1px solid var(--line); }
+  .step:last-child { border-bottom: 0; }
+  .row2 { grid-template-columns: 1fr; }
+  form { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="/about/">
+      <img src="/siddhesh-thapa.jpg" alt="" width="34" height="34">
+      <div><b>Siddhesh Thapa</b><span>AI Visibility Specialist</span></div>
+    </a>
+    <a class="btn small" href="#request">Get the free check</a>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <div class="kicker">For private clinics in the UK and Canada</div>
+      <h1>When a patient asks ChatGPT for a clinic near them, <em>is yours one of the names?</em></h1>
+      <p class="lede">AI assistants don't show a list of links. They name a handful of practices and stop. I check what ChatGPT and Gemini say in your area, show you exactly why you're missing, and fix what they read, within your regulator's rules.</p>
+      <div class="cta-row">
+        <a class="btn" href="#request">Get your free AI visibility check →</a>
+        <a class="btn ghost" href="#found">See what we found</a>
+      </div>
+      <p class="fine">15-minute video call · No obligation · Therapists, dentists, chiropractors, osteopaths, physios, naturopaths and private doctors</p>
+    </div>
+
+    <div class="answer" aria-label="Illustration of an AI assistant answer that leaves your clinic out">
+      <div class="q"><p>Can you recommend a counsellor or therapist in Liverpool city centre?</p></div>
+      <div class="a-head"><span class="dot" aria-hidden="true"></span> AI assistant</div>
+      <p class="a-intro">Here are a few well-reviewed options:</p>
+      <div class="pick" style="animation-delay:.3s"><span class="n">1</span><span class="bar-name" style="width:72%"></span><span class="chip">BACP</span></div>
+      <div class="pick" style="animation-delay:.55s"><span class="n">2</span><span class="bar-name" style="width:58%"></span><span class="chip">Psychology Today</span></div>
+      <div class="pick" style="animation-delay:.8s"><span class="n">3</span><span class="bar-name" style="width:66%"></span><span class="chip">BACP</span></div>
+      <div class="pick" style="animation-delay:1.05s"><span class="n">4</span><span class="bar-name" style="width:50%"></span><span class="chip">Counselling Directory</span></div>
+      <div class="pick" style="animation-delay:1.3s"><span class="n">5</span><span class="bar-name" style="width:62%"></span><span class="chip">Psychology Today</span></div>
+      <div class="missing"><span aria-hidden="true">✕</span><div><b>Your practice: not mentioned</b><small>even with a 5-star rating on Google</small></div></div>
+      <p class="sources">Names hidden. Sources are the directories the real answer cited, 27 Nov 2026.</p>
+    </div>
+  </div>
+</section>
+
+<section id="found" class="reveal">
+  <div class="wrap">
+    <div class="ev">
+      <p class="label" style="color:#9fc9c1">What we found, November 2026</p>
+      <h2>Good clinics are invisible to AI for fixable reasons.</h2>
+      <p class="sub">We collected every private clinic around two neighbourhoods, checked their websites, and asked AI search the questions patients ask.</p>
+      <div class="toggle" role="group" aria-label="Choose a city">
+        <button type="button" data-show="uk" aria-pressed="true">Liverpool, UK</button>
+        <button type="button" data-show="ca" aria-pressed="false">Cambridge, Ontario</button>
+      </div>
+      <div data-region="uk" class="on">
+        <div class="stats">
+          <div class="stat"><div class="big">304</div><p>private clinics found around Kensington and the city centre</p></div>
+          <div class="stat"><div class="big">114<small>/ 227</small></div><p>clinic websites give AI tools no machine-readable business details</p></div>
+          <div class="stat"><div class="big">62<small>/ 227</small></div><p>never say "Liverpool" in their page title or main heading</p></div>
+        </div>
+        <p class="quote">Asked for a therapist, a private dentist and a chiropractor in Liverpool, AI named practices listed on <b>BACP, Psychology Today, WhatClinic, Doctify and CQC reports</b>, and none of the eight well-rated clinics we picked out.</p>
+      </div>
+      <div data-region="ca">
+        <div class="stats">
+          <div class="stat"><div class="big">162</div><p>private clinics found around Preston, Cambridge</p></div>
+          <div class="stat"><div class="big">71<small>/ 130</small></div><p>clinic websites give AI tools no machine-readable business details</p></div>
+          <div class="stat"><div class="big">44<small>/ 130</small></div><p>never say "Cambridge" in their page title or main heading</p></div>
+        </div>
+        <p class="quote">Asked for a psychotherapist, a naturopathic doctor and a dentist in Cambridge, AI named practices from <b>Psychology Today, Theravive, Medimap, 123Dentist and Sun Life's provider directory</b>, and none of the eight well-rated clinics we picked out.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="wrap">
+    <p class="label">Why great clinics get skipped</p>
+    <h2>AI recommends what it can read and verify.</h2>
+    <div class="grid3" style="margin-top:28px">
+      <div class="card"><div class="num">01</div><h3>It reads directories, not just your website</h3><p>Answers lean on the profiles AI trusts in your field and city: Psychology Today, BACP, Medimap, WhatClinic, Doctify, nhs.uk. Missing or half-filled profiles mean you aren't in the running.</p></div>
+      <div class="card"><div class="num">02</div><h3>Your site doesn't say who, what and where</h3><p>Many clinic sites never state the city in the title, have no machine-readable business details, or hide their text behind scripts that AI crawlers can't read.</p></div>
+      <div class="card"><div class="num">03</div><h3>Reviews alone won't save you</h3><p>Many regulated professionals can't ask clients for reviews or use testimonials. So the signals you <em>can</em> control matter even more.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="wrap">
+    <p class="label">How it works</p>
+    <h2>Four steps, no long contracts.</h2>
+    <div class="steps" style="margin-top:28px">
+      <div class="step"><h3>Request the check</h3><p>Two-minute form below. Tell us your practice, city and what you'd like more of.</p><span class="when">2 minutes</span></div>
+      <div class="step"><h3>I run the tests</h3><p>Before we talk, I ask ChatGPT, Gemini and Google AI the questions your patients ask, several times each.</p><span class="when">before the call</span></div>
+      <div class="step"><h3>15-minute video call</h3><p>On Google Meet, in your business hours. You see the answers, who's named, and your three biggest gaps.</p><span class="when">free</span></div>
+      <div class="step"><h3>We fix it (if you want)</h3><p>Listings, directory profiles and website details, done for you. Retest at 30 days.</p><span class="when">14 days</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="reveal" id="pricing">
+  <div class="wrap">
+    <p class="label">Founding-client pricing</p>
+    <h2>Clear prices. You only pay if you want the fix.</h2>
+    <div class="toggle light" role="group" aria-label="Choose currency">
+      <button type="button" data-cur="uk" aria-pressed="true">United Kingdom (£)</button>
+      <button type="button" data-cur="ca" aria-pressed="false">Canada (CA$)</button>
+    </div>
+    <div class="prices">
+      <div class="price">
+        <span class="tag">Step 1</span>
+        <div class="amt">Free</div><span class="per">15-minute video call</span>
+        <ul><li>Live test on ChatGPT, Gemini and Google AI</li><li>Which sources AI trusts in your city</li><li>Your three biggest gaps</li></ul>
+      </div>
+      <div class="price feature">
+        <span class="tag">Step 2 · AI Visibility Setup</span>
+        <div class="amt"><span data-price-uk>£399</span><span data-price-ca hidden>CA$499</span><s><span data-price-uk>£799</span><span data-price-ca hidden>CA$999</span></s></div>
+        <span class="per">one-time, founding-client price</span>
+        <ul>
+          <li>Baseline test: 10 patient-style questions × 3 AI tools × 3 runs</li>
+          <li>Google Business Profile, Bing Places and Apple listings completed</li>
+          <li>The directory profiles AI quotes in your field, complete and consistent (including nhs.uk for NHS dentists)</li>
+          <li>Website fixes: city and service in titles, business schema, a plain-language FAQ, crawler check</li>
+          <li>Retest and report at 30 days</li>
+        </ul>
+      </div>
+      <div class="price">
+        <span class="tag">Optional · AI Visibility Care</span>
+        <div class="amt"><span data-price-uk>£149</span><span data-price-ca hidden>CA$199</span></div><span class="per">per month, cancel anytime</span>
+        <ul><li>Monthly retest across AI tools</li><li>Listings kept accurate</li><li>One new FAQ answer each month</li></ul>
+      </div>
+    </div>
+    <div class="guarantee"><span aria-hidden="true">◆</span><div><b>Every setup fix done within 14 days, or a full refund.</b> No one can honestly guarantee that ChatGPT will name you, and we never promise rankings. We guarantee the work, and we show you the before-and-after answers.</div></div>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="wrap rules">
+    <div>
+      <p class="label">Built for regulated clinics</p>
+      <h2>We work inside your regulator's rules, not around them.</h2>
+      <p class="sub">Health professionals have advertising rules most marketers ignore. Everything we publish for you is plain, factual, and approved by you first.</p>
+    </div>
+    <ul>
+      <li><span class="x">✕</span><div><b>No fake, paid or incentivised reviews.</b> Banned in the UK since April 2025, and never worth the risk.</div></li>
+      <li><span class="x">✕</span><div><b>No testimonials, and no asking therapy clients for reviews.</b> That respects confidentiality and rules like CRPO's in Ontario.</div></li>
+      <li><span class="x">✕</span><div><b>No "best", "#1" or guaranteed results</b> in anything written for you.</div></li>
+      <li><span class="ok">✓</span><div><b>Accurate, consistent facts</b> about who you are, what you treat and where, wherever AI looks.</div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="wrap">
+    <div class="about">
+      <img src="/siddhesh-thapa.jpg" alt="Siddhesh Thapa, AI Visibility Specialist" width="220" height="220" loading="lazy">
+      <div>
+        <p class="label">Who you'll talk to</p>
+        <h3>Siddhesh Thapa</h3>
+        <p class="role">AI Visibility Specialist</p>
+        <p>I help clinics get found and recommended by ChatGPT, Gemini and Google. I've spent 8 years in B2B sales, and I build my own tools: I'm the founder of startups and tools like Tax.cal and CarryAll.</p>
+        <p>I'm based in Nashik, India, and work with clinics in the UK and Canada remotely. Every call is on Google Meet, in your business hours.</p>
+        <p><a href="/about/">More about me →</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="request" class="reveal">
+  <div class="wrap form-wrap">
+    <div>
+      <p class="label">Free AI visibility check</p>
+      <h2>See what AI says about your clinic, before your patients do.</h2>
+      <p class="sub">Fill this in and I'll reply within one business day with a time for a 15-minute video call. I run the tests beforehand, so the call is all answers.</p>
+      <p class="fine">Prefer email? <a href="mailto:siddheshthapa02@gmail.com?subject=Free%20AI%20visibility%20check">siddheshthapa02@gmail.com</a> · WhatsApp <a href="https://wa.me/918767866424">+91 87678 66424</a></p>
+    </div>
+    <form action="https://formsubmit.co/siddheshthapa02@gmail.com" method="POST">
+      <input type="hidden" name="_subject" value="New AI visibility check request">
+      <input type="hidden" name="_next" value="https://siddheshthapa.com/ai-visibility-check/thanks/">
+      <input type="hidden" name="_template" value="table">
+      <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="row2">
+        <div><label for="f-name">Your name</label><input id="f-name" name="Name" required autocomplete="name"></div>
+        <div><label for="f-email">Work email</label><input id="f-email" name="email" type="email" required autocomplete="email"></div>
+      </div>
+      <label for="f-practice">Practice name</label><input id="f-practice" name="Practice" required autocomplete="organization">
+      <div class="row2">
+        <div><label for="f-type">Type of practice</label>
+          <select id="f-type" name="Practice type" required>
+            <option value="">Choose one</option>
+            <option>Therapist / counsellor / psychologist</option>
+            <option>Dentist</option>
+            <option>Chiropractor / osteopath / physio</option>
+            <option>Naturopathic doctor</option>
+            <option>Private doctor / clinic</option>
+            <option>Other</option>
+          </select></div>
+        <div><label for="f-country">Country</label>
+          <select id="f-country" name="Country" required>
+            <option value="">Choose one</option><option>United Kingdom</option><option>Canada</option>
+          </select></div>
+      </div>
+      <div class="row2">
+        <div><label for="f-city">City or area</label><input id="f-city" name="City" required></div>
+        <div><label for="f-web">Website <span>(if you have one)</span></label><input id="f-web" name="Website" type="url" placeholder="https://"></div>
+      </div>
+      <label for="f-more">What would you like more of? <span>(optional)</span></label>
+      <textarea id="f-more" name="Goal" placeholder="e.g. more new clients for anxiety therapy, more implant consultations"></textarea>
+      <label class="consent"><input type="checkbox" name="Consent" value="Yes" required><span>I agree that Siddhesh Thapa can use these details to prepare my check and contact me about it. See the privacy note below.</span></label>
+      <button class="btn" type="submit">Request my free check →</button>
+      <p class="contact-alt">No spam. One reply, about your check.</p>
+    </form>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="wrap">
+    <p class="label">Questions</p>
+    <h2>Before you ask</h2>
+    <details><summary>Is this just SEO with a new name?</summary><p>It builds on the same basics, but the target is different. Google shows ten links; an AI assistant names a few practices and quotes the directories and facts it trusts. We work on those sources directly and measure whether you're named.</p></details>
+    <details><summary>Can you guarantee ChatGPT will recommend us?</summary><p>No, and be wary of anyone who says they can. AI answers change from one run to the next. We guarantee the setup work within 14 days and measure how often you're named before and after.</p></details>
+    <details><summary>What do you need from us?</summary><p>About 20 minutes: manager access to your Google Business Profile, a few practice details, and either access to your website or a contact who updates it. You approve every word before it goes live.</p></details>
+    <details><summary>Do you work with NHS GP surgeries?</summary><p>No. Patients register with an NHS GP by catchment area on nhs.uk, so visibility work doesn't help them. We work with private clinics and with dentists who offer NHS and private care.</p></details>
+    <details><summary>You're in India. How does that work?</summary><p>All the work is online: listings, profiles, website changes and AI testing. Calls are on Google Meet at a time that suits your clinic, UK or Canadian business hours.</p></details>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div><b style="color:var(--ink)">Siddhesh Thapa</b> · AI Visibility Specialist · <a href="/about/">About</a> · <a href="mailto:siddheshthapa02@gmail.com">siddheshthapa02@gmail.com</a></div>
+    <div id="privacy" style="max-width:640px">Privacy: the form sends your details to Siddhesh's email through FormSubmit (formsubmit.co). They're used only to prepare your check and reply to you, kept no longer than 12 months, and never sold or shared. Email to see or delete them anytime. This page uses no cookies or tracking.</div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  function setPressed(group, attr, value) {
+    group.forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute(attr) === value)); });
+  }
+  var regionBtns = Array.prototype.slice.call(document.querySelectorAll("[data-show]"));
+  regionBtns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      var v = b.getAttribute("data-show");
+      setPressed(regionBtns, "data-show", v);
+      document.querySelectorAll("[data-region]").forEach(function (el) { el.classList.toggle("on", el.getAttribute("data-region") === v); });
+    });
+  });
+  var curBtns = Array.prototype.slice.call(document.querySelectorAll("[data-cur]"));
+  curBtns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      var v = b.getAttribute("data-cur");
+      setPressed(curBtns, "data-cur", v);
+      document.querySelectorAll("[data-price-uk]").forEach(function (el) { el.hidden = v !== "uk"; });
+      document.querySelectorAll("[data-price-ca]").forEach(function (el) { el.hidden = v !== "ca"; });
+    });
+  });
+  var country = document.getElementById("f-country");
+  try {
+    var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+    if (/^America\/(Toronto|Vancouver|Edmonton|Winnipeg|Halifax|St_Johns|Regina|Montreal)/.test(tz)) {
+      curBtns.forEach(function (b) { if (b.getAttribute("data-cur") === "ca") b.click(); });
+      regionBtns.forEach(function (b) { if (b.getAttribute("data-show") === "ca") b.click(); });
+      country.value = "Canada";
+    } else if (tz === "Europe/London") { country.value = "United Kingdom"; }
+  } catch (e) {}
+  var els = document.querySelectorAll(".reveal");
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } });
+    }, { rootMargin: "0px 0px -8% 0px" });
+    els.forEach(function (el) { io.observe(el); });
+  } else { els.forEach(function (el) { el.classList.add("in"); }); }
+})();
+</script>
+</body>
+</html>
